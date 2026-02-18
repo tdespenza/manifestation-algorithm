@@ -3,6 +3,7 @@
     <div class="status-indicator"></div>
     <span class="status-text">{{ statusText }}</span>
     <span v-if="count > 0" class="peer-count">({{ count }} peers)</span>
+    <span v-if="manifestations > 0" class="manifestation-count">| {{ manifestations }} results</span>
   </div>
 </template>
 
@@ -12,6 +13,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 
 const count = ref(0);
+const manifestations = ref(0);
 const lastUpdate = ref(Date.now());
 // Track if we heard from backend
 const isConnected = ref(false);
@@ -32,8 +34,11 @@ onMounted(async () => {
     isConnected.value = true;
 
     // Listen for updates
-    unlisten = await listen<{ peer_count: number }>('network-stats', (event) => {
+    unlisten = await listen<{ peer_count: number, total_manifestations: number }>('network-stats', (event) => {
       count.value = event.payload.peer_count;
+      if (event.payload.total_manifestations !== undefined) {
+        manifestations.value = event.payload.total_manifestations;
+      }
       lastUpdate.value = Date.now();
       isConnected.value = true;
     });
@@ -85,5 +90,12 @@ onUnmounted(() => {
 .peer-count {
   opacity: 0.8;
   font-size: 0.8em;
+}
+
+.manifestation-count {
+  opacity: 0.8;
+  font-size: 0.8em;
+  font-variant-numeric: tabular-nums;
+  margin-left: 4px;
 }
 </style>

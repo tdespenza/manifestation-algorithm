@@ -9,6 +9,7 @@ use std::error::Error;
 use std::hash::{Hash, Hasher};
 use std::time::Duration;
 use tokio::sync::{mpsc, oneshot};
+use libp2p::futures::StreamExt;
 
 #[derive(NetworkBehaviour)]
 pub struct AppBehaviour {
@@ -23,6 +24,14 @@ pub struct AppBehaviour {
 pub struct NetworkStatUpdate {
     pub peer_count: usize,
     pub connected_peers: Vec<String>,
+    pub total_manifestations: usize, // New field for aggregation
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ManifestationResult {
+    pub score: f64,
+    pub timestamp: u64,
+    pub category_scores: std::collections::HashMap<String, f64>,
 }
 
 pub enum Command {
@@ -50,6 +59,7 @@ pub struct PeerNode {
     swarm: Swarm<AppBehaviour>,
     command_receiver: mpsc::Receiver<Command>,
     event_sender: mpsc::Sender<NetworkStatUpdate>,
+    total_manifestations: usize,
 }
 
 impl PeerNode {
@@ -57,7 +67,7 @@ impl PeerNode {
         keypair: libp2p::identity::Keypair,
         command_receiver: mpsc::Receiver<Command>,
         event_sender: mpsc::Sender<NetworkStatUpdate>,
-    ) -> Result<Self, Box<dyn Error>> {
+    ) -> Result<Self, Box<dyn Error + Send + Sync>> {
         let peer_id = keypair.public().to_peer_id();
 
         let mut swarm = libp2p::SwarmBuilder::with_existing_identity(keypair)
@@ -124,6 +134,7 @@ impl PeerNode {
             swarm,
             command_receiver,
             event_sender,
+            total_manifestations: 0,
         })
     }
 
@@ -141,7 +152,8 @@ impl PeerNode {
                                 self.swarm.behaviour_mut().gossipsub.add_explicit_peer(&peer_id);
                                 self.swarm.behaviour_mut().kademlia.add_address(&peer_id, _multiaddr);
                             }
-                            self.broadcast_stats().await;
+                            let stats = self.get_stats();
+                            let _ = self.event_sender.send(stats).await;
                         }
                         SwarmEvent::Behaviour(AppBehaviourEvent::Mdns(mdns::Event::Expired(list))) => {
                             for (peer_id, _multiaddr) in list {
@@ -149,18 +161,29 @@ impl PeerNode {
                                 self.swarm.behaviour_mut().gossipsub.remove_explicit_peer(&peer_id);
                                 self.swarm.behaviour_mut().kademlia.remove_address(&peer_id, &_multiaddr);
                             }
-                            self.broadcast_stats().await;
+                            let stats = self.get_stats();
+                            let _ = self.event_sender.send(stats).await;
                         }
                         SwarmEvent::Behaviour(AppBehaviourEvent::Gossipsub(gossipsub::Event::Message {
                             propagation_source: peer_id,
                             message_id: id,
                             message,
                         })) => {
-                            println!(
-                                "Got message: '{}' with id: {id} from peer: {peer_id}",
-                                String::from_utf8_lossy(&message.data),
-                            );
-                            // Process message here (e.g., aggregate stats)
+                            match serde_json::from_slice::<ManifestationResult>(&message.data) {
+                                Ok(result) => {
+                                    println!("Received valid result from {}: {:?}", peer_id, result);
+                                    self.total_manifestations += 1;
+                                    let stats = self.get_stats();
+                                    let _ = self.event_sender.send(stats).await;
+                                }
+                                Err(e) => {
+                                    println!("Received invalid message: {} ({})", String::from_utf8_lossy(&message.data), e);
+                                }
+                            }
+                        }
+                        SwarmEvent::ConnectionEstablished { .. } | SwarmEvent::ConnectionClosed { .. } => {
+                            let stats = self.get_stats();
+                            let _ = self.event_sender.send(stats).await;
                         }
                         _ => {}
                     }
@@ -203,12 +226,12 @@ impl PeerNode {
         }
     }
 
-    async fn broadcast_stats(&self) {
+    fn get_stats(&self) -> NetworkStatUpdate {
         let peers: Vec<String> = self.swarm.connected_peers().map(|p| p.to_string()).collect();
-        let update = NetworkStatUpdate {
+        NetworkStatUpdate {
             peer_count: peers.len(),
             connected_peers: peers,
-        };
-        let _ = self.event_sender.send(update).await;
+            total_manifestations: self.total_manifestations,
+        }
     }
 }

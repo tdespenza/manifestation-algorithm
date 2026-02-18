@@ -93,6 +93,22 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![greet, get_peer_count])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while running tauri application")
+        .run(|app_handle, event| {
+            if let tauri::RunEvent::ExitRequested { code: _, api: _, .. } = event {
+                 // Nothing special needed here unless preventing exit
+            }
+            if let tauri::RunEvent::Exit = event {
+                // Send Shutdown command
+                if let Some(state) = app_handle.try_state::<NetworkState>() {
+                    if let Ok(guard) = state.sender.lock() {
+                        if let Some(tx) = guard.as_ref() {
+                            // Use blocking send as we are shutting down
+                            let _ = tx.blocking_send(Command::Shutdown);
+                        }
+                    }
+                }
+            }
+        });
 }
