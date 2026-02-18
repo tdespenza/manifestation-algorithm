@@ -4,6 +4,7 @@ import { useHistoryStore } from '../stores/history';
 import ProgressChart from '../components/charts/ProgressChart.vue';
 import CategoryCard from '../components/dashboard/CategoryCard.vue';
 import StatsPanel from '../components/dashboard/StatsPanel.vue';
+import NetworkRanking from '../components/dashboard/NetworkRanking.vue';
 import { exportToCSV } from '../services/export';
 
 const historyStore = useHistoryStore();
@@ -90,7 +91,10 @@ onMounted(() => {
       <div v-if="isLoading" class="loading">Loading history...</div>
       
       <div v-else-if="sessions.length > 0" class="history-content">
-        <StatsPanel :sessions="sessions" />
+        <div class="stats-overview">
+          <StatsPanel :sessions="sessions" />
+          <NetworkRanking />
+        </div>
 
         <div class="chart-section">
           <h2>Progress Trend</h2>
@@ -204,8 +208,22 @@ h1 {
 }
 
 .history-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.stats-overview {
   display: grid;
-  gap: 30px;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .stats-overview {
+    grid-template-columns: 1fr;
+  }
 }
 
 .category-grid-section h2 {

@@ -38,19 +38,16 @@ describe('Questionnaire Store', () => {
 
     it('init should clear answers if session expired', async () => {
         const store = useQuestionnaireStore();
-        // Mock returning old time (1 hr age)
-        const oldTime = Date.now() - (60 * 60 * 1000);
+        // Mock returning OLD time (31 days ago = past 30-day timeout)
+        const oldTime = Date.now() - (31 * 24 * 60 * 60 * 1000);
         
         dbMocks.loadAnswers.mockResolvedValue({ '1a': 5 });
         dbMocks.getLastActive.mockResolvedValue(oldTime.toString());
         
         await store.init();
         
-        // Answers should be empty despite loading them, effectively treated as expired
+        // Answers should be empty because session was expired and cleared
         expect(store.answers).toEqual({});
-        // Should actually load answers first to check if there are any,
-        // OR logic might check expiry first. Assuming logic checks expiry first.
-        
         expect(dbMocks.clearSession).toHaveBeenCalled(); 
         expect(dbMocks.updateLastActive).toHaveBeenCalled();
     });

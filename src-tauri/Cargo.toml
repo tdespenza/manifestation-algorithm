@@ -38,4 +38,11 @@ libp2p = { version = "0.53", features = [
 ] }
 log = "0.4"
 env_logger = "0.10"
+lru = "0.16.3"
+sha2 = "0.10.9"
+cid = "0.10"
+multihash = { version = "0.18", features = ["sha2"] }
+ed25519-dalek = { version = "2", features = ["rand_core"] }
+rand = "0.8"
+base64 = "0.22"
 

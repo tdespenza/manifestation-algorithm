@@ -12,7 +12,7 @@ import {
   saveHistoricalSession
 } from '../services/db';
 
-const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+const SESSION_TIMEOUT_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 function getLeafQuestions(qs: Question[]): Question[] {
   let leaves: Question[] = [];
@@ -33,10 +33,9 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
   const answers = ref<Record<string, number>>({});
   const sessionId = ref('default-session');
   const isSaving = ref(false);
+  const currentIndex = ref(0);
 
-  const score = computed(() => {
-    return calculateScore(answers.value);
-  });
+  const score = computed(() => calculateScore(answers.value));
 
   const percentComplete = computed(() => {
     const answered = Object.keys(answers.value).length;
@@ -44,53 +43,85 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
     return Math.floor((answered / TOTAL_QUESTIONS_COUNT) * 100);
   });
 
-  const isComplete = computed(() => {
-    // Check if every leaf question has an answer
-    return allQuestions.every(q => {
+  const isComplete = computed(() =>
+    allQuestions.every(q => {
       const val = answers.value[q.id];
       return typeof val === 'number' && val >= 1;
-    });
-  });
+    })
+  );
+
+  /** Total leaf question count */
+  const totalQuestions = computed(() => TOTAL_QUESTIONS_COUNT);
+
+  /** The currently focused leaf question */
+  const currentQuestion = computed(() => allQuestions[currentIndex.value]);
+
+  function goToNext() {
+    if (currentIndex.value < TOTAL_QUESTIONS_COUNT - 1) {
+      currentIndex.value++;
+    }
+  }
+
+  function goToPrev() {
+    if (currentIndex.value > 0) {
+      currentIndex.value--;
+    }
+  }
+
+  function goToIndex(idx: number) {
+    if (idx >= 0 && idx < TOTAL_QUESTIONS_COUNT) {
+      currentIndex.value = idx;
+    }
+  }
+
+  /** True if there's a saved session with data (for resume dialog) */
+  const hasSavedSession = ref(false);
 
   async function init() {
     try {
-      // Check expiry
       const lastActive = await getLastActive(sessionId.value);
       if (lastActive) {
         const timeSince = Date.now() - parseInt(lastActive, 10);
         if (timeSince > SESSION_TIMEOUT_MS) {
-          console.log('Session expired, clearing data.');
           await clearSession(sessionId.value);
           answers.value = {};
           await updateLastActive(sessionId.value);
+          hasSavedSession.value = false;
           return;
         }
       }
 
       const saved = await loadAnswers(sessionId.value);
+      hasSavedSession.value = Object.keys(saved).length > 0;
       answers.value = saved;
-      
-      // Update activity timestamp on load
       await updateLastActive(sessionId.value);
     } catch (e) {
       console.error('Failed to init store:', e);
     }
   }
 
+  /** Resume saved session (load answers without clearing) */
+  async function resumeSession() {
+    // answers are already loaded in init — just confirm
+    hasSavedSession.value = false;
+  }
+
+  /** Discard saved session and start fresh */
+  async function startFresh() {
+    await clearSession(sessionId.value);
+    answers.value = {};
+    currentIndex.value = 0;
+    hasSavedSession.value = false;
+    await updateLastActive(sessionId.value);
+  }
+
   async function setAnswer(questionId: string, value: number) {
     if (value < 1 || value > 10) return;
-    
-    // Optimistic update
     answers.value[questionId] = value;
-    
     try {
       isSaving.value = true;
       await dbSaveAnswer(sessionId.value, questionId, value);
-      
-      // Update activity timestamp
       updateLastActive(sessionId.value).catch(console.error);
-
-      // Brief delay so user sees "Saving..."
       await new Promise(r => setTimeout(r, 300));
     } catch (e) {
       console.error('Failed to save answer:', e);
@@ -100,20 +131,14 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
   }
 
   async function submitSession(): Promise<string> {
-    if (!isComplete.value) {
-      throw new Error('Questionnaire is not complete');
-    }
-
+    if (!isComplete.value) throw new Error('Questionnaire is not complete');
     try {
       isSaving.value = true;
-      // Calculate score one last time to be sure
       const finalScore = score.value;
       const historyId = await saveHistoricalSession(finalScore, answers.value);
-      
-      // Clear current session
       await clearSession(sessionId.value);
-      answers.value = {}; // Reset local state
-      
+      answers.value = {};
+      currentIndex.value = 0;
       return historyId;
     } catch (e) {
       console.error('Failed to submit session:', e);
@@ -128,10 +153,19 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
     score,
     percentComplete,
     isComplete,
+    totalQuestions,
+    currentQuestion,
+    currentIndex,
+    hasSavedSession,
     init,
+    resumeSession,
+    startFresh,
+    goToNext,
+    goToPrev,
+    goToIndex,
     setAnswer,
     submitSession,
     sessionId,
-    isSaving
+    isSaving,
   };
 });

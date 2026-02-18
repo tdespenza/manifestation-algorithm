@@ -4,19 +4,24 @@
     <span class="status-text">{{ statusText }}</span>
     <span v-if="count > 0" class="peer-count">({{ count }} peers)</span>
     <span v-if="manifestations > 0" class="manifestation-count">| {{ manifestations }} results</span>
+    <span v-if="avgScore && avgScore > 0" class="avg-score" title="Average Score">| μ: {{ avgScore.toFixed(1) }}</span>
+    <span v-if="percentile90 && percentile90 > 0" class="p90" title="90th Percentile">| P90: {{ percentile90.toFixed(1) }}</span>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue';
-import { invoke } from '@tauri-apps/api/core';
-import { listen } from '@tauri-apps/api/event';
+import { onMounted, onUnmounted, computed } from 'vue';
+import { useNetwork } from '../composables/useNetwork';
 
-const count = ref(0);
-const manifestations = ref(0);
-const lastUpdate = ref(Date.now());
-// Track if we heard from backend
-const isConnected = ref(false);
+const { 
+  count, 
+  manifestations, 
+  avgScore, 
+  percentile90, 
+  isConnected,
+  init,
+  cleanup
+} = useNetwork();
 
 const statusText = computed(() => {
   if (count.value > 0) return 'Online';
@@ -24,31 +29,16 @@ const statusText = computed(() => {
   return 'Connecting...';
 });
 
-let unlisten: () => void;
-
-onMounted(async () => {
-  try {
-    // Initial check
-    const initialCount = await invoke<number>('get_peer_count').catch(() => 0);
-    count.value = initialCount;
-    isConnected.value = true;
-
-    // Listen for updates
-    unlisten = await listen<{ peer_count: number, total_manifestations: number }>('network-stats', (event) => {
-      count.value = event.payload.peer_count;
-      if (event.payload.total_manifestations !== undefined) {
-        manifestations.value = event.payload.total_manifestations;
-      }
-      lastUpdate.value = Date.now();
-      isConnected.value = true;
-    });
-  } catch (e) {
-    console.error('Failed to connect to network service:', e);
-  }
+onMounted(() => {
+  init();
 });
 
 onUnmounted(() => {
-  if (unlisten) unlisten();
+  // We keep the listener active if there are multiple components using it,
+  // or we can structure useNetwork to manage singular subscription.
+  // For now, let's allow it to persist or be managed by the composable logic.
+  // If we want to strictly cleanup when no components are using it, we need a ref count.
+  // But given the app structure, global listener is fine.
 });
 </script>
 

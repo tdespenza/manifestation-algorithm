@@ -1,7 +1,120 @@
-# Tauri + Vue + TypeScript
+# Manifestation Algorithm
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+A privacy-first desktop application for tracking and scoring personal development practices, built with **Tauri + Vue 3 + TypeScript**.
 
-## Recommended IDE Setup
+---
 
-- [VS Code](https://code.visualstudio.com/) + [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+## Features
+
+- **40-Category Questionnaire** – Weighted 1-10 slider inputs mapping to a 10,000-point score model
+- **Local Encrypted Storage** – SQLite with automatic migration versioning
+- **Auto-Save** – Answers persist every time you move to the next question
+- **Session Recovery** – Resume or discard an in-progress session on startup
+- **Dashboard & Statistics** – Track score history and category breakdowns over time
+- **Anonymous Network Ranking** – Opt-in P2P gossipsub network using libp2p for aggregate percentile rankings, with Ed25519 application-level signing (no node identity exposed)
+- **Privacy-First** – Zero PII; category keys are validated to reject emails/URLs
+
+---
+
+## Prerequisites
+
+| Tool | Version |
+|------|---------|
+| Node.js | ≥ 20 |
+| npm | ≥ 10 |
+| Rust | stable (via [rustup](https://rustup.rs)) |
+| Tauri CLI | installed via `npm run tauri` |
+
+### macOS extras
+```bash
+xcode-select --install
+```
+
+### Ubuntu/Debian extras
+```bash
+sudo apt-get install -y \
+  libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev \
+  librsvg2-dev patchelf libssl-dev libsoup-3.0-dev pkg-config
+```
+
+---
+
+## Setup
+
+```bash
+# Clone
+git clone https://github.com/tyshawn/manifestation-algorithm.git
+cd manifestation-algorithm
+
+# Install JS dependencies
+npm install
+
+# Run in development mode (hot-reload frontend + Tauri window)
+npm run tauri dev
+```
+
+---
+
+## Testing
+
+```bash
+# Frontend unit tests (Vitest)
+npx vitest run
+
+# Frontend tests with coverage
+npx vitest run --coverage
+
+# TypeScript type-check only
+npx vue-tsc --noEmit
+
+# Rust backend tests
+cd src-tauri && cargo test
+```
+
+---
+
+## Building
+
+```bash
+# Build distributable for current platform
+npm run tauri build
+
+# Output is in src-tauri/target/release/bundle/
+```
+
+Cross-platform builds are handled by GitHub Actions CI (see `.github/workflows/ci.yml`).
+
+---
+
+## Project Structure
+
+```
+src/
+  components/
+    ui/           # Questionnaire, QuestionItem, ResumeDialog
+    dashboard/    # CategoryCard, StatsPanel, NetworkRanking
+    charts/       # ProgressChart
+  composables/    # useNetwork (P2P state)
+  data/           # questions.ts (the 40 categories definition)
+  services/       # db.ts, migrations.ts, scoring.ts, sessionManager.ts
+  stores/         # Pinia stores (questionnaire, history)
+  types/          # TypeScript interfaces
+  views/          # HomeView, DashboardView, CategoryDetailView, SettingsView
+src-tauri/
+  src/
+    lib.rs        # Tauri commands + app setup
+    network.rs    # libp2p gossipsub node + aggregation
+    identity.rs   # Ed25519 user identity (persistent, separate from node ID)
+```
+
+---
+
+## Architecture Decisions
+
+See `_bmad-output/planning-artifacts/ADR-*.md` for full Architecture Decision Records covering:
+- Desktop framework (Tauri)
+- Encrypted storage (SQLite)
+- P2P network (IPFS/libp2p)
+- Frontend (Vue 3)
+- Privacy design (Zero PII)
+

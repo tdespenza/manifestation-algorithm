@@ -39,21 +39,20 @@ describe('Database Migrations', () => {
   });
 
   it('should skip already applied migrations', async () => {
-    // Mock select returning migration 1 applied
-    (mockDb.select as any).mockResolvedValue([{ id: 1 }]);
+    // Mock select returning ALL 3 migrations applied
+    (mockDb.select as any).mockResolvedValue([{ id: 1 }, { id: 2 }, { id: 3 }]);
 
     await runMigrations(mockDb);
 
     // Should create _migrations table (always checked)
     expect(mockDb.execute).toHaveBeenCalledWith(expect.stringContaining('CREATE TABLE IF NOT EXISTS _migrations'));
 
-    // Should NOT run migration 1 logic
-    // We check that specific create statement for stats is NOT called
+    // Should NOT run migration 1 logic — stats table NOT created
     const calls = (mockDb.execute as any).mock.calls;
     const createStatsCall = calls.find((call: any[]) => call[0].includes('CREATE TABLE IF NOT EXISTS stats'));
     expect(createStatsCall).toBeUndefined();
 
-    // Should NOT insert record again
+    // Should NOT insert ANY migration record for already-applied ones
     const insertCall = calls.find((call: any[]) => call[0].includes('INSERT INTO _migrations'));
     expect(insertCall).toBeUndefined();
   });
