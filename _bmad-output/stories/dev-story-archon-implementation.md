@@ -8,7 +8,7 @@
 ## Phase 1: Core Foundation (Tasks 1-10)
 - [x] **1. Define score calculation formula** (US-1-3-1) `ARCHON-f057f6ec`
 - [ ] **2. Plan database schema expansion** (US-2-1-1) `ARCHON-ea470d82` 
-- [ ] **3. Implement database migration support** (US-1-4-9) `ARCHON-fb4d06ad`
+- [x] **3. Implement database migration support** (US-1-4-9) `ARCHON-fb4d06ad`
 - [x] **4. Add session expiry logic** (US-1-5-5) `ARCHON-cdcb1219`
 - [x] **5. Create save indicator UI** (US-1-5-6) `ARCHON-5e6ee753`
 - [x] **6. (Placeholder) Implement auto-save logic**
