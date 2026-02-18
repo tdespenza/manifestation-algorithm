@@ -124,6 +124,53 @@ export async function saveHistoricalSession(
   return id;
 }
 
+export interface SessionSummary {
+  id: string;
+  completed_at: string;
+  total_score: number;
+  duration_seconds: number;
+  notes?: string;
+}
+
+export async function loadHistoricalSessions(): Promise<SessionSummary[]> {
+  const db = await getDb();
+  return await db.select<SessionSummary[]>(
+    'SELECT * FROM historical_sessions ORDER BY completed_at DESC'
+  );
+}
+
+export interface DetailedResponse {
+  question_id: string;
+  category: string;
+  answer_value: number;
+}
+
+export async function loadSessionResponses(sessionId: string): Promise<DetailedResponse[]> {
+  const db = await getDb();
+  return await db.select<DetailedResponse[]>(
+    'SELECT question_id, category, answer_value FROM historical_responses WHERE session_id = $1',
+    [sessionId]
+  );
+}
+
+export interface CategoryTrendPoint {
+  completed_at: string;
+  answer_value: number;
+}
+
+export async function loadCategoryTrend(category: string): Promise<CategoryTrendPoint[]> {
+  const db = await getDb();
+  return await db.select<CategoryTrendPoint[]>(
+    `SELECT s.completed_at, r.answer_value 
+     FROM historical_responses r
+     JOIN historical_sessions s ON r.session_id = s.id
+     WHERE r.category = $1
+     ORDER BY s.completed_at ASC`,
+    [category]
+  );
+}
+
+
 /**
  * @deprecated Use saveHistoricalSession instead
  */

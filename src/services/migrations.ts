@@ -74,6 +74,15 @@ const migrations: Migration[] = [
       await db.execute('CREATE INDEX IF NOT EXISTS idx_sessions_completed ON historical_sessions(completed_at);');
       await db.execute('CREATE INDEX IF NOT EXISTS idx_responses_qid ON historical_responses(question_id);');
     }
+  },
+  {
+    id: 3,
+    name: 'optimized_indexes',
+    up: async (db: Database) => {
+      // Additional indexes for trends calculation
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_responses_session_id ON historical_responses(session_id);');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_responses_category ON historical_responses(category);');
+    }
   }
 ];
 
