@@ -1,0 +1,59 @@
+:root {
+  --true-cobalt: #0a1f7d;
+  --dark-goldenrod: #c4923e;
+  --white: #f8fdff;
+  --deep-twilight: #0f0758;
+  --dusty-grape: #6061a4;
+  --bg-gradient: linear-gradient(135deg, var(--true-cobalt) 0%, var(--deep-twilight) 100%);
+  --success: #4caf50;
+  --failure: #f44336;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: var(--bg-gradient);
+  min-height: 100vh;
+  padding: 20px;
+  color: var(--deep-twilight);
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  background: var(--white);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  padding: 40px;
+  min-height: 80vh;
+}
+
+h1 {
+  color: var(--deep-twilight);
+  margin-bottom: 10px;
+  font-size: 2.5em;
+  text-align: center;
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--dusty-grape);
+  margin-bottom: 40px;
+  font-size: 1.1em;
+}
+
+/* Transitions */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
