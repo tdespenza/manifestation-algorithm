@@ -19,10 +19,23 @@
       <QuestionItem :question="q" />
     </div>
   </div>
+
+  <div class="submit-actions">
+    <div v-if="!isComplete" class="completion-hint">
+      Complete all questions to save results.
+    </div>
+    <button 
+      class="submit-button"
+      :disabled="!isComplete"
+      @click="submit"
+    >
+      {{ isComplete ? 'Complete Assessment' : 'Assessment Incomplete' }}
+    </button>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useQuestionnaireStore } from '../../stores/questionnaire';
 import { questions } from '../../data/questions';
 import QuestionItem from './QuestionItem.vue';
@@ -33,6 +46,20 @@ const isSaving = computed(() => store.isSaving);
 
 const score = computed(() => store.score);
 const formattedScore = computed(() => Math.round(score.value).toLocaleString());
+const isComplete = computed(() => store.isComplete);
+
+const submit = async () => {
+  if (!isComplete.value) return;
+  if (!confirm('Are you sure you want to complete this session?')) return;
+  
+  try {
+    await store.submitSession();
+    alert('Session saved successfully!');
+    // Ideally navigate to history/dashboard
+  } catch (e) {
+    alert('Failed to save session: ' + e);
+  }
+};
 
 // Initialization
 onMounted(async () => {
@@ -121,5 +148,42 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+.submit-actions {
+  margin: 40px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.completion-hint {
+  color: #666;
+  font-size: 0.9em;
+  font-style: italic;
+}
+
+.submit-button {
+  padding: 15px 40px;
+  background: var(--true-cobalt, #0047AB);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-size: 1.2em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 71, 171, 0.3);
+}
+
+.submit-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.submit-button:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 71, 171, 0.4);
 }
 </style>

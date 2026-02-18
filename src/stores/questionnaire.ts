@@ -1,15 +1,33 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { calculateScore } from '../services/scoring';
+import { questions } from '../data/questions';
+import { Question } from '../types';
 import { 
   saveAnswer as dbSaveAnswer, 
   loadAnswers, 
   getLastActive, 
   updateLastActive, 
-  clearSession 
+  clearSession,
+  saveHistoricalSession
 } from '../services/db';
 
 const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+
+function getLeafQuestions(qs: Question[]): Question[] {
+  let leaves: Question[] = [];
+  for (const q of qs) {
+    if (q.hasSubPoints && q.subPoints?.length) {
+      leaves = leaves.concat(getLeafQuestions(q.subPoints));
+    } else {
+      leaves.push(q);
+    }
+  }
+  return leaves;
+}
+
+const allQuestions = getLeafQuestions(questions);
+const TOTAL_QUESTIONS_COUNT = allQuestions.length;
 
 export const useQuestionnaireStore = defineStore('questionnaire', () => {
   const answers = ref<Record<string, number>>({});
@@ -18,6 +36,20 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
 
   const score = computed(() => {
     return calculateScore(answers.value);
+  });
+
+  const percentComplete = computed(() => {
+    const answered = Object.keys(answers.value).length;
+    if (TOTAL_QUESTIONS_COUNT === 0) return 0;
+    return Math.floor((answered / TOTAL_QUESTIONS_COUNT) * 100);
+  });
+
+  const isComplete = computed(() => {
+    // Check if every leaf question has an answer
+    return allQuestions.every(q => {
+      const val = answers.value[q.id];
+      return typeof val === 'number' && val >= 1;
+    });
   });
 
   async function init() {
@@ -67,11 +99,38 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
     }
   }
 
+  async function submitSession(): Promise<string> {
+    if (!isComplete.value) {
+      throw new Error('Questionnaire is not complete');
+    }
+
+    try {
+      isSaving.value = true;
+      // Calculate score one last time to be sure
+      const finalScore = score.value;
+      const historyId = await saveHistoricalSession(finalScore, answers.value);
+      
+      // Clear current session
+      await clearSession(sessionId.value);
+      answers.value = {}; // Reset local state
+      
+      return historyId;
+    } catch (e) {
+      console.error('Failed to submit session:', e);
+      throw e;
+    } finally {
+      isSaving.value = false;
+    }
+  }
+
   return {
     answers,
     score,
+    percentComplete,
+    isComplete,
     init,
     setAnswer,
+    submitSession,
     sessionId,
     isSaving
   };

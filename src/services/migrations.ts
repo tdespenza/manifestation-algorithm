@@ -42,6 +42,38 @@ const migrations: Migration[] = [
         );
       `);
     }
+  },
+  {
+    id: 2,
+    name: 'historical_schema',
+    up: async (db: Database) => {
+      // Historical Sessions
+      await db.execute(`
+        CREATE TABLE IF NOT EXISTS historical_sessions (
+          id TEXT PRIMARY KEY,
+          completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          total_score REAL NOT NULL,
+          duration_seconds INTEGER,
+          notes TEXT
+        );
+      `);
+
+      // Historical Responses
+      await db.execute(`
+        CREATE TABLE IF NOT EXISTS historical_responses (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          session_id TEXT NOT NULL,
+          question_id TEXT NOT NULL,
+          category TEXT NOT NULL,
+          answer_value INTEGER NOT NULL,
+          FOREIGN KEY(session_id) REFERENCES historical_sessions(id) ON DELETE CASCADE
+        );
+      `);
+
+      // Indexes
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_sessions_completed ON historical_sessions(completed_at);');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_responses_qid ON historical_responses(question_id);');
+    }
   }
 ];
 
