@@ -92,3 +92,14 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# New additions
+src/tauri-gen/
+src-tauri/gen/
+src-tauri/target/
+*.db
+*.db-shm
+*.db-wal
+*.DS_Store
+.idea
+

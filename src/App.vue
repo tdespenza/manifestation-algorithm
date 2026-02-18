@@ -1,6 +1,7 @@
 
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router';
+import NetworkStatus from './components/NetworkStatus.vue';
 </script>
 
 <template>
@@ -15,6 +16,7 @@ import { RouterLink, RouterView } from 'vue-router';
           </div>
         </div>
         <div class="nav-right">
+          <NetworkStatus class="network-status-nav" />
           <router-link to="/settings" active-class="active" class="settings-link" aria-label="Settings">⚙️</router-link>
         </div>
       </div>
@@ -90,6 +92,12 @@ import { RouterLink, RouterView } from 'vue-router';
 .nav-links a.active {
   color: var(--true-cobalt, #0047AB);
   border-bottom-color: var(--true-cobalt, #0047AB);
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
 .settings-link {
