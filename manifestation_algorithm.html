@@ -1,0 +1,731 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manifestation Algorithm Questionnaire</title>
+    <style>
+      :root {
+        --true-cobalt: #0a1f7d;
+        --dark-goldenrod: #c4923e;
+        --white: #f8fdff;
+        --deep-twilight: #0f0758;
+        --dusty-grape: #6061a4;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+          Cantarell, sans-serif;
+        background: linear-gradient(
+          135deg,
+          var(--true-cobalt) 0%,
+          var(--deep-twilight) 100%
+        );
+        min-height: 100vh;
+        padding: 40px 20px;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        padding: 40px;
+      }
+
+      h1 {
+        color: var(--deep-twilight);
+        margin-bottom: 10px;
+        font-size: 2.5em;
+        text-align: center;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: var(--dusty-grape);
+        margin-bottom: 40px;
+        font-size: 1.1em;
+      }
+
+      .question {
+        margin-bottom: 35px;
+        padding: 25px;
+        background: var(--white);
+        border-radius: 12px;
+        border-left: 4px solid var(--true-cobalt);
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+
+      .question:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .question-number {
+        font-weight: bold;
+        color: var(--true-cobalt);
+        font-size: 1.2em;
+        text-transform: uppercase;
+        line-height: 1.5;
+      }
+
+      .question-text {
+        flex: 1;
+        font-size: 1.1em;
+        color: var(--deep-twilight);
+        font-weight: 500;
+        line-height: 1.5;
+      }
+
+      .question-points {
+        background: var(--true-cobalt);
+        color: var(--white);
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9em;
+        font-weight: bold;
+        white-space: nowrap;
+      }
+
+      .slider-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 15px;
+      }
+
+      .slider-label {
+        font-size: 0.9em;
+        color: var(--dusty-grape);
+        min-width: auto;
+        width: auto;
+      }
+
+      .slider {
+        flex: 1;
+        height: 8px;
+        border-radius: 5px;
+        background: #ddd;
+        outline: none;
+        -webkit-appearance: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .slider::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 8px;
+        border-radius: 5px;
+        background: #ddd;
+      }
+
+      .slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--true-cobalt);
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s;
+        margin-top: -8px;
+      }
+
+      .slider::-webkit-slider-thumb:hover {
+        transform: scale(1.1);
+      }
+
+      .slider::-moz-range-track {
+        width: 100%;
+        height: 8px;
+        border-radius: 5px;
+        background: #ddd;
+        border: none;
+      }
+
+      .slider::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--true-cobalt);
+        cursor: pointer;
+        border: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      }
+
+      .slider-value {
+        font-weight: bold;
+        color: var(--true-cobalt);
+        font-size: 1.2em;
+        min-width: 30px;
+        text-align: center;
+      }
+
+      .score-display {
+        font-size: 0.9em;
+        color: var(--dusty-grape);
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #ddd;
+      }
+
+      .score-value {
+        font-weight: bold;
+        color: var(--true-cobalt);
+      }
+
+      .total-score {
+        margin-top: 50px;
+        padding: 30px;
+        background: linear-gradient(
+          135deg,
+          var(--true-cobalt) 0%,
+          var(--deep-twilight) 100%
+        );
+        border-radius: 15px;
+        text-align: center;
+        color: var(--white);
+      }
+
+      .total-score-label {
+        font-size: 1.2em;
+        margin-bottom: 5px;
+        opacity: 0.9;
+      }
+
+      .max-score-info {
+        font-size: 0.9em;
+        opacity: 0.8;
+        margin-bottom: 10px;
+      }
+
+      .total-score-value {
+        font-size: 3.5em;
+        font-weight: bold;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+      }
+
+      .score-badge {
+        font-size: 0.5em;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      .score-badge.success {
+        background: #4caf50;
+        color: white;
+      }
+
+      .score-badge.failure {
+        background: #f44336;
+        color: white;
+      }
+
+      .score-badge.hidden {
+        display: none;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .parent-question {
+        margin-bottom: 35px;
+      }
+
+      .sub-points-section {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 2px solid rgba(10, 31, 125, 0.1);
+      }
+
+      .sub-question {
+        margin-bottom: 15px;
+        padding: 15px;
+        background: rgba(248, 253, 255, 0.5);
+        border-radius: 8px;
+        border-left: 3px solid var(--dark-goldenrod);
+      }
+
+      .sub-question:last-child {
+        margin-bottom: 0;
+      }
+
+      .sub-question:hover {
+        background: rgba(248, 253, 255, 0.8);
+        transform: translateX(3px);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Manifestation Algorithm</h1>
+      <p class="subtitle">Rate each item from 1 to 10</p>
+
+      <div id="questions-container"></div>
+
+      <div class="total-score">
+        <div class="total-score-label">Total Score</div>
+        <div class="max-score-info">Max score: 10,000 points</div>
+        <div class="total-score-value">
+          <span id="score-badge" class="score-badge hidden"></span>
+          <span id="total-score">0</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // CSV data embedded in JavaScript
+      const csvData = `NUMBER,POINTS,DESCRIPTION
+1,100,Master the Basics
+1a,25,Who do you listen to?
+1b,25,Teachability Index
+1c,25,Training Balance Scale
+1d,25,Unconscious competence
+2,100,Activate & Illuminate Words
+3,250,Find Pain & Contract Energy
+4,250,Define what you want
+5,250,Write down what you want
+6,50,Don't share your dream with others
+7,200,Get a burning desire for your goal
+8,50,Goal must be in Sweet Spot
+9,200,Make a Decision
+10,300,See/Feel good in posssession of your goal
+11,250,Release attachment to the outcome
+12,100,Allow the HOW to present itself
+13,50,Know the difference between Dream & Chief Aim
+14,50,Be Focused / Singleness of purpose
+15,50,Daily TO DO list of Priorities
+16,50,Chart Progress / Know the Score
+17,50,Use Momentum Cycle of Success
+18,200,Dream Build - Dream Book & Vision Board
+19,500,Plug into System 
+19a,100,Read books
+19b,100,Listen to Audios
+19c,100,Attend Events (monthly)
+19d,100,Give and receive Recognition / expanded Golden Rule
+19e,100,Develop relationships with like minded people
+20,750,Science of Personal Mastery Course
+21,200,Watch the words you speak - what you say is what you get
+22,50,Physiology / Dress for success
+23,1400,Clear Counter Intentions
+23a,600,Money Processes
+23b,150,Relationship Processes
+23c,150,Leadership Processes
+23d,100,Communication Processes
+23e,50,Health Processes
+23f,50,Spiritual Awareness Processes
+23g,200,Dream Processes
+23h,50,Organization & Focus Processes
+24,600,Awaken your Inner Power: Superpower Processes
+25,100,Broadcast on Alpha-theta brainwave 
+26,100,Stop Telling Your Story of woe
+27,100,Show Appreciation / Gratitude 
+28,600,Replace Failure Habits w/ Success Habits (Accelerator Processes)
+29,50,Create a Mastermind
+30,250,Watch Successful People/Apprentice
+31,50,Listen to/Read Success Stories
+32,200,Give away what you want first
+33,50,Do It Now Mentality
+34,50,Take Care of Your Body
+35,50,Find the Gold in Adversity
+36,200,Clear Samskaras from Field
+37,200,Take 100% Responsibility
+38,800,Attractor Field Generators
+39,1200,Join a Club that connects you to a Power Source
+40,100,Live life with deliberate intent - be in present time`;
+
+      // Check if a number contains a letter (sub-point)
+      function isSubPoint(number) {
+        return /[a-zA-Z]/.test(number);
+      }
+
+      // Extract parent number from sub-point (e.g., "1a" -> "1")
+      function getParentNumber(number) {
+        return number.replace(/[a-zA-Z].*$/, "");
+      }
+
+      // Parse CSV data
+      function parseCSV(csv) {
+        const lines = csv.trim().split("\n");
+        const headers = lines[0].split(",");
+        const questions = [];
+
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+
+          // Handle CSV parsing (accounting for commas in description)
+          const parts = [];
+          let current = "";
+          let inQuotes = false;
+
+          for (let j = 0; j < line.length; j++) {
+            const char = line[j];
+            if (char === '"') {
+              inQuotes = !inQuotes;
+            } else if (char === "," && !inQuotes) {
+              parts.push(current.trim());
+              current = "";
+            } else {
+              current += char;
+            }
+          }
+          parts.push(current.trim());
+
+          const number = parts[0] || "";
+          const points = parts[1] ? parseInt(parts[1]) : 0;
+          const description = parts[2] || "";
+
+          // Skip rows without description or number
+          if (!description || !number) continue;
+
+          const isSub = isSubPoint(number);
+          const parentNumber = isSub ? getParentNumber(number) : null;
+
+          questions.push({
+            number,
+            points,
+            description,
+            isSubPoint: isSub,
+            parentNumber: parentNumber,
+          });
+        }
+
+        return questions;
+      }
+
+      // Organize questions into parent-child structure
+      function organizeQuestions(questions) {
+        const organized = [];
+        const parentMap = new Map();
+        const subPointMap = new Map();
+
+        // First pass: identify parents and sub-points
+        questions.forEach((q) => {
+          if (q.isSubPoint) {
+            const parentNum = q.parentNumber;
+            if (!subPointMap.has(parentNum)) {
+              subPointMap.set(parentNum, []);
+            }
+            subPointMap.get(parentNum).push(q);
+          } else {
+            parentMap.set(q.number, q);
+          }
+        });
+
+        // Second pass: build organized structure
+        questions.forEach((q) => {
+          if (!q.isSubPoint) {
+            // Check if this parent has sub-points
+            const subPoints = subPointMap.get(q.number) || [];
+            organized.push({
+              ...q,
+              hasSubPoints: subPoints.length > 0,
+              subPoints: subPoints,
+            });
+          } else {
+            // Only add if parent doesn't exist (standalone sub-point like "18a")
+            const parentNum = q.parentNumber;
+            if (!parentMap.has(parentNum)) {
+              organized.push({
+                ...q,
+                hasSubPoints: false,
+                subPoints: [],
+              });
+            }
+          }
+        });
+
+        return organized;
+      }
+
+      // Create question HTML
+      function createQuestionHTML(question, index, isSubPoint = false) {
+        const questionId = `question-${index}`;
+        const sliderId = `slider-${index}`;
+        const scoreId = `score-${index}`;
+        const questionClass = isSubPoint ? "sub-question" : "question";
+        const borderColor = isSubPoint ? "#C4923E" : "#0A1F7D";
+
+        // Hide slider if parent has sub-points
+        const showSlider = !question.hasSubPoints;
+
+        const sliderHTML = showSlider
+          ? `
+                    <div class="slider-container">
+                        <span class="slider-label">1</span>
+                        <input 
+                            type="range" 
+                            id="${sliderId}" 
+                            class="slider" 
+                            min="1" 
+                            max="10" 
+                            value="1"
+                            data-points="${question.points}"
+                            data-index="${index}"
+                            data-question-number="${question.number}"
+                        >
+                        <span class="slider-label">10</span>
+                        <span class="slider-value" id="value-${index}">1</span>
+                    </div>
+                    <div class="score-display">
+                        Score: <span class="score-value" id="${scoreId}">${question.points / 10}</span> points
+                    </div>
+        `
+          : "";
+
+        return `
+                <div class="${questionClass}" id="${questionId}" style="border-left-color: ${borderColor};">
+                    <div class="question-header">
+                        <span class="question-number">${question.number}</span>
+                        <div class="question-text">${question.description}</div>
+                        <span class="question-points">${question.points} points</span>
+                    </div>
+                    ${sliderHTML}
+                </div>
+            `;
+      }
+
+      // Create parent question with sub-points HTML
+      function createParentWithSubPointsHTML(
+        parent,
+        globalIndex,
+        getNextIndex,
+      ) {
+        const questionId = `question-${globalIndex}`;
+        const sliderId = `slider-${globalIndex}`;
+        const scoreId = `score-${globalIndex}`;
+
+        // Create parent question header
+        const parentHeader = `
+          <div class="question-header">
+            <span class="question-number">${parent.number}</span>
+            <div class="question-text">${parent.description}</div>
+            <span class="question-points">${parent.points} points</span>
+          </div>
+        `;
+
+        // Create sub-questions HTML
+        let subQuestionsHTML = "";
+        if (parent.hasSubPoints && parent.subPoints.length > 0) {
+          subQuestionsHTML = '<div class="sub-points-section">';
+          parent.subPoints.forEach((subPoint) => {
+            const subIndex = getNextIndex();
+            const subSliderId = `slider-${subIndex}`;
+            const subScoreId = `score-${subIndex}`;
+
+            subQuestionsHTML += `
+              <div class="sub-question" id="question-${subIndex}" style="border-left-color: #C4923E;">
+                <div class="question-header">
+                  <span class="question-number">${subPoint.number}</span>
+                  <div class="question-text">${subPoint.description}</div>
+                  <span class="question-points">${subPoint.points} points</span>
+                </div>
+                <div class="slider-container">
+                  <span class="slider-label">1</span>
+                  <input 
+                    type="range" 
+                    id="${subSliderId}" 
+                    class="slider" 
+                    min="1" 
+                    max="10" 
+                    value="1"
+                    data-points="${subPoint.points}"
+                    data-index="${subIndex}"
+                    data-question-number="${subPoint.number}"
+                  >
+                  <span class="slider-label">10</span>
+                  <span class="slider-value" id="value-${subIndex}">1</span>
+                </div>
+                <div class="score-display">
+                  Score: <span class="score-value" id="${subScoreId}">${subPoint.points / 10}</span> points
+                </div>
+              </div>
+            `;
+          });
+          subQuestionsHTML += "</div>";
+        }
+
+        return `
+          <div class="question parent-question" id="${questionId}" style="border-left-color: #0A1F7D;">
+            ${parentHeader}
+            ${subQuestionsHTML}
+          </div>
+        `;
+      }
+
+      // Calculate and update total score
+      function updateTotalScore() {
+        const sliders = document.querySelectorAll(".slider");
+        let total = 0;
+
+        sliders.forEach((slider) => {
+          const points = parseInt(slider.getAttribute("data-points"));
+          const value = parseInt(slider.value);
+          total += points * (value / 10);
+        });
+
+        const totalScoreElement = document.getElementById("total-score");
+        const badgeElement = document.getElementById("score-badge");
+
+        totalScoreElement.textContent = total.toLocaleString();
+
+        // Update badge based on score
+        if (total >= 5000) {
+          badgeElement.textContent = "✓";
+          badgeElement.className = "score-badge success";
+        } else {
+          badgeElement.textContent = "✗";
+          badgeElement.className = "score-badge failure";
+        }
+      }
+
+      // Update individual question score
+      function updateQuestionScore(index, sliderValue) {
+        const slider = document.getElementById(`slider-${index}`);
+        const points = parseInt(slider.getAttribute("data-points"));
+        const score = points * (sliderValue / 10);
+        document.getElementById(`score-${index}`).textContent = score;
+      }
+
+      // Save slider value to localStorage
+      function saveSliderValue(questionNumber, value) {
+        try {
+          const savedValues = getSavedValues();
+          savedValues[questionNumber] = value;
+          localStorage.setItem(
+            "manifestationAlgorithmValues",
+            JSON.stringify(savedValues),
+          );
+        } catch (e) {
+          console.error("Error saving to localStorage:", e);
+        }
+      }
+
+      // Get all saved values from localStorage
+      function getSavedValues() {
+        try {
+          const saved = localStorage.getItem("manifestationAlgorithmValues");
+          return saved ? JSON.parse(saved) : {};
+        } catch (e) {
+          console.error("Error reading from localStorage:", e);
+          return {};
+        }
+      }
+
+      // Load saved value for a question
+      function loadSliderValue(questionNumber) {
+        const savedValues = getSavedValues();
+        return savedValues[questionNumber] || null;
+      }
+
+      // Clear all saved values
+      function clearSavedValues() {
+        try {
+          localStorage.removeItem("manifestationAlgorithmValues");
+        } catch (e) {
+          console.error("Error clearing localStorage:", e);
+        }
+      }
+
+      // Initialize the page
+      function init() {
+        const questions = parseCSV(csvData);
+        const organized = organizeQuestions(questions);
+        const container = document.getElementById("questions-container");
+
+        let globalIndex = 0;
+        const getNextIndex = () => {
+          const idx = globalIndex;
+          globalIndex++;
+          return idx;
+        };
+
+        organized.forEach((question) => {
+          if (question.hasSubPoints) {
+            const parentIndex = getNextIndex();
+            container.innerHTML += createParentWithSubPointsHTML(
+              question,
+              parentIndex,
+              getNextIndex,
+            );
+          } else {
+            container.innerHTML += createQuestionHTML(
+              question,
+              getNextIndex(),
+              question.isSubPoint,
+            );
+          }
+        });
+
+        // Load saved values and set up sliders
+        const sliders = document.querySelectorAll(".slider");
+        sliders.forEach((slider) => {
+          const index = parseInt(slider.getAttribute("data-index"));
+          const questionNumber = slider.getAttribute("data-question-number");
+
+          // Load saved value if available
+          if (questionNumber) {
+            const savedValue = loadSliderValue(questionNumber);
+            if (savedValue !== null) {
+              slider.value = savedValue;
+              document.getElementById(`value-${index}`).textContent =
+                savedValue;
+              updateQuestionScore(index, parseInt(savedValue));
+            }
+          }
+
+          // Update slider value display and save on change
+          slider.addEventListener("input", function () {
+            const value = this.value;
+            document.getElementById(`value-${index}`).textContent = value;
+            updateQuestionScore(index, parseInt(value));
+            updateTotalScore();
+
+            // Save to localStorage
+            if (questionNumber) {
+              saveSliderValue(questionNumber, value);
+            }
+          });
+        });
+
+        // Initial total score calculation
+        updateTotalScore();
+      }
+
+      // Start the application
+      init();
+    </script>
+  </body>
+</html>
