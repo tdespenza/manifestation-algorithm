@@ -46,6 +46,12 @@ async function initTables(db: Database) {
   `);
 }
 
+export async function clearSession(sessionId: string) {
+  const db = await getDb();
+  await db.execute('DELETE FROM questionnaire_responses WHERE session_id = $1', [sessionId]);
+  await db.execute('DELETE FROM settings WHERE key = $1', [`last_active_${sessionId}`]);
+}
+
 /**
  * Save a single answer to the database.
  * Uses UPSERT behavior via INSERT OR REPLACE.
@@ -75,6 +81,25 @@ export async function loadAnswers(sessionId: string): Promise<Record<string, num
   });
   
   return answers;
+}
+
+export async function updateLastActive(sessionId: string) {
+  const db = await getDb();
+  const now = Date.now().toString();
+  await db.execute(
+    'INSERT OR REPLACE INTO settings (key, value) VALUES ($1, $2)',
+    [`last_active_${sessionId}`, now]
+  );
+}
+
+export async function getLastActive(sessionId: string): Promise<string | null> {
+  const db = await getDb();
+  const rows = await db.select<{value: string}[]>(
+    'SELECT value FROM settings WHERE key = $1',
+    [`last_active_${sessionId}`]
+  );
+  if (rows.length > 0) return rows[0].value;
+  return null;
 }
 
 /**

@@ -6,11 +6,17 @@ import { useQuestionnaireStore } from './questionnaire';
 const dbMocks = vi.hoisted(() => ({
   saveAnswer: vi.fn(),
   loadAnswers: vi.fn().mockResolvedValue({}),
+  getLastActive: vi.fn().mockResolvedValue(null),
+  updateLastActive: vi.fn().mockResolvedValue(undefined),
+  clearSession: vi.fn(),
 }));
 
 vi.mock('../services/db', () => ({
   saveAnswer: dbMocks.saveAnswer,
   loadAnswers: dbMocks.loadAnswers,
+  getLastActive: dbMocks.getLastActive,
+  updateLastActive: dbMocks.updateLastActive,
+  clearSession: dbMocks.clearSession,
 }));
 
 describe('Questionnaire Store', () => {
@@ -22,11 +28,44 @@ describe('Questionnaire Store', () => {
   describe('Initialization', () => {
     it('init should load answers on success', async () => {
       dbMocks.loadAnswers.mockResolvedValue({ '1a': 5 });
+      dbMocks.getLastActive.mockResolvedValue(Date.now().toString());
       const store = useQuestionnaireStore();
       
       await store.init();
       
       expect(store.answers['1a']).toBe(5);
+    });
+
+    it('init should clear answers if session expired', async () => {
+        const store = useQuestionnaireStore();
+        // Mock returning old time (1 hr age)
+        const oldTime = Date.now() - (60 * 60 * 1000);
+        
+        dbMocks.loadAnswers.mockResolvedValue({ '1a': 5 });
+        dbMocks.getLastActive.mockResolvedValue(oldTime.toString());
+        
+        await store.init();
+        
+        // Answers should be empty despite loading them, effectively treated as expired
+        expect(store.answers).toEqual({});
+        // Should actually load answers first to check if there are any,
+        // OR logic might check expiry first. Assuming logic checks expiry first.
+        
+        expect(dbMocks.clearSession).toHaveBeenCalled(); 
+        expect(dbMocks.updateLastActive).toHaveBeenCalled();
+    });
+
+    it('init should not expire if within timeout', async () => {
+        const store = useQuestionnaireStore();
+        // Mock returning recent time (5 mins ago)
+        const recentTime = Date.now() - (5 * 60 * 1000);
+        
+        dbMocks.loadAnswers.mockResolvedValue({ '1a': 5 });
+        dbMocks.getLastActive.mockResolvedValue(recentTime.toString());
+        
+        await store.init();
+        
+        expect(store.answers['1a']).toBe(5);
     });
 
     it('init should handle errors gracefully', async () => {
@@ -51,7 +90,33 @@ describe('Questionnaire Store', () => {
       expect(store.answers['1b']).toBe(8);
       expect(dbMocks.saveAnswer).toHaveBeenCalledWith(expect.anything(), '1b', 8);
     });
+    it('setAnswer should update isSaving state', async () => {
+        const store = useQuestionnaireStore();
+        let wasSavingDuringExecution = false;
+        
+        // Mock saveAnswer to check state while running
+        dbMocks.saveAnswer.mockImplementation(async () => {
+            wasSavingDuringExecution = store.isSaving;
+            return Promise.resolve();
+        });
+        
+        // Use fake timers to fast-forward the delay
+        vi.useFakeTimers();
 
+        const promise = store.setAnswer('1c', 7);
+        
+        // Check immediate state
+        expect(store.isSaving).toBe(true);
+        
+        // Advance timers for the artificial delay
+        await vi.advanceTimersByTimeAsync(300);
+        await promise;
+        
+        expect(wasSavingDuringExecution).toBe(true);
+        expect(store.isSaving).toBe(false);
+        
+        vi.useRealTimers();
+    });
     it('setAnswer should ignore invalid values', async () => {
       const store = useQuestionnaireStore();
       
