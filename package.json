@@ -10,7 +10,17 @@
     "preview": "vite preview",
     "sync-version": "node scripts/sync-version.js",
     "preversion": "npm run sync-version",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:report": "playwright show-report playwright-report",
+    "test:all": "npm run test && npm run test:e2e"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",
@@ -25,7 +35,9 @@
   },
   "devDependencies": {
     "@pinia/testing": "^1.0.3",
+    "@playwright/test": "^1.58.2",
     "@tauri-apps/cli": "^2",
+    "@types/node": "^25.3.0",
     "@types/uuid": "^10.0.0",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vitest/coverage-istanbul": "^4.0.18",
