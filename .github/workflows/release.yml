@@ -1,20 +1,40 @@
 name: Publish Release
 
-# Triggered by pushing a version tag, e.g. git tag v1.2.3 && git push --tags
+# Triggered directly when the Auto-Merge Dev to Main workflow completes
+# successfully. Using workflow_run is the only reliable way to chain off a
+# bot-authenticated merge — tag-push triggers are frequently suppressed by
+# GitHub when the push originates from a workflow token.
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_run:
+    workflows: ['Auto-Merge Dev to Main']
+    types: [completed]
 
 permissions:
   contents: write
 
-# Build all three platforms in parallel, then publish a single GitHub Release.
 jobs:
+  # Resolve the version tag from package.json on main so the matrix jobs
+  # share a single consistent value.
+  resolve-tag:
+    name: Resolve Version Tag
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Read version from package.json
+        id: version
+        run: echo "tag=v$(jq -r .version package.json)" >> "$GITHUB_OUTPUT"
+
+  # Build all three platforms in parallel, then publish a single GitHub Release.
   build:
     name: Build & Publish (${{ matrix.name }})
-    # Explicit job-level permission ensures GITHUB_TOKEN can create releases
-    # even in organisations that restrict workflow-level token inheritance.
+    needs: resolve-tag
     permissions:
       contents: write
     strategy:
@@ -31,8 +51,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout
+      - name: Checkout main
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Set Up Node.js
         uses: actions/setup-node@v4
@@ -70,13 +92,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: 'Manifestation Algorithm ${{ github.ref_name }}'
+          tagName: ${{ needs.resolve-tag.outputs.tag }}
+          releaseName: 'Manifestation Algorithm ${{ needs.resolve-tag.outputs.tag }}'
           releaseBody: |
             ## What's new
-            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md) for full release notes.
+            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ needs.resolve-tag.outputs.tag }}/CHANGELOG.md) for full release notes.
 
             ## Installation
             Download the installer for your platform below.
           releaseDraft: false
-          prerelease: ${{ contains(github.ref_name, '-') }}
+          prerelease: ${{ contains(needs.resolve-tag.outputs.tag, '-') }}
