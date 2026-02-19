@@ -40,6 +40,7 @@ jobs:
       - name: Trigger CI on Main
         # GITHUB_TOKEN pushes do not fire workflow triggers, so we explicitly
         # dispatch the CI workflow on main to run tests and create the release tag.
+        # GITHUB_TOKEN cannot dispatch workflows (HTTP 403), so we use the PAT.
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT }}
         run: gh workflow run ci.yml --ref main --repo ${{ github.repository }}
