@@ -141,9 +141,14 @@ describe('Questionnaire Store', () => {
     });
   });
   
-  it('calculateScore computed should work', () => {
+  it('calculateScore computed reflects answer changes', () => {
     const store = useQuestionnaireStore();
-    store.answers['2'] = 5; 
-    expect(store.score).toBe(50);
+    const baseline = store.score; // all implicit default (1) = 10% of max
+    // Q2 = 100 pts. Setting from implicit 1 → 5: delta = 100*(5-1)/10 = +40
+    store.answers['2'] = 5;
+    expect(store.score).toBeCloseTo(baseline + 40);
+    // Setting Q2 from 5 → 10: delta = 100*(10-5)/10 = +50
+    store.answers['2'] = 10;
+    expect(store.score).toBeCloseTo(baseline + 90);
   });
 });

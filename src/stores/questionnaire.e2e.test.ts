@@ -76,7 +76,8 @@ describe('E2E: Complete questionnaire flow', () => {
 
     expect(store.answers).toEqual({});
     expect(store.percentComplete).toBe(0);
-    expect(store.isComplete).toBe(false);
+    // With no explicit answers, all questions implicitly default to 1, so isComplete is true
+    expect(store.isComplete).toBe(true);
     expect(store.currentIndex).toBe(0);
     expect(store.hasSavedSession).toBe(false);
   });
@@ -166,20 +167,20 @@ describe('E2E: Complete questionnaire flow', () => {
 
     // State should be reset after submit
     expect(store.answers).toEqual({});
-    expect(store.isComplete).toBe(false);
+    // After reset, answers are empty → all implicit defaults → isComplete is true again
+    expect(store.isComplete).toBe(true);
     expect(store.percentComplete).toBe(0);
     expect(store.currentIndex).toBe(0);
     expect(dbMocks.clearSession).toHaveBeenCalled();
   });
 
-  it('submitSession throws if questionnaire not complete', async () => {
+  it('submitSession always succeeds (all questions default to 1)', async () => {
     const store = useQuestionnaireStore();
     await store.init();
-
-    // Only answer one question
-    await fastSetAnswer(store, '2', 7);
-
-    await expect(store.submitSession()).rejects.toThrow('not complete');
+    // No explicit answers — all default to 1, isComplete = true
+    expect(store.isComplete).toBe(true);
+    const histId = await store.submitSession();
+    expect(histId).toBe('hist-e2e-001');
   });
 
   it('Step 7 – startFresh clears all answers and resets navigation', async () => {
@@ -220,13 +221,26 @@ describe('E2E: Complete questionnaire flow', () => {
   it('score is consistent with scoring formula (points × rating/10)', async () => {
     const store = useQuestionnaireStore();
     await store.init();
+    const baseline = store.score; // all implicit 1s
 
-    // Q2: 100 pts at rating 5 → 50 pts
+    // Q2: 100 pts. 1→5: delta = 100*(5-1)/10 = +40
     await fastSetAnswer(store, '2', 5);
-    // Q3: 250 pts at rating 10 → 250 pts
-    await fastSetAnswer(store, '3', 10);
+    expect(store.score - baseline).toBeCloseTo(40, 1);
 
-    // score should be 50 + 250 = 300
-    expect(store.score).toBeCloseTo(300, 2);
+    // Q3: 250 pts. 1→10: delta = 250*(10-1)/10 = +225
+    await fastSetAnswer(store, '3', 10);
+    expect(store.score - baseline).toBeCloseTo(40 + 225, 1);
+  });
+
+  it('submitSession rethrows and logs when saveHistoricalSession rejects', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    dbMocks.saveHistoricalSession.mockRejectedValueOnce(new Error('DB write failed'));
+
+    const store = useQuestionnaireStore();
+    await store.init();
+
+    await expect(store.submitSession()).rejects.toThrow('DB write failed');
+    expect(consoleSpy).toHaveBeenCalledWith('Failed to submit session:', expect.any(Error));
+    consoleSpy.mockRestore();
   });
 });

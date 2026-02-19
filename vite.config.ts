@@ -20,6 +20,28 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     include: ['src/**/*.{test,spec}.{js,ts}'],
-    globals: true
+    globals: true,
+    coverage: {
+      provider: 'istanbul',
+      reporter: ['text', 'lcov', 'html'],
+      include: ['src/**/*.{ts,vue}'],
+      exclude: [
+        'src/**/*.{test,spec}.{ts,js}',
+        'src/**/__tests__/**',
+        'src/**/tests/**',
+        'src/vite-env.d.ts',
+        'src/main.ts',
+        'src/router/**',
+        'src/data/**',
+        'src/types/**',
+        'src/assets/**',
+      ],
+      thresholds: {
+        branches: 100,
+        functions: 100,
+        lines: 100,
+        statements: 100,
+      },
+    },
   }
 });

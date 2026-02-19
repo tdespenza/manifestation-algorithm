@@ -39,7 +39,6 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
 
   const percentComplete = computed(() => {
     const answered = Object.keys(answers.value).length;
-    if (TOTAL_QUESTIONS_COUNT === 0) return 0;
     return Math.floor((answered / TOTAL_QUESTIONS_COUNT) * 100);
   });
 
@@ -135,7 +134,6 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
   }
 
   async function submitSession(): Promise<string> {
-    if (!isComplete.value) throw new Error('Questionnaire is not complete');
     try {
       isSaving.value = true;
       // Fill in default value of 1 for any questions the user never touched

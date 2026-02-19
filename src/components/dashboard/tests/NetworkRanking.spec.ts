@@ -50,14 +50,24 @@ describe('NetworkRanking.vue', () => {
 
   // ── Connection state ────────────────────────────────────────────────────────
 
-  it('shows "Connecting to network..." loading text when not connected', () => {
-    mockIsConnected.value = false;
+  it('shows "Searching for peers..." loading text when count and manifestations are both 0', () => {
+    mockCount.value = 0;
+    mockManifestations.value = 0;
     const wrapper = mount(NetworkRanking);
-    expect(wrapper.find('.loading').text()).toContain('Connecting to network...');
+    expect(wrapper.find('.loading').text()).toContain('Searching for peers...');
   });
 
-  it('hides loading text and shows stats-grid when connected', async () => {
-    mockIsConnected.value = true;
+  it('hides loading text and shows stats-grid when count > 0', async () => {
+    mockCount.value = 1;
+    const wrapper = mount(NetworkRanking);
+    await wrapper.vm.$nextTick();
+    expect(wrapper.find('.loading').exists()).toBe(false);
+    expect(wrapper.find('.stats-grid').exists()).toBe(true);
+  });
+
+  it('hides loading text and shows stats-grid when manifestations > 0', async () => {
+    mockCount.value = 0;
+    mockManifestations.value = 5;
     const wrapper = mount(NetworkRanking);
     await wrapper.vm.$nextTick();
     expect(wrapper.find('.loading').exists()).toBe(false);
@@ -67,7 +77,7 @@ describe('NetworkRanking.vue', () => {
   // ── Stats values ─────────────────────────────────────────────────────────
 
   it('displays "-" for global average when avgScore is null', async () => {
-    mockIsConnected.value = true;
+    mockCount.value = 1; // grid visible
     mockAvgScore.value = null;
     const wrapper = mount(NetworkRanking);
     await wrapper.vm.$nextTick();
@@ -76,7 +86,7 @@ describe('NetworkRanking.vue', () => {
   });
 
   it('displays formatted avgScore when present', async () => {
-    mockIsConnected.value = true;
+    mockCount.value = 1; // grid visible
     mockAvgScore.value = 75.567;
     const wrapper = mount(NetworkRanking);
     await wrapper.vm.$nextTick();
@@ -85,7 +95,7 @@ describe('NetworkRanking.vue', () => {
   });
 
   it('displays "-" for P90 when percentile90 is null', async () => {
-    mockIsConnected.value = true;
+    mockCount.value = 1; // grid visible
     mockPercentile90.value = null;
     const wrapper = mount(NetworkRanking);
     await wrapper.vm.$nextTick();
@@ -94,7 +104,7 @@ describe('NetworkRanking.vue', () => {
   });
 
   it('displays formatted P90 when present', async () => {
-    mockIsConnected.value = true;
+    mockCount.value = 1; // grid visible
     mockPercentile90.value = 91.04;
     const wrapper = mount(NetworkRanking);
     await wrapper.vm.$nextTick();

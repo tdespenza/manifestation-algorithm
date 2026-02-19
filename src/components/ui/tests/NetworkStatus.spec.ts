@@ -40,11 +40,11 @@ describe('NetworkStatus.vue', () => {
     vi.clearAllMocks();
   });
 
-  it('shows "Connecting..." when not connected and no peers', async () => {
+  it('shows "Searching..." when count is zero (regardless of connected state)', async () => {
     mockIsConnected.value = false;
     mockCount.value = 0;
     const wrapper = mount(NetworkStatus);
-    expect(wrapper.find('.status-text').text()).toBe('Connecting...');
+    expect(wrapper.find('.status-text').text()).toBe('Searching...');
   });
 
   it('shows "Searching..." when connected but zero peers', async () => {
@@ -138,5 +138,10 @@ describe('NetworkStatus.vue', () => {
   it('calls init() on mount', () => {
     mount(NetworkStatus);
     expect(mockInit).toHaveBeenCalledOnce();
+  });
+
+  it('onUnmounted callback runs without error when component is unmounted', () => {
+    const wrapper = mount(NetworkStatus);
+    expect(() => wrapper.unmount()).not.toThrow();
   });
 });

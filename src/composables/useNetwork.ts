@@ -133,4 +133,8 @@ export function _resetNetworkState(): void {
   isListening.value = false;
   sharingEnabled.value = false;
   unlisten = null;
+  if (connectTimeoutId !== null) {
+    clearTimeout(connectTimeoutId);
+  }
+  connectTimeoutId = null;
 }

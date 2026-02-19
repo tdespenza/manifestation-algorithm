@@ -56,4 +56,24 @@ describe('Database Migrations', () => {
     const insertCall = calls.find((call: any[]) => call[0].includes('INSERT INTO _migrations'));
     expect(insertCall).toBeUndefined();
   });
+
+  it('should throw and stop when a migration fails', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    // No migrations applied yet
+    (mockDb.select as any).mockResolvedValue([]);
+    // Make execute throw on the first CREATE TABLE call (migration 1 body)
+    (mockDb.execute as any).mockImplementation((sql: string) => {
+      if (sql.includes('CREATE TABLE IF NOT EXISTS stats')) {
+        throw new Error('Migration 1 failed');
+      }
+      return Promise.resolve([]);
+    });
+
+    await expect(runMigrations(mockDb)).rejects.toThrow('Migration 1 failed');
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to apply migration 1'),
+      expect.any(Error)
+    );
+    consoleSpy.mockRestore();
+  });
 });

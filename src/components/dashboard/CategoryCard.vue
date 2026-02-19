@@ -77,11 +77,17 @@ const scoreClass = computed(() => {
   return 'low';
 });
 
+const isUptrend = computed(() =>
+  props.trendData.length > 1
+    ? props.trendData[props.trendData.length - 1] >= props.trendData[0]
+    : true
+);
+
 const chartData = computed(() => ({
   labels: props.dates,
   datasets: [{
     data: props.trendData,
-    borderColor: props.trendData[props.trendData.length - 1] >= (props.trendData[0] || 0) ? '#4caf50' : '#f44336',
+    borderColor: isUptrend.value ? '#000000' : '#f44336',
     borderWidth: 2,
     pointRadius: 0,
     pointHoverRadius: 4,
@@ -114,11 +120,11 @@ const chartOptions: ChartOptions<'line'> = {
 .category-card {
   background: white;
   border-radius: 8px;
-  padding: 15px;
+  padding: 16px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   display: flex;
   flex-direction: column;
-  height: 140px;
+  height: 160px;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
 }
@@ -132,7 +138,8 @@ const chartOptions: ChartOptions<'line'> = {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  gap: 8px;
 }
 
 h3 {
@@ -165,6 +172,8 @@ h3 {
   flex: 1;
   position: relative;
   width: 100%;
+  overflow: hidden;
+  min-height: 0;
 }
 
 .no-trend {

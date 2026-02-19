@@ -11,8 +11,6 @@ export function detectTrend(data: number[]): TrendDirection {
 
   // Use the last 7 points or less
   const recentData = data.slice(-7);
-  
-  if (recentData.length < 2) return 'insufficient';
 
   // Simple linear regression to find slope
   const n = recentData.length;

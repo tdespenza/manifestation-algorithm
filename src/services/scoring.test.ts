@@ -4,10 +4,13 @@ import { questions } from '../data/questions';
 
 describe('Score Calculation Engine', () => {
   it('should calculate specific score for a single question', () => {
-    // Q2 is 100 points
-    const answers = { '2': 5 }; // 50% score
-    const score = calculateScore(answers);
-    expect(score).toBe(50);
+    // Fill all questions to baseline 1, then override Q2 to 5
+    const answers: Record<string, number> = {};
+    const fill = (q: any) => { if (q.subPoints) q.subPoints.forEach(fill); else answers[q.id] = 1; };
+    questions.forEach(fill);
+    const baseline = calculateScore({ ...answers });
+    answers['2'] = 5; // Q2 = 100 pts: (5-1)/10 * 100 = +40 pts over baseline
+    expect(calculateScore(answers) - baseline).toBeCloseTo(40);
   });
 
   it('should calculate minimum score (1 everywhere)', () => {
@@ -47,12 +50,11 @@ describe('Score Calculation Engine', () => {
     expect(result).toBe(max);
   });
 
-  it('should handle missing answers as 0 points', () => {
-    // Only answer Q2 (100 pts) with 10 -> 100 pts
-    // Leave Q3 (250 pts) blank
-    const answers = { '2': 10 };
-    const score = calculateScore(answers);
-    expect(score).toBe(100);
+  it('should default missing answers to minimum rating (1)', () => {
+    // No answers → all default to 1 → 10% of max score
+    const max = getMaxPossibleScore();
+    const score = calculateScore({});
+    expect(score).toBeCloseTo(max * 0.1);
   });
 
   it('should verify total max points matches expectation (approx 10,000)', () => {
@@ -65,13 +67,16 @@ describe('Score Calculation Engine', () => {
   });
   
   it('should process sub-questions correctly (Q1)', () => {
-    const answers = {
-      '1a': 10, // 25
-      '1b': 10, // 25
-      '1c': 10, // 25
-      '1d': 10, // 25
-    };
-    // Total should be 100
-    expect(calculateScore(answers)).toBe(100);
+    // Fill all answers to 1, then set Q1 sub-questions to 10
+    const answers: Record<string, number> = {};
+    const fill = (q: any) => { if (q.subPoints) q.subPoints.forEach(fill); else answers[q.id] = 1; };
+    questions.forEach(fill);
+    const baseline = calculateScore({ ...answers });
+    answers['1a'] = 10; // 25 pts each
+    answers['1b'] = 10;
+    answers['1c'] = 10;
+    answers['1d'] = 10;
+    // Going from 1→10 for 4 questions of 25pts each: delta = 4 * 25 * (9/10) = 90
+    expect(calculateScore(answers) - baseline).toBeCloseTo(90);
   });
 });
