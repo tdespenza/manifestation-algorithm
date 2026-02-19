@@ -145,7 +145,7 @@ onMounted(() => {
 
 <style scoped>
 .dashboard-view {
-  padding: 24px;
+  padding: 24px 0;
   max-width: 100%;
   margin: 0 auto;
 }
@@ -153,11 +153,13 @@ onMounted(() => {
 .dashboard-header {
   margin-bottom: 2rem;
   text-align: center;
+  padding: 0 24px;
 }
 
 .dashboard-content {
-  max-width: 1800px;
-  margin: 0 auto;
+  width: 100%;
+  padding: 0 24px;
+  box-sizing: border-box;
 }
 
 .controls-bar {

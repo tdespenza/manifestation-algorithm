@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router';
+import { RouterLink, RouterView, useRoute } from 'vue-router';
+import { computed } from 'vue';
 import NetworkStatus from './components/NetworkStatus.vue';
 import logoUrl from './assets/logo.svg';
+
+const route = useRoute();
+const mainClass = computed(() => (route.name === 'dashboard' ? 'full-width-main' : 'container'));
 </script>
 
 <template>
@@ -30,7 +34,7 @@ import logoUrl from './assets/logo.svg';
       </div>
     </nav>
 
-    <main class="container">
+    <main :class="mainClass">
       <router-view v-slot="{ Component }">
         <transition name="fade" mode="out-in">
           <component :is="Component" />
@@ -133,6 +137,12 @@ import logoUrl from './assets/logo.svg';
 }
 
 .container {
+  padding-top: 20px;
+  padding-bottom: 40px;
+}
+
+.full-width-main {
+  width: 100%;
   padding-top: 20px;
   padding-bottom: 40px;
 }
