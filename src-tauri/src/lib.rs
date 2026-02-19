@@ -60,11 +60,13 @@ fn load_settings(path: &Path) -> bool {
 }
 
 /// Persist sharing opt-in state to the app settings file.
-fn save_settings(path: &Path, sharing_enabled: bool) {
+fn save_settings(path: &Path, sharing_enabled: bool) -> Result<(), String> {
     let json = serde_json::json!({ "sharing_enabled": sharing_enabled });
-    if let Ok(content) = serde_json::to_string(&json) {
-        let _ = std::fs::write(path, content);
-    }
+    let content = serde_json::to_string(&json).map_err(|e| e.to_string())?;
+    std::fs::write(path, content).map_err(|e| {
+        eprintln!("[settings] Failed to write {:?}: {}", path, e);
+        e.to_string()
+    })
 }
 
 #[tauri::command]
@@ -149,17 +151,29 @@ async fn publish_result(
 /// Sharing is **opt-in** and disabled by default (PRD Feature 3.6).
 /// The setting is persisted to disk and restored on next launch.
 #[tauri::command]
-fn set_network_sharing(enabled: bool, state: State<'_, NetworkState>) -> Result<(), String> {
+fn set_network_sharing(enabled: bool, state: State<'_, NetworkState>, app: tauri::AppHandle) -> Result<(), String> {
     {
         let mut guard = state.sharing_enabled.lock().map_err(|e| e.to_string())?;
         *guard = enabled;
     }
-    // Persist to disk so the setting survives app restarts
-    let path_guard = state.settings_path.lock().map_err(|e| e.to_string())?;
-    if let Some(ref path) = *path_guard {
-        save_settings(path, enabled);
-    }
-    println!("Network sharing {}", if enabled { "enabled" } else { "disabled" });
+
+    // Resolve path from stored state; fall back to computing it from AppHandle
+    // so a None settings_path never silently skips the write.
+    let path: PathBuf = {
+        let path_guard = state.settings_path.lock().map_err(|e| e.to_string())?;
+        match path_guard.clone() {
+            Some(p) => p,
+            None => {
+                eprintln!("[settings] settings_path not set, resolving from app_data_dir");
+                let dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
+                let _ = std::fs::create_dir_all(&dir);
+                dir.join("app_settings.json")
+            }
+        }
+    };
+
+    save_settings(&path, enabled)?;
+    println!("[settings] Network sharing {} — persisted to {:?}", if enabled { "enabled" } else { "disabled" }, path);
     Ok(())
 }
 
