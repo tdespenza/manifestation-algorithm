@@ -23,14 +23,15 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          # Use PAT so the tag push triggers release.yml.
-          # GITHUB_TOKEN pushes are intentionally blocked from firing workflow events.
           token: ${{ secrets.PAT }}
 
       - name: Configure Git Identity
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Always push via PAT so the tag push fires workflow triggers.
+          # GITHUB_TOKEN pushes are intentionally blocked from firing downstream events.
+          git remote set-url origin "https://x-access-token:${{ secrets.PAT }}@github.com/${{ github.repository }}"
 
       - name: Merge Dev into Main
         run: |
