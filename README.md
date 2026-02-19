@@ -1,5 +1,7 @@
 # Manifestation Algorithm
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-violet.svg)](LICENSE)
+
 A privacy-first desktop application for tracking and scoring personal development practices, built with **Tauri + Vue 3 + TypeScript**.
 
 ---
@@ -147,4 +149,12 @@ See `_bmad-output/planning-artifacts/ADR-*.md` for full Architecture Decision Re
 - P2P network (IPFS/libp2p)
 - Frontend (Vue 3)
 - Privacy design (Zero PII)
+
+---
+
+## License
+
+MIT License — see [LICENSE](LICENSE) for details.
+
+Copyright © 2026 Tyshawn Despenza
 
