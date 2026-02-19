@@ -71,23 +71,21 @@ const scoreClass = computed(() => {
   return 'low';
 });
 
-const isUptrend = computed(() =>
-  props.trendData.length > 1
-    ? props.trendData[props.trendData.length - 1] >= props.trendData[0]
-    : true
-);
-
 const chartData = computed(() => ({
   labels: props.dates,
   datasets: [
     {
       data: props.trendData,
-      borderColor: isUptrend.value ? '#000000' : '#f44336',
+      borderColor: '#000000',
       borderWidth: 2,
       pointRadius: 0,
       pointHoverRadius: 4,
       fill: false,
-      tension: 0.3
+      tension: 0.3,
+      segment: {
+        borderColor: (ctx: { p0: { parsed: { y: number } }; p1: { parsed: { y: number } } }) =>
+          ctx.p1.parsed.y >= ctx.p0.parsed.y ? '#000000' : '#f44336'
+      }
     }
   ]
 }));

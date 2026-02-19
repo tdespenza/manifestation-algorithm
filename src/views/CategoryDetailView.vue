@@ -77,18 +77,20 @@ const reversedHistory = computed(() => {
 
 const chartData = computed(() => {
   const data = categoryData.value;
-  const isUptrend = data.length > 1 ? data[data.length - 1].value >= data[0].value : true;
-  const lineColor = isUptrend ? '#000000' : '#f44336';
   return {
     labels: data.map(d => new Date(d.date).toLocaleDateString()),
     datasets: [
       {
         label: category.value,
         data: data.map(d => d.value),
-        borderColor: lineColor,
-        backgroundColor: isUptrend ? 'rgba(0,0,0,0.08)' : 'rgba(244,67,54,0.1)',
+        borderColor: '#000000',
+        backgroundColor: 'transparent',
         tension: 0.2,
-        fill: true
+        fill: false,
+        segment: {
+          borderColor: (ctx: { p0: { parsed: { y: number } }; p1: { parsed: { y: number } } }) =>
+            ctx.p1.parsed.y >= ctx.p0.parsed.y ? '#000000' : '#f44336'
+        }
       }
     ]
   };
