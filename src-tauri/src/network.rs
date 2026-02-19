@@ -17,7 +17,7 @@ use lru::LruCache;
 use std::num::NonZeroUsize;
 use sha2::{Sha256, Digest};
 use cid::Cid;
-use multihash::{Code, MultihashDigest};
+use multihash::Multihash;
 
 
 #[derive(NetworkBehaviour)]
@@ -88,18 +88,23 @@ pub struct ManifestationResult {
 impl ManifestationResult {
     pub fn get_cid(&self) -> Result<String, String> {
         let json_bytes = serde_json::to_vec(self).map_err(|e| e.to_string())?;
-        
-        let hash = Code::Sha2_256.digest(&json_bytes);
-        
+
+        // Compute SHA2-256 digest using the sha2 crate, then wrap into a Multihash.
+        // multihash v0.19 removed Code/MultihashDigest from the root; use Multihash::wrap
+        // instead. SHA2-256 multicodec value is 0x12.
+        let digest = Sha256::digest(&json_bytes);
+        let hash = Multihash::<64>::wrap(0x12, &digest)
+            .map_err(|e| e.to_string())?;
+
         // Use DAG-JSON (0x0129)
         let cid = Cid::new_v1(0x0129, hash);
         Ok(cid.to_string())
     }
 
     pub fn validate(&self) -> Result<(), String> {
-        // 1. Score validation — max possible score is 10,000
-        if self.score < 0.0 || self.score > 10_000.0 {
-            return Err(format!("Score {} is out of range (0.0 - 10000.0)", self.score));
+        // 1. Score validation — valid range is 0–100
+        if self.score < 0.0 || self.score > 100.0 {
+            return Err(format!("Score {} is out of range (0.0 - 100.0)", self.score));
         }
 
         // 2. Timestamp validation (not in future)
@@ -115,8 +120,8 @@ impl ManifestationResult {
 
         // 3. Category scores validation
         for (category, &score) in &self.category_scores {
-            if score < 0.0 || score > 10_000.0 {
-                return Err(format!("Category '{}' score {} is out of range", category, score));
+            if score < 0.0 || score > 100.0 {
+                return Err(format!("Category '{}' score {} is out of range (0.0 - 100.0)", category, score));
             }
 
             // 4. Privacy validation (PII check in keys)
