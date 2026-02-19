@@ -2,7 +2,6 @@ title: Manifestation Algorithm
 description: Privacy-first desktop app for personal development tracking
 url: https://tdespenza.github.io/manifestation-algorithm
 baseurl: /manifestation-algorithm
-theme: jekyll-theme-slate
 
 # Build settings
 markdown: kramdown
