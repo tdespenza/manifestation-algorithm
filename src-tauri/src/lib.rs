@@ -182,6 +182,27 @@ pub fn run() {
             settings_path: Mutex::new(None),
         })
         .setup(|app| {
+            // Load persisted settings synchronously so get_network_sharing returns
+            // the correct value immediately when the frontend calls it on startup.
+            {
+                let settings_path = match app.path().app_data_dir() {
+                    Ok(path) => {
+                        let _ = std::fs::create_dir_all(&path);
+                        path.join("app_settings.json")
+                    },
+                    Err(_) => std::path::PathBuf::from("app_settings.json"),
+                };
+                let saved_sharing = load_settings(&settings_path);
+                let state = app.state::<NetworkState>();
+                if let Ok(mut guard) = state.sharing_enabled.lock() {
+                    *guard = saved_sharing;
+                }
+                if let Ok(mut guard) = state.settings_path.lock() {
+                    *guard = Some(settings_path);
+                }
+                println!("[setup] Loaded sharing_enabled={} from settings", saved_sharing);
+            }
+
             let app_handle = app.handle().clone();
 
             tauri::async_runtime::spawn(async move {
@@ -214,17 +235,17 @@ pub fn run() {
                     Err(_) => std::path::PathBuf::from("identity.key"), // Fallback
                 };
 
-                // Load persisted settings (sharing opt-in state) and store path for future saves
+                // Update settings_path to the canonical app_data_dir location now that
+                // we have the full key_path resolved; sharing_enabled was already loaded
+                // synchronously in setup above.
                 let settings_path = key_path.with_file_name("app_settings.json");
-                let saved_sharing = load_settings(&settings_path);
                 if let Some(state) = app_handle.try_state::<NetworkState>() {
-                    if let Ok(mut guard) = state.sharing_enabled.lock() {
-                        *guard = saved_sharing;
-                    }
                     if let Ok(mut guard) = state.settings_path.lock() {
-                        *guard = Some(settings_path);
+                        // Only update if not already set (setup already set it)
+                        if guard.is_none() {
+                            *guard = Some(settings_path);
+                        }
                     }
-                    println!("Loaded sharing_enabled={} from settings", saved_sharing);
                 }
 
                 // Load or generate user identity (separate from P2P node ID)

@@ -1,1 +1,40 @@
+#!/usr/bin/env sh
+# Pre-commit hook — mirrors the CI pipeline (lint, typecheck, unit, e2e).
+# Rust tests are excluded locally (require Linux system deps; covered in CI).
+
+set -e
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  Pre-commit checks (CI mirror)"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+echo ""
+echo "▶ [1/6] Lint-staged (auto-fix staged files)..."
 npx lint-staged
+
+echo ""
+echo "▶ [2/6] ESLint check..."
+npm run lint:check
+
+echo ""
+echo "▶ [3/6] Prettier format check..."
+npm run format:check
+
+echo ""
+echo "▶ [4/6] TypeScript type check..."
+npx vue-tsc --noEmit
+
+echo ""
+echo "▶ [5/6] Unit & integration tests..."
+npx vitest run
+
+echo ""
+echo "▶ [6/6] End-to-end tests (Chromium)..."
+npx playwright test --project=chromium
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  ✓ All checks passed — committing."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""

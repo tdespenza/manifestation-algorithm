@@ -50,7 +50,8 @@ import {
   Title,
   Tooltip,
   Legend,
-  type ChartOptions
+  type ChartOptions,
+  type ScriptableLineSegmentContext
 } from 'chart.js';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
@@ -77,19 +78,20 @@ const reversedHistory = computed(() => {
 
 const chartData = computed(() => {
   const data = categoryData.value;
+  const isDowntrend = data.length > 1 && data[data.length - 1].value < data[0].value;
   return {
     labels: data.map(d => new Date(d.date).toLocaleDateString()),
     datasets: [
       {
         label: category.value,
         data: data.map(d => d.value),
-        borderColor: '#000000',
+        borderColor: isDowntrend ? '#f44336' : '#000000',
         backgroundColor: 'transparent',
         tension: 0.2,
         fill: false,
         segment: {
-          borderColor: (ctx: { p0: { parsed: { y: number } }; p1: { parsed: { y: number } } }) =>
-            ctx.p1.parsed.y >= ctx.p0.parsed.y ? '#000000' : '#f44336'
+          borderColor: (ctx: ScriptableLineSegmentContext) =>
+            (ctx.p1.parsed.y ?? 0) >= (ctx.p0.parsed.y ?? 0) ? '#000000' : '#f44336'
         }
       }
     ]

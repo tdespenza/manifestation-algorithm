@@ -21,6 +21,7 @@
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:report": "playwright show-report playwright-report",
     "test:all": "npm run test && npm run test:e2e",
+    "ci": "npm run lint:check && npm run format:check && npm run deps:validate && vue-tsc --noEmit && npm run test && npx playwright test --project=chromium",
     "prepare": "husky",
 
     "lint": "eslint src tests --fix",

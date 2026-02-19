@@ -11,7 +11,7 @@ import logoUrl from './assets/logo.svg';
         <div class="nav-left">
           <router-link to="/" class="nav-logo">
             <img :src="logoUrl" alt="Manifestation Algorithm" class="nav-logo-img" />
-            <span class="nav-logo-text">MA</span>
+            <span class="nav-logo-text">Manifestation Algorithm</span>
           </router-link>
           <div class="nav-links">
             <router-link to="/" active-class="active">Questionnaire</router-link>
@@ -88,9 +88,10 @@ import logoUrl from './assets/logo.svg';
 
 .nav-logo-text {
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.85rem;
   color: #333;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 .nav-logo:hover .nav-logo-img {
