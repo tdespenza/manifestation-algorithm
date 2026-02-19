@@ -49,10 +49,8 @@
     </div>
 
     <div class="bandwidth-stats">
-      <small
-        >Bandwidth: ↓ {{ formatBytes(bandwidthStats.inbound) }} | ↑
-        {{ formatBytes(bandwidthStats.outbound) }}</small
-      >
+      ↓ {{ formatBytes(bandwidthStats.inbound) }} &nbsp;|&nbsp; ↑
+      {{ formatBytes(bandwidthStats.outbound) }}
     </div>
 
     <div class="sharing-section">
@@ -86,151 +84,233 @@ function formatBytes(bytes: number, decimals = 2) {
 </script>
 
 <style scoped>
+/* ── Panel shell ── */
 .network-stats-panel {
   background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border-radius: 14px;
+  padding: 1.75rem 1.75rem 1.25rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
+/* ── Header ── */
 h3 {
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-  color: #2c3e50;
-  font-size: 1.25rem;
+  margin: 0;
+  color: #1a2233;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
 }
 
+/* ── Sub-headings ── */
 h4 {
-  margin: 1.5rem 0 1rem;
-  color: #666;
-  font-size: 1rem;
+  margin: 0 0 0.875rem;
+  color: #555;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
 }
 
+/* ── Top-level stat cards ── */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-}
-
-@media (max-width: 600px) {
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
+  gap: 0.875rem;
 }
 
 .stat-box {
-  background: #f8f9fa;
-  padding: 1rem;
-  border-radius: 8px;
+  background: #f4f6fa;
+  padding: 1rem 1.1rem;
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
+  gap: 0.3rem;
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .stat-box.primary {
-  background: #e3f2fd;
-  color: #0d47a1;
+  background: linear-gradient(135deg, #e8f0fe 0%, #d0e4ff 100%);
+  border-color: rgba(10, 31, 125, 0.12);
 }
 
 .stat-box.accent {
-  background: #f3e5f5;
-  color: #7b1fa2;
+  background: linear-gradient(135deg, #f0eaff 0%, #e4d5ff 100%);
+  border-color: rgba(96, 97, 164, 0.15);
 }
 
 .label {
-  font-size: 0.8rem;
-  opacity: 0.8;
-  margin-bottom: 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b7a99;
+  line-height: 1;
 }
 
+.stat-box.primary .label { color: #3a5cc5; }
+.stat-box.accent .label  { color: #6061a4; }
+
 .value {
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #1a2233;
+}
+
+.stat-box.primary .value { color: #0a1f7d; }
+.stat-box.accent .value  { color: #4a3b9c; }
+
+/* ── Category breakdown ── */
+.category-breakdown {
+  display: flex;
+  flex-direction: column;
 }
 
 .category-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0;
+  border: 1px solid #ebebf0;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 .category-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: center;
   gap: 1rem;
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid #f0f0f4;
+  background: #fff;
+  transition: background 0.15s;
 }
 
-@media (max-width: 600px) {
-  .category-item {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5rem;
-  }
+.category-item:last-child {
+  border-bottom: none;
+}
 
-  .cat-name {
-    width: 100%;
-    margin-bottom: 0.25rem;
-  }
+.category-item:hover {
+  background: #fafbff;
 }
 
 .cat-name {
-  width: 100px;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 500;
+  color: #2c3e50;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .cat-bars {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
+  width: 140px;
+  flex-shrink: 0;
 }
 
 .bar-group {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.75rem;
+  gap: 6px;
+  font-size: 0.72rem;
 }
 
 .bar-label {
-  width: 24px;
-  color: #666;
+  width: 26px;
+  color: #8a94a6;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
 }
 
 .bar-bg {
   flex: 1;
-  height: 6px;
-  background: #eee;
-  border-radius: 3px;
+  height: 7px;
+  background: #eceff4;
+  border-radius: 4px;
   overflow: hidden;
 }
 
 .bar-fill {
   height: 100%;
-  border-radius: 3px;
-  transition: width 0.5s ease;
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 2px;
 }
 
 .bar-fill.avg {
-  background: #2196f3;
+  background: linear-gradient(90deg, #2979ff, #448aff);
 }
+
 .bar-fill.p90 {
-  background: #9c27b0;
+  background: linear-gradient(90deg, #7c4dff, #b388ff);
 }
 
 .bar-val {
-  width: 30px;
+  width: 28px;
   text-align: right;
-  font-weight: 500;
+  font-weight: 600;
+  color: #4a5568;
+  flex-shrink: 0;
 }
 
+/* ── Bandwidth line ── */
 .bandwidth-stats {
-  margin-top: 1.5rem;
-  text-align: right;
-  color: #999;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.875rem;
+  background: #f8f9fb;
+  border-radius: 8px;
+  border: 1px solid #ebebf0;
+  color: #8a94a6;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
 }
 
+.bandwidth-stats::before {
+  content: '📡';
+  font-size: 0.85rem;
+}
+
+/* ── Sharing section ── */
 .sharing-section {
-  margin-top: 1rem;
+  border-top: 1px solid #f0f0f4;
+  padding-top: 1.25rem;
+  margin-top: 0.25rem;
+}
+
+/* ── Loading state ── */
+.loading {
+  color: #8a94a6;
+  font-size: 0.875rem;
+  text-align: center;
+  padding: 1.5rem 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .network-stats-panel {
+    padding: 1.25rem 1rem 1rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.625rem;
+  }
+
+  .value {
+    font-size: 1.4rem;
+  }
+
+  .cat-bars {
+    width: 110px;
+  }
 }
 </style>
