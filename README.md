@@ -49,9 +49,14 @@ cd manifestation-algorithm
 # Install JS dependencies
 npm install
 
+# Configure git hooks (one-time setup)
+git config core.hooksPath .githooks
+
 # Run in development mode (hot-reload frontend + Tauri window)
 npm run tauri dev
 ```
+
+> **Note**: Git hooks are automatically wired to sync version numbers across `package.json`, `Cargo.toml`, and `tauri.conf.json` on every commit.
 
 ---
 
@@ -83,6 +88,31 @@ npm run tauri build
 ```
 
 Cross-platform builds are handled by GitHub Actions CI (see `.github/workflows/ci.yml`).
+
+---
+
+## Version Management
+
+Versions are automatically synchronized across three files on every commit via git pre-commit hook:
+- `package.json` (source of truth)
+- `src-tauri/Cargo.toml` 
+- `src-tauri/tauri.conf.json`
+
+### Bumping Version
+
+```bash
+npm version patch   # 0.1.0 → 0.1.1
+npm version minor   # 0.1.0 → 0.2.0
+npm version major   # 0.1.0 → 1.0.0
+```
+
+Or manually sync without bumping:
+
+```bash
+npm run sync-version
+```
+
+The git pre-commit hook ensures all three files stay in sync automatically.
 
 ---
 
