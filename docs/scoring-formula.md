@@ -1,7 +1,7 @@
 # Manifestation Algorithm - Scoring Formula Specification
 
 ## Overview
-The application calculates a "Manifestation Score" based on user self-assessments across 40 distinct categories. The maximum possible score is **10,000 points**.
+The application calculates a "Manifestation Score" based on user self-assessments across 40 distinct categories. The maximum possible score is **10,100 points**.
 
 ## Core Formula
 
@@ -104,9 +104,49 @@ Table of weights extracted from the legacy system:
 
 | Scenario | Input | Logic | Expected Total |
 | :--- | :--- | :--- | :--- |
-| **Minimum** | 1 for all inputs | $\sum (\text{Point}_i \times 0.1)$ | 1,000 |
-| **Maximum** | 10 for all inputs | $\sum (\text{Point}_i \times 1.0)$ | 10,000 |
-| **Mid-range** | 5 for all inputs | $\sum (\text{Point}_i \times 0.5)$ | 5,000 |
+| **Minimum** | 1 for all inputs | $\sum (\text{Point}_i \times 0.1)$ | 1,010 |
+| **Maximum** | 10 for all inputs | $\sum (\text{Point}_i \times 1.0)$ | 10,100 |
+| **Mid-range** | 5 for all inputs | $\sum (\text{Point}_i \times 0.5)$ | 5,050 |
 | **Single Item** | Q2=10, rest=0 | $100 \times 1.0$ | 100 |
 
 Note: "0" rating is not possible in standard UI (min is 1), but effectively represents unanswered.
+
+## Default Rating for Unanswered Questions
+
+When a session is submitted, any question that was never touched by the user receives a default rating of **1** (not 0). This is applied in `questionnaire` store's `submitSession()` before the score is calculated:
+
+```typescript
+// questionnaire.ts — submitSession()
+const fullAnswers: AnswerSheet = {};
+for (const q of questions) {
+  const subIds = q.subPoints?.map(s => s.id) ?? [q.id];
+  for (const id of subIds) {
+    fullAnswers[id] = answers.value[id] ?? 1; // default = 1, not 0
+  }
+}
+```
+
+This means a completely empty submission scores **1,000 points** (10% of maximum), not 0.
+
+## getMaxPossibleScore()
+
+The `scoring.ts` service exposes a helper that computes the theoretical maximum:
+
+```typescript
+function getMaxPossibleScore(): number {
+  const allTen: AnswerSheet = {};
+  for (const q of questions) {
+    const targets = q.subPoints ?? [q];
+    for (const t of targets) {
+      allTen[t.id] = 10;
+    }
+  }
+  return calculateScore(allTen); // always 10,100
+}
+```
+
+This is used by the dashboard percentage display:
+
+```typescript
+const percent = (score / getMaxPossibleScore()) * 100;
+```

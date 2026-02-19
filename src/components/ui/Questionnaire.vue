@@ -163,7 +163,10 @@ function handleGlobalKey(e: KeyboardEvent) {
 }
 
 const submit = async () => {
+  // Allow submission even if 0% complete (defaults apply)
+  // However, check isComplete just in case store logic changes later (currently always true)
   if (!isComplete.value || isSubmitting.value) return;
+
   submitError.value = null;
   isSubmitting.value = true;
   try {

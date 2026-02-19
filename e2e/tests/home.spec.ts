@@ -46,6 +46,6 @@ test.describe('Home page', () => {
   });
 
   test('questionnaire shows the max score info', async ({ page }) => {
-    await expect(page.locator('.max-info')).toContainText('10,000');
+    await expect(page.locator('.max-info')).toContainText('10,100');
   });
 });

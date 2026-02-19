@@ -47,6 +47,9 @@ function onFresh() {
   text-align: center;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
   animation: slideUp 0.3s ease;
+  /* Reset native <dialog> margin: auto so the flex parent owns centering */
+  margin: 0;
+  position: static;
 }
 
 @keyframes slideUp {
