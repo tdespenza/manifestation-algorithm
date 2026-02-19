@@ -20,9 +20,12 @@ export function calculateScore(answers: AnswerSheet): number {
       // Direct question or sub-question leaf
       const rating = answers[q.id];
       
-      // If unanswered or invalid rating, it contributes 0
+      // If unanswered, default to 1 as specified
       if (typeof rating === 'number' && rating >= 1 && rating <= 10) {
         totalScore += q.points * (rating / 10);
+      } else {
+        // Default: 1 point (min rating)
+        totalScore += q.points * (1 / 10);
       }
     }
   };

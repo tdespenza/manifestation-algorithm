@@ -44,9 +44,13 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
   });
 
   const isComplete = computed(() =>
+    // All questions default to 1, so they are always "complete" in a sense.
+    // We only check if explicit answers are valid (1-10).
+    // If no answer is present, it's implicitly 1.
     allQuestions.every(q => {
       const val = answers.value[q.id];
-      return typeof val === 'number' && val >= 1;
+      if (val === undefined) return true;
+      return typeof val === 'number' && val >= 1 && val <= 10;
     })
   );
 
