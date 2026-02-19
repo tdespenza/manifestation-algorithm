@@ -54,7 +54,6 @@
       </div>
       <QuestionItem
         v-if="store.currentQuestion"
-        ref="activeItemRef"
         :question="store.currentQuestion"
         :highlighted="true"
       />
@@ -113,7 +112,6 @@ import ResumeDialog from './ResumeDialog.vue';
 const store = useQuestionnaireStore();
 const router = useRouter();
 const containerRef = ref<HTMLElement | null>(null);
-const activeItemRef = ref<InstanceType<typeof QuestionItem> | null>(null);
 const questionRefs: Record<string, HTMLElement> = {};
 const mode = ref<'scroll' | 'step'>('scroll');
 const submitError = ref<string | null>(null);
@@ -154,7 +152,7 @@ function handleGlobalKey(e: KeyboardEvent) {
     e.preventDefault();
     store.goToPrev();
   } else if (e.key >= '1' && e.key <= '9') {
-    const val = parseInt(e.key);
+    const val = Number.parseInt(e.key);
     if (store.currentQuestion) store.setAnswer(store.currentQuestion.id, val);
   } else if (e.key === '0') {
     // '0' key = 10

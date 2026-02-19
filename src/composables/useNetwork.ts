@@ -60,11 +60,10 @@ export function useNetwork() {
     // Mark as connected immediately — the P2P node is always running in the backend.
     // This prevents the UI from being stuck on "Connecting..." forever.
     isConnected.value = true;
-    if (connectTimeoutId === null) {
-      connectTimeoutId = setTimeout(() => {
-        isConnected.value = true;
-      }, 3000);
-    }
+    // ??= only sets if currently null/undefined, so no separate guard needed
+    connectTimeoutId ??= setTimeout(() => {
+      isConnected.value = true;
+    }, 3000);
 
     try {
       const initialCount = await invoke<number>('get_peer_count').catch(() => 0);

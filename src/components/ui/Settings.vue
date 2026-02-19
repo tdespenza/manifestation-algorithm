@@ -7,8 +7,10 @@
 
     <div class="settings-group">
       <div class="setting-item">
-        <label>Reset Progress</label>
-        <button class="btn btn-danger" @click="confirmClear">Clear All Answers</button>
+        <span class="setting-label">Reset Progress</span>
+        <button id="clear-answers-btn" class="btn btn-danger" @click="confirmClear">
+          Clear All Answers
+        </button>
       </div>
 
       <div class="setting-about">
@@ -28,8 +30,8 @@ const store = useQuestionnaireStore();
 async function confirmClear() {
   if (confirm('Are you sure? This will delete all your answers.')) {
     await clearSession(store.sessionId);
-    store.$reset(); // Pinia reset
-    store.init(); // Reload clean state
+    store.reset();
+    store.init();
     emit('close');
   }
 }
@@ -52,6 +54,11 @@ async function confirmClear() {
   margin-bottom: 2rem;
   border-bottom: 1px solid #eee;
   padding-bottom: 1rem;
+}
+
+.setting-label {
+  font-weight: 500;
+  color: #374151;
 }
 
 .setting-item {

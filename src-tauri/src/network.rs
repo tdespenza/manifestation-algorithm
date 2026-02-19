@@ -494,7 +494,6 @@ fn calculate_percentile(scores: &[f64], percentile: f64) -> Option<f64> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::collections::HashMap;
 
     // ── Percentile tests ──────────────────────────────────────────────────────
 

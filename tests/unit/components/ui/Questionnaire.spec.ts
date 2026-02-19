@@ -130,6 +130,7 @@ describe('Questionnaire.vue', () => {
   it('navigates to /dashboard on successful submit', async () => {
     const wrapper = makeWrapper();
     const store = useQuestionnaireStore();
+    (store as any).isComplete = true;
     (store.submitSession as ReturnType<typeof vi.fn>).mockResolvedValue('session-id');
     await wrapper.vm.$nextTick();
     await wrapper.find('.submit-button').trigger('click');
@@ -140,6 +141,7 @@ describe('Questionnaire.vue', () => {
   it('shows error message on submit failure', async () => {
     const wrapper = makeWrapper();
     const store = useQuestionnaireStore();
+    (store as any).isComplete = true;
     (store.submitSession as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('DB error'));
     await wrapper.vm.$nextTick();
     await wrapper.find('.submit-button').trigger('click');
@@ -152,6 +154,7 @@ describe('Questionnaire.vue', () => {
   it('does not invoke submitSession while already submitting', async () => {
     const wrapper = makeWrapper();
     const store = useQuestionnaireStore();
+    (store as any).isComplete = true;
     // First click starts submission — which awaits the (never-resolving) spy
     const pending = new Promise(() => {});
     (store.submitSession as ReturnType<typeof vi.fn>).mockReturnValue(pending);

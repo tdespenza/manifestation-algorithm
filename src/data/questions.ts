@@ -23,7 +23,7 @@ export const questions: Question[] = [
   { id: '9', description: 'Make a Decision', points: 200, hasSubPoints: false },
   {
     id: '10',
-    description: 'See/Feel good in posssession of your goal',
+    description: 'See/Feel good in possession of your goal',
     points: 300,
     hasSubPoints: false
   },

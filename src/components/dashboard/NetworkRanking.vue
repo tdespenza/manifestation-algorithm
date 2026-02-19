@@ -81,7 +81,7 @@ function formatBytes(bytes: number, decimals = 2) {
   const dm = decimals;
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+  return `${Number.parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
 </script>
 
@@ -122,7 +122,7 @@ h4 {
 
 .stat-box.primary {
   background: #e3f2fd;
-  color: #1976d2;
+  color: #0d47a1;
 }
 
 .stat-box.accent {

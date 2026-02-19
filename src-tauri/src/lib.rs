@@ -38,6 +38,12 @@ fn load_or_generate_keypair(path: &Path) -> std::io::Result<libp2p::identity::Ke
         
         let mut file = std::fs::File::create(path)?;
         file.write_all(&encoded)?;
+        // Restrict permissions to owner-only (rw-------) on Unix
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let _ = std::fs::set_permissions(path, std::fs::Permissions::from_mode(0o600));
+        }
         println!("Saved identity to {:?}", path);
         Ok(keypair)
     }

@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import { calculateScore } from '../services/scoring';
 import { questions } from '../data/questions';
 import type { Question } from '../types';
+import { SESSION_TIMEOUT_MS } from '../constants';
 import {
   saveAnswer as dbSaveAnswer,
   loadAnswers,
@@ -11,8 +12,6 @@ import {
   clearSession,
   saveHistoricalSession
 } from '../services/db';
-
-const SESSION_TIMEOUT_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 function getLeafQuestions(qs: Question[]): Question[] {
   let leaves: Question[] = [];
@@ -43,12 +42,12 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
   });
 
   const isComplete = computed(() =>
-    // All questions default to 1, so they are always "complete" in a sense.
-    // We only check if explicit answers are valid (1-10).
-    // If no answer is present, it's implicitly 1.
+    // Require every leaf question to have an explicitly set answer (1-10).
+    // Unanswered questions are NOT treated as complete — the user must move
+    // each slider at least once. Default-1 fill-in only happens on submit.
     allQuestions.every(q => {
       const val = answers.value[q.id];
-      if (val === undefined) return true;
+      if (val === undefined) return false;
       return typeof val === 'number' && val >= 1 && val <= 10;
     })
   );
@@ -84,7 +83,7 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
     try {
       const lastActive = await getLastActive(sessionId.value);
       if (lastActive) {
-        const timeSince = Date.now() - parseInt(lastActive, 10);
+        const timeSince = Date.now() - Number.parseInt(lastActive, 10);
         if (timeSince > SESSION_TIMEOUT_MS) {
           await clearSession(sessionId.value);
           answers.value = {};
@@ -125,7 +124,6 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
       isSaving.value = true;
       await dbSaveAnswer(sessionId.value, questionId, value);
       updateLastActive(sessionId.value).catch(console.error);
-      await new Promise(r => setTimeout(r, 300));
     } catch (e) {
       console.error('Failed to save answer:', e);
     } finally {
@@ -155,6 +153,14 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
     }
   }
 
+  /** Reset all in-memory state (for use after clearing a session). */
+  function reset() {
+    answers.value = {};
+    currentIndex.value = 0;
+    hasSavedSession.value = false;
+    isSaving.value = false;
+  }
+
   return {
     answers,
     score,
@@ -172,6 +178,7 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
     goToIndex,
     setAnswer,
     submitSession,
+    reset,
     sessionId,
     isSaving
   };

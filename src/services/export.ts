@@ -40,7 +40,7 @@ export function generateCSV(sessions: ExportSession[], responses: ExportResponse
     if (!s) continue;
 
     // Sanitize note
-    const note = s.notes ? `"${s.notes.replace(/"/g, '""')}"` : '';
+    const note = s.notes ? `"${s.notes.replaceAll('"', '""')}"` : '';
 
     const row = [
       s.id,
@@ -48,7 +48,7 @@ export function generateCSV(sessions: ExportSession[], responses: ExportResponse
       s.total_score,
       note,
       r.question_id,
-      `"${r.category.replace(/"/g, '""')}"`, // Handle quotes in category
+      `"${r.category.replaceAll('"', '""')}"`, // Handle quotes in category
       r.answer_value
     ].join(',');
 
@@ -95,5 +95,5 @@ export async function exportToCSV(): Promise<void> {
   link.style.visibility = 'hidden';
   document.body.appendChild(link);
   link.click();
-  document.body.removeChild(link);
+  link.remove();
 }

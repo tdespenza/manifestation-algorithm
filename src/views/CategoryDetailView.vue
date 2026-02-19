@@ -114,7 +114,7 @@ const chartOptions: ChartOptions<'line'> = {
         stepSize: 1
       },
       grid: {
-        color: '#333'
+        color: '#e0e0e0'
       }
     },
     x: {
@@ -143,7 +143,7 @@ const formatScore = (score: number) => Number(score).toFixed(2);
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  color: #fff;
+  color: var(--deep-twilight, #0f0758);
 }
 
 .view-header {
@@ -154,17 +154,19 @@ const formatScore = (score: number) => Number(score).toFixed(2);
 }
 
 .back-btn {
-  background: none;
-  border: 1px solid #666;
-  color: #ccc;
+  background: white;
+  border: 1px solid #ddd;
+  color: #555;
   padding: 0.5rem 1rem;
   cursor: pointer;
   border-radius: 4px;
+  transition: all 0.2s;
 }
 
 .back-btn:hover {
-  background: #333;
-  color: #fff;
+  background: #f8f9fa;
+  color: #333;
+  border-color: #bbb;
 }
 
 .detail-content {
@@ -174,16 +176,18 @@ const formatScore = (score: number) => Number(score).toFixed(2);
 }
 
 .main-chart-container {
-  background: #1e1e1e;
+  background: white;
   padding: 1.5rem;
-  border-radius: 8px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   height: 400px;
 }
 
 .data-table-container {
-  background: #1e1e1e;
+  background: white;
   padding: 1.5rem;
-  border-radius: 8px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   max-height: 400px;
   overflow-y: auto;
 }
@@ -197,23 +201,33 @@ const formatScore = (score: number) => Number(score).toFixed(2);
 .history-table td {
   padding: 0.75rem;
   text-align: left;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid #eee;
+  color: #333;
 }
 
 .history-table th {
-  color: #888;
-  font-weight: normal;
+  color: #666;
+  font-weight: 600;
 }
 
 .high-score {
-  color: #42b983;
+  color: #2e7d32;
   font-weight: bold;
 }
 .med-score {
-  color: #f1c40f;
+  color: #e65100;
 }
 .low-score {
-  color: #e74c3c;
+  color: #c62828;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 4rem;
+  color: #666;
 }
 
 @media (max-width: 768px) {

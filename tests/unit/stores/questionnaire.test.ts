@@ -94,25 +94,17 @@ describe('Questionnaire Store', () => {
       // Mock saveAnswer to check state while running
       dbMocks.saveAnswer.mockImplementation(async () => {
         wasSavingDuringExecution = store.isSaving;
-        return Promise.resolve();
       });
-
-      // Use fake timers to fast-forward the delay
-      vi.useFakeTimers();
 
       const promise = store.setAnswer('1c', 7);
 
       // Check immediate state
       expect(store.isSaving).toBe(true);
 
-      // Advance timers for the artificial delay
-      await vi.advanceTimersByTimeAsync(300);
       await promise;
 
       expect(wasSavingDuringExecution).toBe(true);
       expect(store.isSaving).toBe(false);
-
-      vi.useRealTimers();
     });
     it('setAnswer should ignore invalid values', async () => {
       const store = useQuestionnaireStore();

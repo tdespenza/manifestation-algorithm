@@ -4,6 +4,7 @@
  * for crash recovery and multi-session management.
  */
 import { getLastActive, updateLastActive, clearSession, loadHistoricalSessions } from './db';
+import { SESSION_TIMEOUT_MS } from '../constants';
 
 export interface SessionState {
   sessionId: string;
@@ -11,15 +12,13 @@ export interface SessionState {
   isExpired: boolean;
 }
 
-const SESSION_TIMEOUT_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
-
 /**
  * Get the state of a session (last active time, expiry status).
  */
 export async function getSessionState(sessionId: string): Promise<SessionState> {
   const lastActiveStr = await getLastActive(sessionId);
-  const lastActive = lastActiveStr ? parseInt(lastActiveStr, 10) : null;
-  const isExpired = lastActive !== null ? Date.now() - lastActive > SESSION_TIMEOUT_MS : false;
+  const lastActive = lastActiveStr ? Number.parseInt(lastActiveStr, 10) : null;
+  const isExpired = lastActive !== null && Date.now() - lastActive > SESSION_TIMEOUT_MS;
   return { sessionId, lastActive, isExpired };
 }
 

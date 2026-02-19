@@ -3,7 +3,7 @@
  * Covers: init → navigate → setAnswer → percentComplete → isComplete → submitSession
  * (Tauri DB calls are mocked; this tests the full store logic end-to-end.)
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { useQuestionnaireStore } from '@/stores/questionnaire';
 import { questions } from '@/data/questions';
@@ -44,6 +44,15 @@ function getLeafIds(qs: typeof questions): string[] {
   return ids;
 }
 
+/** Helper: call setAnswer and await it (no artificial delay in store). */
+async function fastSetAnswer(
+  store: ReturnType<typeof useQuestionnaireStore>,
+  id: string,
+  value: number
+) {
+  await store.setAnswer(id, value);
+}
+
 // ── Tests ────────────────────────────────────────────────────────────────────
 
 describe('E2E: Complete questionnaire flow', () => {
@@ -51,26 +60,8 @@ describe('E2E: Complete questionnaire flow', () => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
     dbMocks.loadAnswers.mockResolvedValue({});
-    // Fast saveAnswer: skip the 300ms artificial delay by resolving immediately
     dbMocks.saveAnswer.mockResolvedValue(undefined);
-    // Use fake timers to skip the 300ms "saving..." indicator delay
-    vi.useFakeTimers();
   });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  /** Helper: call setAnswer and advance past the 300ms save delay */
-  async function fastSetAnswer(
-    store: ReturnType<typeof useQuestionnaireStore>,
-    id: string,
-    value: number
-  ) {
-    const p = store.setAnswer(id, value);
-    await vi.advanceTimersByTimeAsync(301);
-    await p;
-  }
 
   it('Step 1 – init loads an empty session', async () => {
     const store = useQuestionnaireStore();
@@ -78,8 +69,8 @@ describe('E2E: Complete questionnaire flow', () => {
 
     expect(store.answers).toEqual({});
     expect(store.percentComplete).toBe(0);
-    // With no explicit answers, all questions implicitly default to 1, so isComplete is true
-    expect(store.isComplete).toBe(true);
+    // With no explicit answers, isComplete is false — users must set each slider
+    expect(store.isComplete).toBe(false);
     expect(store.currentIndex).toBe(0);
     expect(store.hasSavedSession).toBe(false);
   });
@@ -169,18 +160,18 @@ describe('E2E: Complete questionnaire flow', () => {
 
     // State should be reset after submit
     expect(store.answers).toEqual({});
-    // After reset, answers are empty → all implicit defaults → isComplete is true again
-    expect(store.isComplete).toBe(true);
+    // After reset, answers are empty → isComplete is false (explicit answers required)
+    expect(store.isComplete).toBe(false);
     expect(store.percentComplete).toBe(0);
     expect(store.currentIndex).toBe(0);
     expect(dbMocks.clearSession).toHaveBeenCalled();
   });
 
-  it('submitSession always succeeds (all questions default to 1)', async () => {
+  it('submitSession always succeeds even with no explicit answers (all default to 1)', async () => {
     const store = useQuestionnaireStore();
     await store.init();
-    // No explicit answers — all default to 1, isComplete = true
-    expect(store.isComplete).toBe(true);
+    // No explicit answers — isComplete is false but submitSession still works (fills defaults)
+    expect(store.isComplete).toBe(false);
     const histId = await store.submitSession();
     expect(histId).toBe('hist-e2e-001');
   });

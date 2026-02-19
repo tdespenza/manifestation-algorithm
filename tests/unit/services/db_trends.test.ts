@@ -34,7 +34,7 @@ describe('db_trends service', () => {
       // Main aggregation query
       return Promise.resolve([
         { date: '2024-01-01T00:00:00.000Z', category: 'Health', score: 7.5 },
-        { date: '2024-01-02T00:00:00.000Z', category: 'Health', score: 8.0 },
+        { date: '2024-01-02T00:00:00.000Z', category: 'Health', score: 8 },
         { date: '2024-01-01T00:00:00.000Z', category: 'Wealth', score: 5.25 }
       ]);
     });
