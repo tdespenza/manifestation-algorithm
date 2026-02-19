@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router';
 import NetworkStatus from './components/NetworkStatus.vue';
+import logoUrl from './assets/logo.svg';
 </script>
 
 <template>
@@ -9,7 +10,7 @@ import NetworkStatus from './components/NetworkStatus.vue';
       <div class="nav-content">
         <div class="nav-left">
           <router-link to="/" class="nav-logo">
-            <img src="./assets/logo.svg" alt="Manifestation Algorithm" class="nav-logo-img" />
+            <img :src="logoUrl" alt="Manifestation Algorithm" class="nav-logo-img" />
             <span class="nav-logo-text">MA</span>
           </router-link>
           <div class="nav-links">
