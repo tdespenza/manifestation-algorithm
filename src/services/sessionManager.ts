@@ -19,9 +19,7 @@ const SESSION_TIMEOUT_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 export async function getSessionState(sessionId: string): Promise<SessionState> {
   const lastActiveStr = await getLastActive(sessionId);
   const lastActive = lastActiveStr ? parseInt(lastActiveStr, 10) : null;
-  const isExpired = lastActive !== null
-    ? (Date.now() - lastActive) > SESSION_TIMEOUT_MS
-    : false;
+  const isExpired = lastActive !== null ? Date.now() - lastActive > SESSION_TIMEOUT_MS : false;
   return { sessionId, lastActive, isExpired };
 }
 

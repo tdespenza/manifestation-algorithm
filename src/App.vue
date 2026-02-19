@@ -1,4 +1,3 @@
-
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router';
 import NetworkStatus from './components/NetworkStatus.vue';
@@ -17,7 +16,13 @@ import NetworkStatus from './components/NetworkStatus.vue';
         </div>
         <div class="nav-right">
           <NetworkStatus class="network-status-nav" />
-          <router-link to="/settings" active-class="active" class="settings-link" aria-label="Settings">⚙️</router-link>
+          <router-link
+            to="/settings"
+            active-class="active"
+            class="settings-link"
+            aria-label="Settings"
+            >⚙️</router-link
+          >
         </div>
       </div>
     </nav>
@@ -40,7 +45,7 @@ import NetworkStatus from './components/NetworkStatus.vue';
 
 .main-nav {
   background: white;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -65,7 +70,7 @@ import NetworkStatus from './components/NetworkStatus.vue';
 .nav-logo {
   font-weight: 900;
   font-size: 1.5rem;
-  color: var(--true-cobalt, #0047AB);
+  color: var(--true-cobalt, #0047ab);
   text-decoration: none;
   letter-spacing: -1px;
 }
@@ -86,12 +91,12 @@ import NetworkStatus from './components/NetworkStatus.vue';
 }
 
 .nav-links a:hover {
-  color: var(--true-cobalt, #0047AB);
+  color: var(--true-cobalt, #0047ab);
 }
 
 .nav-links a.active {
-  color: var(--true-cobalt, #0047AB);
-  border-bottom-color: var(--true-cobalt, #0047AB);
+  color: var(--true-cobalt, #0047ab);
+  border-bottom-color: var(--true-cobalt, #0047ab);
 }
 
 .nav-right {
@@ -120,5 +125,3 @@ import NetworkStatus from './components/NetworkStatus.vue';
   opacity: 0;
 }
 </style>
-
-

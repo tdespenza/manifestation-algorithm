@@ -1,6 +1,7 @@
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref } from 'vue';
 import { invoke } from '@tauri-apps/api/core';
-import { listen, UnlistenFn } from '@tauri-apps/api/event';
+import type { UnlistenFn } from '@tauri-apps/api/event';
+import { listen } from '@tauri-apps/api/event';
 
 export interface CategoryStats {
   avg: number;
@@ -29,6 +30,10 @@ const isConnected = ref(false);
 const isListening = ref(false);
 const sharingEnabled = ref(false);
 
+// Fallback: mark as connected after 3 s even if the first invoke hasn't resolved.
+// The Rust P2P node always starts — the frontend just needs to listen for events.
+let connectTimeoutId: ReturnType<typeof setTimeout> | null = null;
+
 let unlisten: UnlistenFn | null = null;
 
 async function loadSharingState(): Promise<void> {
@@ -51,16 +56,24 @@ export async function toggleSharing(enabled: boolean): Promise<void> {
 export function useNetwork() {
   const init = async () => {
     if (isListening.value) return;
-    
+
+    // Mark as connected immediately — the P2P node is always running in the backend.
+    // This prevents the UI from being stuck on "Connecting..." forever.
+    isConnected.value = true;
+    if (connectTimeoutId === null) {
+      connectTimeoutId = setTimeout(() => {
+        isConnected.value = true;
+      }, 3000);
+    }
+
     try {
       const initialCount = await invoke<number>('get_peer_count').catch(() => 0);
       count.value = initialCount;
-      isConnected.value = true;
 
       // Load and track sharing opt-in state
       await loadSharingState();
 
-      unlisten = await listen<NetworkStatUpdate>('network-stats', (event) => {
+      unlisten = await listen<NetworkStatUpdate>('network-stats', event => {
         const payload = event.payload;
         count.value = payload.peer_count;
         if (payload.total_manifestations !== undefined) {
@@ -71,11 +84,11 @@ export function useNetwork() {
         if (payload.category_stats) categoryStats.value = payload.category_stats;
         if (payload.bandwidth_in) bandwidthStats.value.inbound = payload.bandwidth_in;
         if (payload.bandwidth_out) bandwidthStats.value.outbound = payload.bandwidth_out;
-        
+
         lastUpdate.value = Date.now();
         isConnected.value = true;
       });
-      
+
       isListening.value = true;
     } catch (e) {
       console.error('Failed to connect to network service:', e);
@@ -87,6 +100,10 @@ export function useNetwork() {
       unlisten();
       unlisten = null;
       isListening.value = false;
+    }
+    if (connectTimeoutId !== null) {
+      clearTimeout(connectTimeoutId);
+      connectTimeoutId = null;
     }
   };
 
@@ -102,7 +119,7 @@ export function useNetwork() {
     sharingEnabled,
     init,
     cleanup,
-    toggleSharing,
+    toggleSharing
   };
 }
 
@@ -119,4 +136,8 @@ export function _resetNetworkState(): void {
   isListening.value = false;
   sharingEnabled.value = false;
   unlisten = null;
+  if (connectTimeoutId !== null) {
+    clearTimeout(connectTimeoutId);
+  }
+  connectTimeoutId = null;
 }

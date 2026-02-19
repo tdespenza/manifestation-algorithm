@@ -1,8 +1,12 @@
 <template>
   <!-- Resume Dialog -->
-  <ResumeDialog v-if="store.hasSavedSession" @resume="store.resumeSession()" @fresh="store.startFresh()" />
+  <ResumeDialog
+    v-if="store.hasSavedSession"
+    @resume="store.resumeSession()"
+    @fresh="store.startFresh()"
+  />
 
-  <div class="questionnaire" @keydown="handleGlobalKey" tabindex="-1" ref="containerRef">
+  <div ref="containerRef" class="questionnaire" tabindex="-1" @keydown="handleGlobalKey">
     <!-- Sticky Header -->
     <div class="header">
       <div class="status-container">
@@ -13,7 +17,9 @@
 
       <!-- Progress bar -->
       <div class="progress-wrapper">
-        <div class="progress-text">{{ store.percentComplete }}% complete ({{ answeredCount }}/{{ store.totalQuestions }})</div>
+        <div class="progress-text">
+          {{ store.percentComplete }}% complete ({{ answeredCount }}/{{ store.totalQuestions }})
+        </div>
         <div class="progress-bar">
           <div class="progress-fill" :style="{ width: store.percentComplete + '%' }"></div>
         </div>
@@ -34,7 +40,7 @@
 
     <!-- SCROLL MODE: show all questions -->
     <div v-if="mode === 'scroll'" class="questions-list">
-      <div v-for="q in questions" :key="q.id" :ref="el => questionRefs[q.id] = el as HTMLElement">
+      <div v-for="q in questions" :key="q.id" :ref="el => (questionRefs[q.id] = el as HTMLElement)">
         <QuestionItem :question="q" :highlighted="false" />
       </div>
     </div>
@@ -42,17 +48,23 @@
     <!-- STEP MODE: show one question at a time with prev/next nav -->
     <div v-else class="step-mode">
       <div class="step-header">
-        <span class="step-counter">Question {{ store.currentIndex + 1 }} of {{ store.totalQuestions }}</span>
+        <span class="step-counter"
+          >Question {{ store.currentIndex + 1 }} of {{ store.totalQuestions }}</span
+        >
       </div>
       <QuestionItem
         v-if="store.currentQuestion"
+        ref="activeItemRef"
         :question="store.currentQuestion"
         :highlighted="true"
-        ref="activeItemRef"
       />
       <!-- Navigation Controls -->
       <div class="nav-controls">
-        <button class="nav-btn prev-btn" :disabled="store.currentIndex === 0" @click="store.goToPrev()">
+        <button
+          class="nav-btn prev-btn"
+          :disabled="store.currentIndex === 0"
+          @click="store.goToPrev()"
+        >
           ← Previous
         </button>
         <div class="dot-nav">
@@ -74,15 +86,16 @@
         </button>
       </div>
       <div class="keyboard-hint">
-        Tip: Use <kbd>←</kbd> <kbd>→</kbd> to navigate · <kbd>1</kbd>–<kbd>9</kbd> / <kbd>0</kbd> to rate
+        Tip: Use <kbd>←</kbd> <kbd>→</kbd> to navigate · <kbd>1</kbd>–<kbd>9</kbd> / <kbd>0</kbd> to
+        rate
       </div>
     </div>
 
     <!-- Submit -->
     <div class="submit-actions">
-      <div v-if="!isComplete" class="completion-hint">Complete all questions to save results.</div>
-      <button class="submit-button" :disabled="!isComplete" @click="submit">
-        {{ isComplete ? 'Complete Assessment' : 'Assessment Incomplete' }}
+      <div v-if="submitError" class="completion-hint error-hint">{{ submitError }}</div>
+      <button class="submit-button" :disabled="isSubmitting" @click="submit">
+        {{ isSubmitting ? 'Saving...' : 'Complete Assessment' }}
       </button>
     </div>
   </div>
@@ -90,21 +103,27 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, nextTick } from 'vue';
+import { useRouter } from 'vue-router';
 import { useQuestionnaireStore } from '../../stores/questionnaire';
 import { questions as allTopLevelQuestions } from '../../data/questions';
-import { Question } from '../../types';
+import type { Question } from '../../types';
 import QuestionItem from './QuestionItem.vue';
 import ResumeDialog from './ResumeDialog.vue';
 
 const store = useQuestionnaireStore();
+const router = useRouter();
 const containerRef = ref<HTMLElement | null>(null);
 const activeItemRef = ref<InstanceType<typeof QuestionItem> | null>(null);
 const questionRefs: Record<string, HTMLElement> = {};
 const mode = ref<'scroll' | 'step'>('scroll');
+const submitError = ref<string | null>(null);
+const isSubmitting = ref(false);
 
 // Flatten leaf questions for dot navigation
 function flattenLeaves(qs: Question[]): Question[] {
-  return qs.flatMap(q => q.hasSubPoints && q.subPoints?.length ? flattenLeaves(q.subPoints) : [q]);
+  return qs.flatMap(q =>
+    q.hasSubPoints && q.subPoints?.length ? flattenLeaves(q.subPoints) : [q]
+  );
 }
 const leafQuestions = flattenLeaves(allTopLevelQuestions);
 
@@ -112,7 +131,9 @@ const isSaving = computed(() => store.isSaving);
 const score = computed(() => store.score);
 const formattedScore = computed(() => Math.round(score.value).toLocaleString());
 const isComplete = computed(() => store.isComplete);
-const answeredCount = computed(() => Object.keys(store.answers).filter(k => store.answers[k] >= 1).length);
+const answeredCount = computed(
+  () => Object.keys(store.answers).filter(k => store.answers[k] >= 1).length
+);
 
 function isAnswered(idx: number): boolean {
   const q = leafQuestions[idx];
@@ -142,13 +163,16 @@ function handleGlobalKey(e: KeyboardEvent) {
 }
 
 const submit = async () => {
-  if (!isComplete.value) return;
-  if (!confirm('Are you sure you want to complete this session?')) return;
+  if (!isComplete.value || isSubmitting.value) return;
+  submitError.value = null;
+  isSubmitting.value = true;
   try {
     await store.submitSession();
-    alert('Session saved successfully!');
+    router.push('/dashboard');
   } catch (e) {
-    alert('Failed to save session: ' + e);
+    submitError.value = 'Failed to save session: ' + e;
+  } finally {
+    isSubmitting.value = false;
   }
 };
 
@@ -172,11 +196,11 @@ onMounted(async () => {
   margin-bottom: 24px;
   position: sticky;
   top: 0;
-  background: rgba(255,255,255,0.97);
+  background: rgba(255, 255, 255, 0.97);
   padding: 12px 20px;
   border-radius: 12px;
   z-index: 10;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(5px);
   gap: 16px;
 }
@@ -203,11 +227,18 @@ onMounted(async () => {
   animation: pulse 1s infinite;
 }
 
-.save-indicator.saved::before { background: #4caf50; }
+.save-indicator.saved::before {
+  background: #4caf50;
+}
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .progress-wrapper {
@@ -230,7 +261,7 @@ onMounted(async () => {
 
 .progress-fill {
   height: 100%;
-  background: var(--true-cobalt, #0047AB);
+  background: var(--true-cobalt, #0047ab);
   border-radius: 3px;
   transition: width 0.4s ease;
 }
@@ -244,13 +275,23 @@ onMounted(async () => {
 .current-score {
   font-size: 2em;
   font-weight: 800;
-  color: var(--true-cobalt, #0047AB);
+  color: var(--true-cobalt, #0047ab);
   line-height: 1;
 }
 
-.current-score.success { color: #4caf50; }
-.score-label { font-size: 0.75em; text-transform: uppercase; letter-spacing: 1px; color: #666; }
-.max-info { font-size: 0.7em; color: #aaa; }
+.current-score.success {
+  color: #4caf50;
+}
+.score-label {
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #666;
+}
+.max-info {
+  font-size: 0.7em;
+  color: #aaa;
+}
 
 /* Mode Toggle */
 .mode-toggle {
@@ -270,9 +311,9 @@ onMounted(async () => {
 }
 
 .mode-toggle button.active {
-  background: var(--true-cobalt, #0047AB);
+  background: var(--true-cobalt, #0047ab);
   color: white;
-  border-color: var(--true-cobalt, #0047AB);
+  border-color: var(--true-cobalt, #0047ab);
 }
 
 /* Step Mode */
@@ -305,16 +346,16 @@ onMounted(async () => {
 .nav-btn {
   padding: 10px 24px;
   border-radius: 25px;
-  border: 2px solid var(--true-cobalt, #0047AB);
+  border: 2px solid var(--true-cobalt, #0047ab);
   background: white;
-  color: var(--true-cobalt, #0047AB);
+  color: var(--true-cobalt, #0047ab);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .nav-btn:hover:not(:disabled) {
-  background: var(--true-cobalt, #0047AB);
+  background: var(--true-cobalt, #0047ab);
   color: white;
 }
 
@@ -340,8 +381,13 @@ onMounted(async () => {
   transition: all 0.2s;
 }
 
-.dot.answered { background: #a0beff; }
-.dot.active { background: var(--true-cobalt, #0047AB); transform: scale(1.3); }
+.dot.answered {
+  background: #a0beff;
+}
+.dot.active {
+  background: var(--true-cobalt, #0047ab);
+  transform: scale(1.3);
+}
 
 .keyboard-hint {
   text-align: center;
@@ -374,18 +420,27 @@ kbd {
   gap: 15px;
 }
 
-.completion-hint { color: #666; font-size: 0.9em; font-style: italic; }
+.completion-hint {
+  color: #666;
+  font-size: 0.9em;
+  font-style: italic;
+}
+.error-hint {
+  color: #e53935;
+  font-style: normal;
+  font-weight: 500;
+}
 
 .submit-button {
   padding: 15px 40px;
-  background: var(--true-cobalt, #0047AB);
+  background: var(--true-cobalt, #0047ab);
   color: white;
   border: none;
   border-radius: 30px;
   font-size: 1.2em;
   cursor: pointer;
   transition: all 0.3s;
-  box-shadow: 0 4px 15px rgba(0,71,171,0.3);
+  box-shadow: 0 4px 15px rgba(0, 71, 171, 0.3);
 }
 
 .submit-button:disabled {
@@ -396,6 +451,6 @@ kbd {
 
 .submit-button:not(:disabled):hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0,71,171,0.4);
+  box-shadow: 0 6px 20px rgba(0, 71, 171, 0.4);
 }
 </style>

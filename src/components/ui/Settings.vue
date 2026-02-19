@@ -4,7 +4,7 @@
       <h2>App Settings</h2>
       <button @click="$emit('close')">X</button>
     </div>
-    
+
     <div class="settings-group">
       <div class="setting-item">
         <label>Reset Progress</label>
@@ -29,7 +29,7 @@ async function confirmClear() {
   if (confirm('Are you sure? This will delete all your answers.')) {
     await clearSession(store.sessionId);
     store.$reset(); // Pinia reset
-    store.init();   // Reload clean state
+    store.init(); // Reload clean state
     emit('close');
   }
 }

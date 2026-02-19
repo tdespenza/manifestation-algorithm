@@ -2,12 +2,12 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { calculateScore } from '../services/scoring';
 import { questions } from '../data/questions';
-import { Question } from '../types';
-import { 
-  saveAnswer as dbSaveAnswer, 
-  loadAnswers, 
-  getLastActive, 
-  updateLastActive, 
+import type { Question } from '../types';
+import {
+  saveAnswer as dbSaveAnswer,
+  loadAnswers,
+  getLastActive,
+  updateLastActive,
   clearSession,
   saveHistoricalSession
 } from '../services/db';
@@ -39,14 +39,17 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
 
   const percentComplete = computed(() => {
     const answered = Object.keys(answers.value).length;
-    if (TOTAL_QUESTIONS_COUNT === 0) return 0;
     return Math.floor((answered / TOTAL_QUESTIONS_COUNT) * 100);
   });
 
   const isComplete = computed(() =>
+    // All questions default to 1, so they are always "complete" in a sense.
+    // We only check if explicit answers are valid (1-10).
+    // If no answer is present, it's implicitly 1.
     allQuestions.every(q => {
       const val = answers.value[q.id];
-      return typeof val === 'number' && val >= 1;
+      if (val === undefined) return true;
+      return typeof val === 'number' && val >= 1 && val <= 10;
     })
   );
 
@@ -131,11 +134,15 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
   }
 
   async function submitSession(): Promise<string> {
-    if (!isComplete.value) throw new Error('Questionnaire is not complete');
     try {
       isSaving.value = true;
+      // Fill in default value of 1 for any questions the user never touched
+      const fullAnswers: Record<string, number> = {};
+      for (const q of allQuestions) {
+        fullAnswers[q.id] = answers.value[q.id] ?? 1;
+      }
       const finalScore = score.value;
-      const historyId = await saveHistoricalSession(finalScore, answers.value);
+      const historyId = await saveHistoricalSession(finalScore, fullAnswers);
       await clearSession(sessionId.value);
       answers.value = {};
       currentIndex.value = 0;
@@ -166,6 +173,6 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
     setAnswer,
     submitSession,
     sessionId,
-    isSaving,
+    isSaving
   };
 });

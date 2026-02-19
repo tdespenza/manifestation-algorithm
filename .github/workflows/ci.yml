@@ -10,28 +10,29 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# All four jobs run in parallel — no dependencies between them.
 jobs:
-  test:
-    name: Frontend Tests (Vitest)
+  lint:
+    name: Lint, Format & Architecture
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
 
-      - name: Run unit tests
-        run: npx vitest run --reporter=verbose
+      - name: ESLint
+        run: npm run lint:check
 
-      - name: Upload coverage
-        run: npx vitest run --coverage
-        continue-on-error: true
+      - name: Prettier
+        run: npm run format:check
+
+      - name: Dependency rules
+        run: npm run deps:validate
 
   typecheck:
     name: TypeScript Type Check
@@ -39,17 +40,75 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
 
-      - name: Type check
-        run: npx vue-tsc --noEmit
+      - run: npx vue-tsc --noEmit
+
+  unit:
+    name: Unit & Integration Tests (Vitest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Run tests with coverage
+        run: npx vitest run --reporter=verbose --coverage
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7
+
+  e2e:
+    name: E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: npx playwright test --project=chromium
+        env:
+          CI: true
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Upload Playwright results
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-results
+          path: playwright-results/
+          retention-days: 7
 
   rust-test:
     name: Rust Tests (Tauri backend)
@@ -81,7 +140,7 @@ jobs:
 
   build-tauri:
     name: Build Tauri App
-    needs: [test, typecheck, rust-test]
+    needs: [test, e2e, typecheck, rust-test]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false

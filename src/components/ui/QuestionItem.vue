@@ -1,6 +1,6 @@
 <template>
-  <div 
-    class="question-item" 
+  <div
+    class="question-item"
     :class="{ 'parent-question': question.hasSubPoints, 'sub-question': isSubQuestion }"
     :style="{ borderLeftColor: isSubQuestion ? '#C4923E' : '#0A1F7D' }"
   >
@@ -14,19 +14,19 @@
     <div v-if="!question.hasSubPoints" class="slider-wrapper">
       <div class="slider-container">
         <span class="slider-label">1</span>
-        <input 
-          type="range" 
-          class="slider" 
-          min="1" 
-          max="10" 
+        <input
+          type="range"
+          class="slider"
+          min="1"
+          max="10"
           :value="internalValue"
-          @input="handleInput"
           :aria-label="`Rate ${question.description}`"
-        >
+          @input="handleInput"
+        />
         <span class="slider-label">10</span>
         <span class="slider-value">{{ internalValue }}</span>
       </div>
-      
+
       <div class="score-display">
         Score: <span class="score-value">{{ calculatedScore }}</span> points
       </div>
@@ -34,10 +34,10 @@
 
     <!-- Sub-Questions -->
     <div v-if="question.hasSubPoints && question.subPoints?.length" class="sub-points-section">
-      <QuestionItem 
-        v-for="sub in question.subPoints" 
-        :key="sub.id" 
-        :question="sub" 
+      <QuestionItem
+        v-for="sub in question.subPoints"
+        :key="sub.id"
+        :question="sub"
         :is-sub-question="true"
       />
     </div>
@@ -47,7 +47,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useQuestionnaireStore } from '../../stores/questionnaire';
-import { Question } from '../../types';
+import type { Question } from '../../types';
 
 const props = defineProps<{
   question: Question;
@@ -59,7 +59,7 @@ const store = useQuestionnaireStore();
 // Access store directly for reactive state
 const internalValue = computed({
   get: () => store.answers[props.question.id] || 1,
-  set: (val) => {
+  set: val => {
     if (val >= 1 && val <= 10) {
       store.setAnswer(props.question.id, val);
     }
@@ -84,13 +84,15 @@ function handleInput(e: Event) {
   background: white;
   border-radius: 12px;
   border-left: 4px solid #0a1f7d;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .question-item:hover {
   transform: translateX(5px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
 .question-header {
@@ -155,7 +157,7 @@ function handleInput(e: Event) {
   height: 24px;
   border-radius: 50%;
   background: var(--true-cobalt);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   margin-top: -8px; /* specific to webkit */
 }
 

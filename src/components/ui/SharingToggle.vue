@@ -6,21 +6,25 @@
     </div>
 
     <p class="toggle-description">
-      Optionally contribute your results anonymously to the global network.
-      No name, email, IP address, or device ID is ever shared.
+      Optionally contribute your results anonymously to the global network. No name, email, IP
+      address, or device ID is ever shared.
     </p>
 
     <label class="toggle-label">
       <input
         type="checkbox"
         :checked="sharingEnabled"
-        @change="handleToggle"
         class="toggle-input"
         data-testid="sharing-checkbox"
+        @change="handleToggle"
       />
       <span class="toggle-switch" :class="{ active: sharingEnabled }"></span>
       <span class="toggle-text">
-        {{ sharingEnabled ? 'Sharing enabled — contributing to network' : 'Sharing disabled (default)' }}
+        {{
+          sharingEnabled
+            ? 'Sharing enabled — contributing to network'
+            : 'Sharing disabled (default)'
+        }}
       </span>
     </label>
 
@@ -113,7 +117,7 @@ async function handleToggle(event: Event) {
   top: 2px;
   left: 2px;
   transition: left 0.2s;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .toggle-switch.active {

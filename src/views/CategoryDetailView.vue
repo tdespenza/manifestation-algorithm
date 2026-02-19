@@ -1,5 +1,5 @@
 <template>
-  <div class="category-detail-view" v-if="categoryData">
+  <div v-if="categoryData.length > 0" class="category-detail-view">
     <header class="view-header">
       <button class="back-btn" @click="$router.back()">← Back</button>
       <h1>{{ category }}</h1>
@@ -22,7 +22,7 @@
           <tbody>
             <tr v-for="(entry, index) in reversedHistory" :key="index">
               <td>{{ formatDate(entry.date) }}</td>
-              <td :class="getScoreClass(entry.score)">{{ entry.score }}</td>
+              <td :class="getScoreClass(entry.value)">{{ formatScore(entry.value) }}</td>
             </tr>
           </tbody>
         </table>
@@ -30,7 +30,9 @@
     </div>
   </div>
   <div v-else class="loading">
-    Loading... <button @click="$router.push('/dashboard')">Go to Dashboard</button>
+    <span v-if="historyStore.isLoading">Loading...</span>
+    <span v-else>No data found for "{{ category }}".</span>
+    <button @click="$router.push('/dashboard')">Go to Dashboard</button>
   </div>
 </template>
 
@@ -51,15 +53,7 @@ import {
   type ChartOptions
 } from 'chart.js';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const route = useRoute();
 const historyStore = useHistoryStore();
@@ -68,13 +62,13 @@ const category = ref('');
 onMounted(async () => {
   category.value = route.params.id as string;
   if (!historyStore.sessions.length) {
-    await historyStore.loadHistory();
+    await historyStore.fetchHistory();
   }
 });
 
 const categoryData = computed(() => {
-  if (!category.value || !historyStore.categoryTrends) return [];
-  return historyStore.categoryTrends[category.value] || [];
+  if (!category.value || !historyStore.trends) return [];
+  return historyStore.trends[category.value] || [];
 });
 
 const reversedHistory = computed(() => {
@@ -83,14 +77,16 @@ const reversedHistory = computed(() => {
 
 const chartData = computed(() => {
   const data = categoryData.value;
+  const isUptrend = data.length > 1 ? data[data.length - 1].value >= data[0].value : true;
+  const lineColor = isUptrend ? '#000000' : '#f44336';
   return {
     labels: data.map(d => new Date(d.date).toLocaleDateString()),
     datasets: [
       {
         label: category.value,
-        data: data.map(d => d.score),
-        borderColor: '#42b983',
-        backgroundColor: 'rgba(66, 185, 131, 0.2)',
+        data: data.map(d => d.value),
+        borderColor: lineColor,
+        backgroundColor: isUptrend ? 'rgba(0,0,0,0.08)' : 'rgba(244,67,54,0.1)',
         tension: 0.2,
         fill: true
       }
@@ -138,6 +134,8 @@ const getScoreClass = (score: number) => {
   if (score >= 5) return 'med-score';
   return 'low-score';
 };
+
+const formatScore = (score: number) => Number(score).toFixed(2);
 </script>
 
 <style scoped>
@@ -207,9 +205,16 @@ const getScoreClass = (score: number) => {
   font-weight: normal;
 }
 
-.high-score { color: #42b983; font-weight: bold; }
-.med-score { color: #f1c40f; }
-.low-score { color: #e74c3c; }
+.high-score {
+  color: #42b983;
+  font-weight: bold;
+}
+.med-score {
+  color: #f1c40f;
+}
+.low-score {
+  color: #e74c3c;
+}
 
 @media (max-width: 768px) {
   .detail-content {

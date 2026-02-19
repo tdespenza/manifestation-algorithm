@@ -1,0 +1,32 @@
+# Build outputs
+dist/
+build/
+coverage/
+playwright-report/
+playwright-results/
+
+# Rust / Tauri
+src-tauri/target/
+src-tauri/gen/
+
+# Dependencies
+node_modules/
+
+# Lockfile
+package-lock.json
+
+# Auto-generated
+scripts/sync-version.js
+check_coverage.js
+check_coverage.cjs
+check_sum.js
+
+# Planning artifacts (no formatting needed)
+_bmad-output/
+_bmad/
+
+# Public & website HTML (not our source)
+public/
+website/
+index.html
+manifestation_algorithm.html
