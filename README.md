@@ -156,5 +156,5 @@ See `_bmad-output/planning-artifacts/ADR-*.md` for full Architecture Decision Re
 
 MIT License — see [LICENSE](LICENSE) for details.
 
-Copyright © 2026 Tyshawn Despenza
+Copyright © 2026 Tyshawn Despenza, Giovanni Ilacqua
 
