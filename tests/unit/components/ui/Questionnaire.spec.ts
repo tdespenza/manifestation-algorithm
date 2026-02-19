@@ -420,6 +420,15 @@ describe('Questionnaire.vue', () => {
     expect(store.setAnswer).not.toHaveBeenCalled();
   });
 
+  it('step mode hides QuestionItem when currentQuestion is undefined (v-if false branch)', async () => {
+    // currentIndex 999 is out of bounds → currentQuestion computed returns undefined → v-if false
+    const wrapper = makeWrapper({ currentIndex: 999 }, false);
+    const buttons = wrapper.findAll('.mode-toggle button');
+    await buttons[1].trigger('click');
+    await wrapper.vm.$nextTick();
+    expect(wrapper.find('.question-item-stub').exists()).toBe(false);
+  });
+
   it('handleGlobalKey: unmatched key (e.g. "a") in step mode does nothing', async () => {
     const wrapper = makeWrapper();
     const store = useQuestionnaireStore();

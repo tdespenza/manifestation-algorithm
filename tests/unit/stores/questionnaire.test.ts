@@ -143,4 +143,19 @@ describe('Questionnaire Store', () => {
     store.answers['2'] = 10;
     expect(store.score).toBeCloseTo(baseline + 90);
   });
+
+  it('reset() clears all in-memory state to defaults', () => {
+    const store = useQuestionnaireStore();
+    store.answers['1a'] = 7;
+    store.currentIndex = 5;
+    store.hasSavedSession = true;
+    store.isSaving = true;
+
+    store.reset();
+
+    expect(store.answers).toEqual({});
+    expect(store.currentIndex).toBe(0);
+    expect(store.hasSavedSession).toBe(false);
+    expect(store.isSaving).toBe(false);
+  });
 });

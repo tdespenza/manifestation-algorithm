@@ -195,4 +195,18 @@ describe('Database Service', () => {
     );
     expect(result).toEqual(rows);
   });
+
+  it('saveHistoricalSession rolls back and rethrows on INSERT failure', async () => {
+    // Let the BEGIN TRANSACTION and session INSERT succeed, then fail on response INSERT
+    mocks.execute
+      .mockResolvedValueOnce([]) // BEGIN TRANSACTION
+      .mockResolvedValueOnce([]) // INSERT INTO historical_sessions
+      .mockRejectedValueOnce(new Error('Insert failed')); // INSERT INTO historical_responses
+
+    await expect(dbService.saveHistoricalSession(1000, { '1a': 5 })).rejects.toThrow(
+      'Insert failed'
+    );
+
+    expect(mocks.execute).toHaveBeenCalledWith('ROLLBACK', []);
+  });
 });
