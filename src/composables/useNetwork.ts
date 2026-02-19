@@ -1,6 +1,7 @@
 import { ref } from 'vue';
 import { invoke } from '@tauri-apps/api/core';
-import { listen, UnlistenFn } from '@tauri-apps/api/event';
+import type { UnlistenFn } from '@tauri-apps/api/event';
+import { listen } from '@tauri-apps/api/event';
 
 export interface CategoryStats {
   avg: number;
@@ -60,7 +61,9 @@ export function useNetwork() {
     // This prevents the UI from being stuck on "Connecting..." forever.
     isConnected.value = true;
     if (connectTimeoutId === null) {
-      connectTimeoutId = setTimeout(() => { isConnected.value = true; }, 3000);
+      connectTimeoutId = setTimeout(() => {
+        isConnected.value = true;
+      }, 3000);
     }
 
     try {
@@ -70,7 +73,7 @@ export function useNetwork() {
       // Load and track sharing opt-in state
       await loadSharingState();
 
-      unlisten = await listen<NetworkStatUpdate>('network-stats', (event) => {
+      unlisten = await listen<NetworkStatUpdate>('network-stats', event => {
         const payload = event.payload;
         count.value = payload.peer_count;
         if (payload.total_manifestations !== undefined) {
@@ -81,11 +84,11 @@ export function useNetwork() {
         if (payload.category_stats) categoryStats.value = payload.category_stats;
         if (payload.bandwidth_in) bandwidthStats.value.inbound = payload.bandwidth_in;
         if (payload.bandwidth_out) bandwidthStats.value.outbound = payload.bandwidth_out;
-        
+
         lastUpdate.value = Date.now();
         isConnected.value = true;
       });
-      
+
       isListening.value = true;
     } catch (e) {
       console.error('Failed to connect to network service:', e);
@@ -116,7 +119,7 @@ export function useNetwork() {
     sharingEnabled,
     init,
     cleanup,
-    toggleSharing,
+    toggleSharing
   };
 }
 

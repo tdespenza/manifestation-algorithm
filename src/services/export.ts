@@ -22,7 +22,15 @@ export interface ExportResponse {
  */
 export function generateCSV(sessions: ExportSession[], responses: ExportResponse[]): string {
   // Columns: SessionID, Date, TotalScore, Note, QuestionID, Category, ScaleValue
-  const header = ['SessionID', 'Date', 'TotalScore', 'Note', 'QuestionID', 'Category', 'ScaleValue'].join(',');
+  const header = [
+    'SessionID',
+    'Date',
+    'TotalScore',
+    'Note',
+    'QuestionID',
+    'Category',
+    'ScaleValue'
+  ].join(',');
   const rows: string[] = [header];
 
   const sessionMap = new Map(sessions.map(s => [s.id, s]));
@@ -30,7 +38,7 @@ export function generateCSV(sessions: ExportSession[], responses: ExportResponse
   for (const r of responses) {
     const s = sessionMap.get(r.session_id);
     if (!s) continue;
-    
+
     // Sanitize note
     const note = s.notes ? `"${s.notes.replace(/"/g, '""')}"` : '';
 
@@ -43,7 +51,7 @@ export function generateCSV(sessions: ExportSession[], responses: ExportResponse
       `"${r.category.replace(/"/g, '""')}"`, // Handle quotes in category
       r.answer_value
     ].join(',');
-    
+
     rows.push(row);
   }
 
@@ -52,12 +60,12 @@ export function generateCSV(sessions: ExportSession[], responses: ExportResponse
 
 export async function exportToCSV(): Promise<void> {
   const db = await getDb();
-  
+
   // 1. Fetch sessions
   const sessions = await db.select<ExportSession[]>(
     'SELECT id, completed_at, total_score, notes FROM historical_sessions ORDER BY completed_at DESC'
   );
-  
+
   if (sessions.length === 0) {
     throw new Error('No data to export');
   }
@@ -72,16 +80,16 @@ export async function exportToCSV(): Promise<void> {
 
   // 4. Create Blob
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  
+
   // 5. Download
   const link = document.createElement('a');
   const url = URL.createObjectURL(blob);
-  
+
   // Create filename with date range
   const dates = sessions.map(s => new Date(s.completed_at).getTime());
   const minDate = new Date(Math.min(...dates)).toISOString().split('T')[0];
   const maxDate = new Date(Math.max(...dates)).toISOString().split('T')[0];
-  
+
   link.setAttribute('href', url);
   link.setAttribute('download', `manifestation_export_${minDate}_to_${maxDate}.csv`);
   link.style.visibility = 'hidden';

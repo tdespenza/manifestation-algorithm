@@ -19,24 +19,16 @@ import {
 import { Line } from 'vue-chartjs';
 import type { SessionSummary } from '../../services/db';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
-
 const props = defineProps<{
   sessions: SessionSummary[];
 }>();
 
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+
 const chartData = computed(() => {
   // Sort by date ascending for the chart
   const sorted = [...props.sessions].reverse(); // sessions come DESC from DB
-  
+
   return {
     labels: sorted.map(s => {
       const d = new Date(s.completed_at);

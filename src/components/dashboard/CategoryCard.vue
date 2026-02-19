@@ -7,8 +7,8 @@
         <span v-if="trendIcon" :class="['trend-icon', trendClass]">{{ trendIcon }}</span>
       </div>
     </div>
-    
-    <div class="sparkline-container" v-if="trendData.length > 1">
+
+    <div v-if="trendData.length > 1" class="sparkline-container">
       <Line :data="chartData" :options="chartOptions" />
     </div>
     <div v-else class="no-trend">
@@ -32,22 +32,16 @@ import {
   type ChartOptions
 } from 'chart.js';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Tooltip
-);
-
-const router = useRouter();
-
 const props = defineProps<{
   category: string;
   currentScore?: number;
   trendData: number[]; // Array of scores over time
   dates: string[]; // Corresponding dates
 }>();
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip);
+
+const router = useRouter();
 
 const goToDetail = () => {
   router.push({ name: 'CategoryDetail', params: { id: props.category } });
@@ -85,15 +79,17 @@ const isUptrend = computed(() =>
 
 const chartData = computed(() => ({
   labels: props.dates,
-  datasets: [{
-    data: props.trendData,
-    borderColor: isUptrend.value ? '#000000' : '#f44336',
-    borderWidth: 2,
-    pointRadius: 0,
-    pointHoverRadius: 4,
-    fill: false,
-    tension: 0.3
-  }]
+  datasets: [
+    {
+      data: props.trendData,
+      borderColor: isUptrend.value ? '#000000' : '#f44336',
+      borderWidth: 2,
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      fill: false,
+      tension: 0.3
+    }
+  ]
 }));
 
 const chartOptions: ChartOptions<'line'> = {
@@ -111,8 +107,8 @@ const chartOptions: ChartOptions<'line'> = {
   },
   interaction: {
     mode: 'index',
-    intersect: false,
-  },
+    intersect: false
+  }
 };
 </script>
 
@@ -121,17 +117,19 @@ const chartOptions: ChartOptions<'line'> = {
   background: white;
   border-radius: 8px;
   padding: 16px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   height: 160px;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .category-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .card-header {
@@ -155,18 +153,30 @@ h3 {
   font-size: 1.2rem;
 }
 
-.current-score.high { color: #4caf50; }
-.current-score.medium { color: #ff9800; }
-.current-score.low { color: #f44336; }
+.current-score.high {
+  color: #4caf50;
+}
+.current-score.medium {
+  color: #ff9800;
+}
+.current-score.low {
+  color: #f44336;
+}
 
 .trend-icon {
   font-size: 0.8rem;
   margin-left: 4px;
   vertical-align: middle;
 }
-.trend-up { color: #4caf50; }
-.trend-down { color: #f44336; }
-.trend-stable { color: #9e9e9e; }
+.trend-up {
+  color: #4caf50;
+}
+.trend-down {
+  color: #f44336;
+}
+.trend-stable {
+  color: #9e9e9e;
+}
 
 .sparkline-container {
   flex: 1;

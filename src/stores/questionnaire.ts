@@ -2,12 +2,12 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { calculateScore } from '../services/scoring';
 import { questions } from '../data/questions';
-import { Question } from '../types';
-import { 
-  saveAnswer as dbSaveAnswer, 
-  loadAnswers, 
-  getLastActive, 
-  updateLastActive, 
+import type { Question } from '../types';
+import {
+  saveAnswer as dbSaveAnswer,
+  loadAnswers,
+  getLastActive,
+  updateLastActive,
   clearSession,
   saveHistoricalSession
 } from '../services/db';
@@ -173,6 +173,6 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
     setAnswer,
     submitSession,
     sessionId,
-    isSaving,
+    isSaving
   };
 });

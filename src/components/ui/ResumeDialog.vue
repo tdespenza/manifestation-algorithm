@@ -3,7 +3,10 @@
     <div class="dialog">
       <div class="icon">💡</div>
       <h2 id="resume-title">Welcome Back!</h2>
-      <p>You have a saved session in progress. Would you like to resume where you left off, or start a fresh assessment?</p>
+      <p>
+        You have a saved session in progress. Would you like to resume where you left off, or start
+        a fresh assessment?
+      </p>
       <div class="actions">
         <button class="btn-primary" @click="$emit('resume')">Resume Session</button>
         <button class="btn-secondary" @click="onFresh">Start Fresh</button>
@@ -46,11 +49,20 @@ function onFresh() {
 }
 
 @keyframes slideUp {
-  from { transform: translateY(30px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
-.icon { font-size: 3em; margin-bottom: 12px; }
+.icon {
+  font-size: 3em;
+  margin-bottom: 12px;
+}
 
 h2 {
   font-size: 1.5em;
@@ -74,7 +86,7 @@ p {
 
 .btn-primary {
   padding: 12px 28px;
-  background: var(--true-cobalt, #0047AB);
+  background: var(--true-cobalt, #0047ab);
   color: white;
   border: none;
   border-radius: 25px;
@@ -85,7 +97,10 @@ p {
   box-shadow: 0 4px 12px rgba(0, 71, 171, 0.3);
 }
 
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0, 71, 171, 0.4); }
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 71, 171, 0.4);
+}
 
 .btn-secondary {
   padding: 12px 28px;
@@ -99,9 +114,11 @@ p {
   transition: all 0.2s;
 }
 
-.btn-secondary:hover { background: #c0392b; color: white; }
+.btn-secondary:hover {
+  background: #c0392b;
+  color: white;
+}
 </style>
-
 
 <style scoped>
 .overlay {
@@ -127,11 +144,20 @@ p {
 }
 
 @keyframes slideUp {
-  from { transform: translateY(30px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
-.icon { font-size: 3em; margin-bottom: 12px; }
+.icon {
+  font-size: 3em;
+  margin-bottom: 12px;
+}
 
 h2 {
   font-size: 1.5em;
@@ -155,7 +181,7 @@ p {
 
 .btn-primary {
   padding: 12px 28px;
-  background: var(--true-cobalt, #0047AB);
+  background: var(--true-cobalt, #0047ab);
   color: white;
   border: none;
   border-radius: 25px;
@@ -166,7 +192,10 @@ p {
   box-shadow: 0 4px 12px rgba(0, 71, 171, 0.3);
 }
 
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0, 71, 171, 0.4); }
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 71, 171, 0.4);
+}
 
 .btn-secondary {
   padding: 12px 28px;
@@ -180,5 +209,8 @@ p {
   transition: all 0.2s;
 }
 
-.btn-secondary:hover { background: #c0392b; color: white; }
+.btn-secondary:hover {
+  background: #c0392b;
+  color: white;
+}
 </style>

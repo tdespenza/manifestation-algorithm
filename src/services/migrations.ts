@@ -1,4 +1,4 @@
-import Database from '@tauri-apps/plugin-sql';
+import type Database from '@tauri-apps/plugin-sql';
 
 interface Migration {
   id: number;
@@ -71,8 +71,12 @@ const migrations: Migration[] = [
       `);
 
       // Indexes
-      await db.execute('CREATE INDEX IF NOT EXISTS idx_sessions_completed ON historical_sessions(completed_at);');
-      await db.execute('CREATE INDEX IF NOT EXISTS idx_responses_qid ON historical_responses(question_id);');
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_sessions_completed ON historical_sessions(completed_at);'
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_responses_qid ON historical_responses(question_id);'
+      );
     }
   },
   {
@@ -80,8 +84,12 @@ const migrations: Migration[] = [
     name: 'optimized_indexes',
     up: async (db: Database) => {
       // Additional indexes for trends calculation
-      await db.execute('CREATE INDEX IF NOT EXISTS idx_responses_session_id ON historical_responses(session_id);');
-      await db.execute('CREATE INDEX IF NOT EXISTS idx_responses_category ON historical_responses(category);');
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_responses_session_id ON historical_responses(session_id);'
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_responses_category ON historical_responses(category);'
+      );
     }
   }
 ];
@@ -97,17 +105,20 @@ export async function runMigrations(db: Database) {
   `);
 
   // Get applied migrations
-  const applied = await db.select<{id: number}[]>('SELECT id FROM _migrations');
+  const applied = await db.select<{ id: number }[]>('SELECT id FROM _migrations');
   const appliedIds = new Set(applied.map(m => m.id));
 
   // Run pending migrations
   for (const migration of migrations) {
     if (!appliedIds.has(migration.id)) {
-      console.log(`Applying migration ${migration.id}: ${migration.name}`);
+      console.warn(`Applying migration ${migration.id}: ${migration.name}`);
       try {
         await migration.up(db);
-        await db.execute('INSERT INTO _migrations (id, name) VALUES ($1, $2)', [migration.id, migration.name]);
-        console.log(`Migration ${migration.id} applied successfully.`);
+        await db.execute('INSERT INTO _migrations (id, name) VALUES ($1, $2)', [
+          migration.id,
+          migration.name
+        ]);
+        console.warn(`Migration ${migration.id} applied successfully.`);
       } catch (e) {
         console.error(`Failed to apply migration ${migration.id}:`, e);
         throw e; // Stop migration process on failure

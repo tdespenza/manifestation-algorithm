@@ -1,10 +1,8 @@
 <template>
   <div class="network-stats-panel">
     <h3>Network Rankings</h3>
-    
-    <div v-if="count === 0 && manifestations === 0" class="loading">
-      Searching for peers...
-    </div>
+
+    <div v-if="count === 0 && manifestations === 0" class="loading">Searching for peers...</div>
 
     <div v-else class="stats-grid">
       <div class="stat-box primary">
@@ -34,14 +32,14 @@
             <div class="bar-group">
               <span class="bar-label">Avg</span>
               <div class="bar-bg">
-                <div class="bar-fill avg" :style="{ width: (stat.avg / 100 * 100) + '%' }"></div>
+                <div class="bar-fill avg" :style="{ width: (stat.avg / 100) * 100 + '%' }"></div>
               </div>
               <span class="bar-val">{{ stat.avg.toFixed(1) }}</span>
             </div>
             <div class="bar-group">
               <span class="bar-label">P90</span>
               <div class="bar-bg">
-                <div class="bar-fill p90" :style="{ width: (stat.p90 / 100 * 100) + '%' }"></div>
+                <div class="bar-fill p90" :style="{ width: (stat.p90 / 100) * 100 + '%' }"></div>
               </div>
               <span class="bar-val">{{ stat.p90.toFixed(1) }}</span>
             </div>
@@ -49,9 +47,12 @@
         </div>
       </div>
     </div>
-    
+
     <div class="bandwidth-stats">
-        <small>Bandwidth: ↓ {{ formatBytes(bandwidthStats.inbound) }} | ↑ {{ formatBytes(bandwidthStats.outbound) }}</small>
+      <small
+        >Bandwidth: ↓ {{ formatBytes(bandwidthStats.inbound) }} | ↑
+        {{ formatBytes(bandwidthStats.outbound) }}</small
+      >
     </div>
 
     <div class="sharing-section">
@@ -65,15 +66,8 @@ import { computed, onMounted } from 'vue';
 import { useNetwork } from '../../composables/useNetwork';
 import SharingToggle from '../ui/SharingToggle.vue';
 
-const { 
-  count, 
-  manifestations, 
-  avgScore, 
-  percentile90, 
-  categoryStats,
-  bandwidthStats,
-  init
-} = useNetwork();
+const { count, manifestations, avgScore, percentile90, categoryStats, bandwidthStats, init } =
+  useNetwork();
 
 const hasCategories = computed(() => Object.keys(categoryStats.value).length > 0);
 
@@ -82,12 +76,12 @@ onMounted(() => {
 });
 
 function formatBytes(bytes: number, decimals = 2) {
-    if (!bytes) return '0 B';
-    const k = 1024;
-    const dm = decimals;
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+  if (!bytes) return '0 B';
+  const k = 1024;
+  const dm = decimals;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
 </script>
 
@@ -96,7 +90,7 @@ function formatBytes(bytes: number, decimals = 2) {
   background: white;
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
 h3 {
@@ -198,8 +192,12 @@ h4 {
   transition: width 0.5s ease;
 }
 
-.bar-fill.avg { background: #2196f3; }
-.bar-fill.p90 { background: #9c27b0; }
+.bar-fill.avg {
+  background: #2196f3;
+}
+.bar-fill.p90 {
+  background: #9c27b0;
+}
 
 .bar-val {
   width: 30px;
@@ -208,12 +206,12 @@ h4 {
 }
 
 .bandwidth-stats {
-    margin-top: 1.5rem;
-    text-align: right;
-    color: #999;
+  margin-top: 1.5rem;
+  text-align: right;
+  color: #999;
 }
 
 .sharing-section {
-    margin-top: 1rem;
+  margin-top: 1rem;
 }
 </style>
