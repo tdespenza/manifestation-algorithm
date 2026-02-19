@@ -2,6 +2,7 @@
 import { RouterLink, RouterView, useRoute } from 'vue-router';
 import { computed } from 'vue';
 import NetworkStatus from './components/NetworkStatus.vue';
+import AppToast from './components/ui/AppToast.vue';
 import logoUrl from './assets/logo.svg';
 
 const route = useRoute();
@@ -42,6 +43,7 @@ const mainClass = computed(() => (route.name === 'dashboard' ? 'full-width-main'
       </router-view>
     </main>
   </div>
+  <AppToast />
 </template>
 
 <style scoped>

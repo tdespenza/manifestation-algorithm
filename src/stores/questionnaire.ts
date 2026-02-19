@@ -76,6 +76,8 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
 
   /** True if there's a saved session with data (for resume dialog) */
   const hasSavedSession = ref(false);
+  /** True when hasSavedSession was triggered by a historical pre-fill (not an in-progress session) */
+  const isHistoricalPreFill = ref(false);
 
   async function init() {
     try {
@@ -112,8 +114,10 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
 
           if (Object.keys(historyAnswers).length > 0) {
             answers.value = historyAnswers;
-            // Note: We do NOT set hasSavedSession=true because this is a *new* session
-            // starting with old values, not a paused session being resumed.
+            // Show the ResumeDialog so the user can choose to continue from
+            // their last scores OR start completely blank (Start Fresh).
+            hasSavedSession.value = true;
+            isHistoricalPreFill.value = true;
           }
         }
       } else {
@@ -138,6 +142,7 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
     answers.value = {};
     currentIndex.value = 0;
     hasSavedSession.value = false;
+    isHistoricalPreFill.value = false;
     await updateLastActive(sessionId.value);
   }
 
@@ -200,6 +205,7 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
     currentQuestion,
     currentIndex,
     hasSavedSession,
+    isHistoricalPreFill,
     init,
     resumeSession,
     startFresh,

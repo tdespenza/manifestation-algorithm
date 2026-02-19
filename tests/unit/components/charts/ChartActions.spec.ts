@@ -1,18 +1,25 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { mount } from '@vue/test-utils';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { mount, flushPromises } from '@vue/test-utils';
 import { nextTick } from 'vue';
 
-// ── Mock the composable ──────────────────────────────────────────────────────
-const mockPrintChart = vi.fn();
-const mockExportToExcel = vi.fn();
-const mockExportToCSV = vi.fn();
-const mockExportToPDF = vi.fn();
-const mockExportToHTML = vi.fn();
+// ── Mock useToast ────────────────────────────────────────────────────────────
+const mockAddToast = vi.fn();
+vi.mock('@/composables/useToast', () => ({
+  useToast: () => ({ addToast: mockAddToast, toasts: { value: [] }, dismissToast: vi.fn() })
+}));
+
+// ── Mock useChartExport ──────────────────────────────────────────────────────
+const mockPrintChart = vi.fn().mockReturnValue({ success: true, message: 'Print dialog opened' });
+const mockExportToExcel = vi.fn().mockResolvedValue({ success: true, message: 'Saved my_export.xlsx' });
+const mockExportToCSV = vi.fn().mockResolvedValue({ success: true, message: 'Saved my_export.csv' });
+const mockExportToPDF = vi.fn().mockReturnValue({ success: true, message: 'Print-to-PDF dialog opened' });
+const mockExportToHTML = vi.fn().mockResolvedValue({ success: true, message: 'Saved chart.html' });
 const mockCopyChart = vi.fn().mockResolvedValue(true);
 
 vi.mock('@/composables/useChartExport', () => ({
   useChartExport: () => ({
     isPrinting: { value: false },
+    isExporting: { value: false },
     printChart: mockPrintChart,
     exportToExcel: mockExportToExcel,
     exportToCSV: mockExportToCSV,
@@ -34,10 +41,6 @@ describe('ChartActions.vue', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
   });
 
   it('renders the Export / Print trigger button', () => {
@@ -105,6 +108,7 @@ describe('ChartActions.vue', () => {
     await nextTick();
     const buttons = document.querySelectorAll('.export-option-btn');
     (buttons[1] as HTMLButtonElement).click();
+    await flushPromises();
     await nextTick();
     expect(mockExportToExcel).toHaveBeenCalledWith(defaultProps.data, 'my_export');
     expect(document.querySelector('.export-dialog')).toBeNull();
@@ -117,6 +121,7 @@ describe('ChartActions.vue', () => {
     await nextTick();
     const buttons = document.querySelectorAll('.export-option-btn');
     (buttons[2] as HTMLButtonElement).click();
+    await flushPromises();
     await nextTick();
     expect(mockExportToCSV).toHaveBeenCalledWith(defaultProps.data, 'my_export');
     expect(document.querySelector('.export-dialog')).toBeNull();
@@ -141,20 +146,42 @@ describe('ChartActions.vue', () => {
     await nextTick();
     const buttons = document.querySelectorAll('.export-option-btn');
     (buttons[4] as HTMLButtonElement).click();
+    await flushPromises();
     await nextTick();
     expect(mockExportToHTML).toHaveBeenCalledWith('my-chart', 'My Chart Title');
     expect(document.querySelector('.export-dialog')).toBeNull();
     wrapper.unmount();
   });
 
-  it('Copy Chart option calls copyChart', async () => {
+  it('Copy Chart option calls copyChart and shows success toast', async () => {
     const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
     await wrapper.find('.export-trigger-btn').trigger('click');
     await nextTick();
     const buttons = document.querySelectorAll('.export-option-btn');
     (buttons[5] as HTMLButtonElement).click();
+    await flushPromises();
     await nextTick();
     expect(mockCopyChart).toHaveBeenCalledWith('my-chart');
+    expect(mockAddToast).toHaveBeenCalledWith(
+      'Chart copied to clipboard',
+      'success'
+    );
+    wrapper.unmount();
+  });
+
+  it('Copy Chart shows error toast when copy fails', async () => {
+    mockCopyChart.mockResolvedValueOnce(false);
+    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
+    await wrapper.find('.export-trigger-btn').trigger('click');
+    await nextTick();
+    const buttons = document.querySelectorAll('.export-option-btn');
+    (buttons[5] as HTMLButtonElement).click();
+    await flushPromises();
+    await nextTick();
+    expect(mockAddToast).toHaveBeenCalledWith(
+      'Copy failed — clipboard not available',
+      'error'
+    );
     wrapper.unmount();
   });
 
@@ -163,39 +190,34 @@ describe('ChartActions.vue', () => {
     await wrapper.find('.export-trigger-btn').trigger('click');
     await nextTick();
     const overlay = document.querySelector('.export-dialog-overlay') as HTMLElement;
-    // Simulate click on overlay (self-click closes dialog)
     overlay.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     await nextTick();
     expect(document.querySelector('.export-dialog')).toBeNull();
     wrapper.unmount();
   });
 
-  it('copyLabel resets to "Copy Chart" after 2 seconds', async () => {
-    vi.useFakeTimers();
+  it('print calls addToast with info type after printing', async () => {
     const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
     await wrapper.find('.export-trigger-btn').trigger('click');
     await nextTick();
     const buttons = document.querySelectorAll('.export-option-btn');
-    (buttons[5] as HTMLButtonElement).click();
+    (buttons[0] as HTMLButtonElement).click();
     await nextTick();
-    const vm = wrapper.vm as unknown as { copyLabel: string };
-    expect(vm.copyLabel).toBe('Copied!');
-    vi.advanceTimersByTime(2000);
-    await nextTick();
-    expect(vm.copyLabel).toBe('Copy Chart');
+    expect(mockAddToast).toHaveBeenCalledWith('Print dialog opened', 'info');
     wrapper.unmount();
   });
 
-  it('copyLabel shows "Copy failed" when copyChart fails', async () => {
-    mockCopyChart.mockResolvedValueOnce(false);
+  it('close button is disabled while busy', async () => {
+    // Use a never-resolving promise to hold the busy state
+    mockExportToExcel.mockReturnValueOnce(new Promise(() => {}));
     const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
     await wrapper.find('.export-trigger-btn').trigger('click');
     await nextTick();
     const buttons = document.querySelectorAll('.export-option-btn');
-    (buttons[5] as HTMLButtonElement).click();
+    (buttons[1] as HTMLButtonElement).click();
     await nextTick();
-    const vm = wrapper.vm as unknown as { copyLabel: string };
-    expect(vm.copyLabel).toBe('Copy failed');
+    const closeBtn = document.querySelector('.close-btn') as HTMLButtonElement;
+    expect(closeBtn.disabled).toBe(true);
     wrapper.unmount();
   });
 });

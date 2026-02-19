@@ -5,7 +5,7 @@ const xlsxMocks = vi.hoisted(() => ({
   json_to_sheet: vi.fn().mockReturnValue({ fakeSheet: true }),
   book_new: vi.fn().mockReturnValue({ fakeBook: true }),
   book_append_sheet: vi.fn(),
-  writeFile: vi.fn()
+  write: vi.fn().mockReturnValue(new ArrayBuffer(8))
 }));
 
 vi.mock('xlsx', () => ({
@@ -14,7 +14,7 @@ vi.mock('xlsx', () => ({
     book_new: xlsxMocks.book_new,
     book_append_sheet: xlsxMocks.book_append_sheet
   },
-  writeFile: xlsxMocks.writeFile
+  write: xlsxMocks.write
 }));
 
 import { useChartExport } from '@/composables/useChartExport';
@@ -86,17 +86,18 @@ describe('useChartExport', () => {
 
   // ── printChart ───────────────────────────────────────────────────────────────
   describe('printChart', () => {
-    it('does nothing when element is not found', () => {
+    it('returns failure result when element is not found', () => {
       const { printChart } = useChartExport();
-      printChart('non-existent-id', 'My Chart');
+      const result = printChart('non-existent-id', 'My Chart');
+      expect(result.success).toBe(false);
       expect(printSpy).not.toHaveBeenCalled();
-      expect(document.body.classList.contains('printing-chart')).toBe(false);
     });
 
     it('adds classes, sets title, calls window.print, then restores everything', () => {
       document.title = 'Original Title';
       const { printChart } = useChartExport();
-      printChart('test-chart-element', 'Progress Trend');
+      const result = printChart('test-chart-element', 'Progress Trend');
+      expect(result.success).toBe(true);
       expect(printSpy).toHaveBeenCalledOnce();
       expect(document.title).toBe('Original Title');
       expect(document.body.classList.contains('printing-chart')).toBe(false);
@@ -129,10 +130,10 @@ describe('useChartExport', () => {
 
   // ── exportToExcel ────────────────────────────────────────────────────────────
   describe('exportToExcel', () => {
-    it('creates a sheet from the data and writes an .xlsx file', () => {
+    it('creates a sheet from the data and writes an .xlsx blob', async () => {
       const { exportToExcel } = useChartExport();
       const data = [{ Date: '1/1/2024', Score: 7 }];
-      exportToExcel(data, 'my_export');
+      const result = await exportToExcel(data, 'my_export');
       expect(xlsxMocks.json_to_sheet).toHaveBeenCalledWith(data);
       expect(xlsxMocks.book_new).toHaveBeenCalled();
       expect(xlsxMocks.book_append_sheet).toHaveBeenCalledWith(
@@ -140,87 +141,93 @@ describe('useChartExport', () => {
         { fakeSheet: true },
         'Data'
       );
-      expect(xlsxMocks.writeFile).toHaveBeenCalledWith({ fakeBook: true }, 'my_export.xlsx');
+      expect(xlsxMocks.write).toHaveBeenCalledWith({ fakeBook: true }, { bookType: 'xlsx', type: 'array' });
+      expect(result.success).toBe(true);
     });
 
-    it('uses a custom sheetName when provided', () => {
+    it('uses a custom sheetName when provided', async () => {
       const { exportToExcel } = useChartExport();
-      exportToExcel([], 'report', 'Progress');
+      const result = await exportToExcel([], 'report', 'Progress');
       expect(xlsxMocks.book_append_sheet).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'Progress'
       );
-      expect(xlsxMocks.writeFile).toHaveBeenCalledWith(expect.anything(), 'report.xlsx');
+      expect(result.success).toBe(true);
     });
 
-    it('appends .xlsx to the filename', () => {
+    it('includes filename in result message', async () => {
       const { exportToExcel } = useChartExport();
-      exportToExcel([], 'health_trend');
-      expect(xlsxMocks.writeFile).toHaveBeenCalledWith(expect.anything(), 'health_trend.xlsx');
+      const result = await exportToExcel([], 'health_trend');
+      expect(result.message).toContain('health_trend.xlsx');
     });
   });
 
   // ── exportToCSV ──────────────────────────────────────────────────────────────
   describe('exportToCSV', () => {
-    it('does nothing when data is empty', () => {
+    it('returns failure result when data is empty', async () => {
       const { exportToCSV } = useChartExport();
-      exportToCSV([], 'empty');
+      const result = await exportToCSV([], 'empty');
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('No data');
       expect(URL.createObjectURL).not.toHaveBeenCalled();
     });
 
-    it('generates a CSV blob and triggers download', () => {
+    it('generates a CSV blob and triggers download', async () => {
       const { exportToCSV } = useChartExport();
-      exportToCSV([{ Date: '1/1/2024', Score: 9 }], 'test_csv');
+      const result = await exportToCSV([{ Date: '1/1/2024', Score: 9 }], 'test_csv');
+      expect(result.success).toBe(true);
       expect(URL.createObjectURL).toHaveBeenCalledWith(expect.any(Blob));
       expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:fake-url');
     });
 
-    it('wraps values containing commas in double quotes', () => {
+    it('wraps values containing commas in double quotes', async () => {
       const { exportToCSV } = useChartExport();
       const BlobSpy = vi.spyOn(globalThis, 'Blob');
-      exportToCSV([{ Name: 'Smith, John', Score: 7 }], 'quoted');
+      await exportToCSV([{ Name: 'Smith, John', Score: 7 }], 'quoted');
       const blobContent = BlobSpy.mock.calls[0][0] as string[];
       expect(blobContent[0]).toContain('"Smith, John"');
     });
 
-    it('escapes double quotes within values', () => {
+    it('escapes double quotes within values', async () => {
       const { exportToCSV } = useChartExport();
       const BlobSpy = vi.spyOn(globalThis, 'Blob');
-      exportToCSV([{ Name: 'He said "hi"', Score: 7 }], 'quoted2');
+      await exportToCSV([{ Name: 'He said "hi"', Score: 7 }], 'quoted2');
       const blobContent = BlobSpy.mock.calls[0][0] as string[];
       expect(blobContent[0]).toContain('"He said ""hi"""');
     });
 
-    it('wraps values containing newlines in double quotes', () => {
+    it('wraps values containing newlines in double quotes', async () => {
       const { exportToCSV } = useChartExport();
       const BlobSpy = vi.spyOn(globalThis, 'Blob');
-      exportToCSV([{ Name: 'line1\nline2', Score: 5 }], 'newline');
+      await exportToCSV([{ Name: 'line1\nline2', Score: 5 }], 'newline');
       const blobContent = BlobSpy.mock.calls[0][0] as string[];
       expect(blobContent[0]).toContain('"line1\nline2"');
     });
-    it('converts null and undefined values to empty string', () => {
+
+    it('converts null and undefined values to empty string', async () => {
       const { exportToCSV } = useChartExport();
       const BlobSpy = vi.spyOn(globalThis, 'Blob');
-      exportToCSV([{ A: null, B: undefined }] as unknown as Record<string, unknown>[], 'nulls');
+      await exportToCSV([{ A: null, B: undefined }] as unknown as Record<string, unknown>[], 'nulls');
       const blobContent = BlobSpy.mock.calls[0][0] as string[];
-      // both null and undefined become empty string (no quotes needed)
       expect(blobContent[0]).toContain(',');
     });
   });
 
   // ── exportToPDF ──────────────────────────────────────────────────────────────
   describe('exportToPDF', () => {
-    it('does nothing when element is not found', () => {
+    it('returns failure result when element is not found', () => {
       const { exportToPDF } = useChartExport();
-      exportToPDF('non-existent-id', 'My PDF');
+      const result = exportToPDF('non-existent-id', 'My PDF');
+      expect(result.success).toBe(false);
       expect(printSpy).not.toHaveBeenCalled();
     });
 
     it('adds print classes, calls window.print, then cleans up', () => {
       document.title = 'Original';
       const { exportToPDF } = useChartExport();
-      exportToPDF('test-chart-element', 'My PDF');
+      const result = exportToPDF('test-chart-element', 'My PDF');
+      expect(result.success).toBe(true);
       expect(printSpy).toHaveBeenCalledOnce();
       expect(document.title).toBe('Original');
       expect(document.body.classList.contains('printing-chart')).toBe(false);
@@ -230,25 +237,27 @@ describe('useChartExport', () => {
 
   // ── exportToHTML ─────────────────────────────────────────────────────────────
   describe('exportToHTML', () => {
-    it('does nothing when element is not found', () => {
+    it('returns failure result when element is not found', async () => {
       const { exportToHTML } = useChartExport();
-      exportToHTML('non-existent-id', 'Missing');
+      const result = await exportToHTML('non-existent-id', 'Missing');
+      expect(result.success).toBe(false);
       expect(URL.createObjectURL).not.toHaveBeenCalled();
     });
 
-    it('generates an HTML blob with canvas image and triggers download', () => {
+    it('generates an HTML blob with canvas image and triggers download', async () => {
       const { exportToHTML } = useChartExport();
-      exportToHTML('test-chart-element', 'My Chart');
+      const result = await exportToHTML('test-chart-element', 'My Chart');
+      expect(result.success).toBe(true);
       expect(mockCanvas.toDataURL).toHaveBeenCalledWith('image/png');
       expect(URL.createObjectURL).toHaveBeenCalledWith(expect.any(Blob));
       expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:fake-url');
     });
 
-    it('falls back when no canvas is present', () => {
+    it('falls back when no canvas is present', async () => {
       mockEl.removeChild(mockCanvas);
       const { exportToHTML } = useChartExport();
-      exportToHTML('test-chart-element', 'No Canvas');
-      // Should still create and download a blob
+      const result = await exportToHTML('test-chart-element', 'No Canvas');
+      expect(result.success).toBe(true);
       expect(URL.createObjectURL).toHaveBeenCalledWith(expect.any(Blob));
       expect(URL.revokeObjectURL).toHaveBeenCalled();
     });
@@ -295,11 +304,17 @@ describe('useChartExport', () => {
     });
   });
 
-  // ── isPrinting ref ───────────────────────────────────────────────────────────
-  describe('isPrinting ref', () => {
+  // ── isPrinting / isExporting refs ────────────────────────────────────────────
+  describe('state refs', () => {
     it('exposes isPrinting reactive ref initialised to false', () => {
       const { isPrinting } = useChartExport();
       expect(isPrinting.value).toBe(false);
     });
+
+    it('exposes isExporting reactive ref initialised to false', () => {
+      const { isExporting } = useChartExport();
+      expect(isExporting.value).toBe(false);
+    });
   });
 });
+

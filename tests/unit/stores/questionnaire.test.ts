@@ -59,8 +59,9 @@ describe('Questionnaire Store', () => {
       await store.init();
 
       expect(store.answers['1a']).toBe(9);
-      // But HAS NOT set hasSavedSession=true (because it's fresh start with pre-fill)
-      expect(store.hasSavedSession).toBe(false);
+      // NOW sets hasSavedSession=true so ResumeDialog appears and user can start fresh
+      expect(store.hasSavedSession).toBe(true);
+      expect(store.isHistoricalPreFill).toBe(true);
     });
 
     it('init skips prefill when historical responses have no valid question IDs', async () => {
