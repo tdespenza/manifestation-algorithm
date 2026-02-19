@@ -8,7 +8,10 @@ const dbMocks = vi.hoisted(() => ({
   loadAnswers: vi.fn().mockResolvedValue({}),
   getLastActive: vi.fn().mockResolvedValue(null),
   updateLastActive: vi.fn().mockResolvedValue(undefined),
-  clearSession: vi.fn()
+  clearSession: vi.fn(),
+  loadHistoricalSessions: vi.fn().mockResolvedValue([]),
+  loadSessionResponses: vi.fn().mockResolvedValue([]),
+  saveHistoricalSession: vi.fn().mockResolvedValue('uuid-1')
 }));
 
 vi.mock('@/services/db', () => ({
@@ -16,13 +19,20 @@ vi.mock('@/services/db', () => ({
   loadAnswers: dbMocks.loadAnswers,
   getLastActive: dbMocks.getLastActive,
   updateLastActive: dbMocks.updateLastActive,
-  clearSession: dbMocks.clearSession
+  clearSession: dbMocks.clearSession,
+  loadHistoricalSessions: dbMocks.loadHistoricalSessions,
+  loadSessionResponses: dbMocks.loadSessionResponses,
+  saveHistoricalSession: dbMocks.saveHistoricalSession
 }));
 
 describe('Questionnaire Store', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
+    // Default mocks
+    dbMocks.loadAnswers.mockResolvedValue({});
+    dbMocks.loadHistoricalSessions.mockResolvedValue([]);
+    dbMocks.getLastActive.mockResolvedValue(null);
   });
 
   describe('Initialization', () => {
@@ -34,6 +44,23 @@ describe('Questionnaire Store', () => {
       await store.init();
 
       expect(store.answers['1a']).toBe(5);
+    });
+
+    it('init should load history if current session empty', async () => {
+      // Current session empty
+      dbMocks.loadAnswers.mockResolvedValue({});
+      // History exists
+      dbMocks.loadHistoricalSessions.mockResolvedValue([{ id: 'hist-1' }]);
+      dbMocks.loadSessionResponses.mockResolvedValue([
+        { question_id: '1a', category: 'General', answer_value: 9 }
+      ]);
+
+      const store = useQuestionnaireStore();
+      await store.init();
+
+      expect(store.answers['1a']).toBe(9);
+      // But HAS NOT set hasSavedSession=true (because it's fresh start with pre-fill)
+      expect(store.hasSavedSession).toBe(false);
     });
 
     it('init should clear answers if session expired', async () => {

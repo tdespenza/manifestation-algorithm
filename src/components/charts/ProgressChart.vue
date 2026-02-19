@@ -30,6 +30,19 @@ const chartData = computed(() => {
   // Sort by date ascending for the chart
   const sorted = [...props.sessions].reverse(); // sessions come DESC from DB
 
+  // Determine trend color (Black for up/stable, Red for down)
+  let trendColor = '#000000';
+  if (sorted.length > 1) {
+    const firstScore = sorted[0].total_score;
+    const lastScore = sorted[sorted.length - 1].total_score;
+    if (lastScore < firstScore) {
+      trendColor = '#d32f2f'; // Material Red 700
+    }
+  } else {
+    // Single point default
+    trendColor = '#000000';
+  }
+
   return {
     labels: sorted.map(s => {
       const d = new Date(s.completed_at);
@@ -38,8 +51,8 @@ const chartData = computed(() => {
     datasets: [
       {
         label: 'Manifestation Score',
-        backgroundColor: '#0047AB',
-        borderColor: '#0047AB',
+        backgroundColor: trendColor,
+        borderColor: trendColor,
         data: sorted.map(s => s.total_score),
         tension: 0.1
       }

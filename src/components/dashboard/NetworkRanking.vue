@@ -112,6 +112,12 @@ h4 {
   gap: 1rem;
 }
 
+@media (max-width: 600px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .stat-box {
   background: #f8f9fa;
   padding: 1rem;
@@ -151,6 +157,19 @@ h4 {
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+@media (max-width: 600px) {
+  .category-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .cat-name {
+    width: 100%;
+    margin-bottom: 0.25rem;
+  }
 }
 
 .cat-name {

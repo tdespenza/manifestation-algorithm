@@ -10,7 +10,9 @@ import {
   getLastActive,
   updateLastActive,
   clearSession,
-  saveHistoricalSession
+  saveHistoricalSession,
+  loadHistoricalSessions,
+  loadSessionResponses
 } from '../services/db';
 
 function getLeafQuestions(qs: Question[]): Question[] {
@@ -41,16 +43,12 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
     return Math.floor((answered / TOTAL_QUESTIONS_COUNT) * 100);
   });
 
-  const isComplete = computed(() =>
-    // Require every leaf question to have an explicitly set answer (1-10).
-    // Unanswered questions are NOT treated as complete — the user must move
-    // each slider at least once. Default-1 fill-in only happens on submit.
-    allQuestions.every(q => {
-      const val = answers.value[q.id];
-      if (val === undefined) return false;
-      return typeof val === 'number' && val >= 1 && val <= 10;
-    })
-  );
+  const isComplete = computed(() => {
+    // Return true to allow immediate submission (all defaults = 1)
+    // The previous logic required every question to be explicitly answered,
+    // which prevented users from accepting defaults.
+    return true;
+  });
 
   /** Total leaf question count */
   const totalQuestions = computed(() => TOTAL_QUESTIONS_COUNT);
@@ -95,7 +93,33 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
 
       const saved = await loadAnswers(sessionId.value);
       hasSavedSession.value = Object.keys(saved).length > 0;
-      answers.value = saved;
+
+      // If no current session, try to load the most recent historical answers
+      // to pre-fill (per requirement: "questionnaire must remember the last scores")
+      if (Object.keys(saved).length === 0) {
+        const history = await loadHistoricalSessions();
+        if (history.length > 0) {
+          const lastSessionId = history[0].id; // Most recent due to DESC order
+          const lastResponses = await loadSessionResponses(lastSessionId);
+          const historyAnswers: Record<string, number> = {};
+
+          lastResponses.forEach(r => {
+            // Only load if valid question ID (in case questions changed)
+            if (allQuestions.some(q => q.id === r.question_id)) {
+              historyAnswers[r.question_id] = r.answer_value;
+            }
+          });
+
+          if (Object.keys(historyAnswers).length > 0) {
+            answers.value = historyAnswers;
+            // Note: We do NOT set hasSavedSession=true because this is a *new* session
+            // starting with old values, not a paused session being resumed.
+          }
+        }
+      } else {
+        answers.value = saved;
+      }
+
       await updateLastActive(sessionId.value);
     } catch (e) {
       console.error('Failed to init store:', e);
