@@ -119,6 +119,11 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
 
   async function setAnswer(questionId: string, value: number) {
     if (value < 1 || value > 10) return;
+    // Validate that questionId exists in the known leaf questions
+    if (!allQuestions.some(q => q.id === questionId)) {
+      console.error('Invalid question ID:', questionId);
+      return;
+    }
     answers.value[questionId] = value;
     try {
       isSaving.value = true;

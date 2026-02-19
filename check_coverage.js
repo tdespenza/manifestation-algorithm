@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('node:fs');
 const data = JSON.parse(fs.readFileSync('coverage/coverage-final.json', 'utf8'));
 
 const filesToCheck = ['Questionnaire.vue', 'questionnaire.ts', 'analysis.ts', 'useNetwork.ts', 'NetworkRanking.vue', 'QuestionItem.vue'];
@@ -9,7 +9,7 @@ filesToCheck.forEach(target => {
   const file = data[key];
   
   const uncovStmts = Object.entries(file.s).filter(([k,v]) => v === 0).map(([k]) => file.statementMap[k].start.line);
-  const uncovBranches = Object.entries(file.b).filter(([k,v]) => v.some(c => c === 0)).map(([k]) => {
+  const uncovBranches = Object.entries(file.b).filter(([_k, v]) => v.includes(0)).map(([k]) => {
     const br = file.branchMap[k];
     return `${br.type}@line${br.loc.start.line}`;
   });

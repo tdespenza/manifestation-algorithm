@@ -119,8 +119,19 @@ export class QuestionnairePage {
     }
   }
 
-  /** Submit the assessment */
+  /** Submit the assessment (assumes all questions are already rated) */
   async submit() {
+    await this.submitBtn.click();
+  }
+
+  /**
+   * Rate every slider with `value` then click the submit button.
+   * Use this in tests that need to exercise the full submit-and-navigate flow,
+   * because the submit guard requires isComplete === true.
+   */
+  async rateAllAndSubmit(value = 5) {
+    await this.rateAllQuestions(value);
+    await this.waitForSaved();
     await this.submitBtn.click();
   }
 
