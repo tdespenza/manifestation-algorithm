@@ -26,8 +26,8 @@ vi.mock('@/composables/useNetwork', () => ({
     sharingEnabled: ref(false),
     bandwidthStats: ref({ inbound: 0, outbound: 0 }),
     lastUpdate: ref(Date.now()),
-    toggleSharing: vi.fn(),
-  }),
+    toggleSharing: vi.fn()
+  })
 }));
 
 describe('NetworkStatus.vue', () => {

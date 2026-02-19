@@ -6,15 +6,15 @@ const mocks = vi.hoisted(() => {
   const select = vi.fn().mockResolvedValue([]);
   const load = vi.fn().mockResolvedValue({
     execute,
-    select,
+    select
   });
   return { load, execute, select };
 });
 
 vi.mock('@tauri-apps/plugin-sql', () => ({
   default: {
-    load: mocks.load, // Use hoisted value
-  },
+    load: mocks.load // Use hoisted value
+  }
 }));
 
 // Import subject AFTER mocking
@@ -45,25 +45,25 @@ describe('Database Service', () => {
     expect(mocks.execute).toHaveBeenCalledWith(expect.stringContaining('INSERT OR REPLACE'), [
       'session1',
       'q1',
-      5,
+      5
     ]);
   });
 
   it('loadAnswers should execute select query and return map', async () => {
     mocks.select.mockResolvedValueOnce([
       { question_number: 'q1', answer_value: 5 },
-      { question_number: 'q2', answer_value: 8 },
+      { question_number: 'q2', answer_value: 8 }
     ]);
 
     const result = await dbService.loadAnswers('session1');
 
     expect(mocks.select).toHaveBeenCalledWith(expect.stringContaining('SELECT question_number'), [
-      'session1',
+      'session1'
     ]);
 
     expect(result).toEqual({
       q1: 5,
-      q2: 8,
+      q2: 8
     });
   });
 
@@ -84,7 +84,7 @@ describe('Database Service', () => {
       ['sess-1']
     );
     expect(mocks.execute).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM settings'), [
-      'last_active_sess-1',
+      'last_active_sess-1'
     ]);
   });
 
@@ -158,8 +158,8 @@ describe('Database Service', () => {
         id: 's1',
         completed_at: '2024-01-01T00:00:00.000Z',
         total_score: 5000,
-        duration_seconds: 120,
-      },
+        duration_seconds: 120
+      }
     ];
     mocks.select.mockResolvedValueOnce(rows);
 
@@ -178,7 +178,7 @@ describe('Database Service', () => {
     const result = await dbService.loadSessionResponses('sess-5');
 
     expect(mocks.select).toHaveBeenCalledWith(expect.stringContaining('SELECT question_id'), [
-      'sess-5',
+      'sess-5'
     ]);
     expect(result).toEqual(rows);
   });

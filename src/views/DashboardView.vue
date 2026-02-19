@@ -18,7 +18,7 @@ const ranges = [
   { label: '30 Days', value: '30d' },
   { label: '90 Days', value: '90d' },
   { label: '1 Year', value: '1y' },
-  { label: 'All Time', value: 'all' },
+  { label: 'All Time', value: 'all' }
 ];
 
 const getCutoffDate = () => {

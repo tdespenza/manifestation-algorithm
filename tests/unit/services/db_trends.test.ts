@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => {
 });
 
 vi.mock('@tauri-apps/plugin-sql', () => ({
-  default: { load: mocks.load },
+  default: { load: mocks.load }
 }));
 
 import { loadConsolidatedCategoryTrends } from '@/services/db_trends';
@@ -35,7 +35,7 @@ describe('db_trends service', () => {
       return Promise.resolve([
         { date: '2024-01-01T00:00:00.000Z', category: 'Health', score: 7.5 },
         { date: '2024-01-02T00:00:00.000Z', category: 'Health', score: 8.0 },
-        { date: '2024-01-01T00:00:00.000Z', category: 'Wealth', score: 5.25 },
+        { date: '2024-01-01T00:00:00.000Z', category: 'Wealth', score: 5.25 }
       ]);
     });
 
@@ -52,7 +52,7 @@ describe('db_trends service', () => {
     mocks.select.mockImplementation((query: string) => {
       if (query.includes('_migrations')) return Promise.resolve([{ id: 1 }, { id: 2 }, { id: 3 }]);
       return Promise.resolve([
-        { date: '2024-01-01T00:00:00.000Z', category: 'Focus', score: 7.555555 },
+        { date: '2024-01-01T00:00:00.000Z', category: 'Focus', score: 7.555555 }
       ]);
     });
 

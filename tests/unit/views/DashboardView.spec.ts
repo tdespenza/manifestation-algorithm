@@ -5,34 +5,34 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 
 // ── Stub child components ─────────────────────────────────────────────────────
 vi.mock('@/components/charts/ProgressChart.vue', () => ({
-  default: { template: '<div class="progress-chart-stub" />' },
+  default: { template: '<div class="progress-chart-stub" />' }
 }));
 vi.mock('@/components/dashboard/CategoryCard.vue', () => ({
   default: {
     template: '<div class="category-card-stub" />',
-    props: ['category', 'trendData', 'dates', 'currentScore'],
-  },
+    props: ['category', 'trendData', 'dates', 'currentScore']
+  }
 }));
 vi.mock('@/components/dashboard/StatsPanel.vue', () => ({
-  default: { template: '<div class="stats-panel-stub" />', props: ['sessions'] },
+  default: { template: '<div class="stats-panel-stub" />', props: ['sessions'] }
 }));
 vi.mock('@/components/dashboard/NetworkRanking.vue', () => ({
-  default: { template: '<div class="network-ranking-stub" />' },
+  default: { template: '<div class="network-ranking-stub" />' }
 }));
 
 // ── Mock export service ───────────────────────────────────────────────────────
 const exportMocks = vi.hoisted(() => ({
-  exportToCSV: vi.fn().mockResolvedValue(undefined),
+  exportToCSV: vi.fn().mockResolvedValue(undefined)
 }));
 vi.mock('@/services/export', () => ({
-  exportToCSV: (...args: unknown[]) => exportMocks.exportToCSV(...args),
+  exportToCSV: (...args: unknown[]) => exportMocks.exportToCSV(...args)
 }));
 
 // ── Mock history store with plain state via vi.hoisted ────────────────────────
 const dashState = vi.hoisted(() => ({
   isLoading: false,
   sessions: [] as any[],
-  trends: {} as Record<string, any[]>,
+  trends: {} as Record<string, any[]>
 }));
 const fetchHistoryMock = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 
@@ -47,8 +47,8 @@ vi.mock('@/stores/history', () => ({
     get trends() {
       return dashState.trends;
     },
-    fetchHistory: fetchHistoryMock,
-  }),
+    fetchHistory: fetchHistoryMock
+  })
 }));
 
 import DashboardView from '@/views/DashboardView.vue';
@@ -57,8 +57,8 @@ const router = createRouter({
   history: createWebHashHistory(),
   routes: [
     { path: '/dashboard', component: DashboardView },
-    { path: '/', component: { template: '<div />' } },
-  ],
+    { path: '/', component: { template: '<div />' } }
+  ]
 });
 
 function makeSession(
@@ -167,7 +167,7 @@ describe('DashboardView.vue', () => {
   it('filters by 1y range', async () => {
     dashState.sessions = [
       makeSession('thisYear', 180, 5000),
-      makeSession('twoYearsAgo', 800, 3000),
+      makeSession('twoYearsAgo', 800, 3000)
     ];
     const wrapper = mount(DashboardView, { global: { plugins: [router] } });
     await wrapper.vm.$nextTick();
@@ -188,8 +188,8 @@ describe('DashboardView.vue', () => {
     dashState.trends = {
       Health: [
         { date: old.toISOString(), value: 5 },
-        { date: recent.toISOString(), value: 7 },
-      ],
+        { date: recent.toISOString(), value: 7 }
+      ]
     };
     const wrapper = mount(DashboardView, { global: { plugins: [router] } });
     await wrapper.vm.$nextTick();
@@ -208,7 +208,7 @@ describe('DashboardView.vue', () => {
 
     dashState.sessions = [makeSession('s1', 5)];
     dashState.trends = {
-      HealthOld: [{ date: old.toISOString(), value: 5 }],
+      HealthOld: [{ date: old.toISOString(), value: 5 }]
     };
     const wrapper = mount(DashboardView, { global: { plugins: [router] } });
     await wrapper.vm.$nextTick();
@@ -226,7 +226,7 @@ describe('DashboardView.vue', () => {
     dashState.trends = {
       Wealth: [{ date: now, value: 6 }],
       Health: [{ date: now, value: 7 }],
-      Focus: [{ date: now, value: 8 }],
+      Focus: [{ date: now, value: 8 }]
     };
     const wrapper = mount(DashboardView, { global: { plugins: [router] } });
     await wrapper.vm.$nextTick();

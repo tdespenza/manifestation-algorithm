@@ -10,8 +10,8 @@ export const questions: Question[] = [
       { id: '1a', description: 'Who do you listen to?', points: 25, hasSubPoints: false },
       { id: '1b', description: 'Teachability Index', points: 25, hasSubPoints: false },
       { id: '1c', description: 'Training Balance Scale', points: 25, hasSubPoints: false },
-      { id: '1d', description: 'Unconscious competence', points: 25, hasSubPoints: false },
-    ],
+      { id: '1d', description: 'Unconscious competence', points: 25, hasSubPoints: false }
+    ]
   },
   { id: '2', description: 'Activate & Illuminate Words', points: 100, hasSubPoints: false },
   { id: '3', description: 'Find Pain & Contract Energy', points: 250, hasSubPoints: false },
@@ -25,7 +25,7 @@ export const questions: Question[] = [
     id: '10',
     description: 'See/Feel good in posssession of your goal',
     points: 300,
-    hasSubPoints: false,
+    hasSubPoints: false
   },
   { id: '11', description: 'Release attachment to the outcome', points: 250, hasSubPoints: false },
   { id: '12', description: 'Allow the HOW to present itself', points: 100, hasSubPoints: false },
@@ -33,7 +33,7 @@ export const questions: Question[] = [
     id: '13',
     description: 'Know the difference between Dream & Chief Aim',
     points: 50,
-    hasSubPoints: false,
+    hasSubPoints: false
   },
   { id: '14', description: 'Be Focused / Singleness of purpose', points: 50, hasSubPoints: false },
   { id: '15', description: 'Daily TO DO list of Priorities', points: 50, hasSubPoints: false },
@@ -43,7 +43,7 @@ export const questions: Question[] = [
     id: '18',
     description: 'Dream Build - Dream Book & Vision Board',
     points: 200,
-    hasSubPoints: false,
+    hasSubPoints: false
   },
   {
     id: '19',
@@ -58,22 +58,22 @@ export const questions: Question[] = [
         id: '19d',
         description: 'Give and receive Recognition / expanded Golden Rule',
         points: 100,
-        hasSubPoints: false,
+        hasSubPoints: false
       },
       {
         id: '19e',
         description: 'Develop relationships with like minded people',
         points: 100,
-        hasSubPoints: false,
-      },
-    ],
+        hasSubPoints: false
+      }
+    ]
   },
   { id: '20', description: 'Science of Personal Mastery Course', points: 750, hasSubPoints: false },
   {
     id: '21',
     description: 'Watch the words you speak - what you say is what you get',
     points: 200,
-    hasSubPoints: false,
+    hasSubPoints: false
   },
   { id: '22', description: 'Physiology / Dress for success', points: 50, hasSubPoints: false },
   {
@@ -89,14 +89,14 @@ export const questions: Question[] = [
       { id: '23e', description: 'Health Processes', points: 50, hasSubPoints: false },
       { id: '23f', description: 'Spiritual Awareness Processes', points: 50, hasSubPoints: false },
       { id: '23g', description: 'Dream Processes', points: 200, hasSubPoints: false },
-      { id: '23h', description: 'Organization & Focus Processes', points: 50, hasSubPoints: false },
-    ],
+      { id: '23h', description: 'Organization & Focus Processes', points: 50, hasSubPoints: false }
+    ]
   },
   {
     id: '24',
     description: 'Awaken your Inner Power: Superpower Processes',
     points: 600,
-    hasSubPoints: false,
+    hasSubPoints: false
   },
   { id: '25', description: 'Broadcast on Alpha-theta brainwave', points: 100, hasSubPoints: false },
   { id: '26', description: 'Stop Telling Your Story of woe', points: 100, hasSubPoints: false },
@@ -105,7 +105,7 @@ export const questions: Question[] = [
     id: '28',
     description: 'Replace Failure Habits w/ Success Habits (Accelerator Processes)',
     points: 600,
-    hasSubPoints: false,
+    hasSubPoints: false
   },
   { id: '29', description: 'Create a Mastermind', points: 50, hasSubPoints: false },
   { id: '30', description: 'Watch Successful People/Apprentice', points: 250, hasSubPoints: false },
@@ -121,12 +121,12 @@ export const questions: Question[] = [
     id: '39',
     description: 'Join a Club that connects you to a Power Source',
     points: 1200,
-    hasSubPoints: false,
+    hasSubPoints: false
   },
   {
     id: '40',
     description: 'Live life with deliberate intent - be in present time',
     points: 100,
-    hasSubPoints: false,
-  },
+    hasSubPoints: false
+  }
 ];

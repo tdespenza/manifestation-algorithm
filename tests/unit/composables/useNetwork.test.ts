@@ -5,11 +5,11 @@ const mockInvoke = vi.fn();
 const mockListen = vi.fn();
 
 vi.mock('@tauri-apps/api/core', () => ({
-  invoke: (...args: unknown[]) => mockInvoke(...args),
+  invoke: (...args: unknown[]) => mockInvoke(...args)
 }));
 
 vi.mock('@tauri-apps/api/event', () => ({
-  listen: (...args: unknown[]) => mockListen(...args),
+  listen: (...args: unknown[]) => mockListen(...args)
 }));
 
 // ── Import composable AFTER mocks are set up ─────────────────────────────────
@@ -85,8 +85,8 @@ describe('useNetwork composable', () => {
         percentile_90: 88.2,
         category_stats: {},
         bandwidth_in: 1024,
-        bandwidth_out: 512,
-      },
+        bandwidth_out: 512
+      }
     });
 
     expect(count.value).toBe(5);
@@ -114,8 +114,8 @@ describe('useNetwork composable', () => {
         percentile_90: null,
         category_stats: {},
         bandwidth_in: 2048,
-        bandwidth_out: 4096,
-      },
+        bandwidth_out: 4096
+      }
     });
 
     expect(bandwidthStats.value.inbound).toBe(2048);
@@ -141,8 +141,8 @@ describe('useNetwork composable', () => {
         percentile_90: 80.0,
         category_stats: { focus: { avg: 70.0, p90: 85.0 } },
         bandwidth_in: 100,
-        bandwidth_out: 50,
-      },
+        bandwidth_out: 50
+      }
     });
 
     expect(categoryStats.value['focus']).toEqual({ avg: 70.0, p90: 85.0 });
@@ -225,8 +225,8 @@ describe('useNetwork composable', () => {
         percentile_90: 80,
         category_stats: {},
         bandwidth_in: 500,
-        bandwidth_out: 250,
-      },
+        bandwidth_out: 250
+      }
     });
 
     expect(isConnected.value).toBe(true);
@@ -282,9 +282,9 @@ describe('useNetwork composable', () => {
     // Send payload WITHOUT optional fields — tests FALSE branches of if-checks
     capturedHandler!({
       payload: {
-        peer_count: 2,
+        peer_count: 2
         // no total_manifestations, avg_score, percentile_90, category_stats, bandwidth_in/out
-      },
+      }
     });
 
     // Optional fields should remain at defaults since payload didn't include them

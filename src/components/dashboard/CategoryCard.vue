@@ -29,7 +29,7 @@ import {
   PointElement,
   LineElement,
   Tooltip,
-  type ChartOptions,
+  type ChartOptions
 } from 'chart.js';
 
 const props = defineProps<{
@@ -87,9 +87,9 @@ const chartData = computed(() => ({
       pointRadius: 0,
       pointHoverRadius: 4,
       fill: false,
-      tension: 0.3,
-    },
-  ],
+      tension: 0.3
+    }
+  ]
 }));
 
 const chartOptions: ChartOptions<'line'> = {
@@ -99,16 +99,16 @@ const chartOptions: ChartOptions<'line'> = {
   normalized: true,
   plugins: {
     legend: { display: false },
-    tooltip: { enabled: false },
+    tooltip: { enabled: false }
   },
   scales: {
     x: { display: false },
-    y: { display: false, min: 0, max: 10 },
+    y: { display: false, min: 0, max: 10 }
   },
   interaction: {
     mode: 'index',
-    intersect: false,
-  },
+    intersect: false
+  }
 };
 </script>
 

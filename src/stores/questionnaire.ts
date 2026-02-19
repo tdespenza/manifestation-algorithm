@@ -9,7 +9,7 @@ import {
   getLastActive,
   updateLastActive,
   clearSession,
-  saveHistoricalSession,
+  saveHistoricalSession
 } from '../services/db';
 
 const SESSION_TIMEOUT_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
@@ -173,6 +173,6 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
     setAnswer,
     submitSession,
     sessionId,
-    isSaving,
+    isSaving
   };
 });

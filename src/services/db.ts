@@ -57,14 +57,14 @@ export async function updateLastActive(sessionId: string) {
   const now = Date.now().toString();
   await db.execute('INSERT OR REPLACE INTO settings (key, value) VALUES ($1, $2)', [
     `last_active_${sessionId}`,
-    now,
+    now
   ]);
 }
 
 export async function getLastActive(sessionId: string): Promise<string | null> {
   const db = await getDb();
   const rows = await db.select<{ value: string }[]>('SELECT value FROM settings WHERE key = $1', [
-    `last_active_${sessionId}`,
+    `last_active_${sessionId}`
   ]);
   if (rows.length > 0) return rows[0].value;
   return null;
@@ -177,6 +177,6 @@ export async function saveCompletion(totalScore: number) {
   const date = new Date().toISOString();
   await db.execute('INSERT INTO stats (completion_date, total_score) VALUES ($1, $2)', [
     date,
-    totalScore,
+    totalScore
   ]);
 }

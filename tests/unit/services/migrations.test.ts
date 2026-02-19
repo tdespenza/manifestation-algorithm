@@ -6,7 +6,7 @@ import type Database from '@tauri-apps/plugin-sql';
 // Mock DB interface
 const mockDb = {
   execute: vi.fn(),
-  select: vi.fn(),
+  select: vi.fn()
 } as unknown as Database;
 
 describe('Database Migrations', () => {

@@ -14,7 +14,7 @@ import {
   LineElement,
   Title,
   Tooltip,
-  Legend,
+  Legend
 } from 'chart.js';
 import { Line } from 'vue-chartjs';
 import type { SessionSummary } from '../../services/db';
@@ -40,9 +40,9 @@ const chartData = computed(() => {
         backgroundColor: '#0047AB',
         borderColor: '#0047AB',
         data: sorted.map(s => s.total_score),
-        tension: 0.1,
-      },
-    ],
+        tension: 0.1
+      }
+    ]
   };
 });
 
@@ -52,9 +52,9 @@ const chartOptions = {
   scales: {
     y: {
       beginAtZero: true,
-      max: 10000, // Max possible score
-    },
-  },
+      max: 10000 // Max possible score
+    }
+  }
 };
 </script>
 

@@ -32,7 +32,7 @@ export async function loadConsolidatedCategoryTrends(): Promise<CategoryTrends> 
     }
     trends[row.category].push({
       date: row.date,
-      value: Number(Number(row.score).toFixed(2)),
+      value: Number(Number(row.score).toFixed(2))
     });
   }
 

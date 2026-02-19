@@ -3,7 +3,7 @@ import { mount } from '@vue/test-utils';
 
 // ── Stub Chart.js-dependent child ────────────────────────────────────────────
 vi.mock('vue-chartjs', () => ({
-  Line: { template: '<canvas class="line-chart-stub" />' },
+  Line: { template: '<canvas class="line-chart-stub" />' }
 }));
 
 import ProgressChart from '@/components/charts/ProgressChart.vue';
@@ -22,8 +22,8 @@ describe('ProgressChart.vue', () => {
   it('renders the chart stub element', () => {
     const wrapper = mount(ProgressChart, {
       props: {
-        sessions: [makeSession('s1', '2024-01-01T00:00:00.000Z', 3000)],
-      },
+        sessions: [makeSession('s1', '2024-01-01T00:00:00.000Z', 3000)]
+      }
     });
     expect(wrapper.find('.line-chart-stub').exists()).toBe(true);
   });
@@ -32,7 +32,7 @@ describe('ProgressChart.vue', () => {
     const sessions = [
       makeSession('s1', '2024-01-03T00:00:00.000Z', 7000), // most recent first (DESC from DB)
       makeSession('s2', '2024-01-02T00:00:00.000Z', 5000),
-      makeSession('s3', '2024-01-01T00:00:00.000Z', 3000),
+      makeSession('s3', '2024-01-01T00:00:00.000Z', 3000)
     ];
     const wrapper = mount(ProgressChart, { props: { sessions } });
     const vm = wrapper.vm as unknown as {

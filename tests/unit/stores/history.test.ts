@@ -4,20 +4,20 @@ import { useHistoryStore } from '@/stores/history';
 
 // Mock db service
 const dbMocks = vi.hoisted(() => ({
-  loadHistoricalSessions: vi.fn().mockResolvedValue([]),
+  loadHistoricalSessions: vi.fn().mockResolvedValue([])
 }));
 
 vi.mock('@/services/db', () => ({
-  loadHistoricalSessions: dbMocks.loadHistoricalSessions,
+  loadHistoricalSessions: dbMocks.loadHistoricalSessions
 }));
 
 // Mock db_trends service
 const trendsMocks = vi.hoisted(() => ({
-  loadConsolidatedCategoryTrends: vi.fn().mockResolvedValue({}),
+  loadConsolidatedCategoryTrends: vi.fn().mockResolvedValue({})
 }));
 
 vi.mock('@/services/db_trends', () => ({
-  loadConsolidatedCategoryTrends: trendsMocks.loadConsolidatedCategoryTrends,
+  loadConsolidatedCategoryTrends: trendsMocks.loadConsolidatedCategoryTrends
 }));
 
 describe('History Store', () => {
@@ -58,10 +58,10 @@ describe('History Store', () => {
 
   it('fetchHistory populates sessions and trends on success', async () => {
     const fakeSessions = [
-      { id: 's1', completed_at: '2024-01-01', total_score: 5000, duration_seconds: 120 },
+      { id: 's1', completed_at: '2024-01-01', total_score: 5000, duration_seconds: 120 }
     ];
     const fakeTrends = {
-      Health: [{ date: '2024-01-01', value: 7.5 }],
+      Health: [{ date: '2024-01-01', value: 7.5 }]
     };
 
     dbMocks.loadHistoricalSessions.mockResolvedValue(fakeSessions);

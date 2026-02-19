@@ -11,14 +11,14 @@ const dbMocks = vi.hoisted(() => ({
   getLastActive: vi.fn(),
   updateLastActive: vi.fn().mockResolvedValue(undefined),
   clearSession: vi.fn().mockResolvedValue(undefined),
-  loadHistoricalSessions: vi.fn().mockResolvedValue([]),
+  loadHistoricalSessions: vi.fn().mockResolvedValue([])
 }));
 
 vi.mock('@/services/db', () => ({
   getLastActive: dbMocks.getLastActive,
   updateLastActive: dbMocks.updateLastActive,
   clearSession: dbMocks.clearSession,
-  loadHistoricalSessions: dbMocks.loadHistoricalSessions,
+  loadHistoricalSessions: dbMocks.loadHistoricalSessions
 }));
 
 import {
@@ -26,7 +26,7 @@ import {
   touchSession,
   needsCrashRecovery,
   discardSession,
-  getCompletedSessions,
+  getCompletedSessions
 } from '@/services/sessionManager';
 
 describe('sessionManager', () => {

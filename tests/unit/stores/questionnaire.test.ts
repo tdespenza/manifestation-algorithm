@@ -8,7 +8,7 @@ const dbMocks = vi.hoisted(() => ({
   loadAnswers: vi.fn().mockResolvedValue({}),
   getLastActive: vi.fn().mockResolvedValue(null),
   updateLastActive: vi.fn().mockResolvedValue(undefined),
-  clearSession: vi.fn(),
+  clearSession: vi.fn()
 }));
 
 vi.mock('@/services/db', () => ({
@@ -16,7 +16,7 @@ vi.mock('@/services/db', () => ({
   loadAnswers: dbMocks.loadAnswers,
   getLastActive: dbMocks.getLastActive,
   updateLastActive: dbMocks.updateLastActive,
-  clearSession: dbMocks.clearSession,
+  clearSession: dbMocks.clearSession
 }));
 
 describe('Questionnaire Store', () => {

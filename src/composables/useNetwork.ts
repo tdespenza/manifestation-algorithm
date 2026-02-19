@@ -119,7 +119,7 @@ export function useNetwork() {
     sharingEnabled,
     init,
     cleanup,
-    toggleSharing,
+    toggleSharing
   };
 }
 

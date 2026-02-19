@@ -41,7 +41,7 @@ const migrations: Migration[] = [
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
       `);
-    },
+    }
   },
   {
     id: 2,
@@ -77,7 +77,7 @@ const migrations: Migration[] = [
       await db.execute(
         'CREATE INDEX IF NOT EXISTS idx_responses_qid ON historical_responses(question_id);'
       );
-    },
+    }
   },
   {
     id: 3,
@@ -90,8 +90,8 @@ const migrations: Migration[] = [
       await db.execute(
         'CREATE INDEX IF NOT EXISTS idx_responses_category ON historical_responses(category);'
       );
-    },
-  },
+    }
+  }
 ];
 
 export async function runMigrations(db: Database) {
@@ -116,7 +116,7 @@ export async function runMigrations(db: Database) {
         await migration.up(db);
         await db.execute('INSERT INTO _migrations (id, name) VALUES ($1, $2)', [
           migration.id,
-          migration.name,
+          migration.name
         ]);
         console.warn(`Migration ${migration.id} applied successfully.`);
       } catch (e) {

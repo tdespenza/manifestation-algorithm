@@ -63,7 +63,7 @@ const internalValue = computed({
     if (val >= 1 && val <= 10) {
       store.setAnswer(props.question.id, val);
     }
-  },
+  }
 });
 
 const calculatedScore = computed(() => {

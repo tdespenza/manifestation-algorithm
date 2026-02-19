@@ -9,8 +9,8 @@ const mockToggleSharing = vi.fn().mockResolvedValue(undefined);
 vi.mock('@/composables/useNetwork', () => ({
   useNetwork: () => ({
     sharingEnabled: mockSharingEnabled,
-    toggleSharing: mockToggleSharing,
-  }),
+    toggleSharing: mockToggleSharing
+  })
 }));
 
 import SharingToggle from '@/components/ui/SharingToggle.vue';

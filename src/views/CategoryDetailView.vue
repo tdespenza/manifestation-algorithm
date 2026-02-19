@@ -50,7 +50,7 @@ import {
   Title,
   Tooltip,
   Legend,
-  type ChartOptions,
+  type ChartOptions
 } from 'chart.js';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
@@ -88,9 +88,9 @@ const chartData = computed(() => {
         borderColor: lineColor,
         backgroundColor: isUptrend ? 'rgba(0,0,0,0.08)' : 'rgba(244,67,54,0.1)',
         tension: 0.2,
-        fill: true,
-      },
-    ],
+        fill: true
+      }
+    ]
   };
 });
 
@@ -99,30 +99,30 @@ const chartOptions: ChartOptions<'line'> = {
   maintainAspectRatio: false,
   plugins: {
     legend: {
-      display: false,
+      display: false
     },
     tooltip: {
       mode: 'index',
-      intersect: false,
-    },
+      intersect: false
+    }
   },
   scales: {
     y: {
       min: 0,
       max: 10,
       ticks: {
-        stepSize: 1,
+        stepSize: 1
       },
       grid: {
-        color: '#333',
-      },
+        color: '#333'
+      }
     },
     x: {
       grid: {
-        display: false,
-      },
-    },
-  },
+        display: false
+      }
+    }
+  }
 };
 
 const formatDate = (dateStr: string) => {

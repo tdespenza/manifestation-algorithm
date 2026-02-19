@@ -29,7 +29,7 @@ export function generateCSV(sessions: ExportSession[], responses: ExportResponse
     'Note',
     'QuestionID',
     'Category',
-    'ScaleValue',
+    'ScaleValue'
   ].join(',');
   const rows: string[] = [header];
 
@@ -49,7 +49,7 @@ export function generateCSV(sessions: ExportSession[], responses: ExportResponse
       note,
       r.question_id,
       `"${r.category.replace(/"/g, '""')}"`, // Handle quotes in category
-      r.answer_value,
+      r.answer_value
     ].join(',');
 
     rows.push(row);

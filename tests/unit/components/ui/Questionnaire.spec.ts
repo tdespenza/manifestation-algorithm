@@ -9,19 +9,19 @@ const router = createRouter({
   history: createMemoryHistory(),
   routes: [
     { path: '/', component: { template: '<div />' } },
-    { path: '/dashboard', component: { template: '<div />' } },
-  ],
+    { path: '/dashboard', component: { template: '<div />' } }
+  ]
 });
 
 vi.mock('@/components/ui/QuestionItem.vue', () => ({
-  default: { template: '<div class="question-item-stub" />' },
+  default: { template: '<div class="question-item-stub" />' }
 }));
 vi.mock('@/components/ui/ResumeDialog.vue', () => ({
   default: {
     template:
       '<div class="resume-dialog-stub"><button class="resume-btn" @click="$emit(\'resume\')">Resume</button><button class="fresh-btn" @click="$emit(\'fresh\')">Fresh</button></div>',
-    emits: ['resume', 'fresh'],
-  },
+    emits: ['resume', 'fresh']
+  }
 }));
 
 function makeWrapper(initialState: Record<string, unknown> = {}, stubActions = true) {
@@ -38,12 +38,12 @@ function makeWrapper(initialState: Record<string, unknown> = {}, stubActions = t
               isSaving: false,
               hasSavedSession: false,
               currentIndex: 0,
-              ...initialState,
-            },
-          },
-        }),
-      ],
-    },
+              ...initialState
+            }
+          }
+        })
+      ]
+    }
   });
 }
 
@@ -220,7 +220,7 @@ describe('Questionnaire.vue', () => {
       id: 'q1',
       description: 'Q1',
       points: 100,
-      hasSubPoints: false,
+      hasSubPoints: false
     } as unknown as typeof store.currentQuestion;
     const buttons = wrapper.findAll('.mode-toggle button');
     await buttons[1].trigger('click');
@@ -236,7 +236,7 @@ describe('Questionnaire.vue', () => {
       id: 'q1',
       description: 'Q1',
       points: 100,
-      hasSubPoints: false,
+      hasSubPoints: false
     } as unknown as typeof store.currentQuestion;
     const buttons = wrapper.findAll('.mode-toggle button');
     await buttons[1].trigger('click');

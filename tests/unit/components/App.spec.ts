@@ -4,7 +4,7 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 
 // Stub NetworkStatus
 vi.mock('@/components/NetworkStatus.vue', () => ({
-  default: { template: '<div class="network-status-stub" />' },
+  default: { template: '<div class="network-status-stub" />' }
 }));
 
 import App from '@/App.vue';
@@ -14,8 +14,8 @@ const router = createRouter({
   routes: [
     { path: '/', component: { template: '<div class="home-stub" />' } },
     { path: '/dashboard', component: { template: '<div class="dash-stub" />' } },
-    { path: '/settings', component: { template: '<div class="settings-stub" />' } },
-  ],
+    { path: '/settings', component: { template: '<div class="settings-stub" />' } }
+  ]
 });
 
 describe('App.vue', () => {

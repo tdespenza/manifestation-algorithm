@@ -4,25 +4,25 @@ import { setActivePinia, createPinia } from 'pinia';
 
 // ── DB mock ───────────────────────────────────────────────────────────────────
 const dbMocks = vi.hoisted(() => ({
-  clearSession: vi.fn().mockResolvedValue(undefined),
+  clearSession: vi.fn().mockResolvedValue(undefined)
 }));
 
 vi.mock('@/services/db', () => ({
-  clearSession: dbMocks.clearSession,
+  clearSession: dbMocks.clearSession
 }));
 
 // ── Store mock ────────────────────────────────────────────────────────────────
 const storeMocks = vi.hoisted(() => ({
   reset: vi.fn(),
-  init: vi.fn().mockResolvedValue(undefined),
+  init: vi.fn().mockResolvedValue(undefined)
 }));
 
 vi.mock('@/stores/questionnaire', () => ({
   useQuestionnaireStore: () => ({
     sessionId: 'test-session-id',
     $reset: storeMocks.reset,
-    init: storeMocks.init,
-  }),
+    init: storeMocks.init
+  })
 }));
 
 import Settings from '@/components/ui/Settings.vue';

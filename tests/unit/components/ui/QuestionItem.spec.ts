@@ -9,7 +9,7 @@ describe('QuestionItem.vue', () => {
     id: '1',
     description: 'Test Question',
     points: 100,
-    hasSubPoints: false,
+    hasSubPoints: false
   };
 
   const parentQuestion = {
@@ -19,8 +19,8 @@ describe('QuestionItem.vue', () => {
     hasSubPoints: true,
     subPoints: [
       { id: 'sub1', description: 'Sub Question 1', points: 50, hasSubPoints: false },
-      { id: 'sub2', description: 'Sub Question 2', points: 50, hasSubPoints: false },
-    ],
+      { id: 'sub2', description: 'Sub Question 2', points: 50, hasSubPoints: false }
+    ]
   };
 
   it('renders correctly', () => {
@@ -29,10 +29,10 @@ describe('QuestionItem.vue', () => {
       global: {
         plugins: [
           createTestingPinia({
-            createSpy: vi.fn,
-          }),
-        ],
-      },
+            createSpy: vi.fn
+          })
+        ]
+      }
     });
 
     expect(wrapper.text()).toContain('Test Question');
@@ -48,10 +48,10 @@ describe('QuestionItem.vue', () => {
         plugins: [
           createTestingPinia({
             createSpy: vi.fn,
-            stubActions: false,
-          }),
-        ],
-      },
+            stubActions: false
+          })
+        ]
+      }
     });
 
     const store = useQuestionnaireStore();
@@ -66,7 +66,7 @@ describe('QuestionItem.vue', () => {
   it('does not show slider for a parent question (hasSubPoints=true)', () => {
     const wrapper = mount(QuestionItem, {
       props: { question: parentQuestion },
-      global: { plugins: [createTestingPinia({ createSpy: vi.fn })] },
+      global: { plugins: [createTestingPinia({ createSpy: vi.fn })] }
     });
     // Parent question should have the parent-question class, not sub-question
     const parentItem = wrapper.find('.parent-question');
@@ -81,7 +81,7 @@ describe('QuestionItem.vue', () => {
   it('renders sub-question items when hasSubPoints=true', () => {
     const wrapper = mount(QuestionItem, {
       props: { question: parentQuestion },
-      global: { plugins: [createTestingPinia({ createSpy: vi.fn })] },
+      global: { plugins: [createTestingPinia({ createSpy: vi.fn })] }
     });
     // Each sub-question rendered as a nested QuestionItem
     const subItems = wrapper.findAll('.question-item');
@@ -94,11 +94,11 @@ describe('QuestionItem.vue', () => {
       id: 'q2',
       description: 'Parent no subs',
       points: 0,
-      hasSubPoints: true,
+      hasSubPoints: true
     };
     const wrapper = mount(QuestionItem, {
       props: { question: questionWithoutSubsArray },
-      global: { plugins: [createTestingPinia({ createSpy: vi.fn })] },
+      global: { plugins: [createTestingPinia({ createSpy: vi.fn })] }
     });
     expect(wrapper.find('.sub-points-section').exists()).toBe(false);
   });
@@ -106,7 +106,7 @@ describe('QuestionItem.vue', () => {
   it('input value out of range does not call setAnswer (setter guards 1-10)', async () => {
     const wrapper = mount(QuestionItem, {
       props: { question: dummyQuestion },
-      global: { plugins: [createTestingPinia({ createSpy: vi.fn, stubActions: false })] },
+      global: { plugins: [createTestingPinia({ createSpy: vi.fn, stubActions: false })] }
     });
     const store = useQuestionnaireStore();
     // Manually trigger handleInput with out-of-range value via direct call
@@ -121,7 +121,7 @@ describe('QuestionItem.vue', () => {
   it('isSubQuestion prop adds sub-question class', () => {
     const wrapper = mount(QuestionItem, {
       props: { question: dummyQuestion, isSubQuestion: true },
-      global: { plugins: [createTestingPinia({ createSpy: vi.fn })] },
+      global: { plugins: [createTestingPinia({ createSpy: vi.fn })] }
     });
     expect(wrapper.find('.question-item').classes()).toContain('sub-question');
   });

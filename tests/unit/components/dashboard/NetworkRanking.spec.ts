@@ -5,7 +5,7 @@ import NetworkRanking from '@/components/dashboard/NetworkRanking.vue';
 
 // ── Stub child components ────────────────────────────────────────────────────
 vi.mock('@/components/ui/SharingToggle.vue', () => ({
-  default: { template: '<div class="sharing-toggle-stub" />' },
+  default: { template: '<div class="sharing-toggle-stub" />' }
 }));
 
 // ── Mock useNetwork composable ───────────────────────────────────────────────
@@ -32,8 +32,8 @@ vi.mock('@/composables/useNetwork', () => ({
     sharingEnabled: ref(false),
     init: mockInit,
     cleanup: mockCleanup,
-    toggleSharing: vi.fn(),
-  }),
+    toggleSharing: vi.fn()
+  })
 }));
 
 describe('NetworkRanking.vue', () => {
@@ -137,7 +137,7 @@ describe('NetworkRanking.vue', () => {
     mockIsConnected.value = true;
     mockCategoryStats.value = {
       Wellness: { avg: 72.5, p90: 88.0, count: 10 },
-      Career: { avg: 65.0, p90: 80.0, count: 5 },
+      Career: { avg: 65.0, p90: 80.0, count: 5 }
     };
     const wrapper = mount(NetworkRanking);
     await wrapper.vm.$nextTick();
@@ -198,7 +198,7 @@ describe('NetworkRanking.vue – formatBytes via bandwidth display', () => {
     [0, 0, '0 B'],
     [1024, 0, '1 KB'],
     [1048576, 0, '1 MB'],
-    [1073741824, 0, '1 GB'],
+    [1073741824, 0, '1 GB']
   ];
 
   cases.forEach(([inbound, outbound, expected]) => {
