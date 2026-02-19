@@ -1,0 +1,34 @@
+title: Manifestation Algorithm
+description: Privacy-first desktop app for personal development tracking
+url: https://tdespenza.github.io/manifestation-algorithm
+baseurl: /manifestation-algorithm
+theme: jekyll-theme-slate
+
+# Build settings
+markdown: kramdown
+permalink: /blog/:year/:month/:day/:title/
+
+# Exclude from builds
+exclude:
+  - .github/
+  - src/
+  - src-tauri/
+  - node_modules/
+  - _bmad/
+  - coverage/
+  - CLAUDE.md
+
+# Author/Contact
+author:
+  name: Tyshawn
+  email: tyshawn@example.com
+
+# Social
+twitter_username: null
+github_username: tdespenza
+
+# Collections
+collections:
+  guides:
+    output: true
+    permalink: /guides/:path/
