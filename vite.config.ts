@@ -1,10 +1,16 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import { resolve } from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue()],
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
+    },
+  },
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   // prevent vite from obscuring rust errors
   clearScreen: false,
@@ -19,16 +25,16 @@ export default defineConfig({
   envPrefix: ['VITE_', 'TAURI_'],
   test: {
     environment: 'jsdom',
-    include: ['src/**/*.{test,spec}.{js,ts}'],
+    include: [
+      'tests/unit/**/*.{test,spec}.{js,ts}',
+      'tests/integration/**/*.{test,spec}.{js,ts}',
+    ],
     globals: true,
     coverage: {
       provider: 'istanbul',
       reporter: ['text', 'lcov', 'html'],
       include: ['src/**/*.{ts,vue}'],
       exclude: [
-        'src/**/*.{test,spec}.{ts,js}',
-        'src/**/__tests__/**',
-        'src/**/tests/**',
         'src/vite-env.d.ts',
         'src/main.ts',
         'src/router/**',
