@@ -40,15 +40,19 @@ async function loadSharingState(): Promise<void> {
   try {
     sharingEnabled.value = await invoke<boolean>('get_network_sharing');
   } catch {
-    sharingEnabled.value = false;
+    // Leave sharingEnabled at its current value — do not force it back to false.
+    // Overwriting it here would silently revert a user-enabled setting if the
+    // backend is momentarily unavailable or if init() is called more than once.
   }
 }
 
 export async function toggleSharing(enabled: boolean): Promise<void> {
+  const previous = sharingEnabled.value;
+  sharingEnabled.value = enabled; // optimistic update so the UI reflects the user's intent immediately
   try {
     await invoke('set_network_sharing', { enabled });
-    sharingEnabled.value = enabled;
   } catch (e) {
+    sharingEnabled.value = previous; // revert on backend error
     console.error('Failed to update sharing setting:', e);
   }
 }

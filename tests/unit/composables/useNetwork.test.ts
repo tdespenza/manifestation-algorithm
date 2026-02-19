@@ -177,7 +177,7 @@ describe('useNetwork composable', () => {
     expect(sharingEnabled.value).toBe(true);
   });
 
-  it('loadSharingState sets sharingEnabled to false when invoke throws', async () => {
+  it('loadSharingState leaves sharingEnabled unchanged when invoke throws', async () => {
     // Make get_network_sharing throw so the catch block is exercised
     mockInvoke.mockImplementation((cmd: string) => {
       if (cmd === 'get_network_sharing') return Promise.reject(new Error('permission denied'));
@@ -188,7 +188,9 @@ describe('useNetwork composable', () => {
     const { init, sharingEnabled } = useNetwork();
     await init();
 
-    // The catch block in loadSharingState should have set sharingEnabled to false
+    // The catch block preserves the current value rather than forcing false,
+    // preventing an already-enabled setting from being silently reverted.
+    // After _resetNetworkState() the value starts as false, so false is expected here.
     expect(sharingEnabled.value).toBe(false);
   });
 
