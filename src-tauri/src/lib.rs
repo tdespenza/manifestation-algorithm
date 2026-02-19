@@ -1,5 +1,6 @@
 use std::io::{Read, Write};
 use std::path::Path;
+use std::path::PathBuf;
 
 mod network;
 mod identity;
@@ -16,6 +17,8 @@ struct NetworkState {
     /// Controls whether `publish_result` forwards data to the P2P network.
     /// Default: false (explicit opt-in required, per PRD Feature 3.6).
     sharing_enabled: Mutex<bool>,
+    /// Path to the app settings JSON file for persisting sharing opt-in state.
+    settings_path: Mutex<Option<PathBuf>>,
 }
 
 fn load_or_generate_keypair(path: &Path) -> std::io::Result<libp2p::identity::Keypair> {
@@ -49,6 +52,21 @@ fn load_or_generate_keypair(path: &Path) -> std::io::Result<libp2p::identity::Ke
     }
 }
 
+/// Load sharing opt-in state from the app settings file.
+fn load_settings(path: &Path) -> bool {
+    let Ok(content) = std::fs::read_to_string(path) else { return false; };
+    let Ok(json) = serde_json::from_str::<serde_json::Value>(&content) else { return false; };
+    json.get("sharing_enabled").and_then(|v| v.as_bool()).unwrap_or(false)
+}
+
+/// Persist sharing opt-in state to the app settings file.
+fn save_settings(path: &Path, sharing_enabled: bool) {
+    let json = serde_json::json!({ "sharing_enabled": sharing_enabled });
+    if let Ok(content) = serde_json::to_string(&json) {
+        let _ = std::fs::write(path, content);
+    }
+}
+
 #[tauri::command]
 async fn get_peer_count(state: State<'_, NetworkState>) -> Result<usize, String> {
     let sender = {
@@ -67,11 +85,6 @@ async fn get_peer_count(state: State<'_, NetworkState>) -> Result<usize, String>
     } else {
         Err("Node not running".into())
     }
-}
-
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
 /// Publish a signed manifestation result to the gossipsub network.
@@ -134,10 +147,18 @@ async fn publish_result(
 
 /// Enable or disable anonymous P2P result sharing.
 /// Sharing is **opt-in** and disabled by default (PRD Feature 3.6).
+/// The setting is persisted to disk and restored on next launch.
 #[tauri::command]
 fn set_network_sharing(enabled: bool, state: State<'_, NetworkState>) -> Result<(), String> {
-    let mut guard = state.sharing_enabled.lock().map_err(|e| e.to_string())?;
-    *guard = enabled;
+    {
+        let mut guard = state.sharing_enabled.lock().map_err(|e| e.to_string())?;
+        *guard = enabled;
+    }
+    // Persist to disk so the setting survives app restarts
+    let path_guard = state.settings_path.lock().map_err(|e| e.to_string())?;
+    if let Some(ref path) = *path_guard {
+        save_settings(path, enabled);
+    }
     println!("Network sharing {}", if enabled { "enabled" } else { "disabled" });
     Ok(())
 }
@@ -158,6 +179,7 @@ pub fn run() {
             sender: Mutex::new(None),
             identity: Mutex::new(None),
             sharing_enabled: Mutex::new(false),
+            settings_path: Mutex::new(None),
         })
         .setup(|app| {
             let app_handle = app.handle().clone();
@@ -191,6 +213,19 @@ pub fn run() {
                     },
                     Err(_) => std::path::PathBuf::from("identity.key"), // Fallback
                 };
+
+                // Load persisted settings (sharing opt-in state) and store path for future saves
+                let settings_path = key_path.with_file_name("app_settings.json");
+                let saved_sharing = load_settings(&settings_path);
+                if let Some(state) = app_handle.try_state::<NetworkState>() {
+                    if let Ok(mut guard) = state.sharing_enabled.lock() {
+                        *guard = saved_sharing;
+                    }
+                    if let Ok(mut guard) = state.settings_path.lock() {
+                        *guard = Some(settings_path);
+                    }
+                    println!("Loaded sharing_enabled={} from settings", saved_sharing);
+                }
 
                 // Load or generate user identity (separate from P2P node ID)
                 let user_id_path = key_path.with_file_name("user_identity.json");
@@ -255,7 +290,7 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![greet, get_peer_count, publish_result, set_network_sharing, get_network_sharing])
+        .invoke_handler(tauri::generate_handler![get_peer_count, publish_result, set_network_sharing, get_network_sharing])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")
         .run(|app_handle, event| {

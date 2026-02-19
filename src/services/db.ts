@@ -175,15 +175,3 @@ export async function loadCategoryTrend(category: string): Promise<CategoryTrend
     [category]
   );
 }
-
-/**
- * @deprecated Use saveHistoricalSession instead
- */
-export async function saveCompletion(totalScore: number) {
-  const db = await getDb();
-  const date = new Date().toISOString();
-  await db.execute('INSERT INTO stats (completion_date, total_score) VALUES ($1, $2)', [
-    date,
-    totalScore
-  ]);
-}

@@ -67,16 +67,6 @@ describe('Database Service', () => {
     });
   });
 
-  it('saveCompletion should save stats', async () => {
-    await dbService.saveCompletion(5000);
-    // expect.arrayContaining doesn't work well directly on args list for partial match
-    // Check second argument array
-    expect(mocks.execute).toHaveBeenCalledWith(
-      expect.stringContaining('INSERT INTO stats'),
-      expect.arrayContaining([5000])
-    );
-  });
-
   it('clearSession deletes responses and settings entries', async () => {
     await dbService.clearSession('sess-1');
     expect(mocks.execute).toHaveBeenCalledWith(

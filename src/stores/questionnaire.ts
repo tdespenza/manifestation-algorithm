@@ -144,7 +144,8 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
       for (const q of allQuestions) {
         fullAnswers[q.id] = answers.value[q.id] ?? 1;
       }
-      const finalScore = score.value;
+      // Recalculate score from the complete answer set (including default fills)
+      const finalScore = calculateScore(fullAnswers);
       const historyId = await saveHistoricalSession(finalScore, fullAnswers);
       await clearSession(sessionId.value);
       answers.value = {};

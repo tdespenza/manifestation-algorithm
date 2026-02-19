@@ -18,6 +18,7 @@ import {
 } from 'chart.js';
 import { Line } from 'vue-chartjs';
 import type { SessionSummary } from '../../services/db';
+import { getMaxPossibleScore } from '../../services/scoring';
 
 const props = defineProps<{
   sessions: SessionSummary[];
@@ -52,7 +53,7 @@ const chartOptions = {
   scales: {
     y: {
       beginAtZero: true,
-      max: 10000 // Max possible score
+      max: getMaxPossibleScore()
     }
   }
 };

@@ -26,7 +26,7 @@
       </div>
 
       <div class="score-summary">
-        <div class="max-info">Max: 10,000</div>
+        <div class="max-info">Max: {{ maxScore.toLocaleString() }}</div>
         <div class="current-score" :class="{ success: score >= 5000 }">{{ formattedScore }}</div>
         <div class="score-label">Current Score</div>
       </div>
@@ -105,6 +105,7 @@ import { computed, onMounted, ref, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuestionnaireStore } from '../../stores/questionnaire';
 import { questions as allTopLevelQuestions } from '../../data/questions';
+import { getMaxPossibleScore } from '../../services/scoring';
 import type { Question } from '../../types';
 import QuestionItem from './QuestionItem.vue';
 import ResumeDialog from './ResumeDialog.vue';
@@ -127,6 +128,7 @@ const leafQuestions = flattenLeaves(allTopLevelQuestions);
 
 const isSaving = computed(() => store.isSaving);
 const score = computed(() => store.score);
+const maxScore = getMaxPossibleScore();
 const formattedScore = computed(() => Math.round(score.value).toLocaleString());
 const isComplete = computed(() => store.isComplete);
 const answeredCount = computed(

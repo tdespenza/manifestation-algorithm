@@ -50,7 +50,7 @@ test.describe('Settings – sharing toggle', () => {
   test('renders the SharingToggle or settings checkboxes', async ({ page }) => {
     // Either a .sharing-toggle or checkbox exists in settings
     const toggle = page.locator('.sharing-toggle, input[type="checkbox"], input[type="toggle"]').first();
-    const hasToggle = await toggle.isVisible().catch(() => false);
+    await toggle.isVisible().catch(() => false);
     const hasSettings = await page.locator('.settings-view').isVisible();
     expect(hasSettings).toBe(true);
   });

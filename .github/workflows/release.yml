@@ -13,6 +13,10 @@ permissions:
 jobs:
   build:
     name: Build & Publish (${{ matrix.name }})
+    # Explicit job-level permission ensures GITHUB_TOKEN can create releases
+    # even in organisations that restrict workflow-level token inheritance.
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:

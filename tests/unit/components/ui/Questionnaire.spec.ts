@@ -83,8 +83,8 @@ describe('Questionnaire.vue', () => {
   it('displays score from store (defaults > 0 with implicit answers)', async () => {
     const wrapper = makeWrapper({}, false);
     const scoreEl = wrapper.find('.current-score');
-    const scoreText = scoreEl.text().replace(/,/g, '');
-    expect(parseInt(scoreText)).toBeGreaterThan(0);
+    const scoreText = scoreEl.text().replaceAll(',', '');
+    expect(Number.parseInt(scoreText, 10)).toBeGreaterThan(0);
   });
 
   // ── Mode toggle ───────────────────────────────────────────────────────────

@@ -22,15 +22,13 @@ test.describe('Dashboard – empty state', () => {
   test('shows empty state when no sessions exist', async ({ page }) => {
     const emptyState = page.locator('.empty-state, .no-data, [class*="empty"]').first();
     // Either the empty state or "no history" message appears
-    const hasEmpty = await emptyState.isVisible().catch(() => false);
+    await emptyState.isVisible().catch(() => false);
     const hasDash = await page.locator('.dashboard-view').isVisible();
     expect(hasDash).toBe(true);
   });
 
   test('does not show the range selector when no sessions', async ({ page }) => {
-    // Range selector appears only with sessions
-    const rangeSelector = page.locator('#range-select');
-    // It may or may not be shown — just verify the dashboard renders
+    // Range selector appears only with sessions — just verify the dashboard renders
     await expect(page.locator('.dashboard-view')).toBeVisible();
   });
 });
