@@ -18,8 +18,6 @@ import CategoryCard from '@/components/dashboard/CategoryCard.vue';
 const improvingData = [1, 2, 3, 4, 5, 6, 7];
 const decliningData = [7, 6, 5, 4, 3, 2, 1];
 const stableData = [5, 5, 5, 5, 5, 5, 5];
-const _shortData = [5, 6]; // length 2 — just enough for sparkline but not trend
-
 describe('CategoryCard.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();

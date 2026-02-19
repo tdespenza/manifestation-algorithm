@@ -10,8 +10,6 @@ import { questions } from '@/data/questions';
 
 // ── Mock entire DB layer ────────────────────────────────────────────────────
 
-const _savedAnswers: Record<string, number> = {};
-
 const dbMocks = vi.hoisted(() => ({
   saveAnswer: vi.fn(),
   loadAnswers: vi.fn(),

@@ -216,12 +216,12 @@ describe('Questionnaire.vue', () => {
   it('handleGlobalKey: number key 1-9 sets answer in step mode', async () => {
     const wrapper = makeWrapper();
     const store = useQuestionnaireStore();
-    store.currentQuestion = {
+    vi.spyOn(store, 'currentQuestion', 'get').mockReturnValue({
       id: 'q1',
       description: 'Q1',
       points: 100,
       hasSubPoints: false
-    } as unknown as typeof store.currentQuestion;
+    } as unknown as typeof store.currentQuestion);
     const buttons = wrapper.findAll('.mode-toggle button');
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
@@ -232,12 +232,12 @@ describe('Questionnaire.vue', () => {
   it('handleGlobalKey: key 0 sets answer to 10 in step mode', async () => {
     const wrapper = makeWrapper();
     const store = useQuestionnaireStore();
-    store.currentQuestion = {
+    vi.spyOn(store, 'currentQuestion', 'get').mockReturnValue({
       id: 'q1',
       description: 'Q1',
       points: 100,
       hasSubPoints: false
-    } as unknown as typeof store.currentQuestion;
+    } as unknown as typeof store.currentQuestion);
     const buttons = wrapper.findAll('.mode-toggle button');
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
@@ -400,7 +400,7 @@ describe('Questionnaire.vue', () => {
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
     // Override currentQuestion to undefined
-    store.currentQuestion = undefined as any;
+    vi.spyOn(store, 'currentQuestion', 'get').mockReturnValue(undefined as any);
     await wrapper.find('.questionnaire').trigger('keydown', { key: '5' });
     // Should NOT have called setAnswer
     expect(store.setAnswer).not.toHaveBeenCalled();
@@ -412,7 +412,7 @@ describe('Questionnaire.vue', () => {
     const buttons = wrapper.findAll('.mode-toggle button');
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
-    store.currentQuestion = undefined as any;
+    vi.spyOn(store, 'currentQuestion', 'get').mockReturnValue(undefined as any);
     await wrapper.find('.questionnaire').trigger('keydown', { key: '0' });
     expect(store.setAnswer).not.toHaveBeenCalled();
   });
