@@ -1,16 +1,15 @@
 use crate::identity::UserIdentity;
 use libp2p::{
     gossipsub, identify, kad, mdns, noise, ping, swarm::NetworkBehaviour, tcp, yamux, Multiaddr,
-    PeerId, StreamProtocol, Swarm, Transport, core, TransportExt,
+    Swarm, Transport, core,
 };
 use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
-use libp2p::bandwidth::BandwidthSinks;
 use libp2p::swarm::SwarmEvent;
 use serde::{Deserialize, Serialize};
-use std::collections::hash_map::DefaultHasher;
+use std::collections::VecDeque;
 use std::error::Error;
-use std::hash::{Hash, Hasher};
-use std::sync::Arc;
+use std::path::PathBuf;
+use std::sync::{Arc, atomic::{AtomicU64, Ordering}};
 use std::time::Duration;
 use tokio::sync::{mpsc, oneshot};
 use libp2p::futures::StreamExt;
@@ -136,11 +135,6 @@ pub enum Command {
         addr: Multiaddr,
         sender: oneshot::Sender<Result<(), Box<dyn Error + Send>>>,
     },
-    Dial {
-        peer_id: PeerId,
-        addr: Multiaddr,
-        sender: oneshot::Sender<Result<(), Box<dyn Error + Send>>>,
-    },
     Publish {
         topic: String,
         message: Vec<u8>,
@@ -152,15 +146,30 @@ pub enum Command {
     Shutdown,
 }
 
+/// Maximum number of scores retained per slot in the sliding window (~80 KB at capacity).
+const MAX_SCORES_CAPACITY: usize = 10_000;
+
+/// Serialisable snapshot used to persist and restore received score windows across sessions.
+#[derive(Serialize, Deserialize, Default)]
+struct NetworkScoresCache {
+    scores: Vec<f64>,
+    category_scores: std::collections::HashMap<String, Vec<f64>>,
+}
+
 pub struct PeerNode {
     swarm: Swarm<AppBehaviour>,
     command_receiver: mpsc::Receiver<Command>,
     event_sender: mpsc::Sender<NetworkStatUpdate>,
     total_manifestations: usize,
-    received_scores: Vec<f64>,
-    received_category_scores: std::collections::HashMap<String, Vec<f64>>,
-    bandwidth_sinks: Arc<BandwidthSinks>,
+    received_scores: VecDeque<f64>,
+    received_category_scores: std::collections::HashMap<String, VecDeque<f64>>,
+    /// Cumulative inbound application bytes (gossipsub message payloads).
+    bytes_in: Arc<AtomicU64>,
+    /// Cumulative outbound application bytes (published gossipsub payloads).
+    bytes_out: Arc<AtomicU64>,
     seen_messages: LruCache<gossipsub::MessageId, ()>,
+    /// Optional path for persisting the score window across restarts.
+    cache_path: Option<PathBuf>,
 }
 
 impl PeerNode {
@@ -168,15 +177,12 @@ impl PeerNode {
         keypair: libp2p::identity::Keypair,
         command_receiver: mpsc::Receiver<Command>,
         event_sender: mpsc::Sender<NetworkStatUpdate>,
+        cache_path: Option<PathBuf>,
     ) -> Result<Self, Box<dyn Error + Send + Sync>> {
-        let peer_id = keypair.public().to_peer_id();
-
         let transport = libp2p::tcp::tokio::Transport::new(tcp::Config::default())
             .upgrade(core::upgrade::Version::V1)
             .authenticate(noise::Config::new(&keypair).unwrap())
             .multiplex(yamux::Config::default());
-            
-        let (transport, bandwidth_sinks) = transport.with_bandwidth_logging();
 
         let mut swarm = libp2p::SwarmBuilder::with_existing_identity(keypair.clone())
             .with_tokio()
@@ -239,19 +245,40 @@ impl PeerNode {
         let topic = gossipsub::IdentTopic::new("manifestation-global");
         swarm.behaviour_mut().gossipsub.subscribe(&topic)?;
 
+        let bytes_in = Arc::new(AtomicU64::new(0));
+        let bytes_out = Arc::new(AtomicU64::new(0));
+
+        // Restore persisted score window from previous session, if available.
+        let cache = cache_path.as_ref()
+            .and_then(|p| Self::load_cache(p))
+            .unwrap_or_default();
+
         Ok(Self {
             swarm,
             command_receiver,
             event_sender,
-            total_manifestations: 0,
+            total_manifestations: cache.scores.len(),
             seen_messages: LruCache::new(NonZeroUsize::new(10000).unwrap()),
-            received_scores: Vec::new(),
-            received_category_scores: std::collections::HashMap::new(),
-            bandwidth_sinks,
+            received_scores: VecDeque::from(cache.scores),
+            received_category_scores: cache.category_scores.into_iter()
+                .map(|(k, v)| (k, VecDeque::from(v)))
+                .collect(),
+            bytes_in,
+            bytes_out,
+            cache_path,
         })
     }
 
     pub async fn run(mut self) {
+        // Dial WAN bootstrap peers for DHT peer discovery (complement to LAN mDNS).
+        for addr in Self::bootstrap_peers() {
+            if let Err(e) = self.swarm.dial(addr.clone()) {
+                println!("Bootstrap dial skipped for {}: {}", addr, e);
+            } else {
+                println!("Dialing bootstrap peer: {}", addr);
+            }
+        }
+
         loop {
             tokio::select! {
                 event = self.swarm.select_next_some() => {
@@ -278,7 +305,7 @@ impl PeerNode {
                             let _ = self.event_sender.send(stats).await;
                         }
                         SwarmEvent::Behaviour(AppBehaviourEvent::Gossipsub(gossipsub::Event::Message {
-                            propagation_source: peer_id,
+                            propagation_source: _peer_id,
                             message_id: id,
                             message,
                         })) => {
@@ -289,23 +316,39 @@ impl PeerNode {
                             }
                             self.seen_messages.put(id.clone(), ());
 
+                            // Track inbound bytes (application-layer payload)
+                            self.bytes_in.fetch_add(message.data.len() as u64, Ordering::Relaxed);
+
                             match serde_json::from_slice::<SignedManifestation>(&message.data) {
                                 Ok(signed) => {
                                     // 1. Cryptographic signature check (app-level)
                                     if !signed.verify() {
-                                        println!("SECURITY: Invalid signature from {:?}, dropping.", peer_id);
+                                        println!("SECURITY: Invalid signature, dropping.");
                                         continue;
                                     }
                                     // 2. Domain validation (range / privacy checks)
                                     if let Err(e) = signed.payload.validate() {
-                                        println!("Validation failed for message from {:?}: {}", peer_id, e);
+                                        println!("Validation failed for received message: {}", e);
                                     } else {
                                         println!("Received valid signed result from author key: {}", &signed.public_key[..8]);
                                         self.total_manifestations += 1;
-                                        self.received_scores.push(signed.payload.score);
-                                        for (category, score) in &signed.payload.category_scores {
-                                            self.received_category_scores.entry(category.clone()).or_default().push(*score);
+
+                                        // Sliding window: evict oldest entry when at capacity
+                                        if self.received_scores.len() >= MAX_SCORES_CAPACITY {
+                                            self.received_scores.pop_front();
                                         }
+                                        self.received_scores.push_back(signed.payload.score);
+
+                                        for (category, score) in &signed.payload.category_scores {
+                                            let cat_scores = self.received_category_scores
+                                                .entry(category.clone())
+                                                .or_default();
+                                            if cat_scores.len() >= MAX_SCORES_CAPACITY {
+                                                cat_scores.pop_front();
+                                            }
+                                            cat_scores.push_back(*score);
+                                        }
+
                                         let stats = self.get_stats();
                                         let _ = self.event_sender.send(stats).await;
                                     }
@@ -330,13 +373,9 @@ impl PeerNode {
                                 Err(e) => sender.send(Err(Box::new(e))),
                             };
                         }
-                        Some(Command::Dial { peer_id, addr, sender }) => {
-                            let _ = match self.swarm.dial(addr) {
-                                Ok(_) => sender.send(Ok(())),
-                                Err(e) => sender.send(Err(Box::new(e))),
-                            };
-                        }
                         Some(Command::Publish { topic, message, sender }) => {
+                            // Track outbound bytes (application-layer payload)
+                            self.bytes_out.fetch_add(message.len() as u64, Ordering::Relaxed);
                             let topic = gossipsub::IdentTopic::new(topic);
                             let _ = match self.swarm.behaviour_mut().gossipsub.publish(topic, message) {
                                 Ok(_) => sender.send(Ok(())),
@@ -349,6 +388,10 @@ impl PeerNode {
                         }
                         Some(Command::Shutdown) => {
                             println!("Shutting down peer node...");
+                            // Persist score window for next session
+                            if let Some(ref path) = self.cache_path.clone() {
+                                self.save_cache(path);
+                            }
                             break;
                         }
                         None => {
@@ -362,23 +405,25 @@ impl PeerNode {
 
     fn get_stats(&self) -> NetworkStatUpdate {
         let peers: Vec<String> = self.swarm.connected_peers().map(|p| p.to_string()).collect();
-        
-        let (avg_score, percentile_90) = if self.received_scores.is_empty() {
+
+        // Collect VecDeque → Vec<f64> contiguous slice for percentile calculation.
+        let scores_vec: Vec<f64> = self.received_scores.iter().cloned().collect();
+        let (avg_score, percentile_90) = if scores_vec.is_empty() {
             (None, None)
         } else {
-            let sum: f64 = self.received_scores.iter().sum();
-            let avg = sum / self.received_scores.len() as f64;
-            let p90 = calculate_percentile(&self.received_scores, 0.9);
+            let sum: f64 = scores_vec.iter().sum();
+            let avg = sum / scores_vec.len() as f64;
+            let p90 = calculate_percentile(&scores_vec, 0.9);
             (Some(avg), p90)
         };
 
         let mut category_stats = std::collections::HashMap::new();
         for (category, scores) in &self.received_category_scores {
             if scores.is_empty() { continue; }
-            let sum: f64 = scores.iter().sum();
-            let avg = sum / scores.len() as f64;
-            
-            let p90 = calculate_percentile(scores, 0.9).unwrap_or(0.0);
+            let scores_slice: Vec<f64> = scores.iter().cloned().collect();
+            let sum: f64 = scores_slice.iter().sum();
+            let avg = sum / scores_slice.len() as f64;
+            let p90 = calculate_percentile(&scores_slice, 0.9).unwrap_or(0.0);
             category_stats.insert(category.clone(), CategoryStats { avg, p90 });
         }
 
@@ -389,8 +434,45 @@ impl PeerNode {
             avg_score,
             percentile_90,
             category_stats,
-            bandwidth_in: self.bandwidth_sinks.total_inbound(),
-            bandwidth_out: self.bandwidth_sinks.total_outbound(),
+            bandwidth_in: self.bytes_in.load(Ordering::Relaxed),
+            bandwidth_out: self.bytes_out.load(Ordering::Relaxed),
+        }
+    }
+
+    /// Returns well-known bootstrap peer addresses for WAN DHT peer discovery.
+    /// These complement mDNS (LAN-only) for internet-scale peer connectivity.
+    fn bootstrap_peers() -> Vec<Multiaddr> {
+        [
+            "/ip4/104.131.131.82/tcp/4001/p2p/QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ",
+            "/ip4/104.236.179.241/tcp/4001/p2p/QmSoLPppuBtQSGwKDZT2M73ULpjvfd3aZ6ha4oFGL1KrGM",
+            "/ip4/128.199.219.111/tcp/4001/p2p/QmSoLSafTMBsPKadTEgaXctDQVcqN88CNLHXMkTNwMKPnu",
+        ]
+        .iter()
+        .filter_map(|a| a.parse().ok())
+        .collect()
+    }
+
+    fn load_cache(path: &std::path::Path) -> Option<NetworkScoresCache> {
+        let file = std::fs::File::open(path).ok()?;
+        serde_json::from_reader(file).ok()
+    }
+
+    fn save_cache(&self, path: &std::path::Path) {
+        let cache = NetworkScoresCache {
+            scores: self.received_scores.iter().cloned().collect(),
+            category_scores: self.received_category_scores.iter()
+                .map(|(k, v)| (k.clone(), v.iter().cloned().collect()))
+                .collect(),
+        };
+        match std::fs::File::create(path) {
+            Ok(file) => {
+                if let Err(e) = serde_json::to_writer(file, &cache) {
+                    eprintln!("Failed to save network cache: {}", e);
+                } else {
+                    println!("Network score cache saved ({} scores)", cache.scores.len());
+                }
+            }
+            Err(e) => eprintln!("Failed to create network cache file: {}", e),
         }
     }
 }

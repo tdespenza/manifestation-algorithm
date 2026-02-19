@@ -27,20 +27,39 @@ const bandwidthStats = ref({ inbound: 0, outbound: 0 });
 const lastUpdate = ref(Date.now());
 const isConnected = ref(false);
 const isListening = ref(false);
+const sharingEnabled = ref(false);
 
 let unlisten: UnlistenFn | null = null;
+
+async function loadSharingState(): Promise<void> {
+  try {
+    sharingEnabled.value = await invoke<boolean>('get_network_sharing');
+  } catch {
+    sharingEnabled.value = false;
+  }
+}
+
+export async function toggleSharing(enabled: boolean): Promise<void> {
+  try {
+    await invoke('set_network_sharing', { enabled });
+    sharingEnabled.value = enabled;
+  } catch (e) {
+    console.error('Failed to update sharing setting:', e);
+  }
+}
 
 export function useNetwork() {
   const init = async () => {
     if (isListening.value) return;
     
     try {
-      // Initial check
       const initialCount = await invoke<number>('get_peer_count').catch(() => 0);
       count.value = initialCount;
       isConnected.value = true;
 
-      // Listen for updates
+      // Load and track sharing opt-in state
+      await loadSharingState();
+
       unlisten = await listen<NetworkStatUpdate>('network-stats', (event) => {
         const payload = event.payload;
         count.value = payload.peer_count;
@@ -80,7 +99,24 @@ export function useNetwork() {
     bandwidthStats,
     lastUpdate,
     isConnected,
+    sharingEnabled,
     init,
-    cleanup
+    cleanup,
+    toggleSharing,
   };
+}
+
+/** Reset all module-level state — for use in tests only. */
+export function _resetNetworkState(): void {
+  count.value = 0;
+  manifestations.value = 0;
+  avgScore.value = null;
+  percentile90.value = null;
+  categoryStats.value = {};
+  bandwidthStats.value = { inbound: 0, outbound: 0 };
+  lastUpdate.value = Date.now();
+  isConnected.value = false;
+  isListening.value = false;
+  sharingEnabled.value = false;
+  unlisten = null;
 }

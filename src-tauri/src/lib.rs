@@ -1,5 +1,5 @@
 use std::io::{Read, Write};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 mod network;
 mod identity;
@@ -7,12 +7,15 @@ mod identity;
 use network::{Command, PeerNode, ManifestationResult, SignedManifestation};
 use identity::UserIdentity;
 use std::sync::Mutex;
-use tauri::{AppHandle, Emitter, Manager, State};
+use tauri::{Emitter, Manager, State};
 use tokio::sync::{mpsc, oneshot};
 
 struct NetworkState {
     sender: Mutex<Option<mpsc::Sender<Command>>>,
     identity: Mutex<Option<UserIdentity>>,
+    /// Controls whether `publish_result` forwards data to the P2P network.
+    /// Default: false (explicit opt-in required, per PRD Feature 3.6).
+    sharing_enabled: Mutex<bool>,
 }
 
 fn load_or_generate_keypair(path: &Path) -> std::io::Result<libp2p::identity::Keypair> {
@@ -67,12 +70,21 @@ fn greet(name: &str) -> String {
 
 /// Publish a signed manifestation result to the gossipsub network.
 /// The result is signed with the user's persistent Ed25519 identity key.
+/// Returns the IPFS CID of the published payload.
+/// Fails if network sharing has not been enabled via `set_network_sharing`.
 #[tauri::command]
 async fn publish_result(
     score: f64,
     category_scores: std::collections::HashMap<String, f64>,
     state: State<'_, NetworkState>
 ) -> Result<String, String> {
+    // Opt-in gate: sharing must be explicitly enabled (PRD Feature 3.6)
+    {
+        let guard = state.sharing_enabled.lock().map_err(|e| e.to_string())?;
+        if !*guard {
+            return Err("Network sharing is disabled. Enable it in Settings to share results anonymously.".into());
+        }
+    }
     // Build the result
     let timestamp = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -113,6 +125,24 @@ async fn publish_result(
     Ok(cid)
 }
 
+
+/// Enable or disable anonymous P2P result sharing.
+/// Sharing is **opt-in** and disabled by default (PRD Feature 3.6).
+#[tauri::command]
+fn set_network_sharing(enabled: bool, state: State<'_, NetworkState>) -> Result<(), String> {
+    let mut guard = state.sharing_enabled.lock().map_err(|e| e.to_string())?;
+    *guard = enabled;
+    println!("Network sharing {}", if enabled { "enabled" } else { "disabled" });
+    Ok(())
+}
+
+/// Return the current sharing opt-in state.
+#[tauri::command]
+fn get_network_sharing(state: State<'_, NetworkState>) -> Result<bool, String> {
+    let guard = state.sharing_enabled.lock().map_err(|e| e.to_string())?;
+    Ok(*guard)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -121,6 +151,7 @@ pub fn run() {
         .manage(NetworkState {
             sender: Mutex::new(None),
             identity: Mutex::new(None),
+            sharing_enabled: Mutex::new(false),
         })
         .setup(|app| {
             let app_handle = app.handle().clone();
@@ -157,7 +188,7 @@ pub fn run() {
 
                 // Load or generate user identity (separate from P2P node ID)
                 let user_id_path = key_path.with_file_name("user_identity.json");
-                let user_identity = match UserIdentity::load_or_create(&user_id_path) {
+                let _user_identity = match UserIdentity::load_or_create(&user_id_path) {
                     Ok(id) => {
                         println!("User identity loaded (pk: {}...)", &id.public_key_b64()[..8]);
                         if let Some(state) = app_handle.try_state::<NetworkState>() {
@@ -184,8 +215,14 @@ pub fn run() {
                     }
                 };
 
-                match PeerNode::new(id_keys, cmd_rx, event_tx).await {
-                    Ok(mut node) => {
+                // Build cache path for network score persistence
+                let cache_path = match app_handle.path().app_data_dir() {
+                    Ok(path) => Some(path.join("network_cache.json")),
+                    Err(_) => None,
+                };
+
+                match PeerNode::new(id_keys, cmd_rx, event_tx, cache_path).await {
+                    Ok(node) => {
                         println!("P2P Node created successfully.");
                         
                         let (ack_tx, ack_rx) = oneshot::channel();
@@ -212,7 +249,7 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![greet, get_peer_count, publish_result])
+        .invoke_handler(tauri::generate_handler![greet, get_peer_count, publish_result, set_network_sharing, get_network_sharing])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")
         .run(|app_handle, event| {
@@ -220,12 +257,14 @@ pub fn run() {
                  // Nothing special needed here unless preventing exit
             }
             if let tauri::RunEvent::Exit = event {
-                // Send Shutdown command
+                // Use try_send to avoid blocking the main thread during teardown.
+                // The channel has capacity 32; at shutdown it is effectively empty.
                 if let Some(state) = app_handle.try_state::<NetworkState>() {
                     if let Ok(guard) = state.sender.lock() {
                         if let Some(tx) = guard.as_ref() {
-                            // Use blocking send as we are shutting down
-                            let _ = tx.blocking_send(Command::Shutdown);
+                            if let Err(e) = tx.try_send(Command::Shutdown) {
+                                eprintln!("Warning: Could not signal P2P shutdown: {}", e);
+                            }
                         }
                     }
                 }

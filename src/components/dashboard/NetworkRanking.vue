@@ -53,12 +53,17 @@
     <div class="bandwidth-stats">
         <small>Bandwidth: ↓ {{ formatBytes(bandwidthStats.inbound) }} | ↑ {{ formatBytes(bandwidthStats.outbound) }}</small>
     </div>
+
+    <div class="sharing-section">
+      <SharingToggle />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
 import { useNetwork } from '../../composables/useNetwork';
+import SharingToggle from '../ui/SharingToggle.vue';
 
 const { 
   count, 
@@ -207,5 +212,9 @@ h4 {
     margin-top: 1.5rem;
     text-align: right;
     color: #999;
+}
+
+.sharing-section {
+    margin-top: 1rem;
 }
 </style>
