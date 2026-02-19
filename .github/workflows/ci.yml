@@ -5,6 +5,12 @@ on:
     branches: [main, dev]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch or SHA to run CI against'
+        required: false
+        default: 'main'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -154,7 +160,7 @@ jobs:
 
   tag-release:
     name: Tag Release
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     needs: [lint, unit, e2e, typecheck, rust-test]
     runs-on: ubuntu-latest
     permissions:

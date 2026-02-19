@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -36,3 +36,10 @@ jobs:
           git merge --no-ff origin/dev \
             -m "chore: auto-merge dev into main (CI passed on ${{ github.event.workflow_run.head_sha }})"
           git push origin main
+
+      - name: Trigger CI on Main
+        # GITHUB_TOKEN pushes do not fire workflow triggers, so we explicitly
+        # dispatch the CI workflow on main to run tests and create the release tag.
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run ci.yml --ref main --repo ${{ github.repository }}
