@@ -38,7 +38,7 @@ libp2p = { version = "0.53", features = [
     "ping"
 ] }
 log = "0.4"
-env_logger = "0.10"
+env_logger = "0.11"
 lru = "0.16.3"
 sha2 = "0.10.9"
 cid = "0.11"
