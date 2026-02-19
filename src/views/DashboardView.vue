@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, computed, ref } from 'vue';
 import { useHistoryStore } from '../stores/history';
+import { useToast } from '../composables/useToast';
 import ProgressChart from '../components/charts/ProgressChart.vue';
 import CategoryCard from '../components/dashboard/CategoryCard.vue';
 import StatsPanel from '../components/dashboard/StatsPanel.vue';
@@ -8,6 +9,7 @@ import NetworkRanking from '../components/dashboard/NetworkRanking.vue';
 import { exportToCSV } from '../services/export';
 
 const historyStore = useHistoryStore();
+const { addToast } = useToast();
 const isLoading = computed(() => historyStore.isLoading);
 const rawSessions = computed(() => historyStore.sessions);
 const rawTrends = computed(() => historyStore.trends);
@@ -20,6 +22,63 @@ const ranges = [
   { label: '1 Year', value: '1y' },
   { label: 'All Time', value: 'all' }
 ];
+
+// ── Selection state ──────────────────────────────────────────────────────────
+const selectedIds = ref<Set<string>>(new Set());
+const isDeleting = ref(false);
+
+const selectedCount = computed(() => selectedIds.value.size);
+const allSelected = computed(
+  () => sessions.value.length > 0 && selectedIds.value.size === sessions.value.length
+);
+const someSelected = computed(
+  () => selectedIds.value.size > 0 && selectedIds.value.size < sessions.value.length
+);
+
+function toggleSelect(id: string) {
+  const updated = new Set(selectedIds.value);
+  if (updated.has(id)) updated.delete(id);
+  else updated.add(id);
+  selectedIds.value = updated;
+}
+
+function toggleSelectAll() {
+  if (allSelected.value) {
+    selectedIds.value = new Set();
+  } else {
+    selectedIds.value = new Set(sessions.value.map(s => s.id));
+  }
+}
+
+async function handleDeleteSession(id: string) {
+  isDeleting.value = true;
+  try {
+    await historyStore.deleteSession(id);
+    const updated = new Set(selectedIds.value);
+    updated.delete(id);
+    selectedIds.value = updated;
+    addToast('Session deleted', 'success');
+  } catch {
+    addToast('Failed to delete session', 'error');
+  } finally {
+    isDeleting.value = false;
+  }
+}
+
+async function handleDeleteSelected() {
+  if (selectedIds.value.size === 0) return;
+  const ids = [...selectedIds.value];
+  isDeleting.value = true;
+  try {
+    await historyStore.deleteSessions(ids);
+    selectedIds.value = new Set();
+    addToast(`Deleted ${ids.length} session${ids.length === 1 ? '' : 's'}`, 'success');
+  } catch {
+    addToast('Failed to delete sessions', 'error');
+  } finally {
+    isDeleting.value = false;
+  }
+}
 
 const getCutoffDate = () => {
   const now = new Date();
@@ -84,6 +143,14 @@ onMounted(() => {
           </select>
         </div>
         <button class="export-btn" @click="exportData">📥 Export CSV</button>
+        <button
+          v-if="selectedCount > 0"
+          class="delete-selected-btn"
+          :disabled="isDeleting"
+          @click="handleDeleteSelected"
+        >
+          {{ isDeleting ? 'Deleting…' : `🗑 Delete ${selectedCount} Selected` }}
+        </button>
       </div>
     </div>
 
@@ -118,9 +185,41 @@ onMounted(() => {
         </div>
 
         <div class="recent-sessions">
-          <h2>Recent Sessions</h2>
+          <div class="recent-sessions-header">
+            <h2>Recent Sessions</h2>
+            <label class="select-all-label">
+              <input
+                type="checkbox"
+                :checked="allSelected"
+                :indeterminate="someSelected"
+                @change="toggleSelectAll"
+              />
+              Select All
+            </label>
+          </div>
           <div class="session-list">
-            <div v-for="session in sessions" :key="session.id" class="session-card">
+            <div
+              v-for="session in sessions"
+              :key="session.id"
+              class="session-card"
+              :class="{ selected: selectedIds.has(session.id) }"
+            >
+              <div class="session-card-top">
+                <input
+                  type="checkbox"
+                  class="session-checkbox"
+                  :checked="selectedIds.has(session.id)"
+                  @change="toggleSelect(session.id)"
+                />
+                <button
+                  class="delete-btn-inline"
+                  title="Delete session"
+                  :disabled="isDeleting"
+                  @click="handleDeleteSession(session.id)"
+                >
+                  ✕
+                </button>
+              </div>
               <div class="session-date">
                 {{ new Date(session.completed_at).toLocaleDateString() }}
                 <span class="session-time">{{
@@ -202,6 +301,27 @@ onMounted(() => {
 .export-btn:hover {
   background: #f8f9fa;
   border-color: #ccc;
+}
+
+.delete-selected-btn {
+  padding: 8px 16px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9em;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.delete-selected-btn:hover:not(:disabled) {
+  background: #b02a37;
+}
+
+.delete-selected-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 h1 {
@@ -330,9 +450,72 @@ h2 {
   border-left: 4px solid var(--true-cobalt, #0047ab);
 }
 
+.session-card.selected {
+  border-left-color: #dc3545;
+  background: #fff8f8;
+}
+
 .session-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.recent-sessions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.recent-sessions-header h2 {
+  margin: 0;
+}
+
+.select-all-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9em;
+  color: #555;
+  cursor: pointer;
+  user-select: none;
+}
+
+.session-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.session-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--true-cobalt, #0047ab);
+}
+
+.delete-btn-inline {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 0.85em;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: color 0.2s, background 0.2s;
+  line-height: 1;
+}
+
+.delete-btn-inline:hover:not(:disabled) {
+  color: #dc3545;
+  background: #fff0f0;
+}
+
+.delete-btn-inline:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .session-date {

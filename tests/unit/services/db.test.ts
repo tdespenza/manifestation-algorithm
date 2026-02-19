@@ -199,4 +199,34 @@ describe('Database Service', () => {
 
     expect(mocks.execute).toHaveBeenCalledWith('ROLLBACK', []);
   });
+
+  it('deleteSession deletes responses then session row', async () => {
+    await dbService.deleteSession('sess-del');
+    expect(mocks.execute).toHaveBeenCalledWith(
+      expect.stringContaining('DELETE FROM historical_responses'),
+      ['sess-del']
+    );
+    expect(mocks.execute).toHaveBeenCalledWith(
+      expect.stringContaining('DELETE FROM historical_sessions'),
+      ['sess-del']
+    );
+  });
+
+  it('deleteSessions deletes responses and sessions for all ids', async () => {
+    await dbService.deleteSessions(['s1', 's2']);
+    expect(mocks.execute).toHaveBeenCalledWith(
+      expect.stringContaining('DELETE FROM historical_responses'),
+      ['s1', 's2']
+    );
+    expect(mocks.execute).toHaveBeenCalledWith(
+      expect.stringContaining('DELETE FROM historical_sessions'),
+      ['s1', 's2']
+    );
+  });
+
+  it('deleteSessions does nothing when given an empty array', async () => {
+    const callsBefore = mocks.execute.mock.calls.length;
+    await dbService.deleteSessions([]);
+    expect(mocks.execute.mock.calls.length).toBe(callsBefore);
+  });
 });

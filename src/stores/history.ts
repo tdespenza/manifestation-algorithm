@@ -1,6 +1,11 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { loadHistoricalSessions, type SessionSummary } from '../services/db';
+import {
+  loadHistoricalSessions,
+  deleteSession as dbDeleteSession,
+  deleteSessions as dbDeleteSessions,
+  type SessionSummary
+} from '../services/db';
 import { loadConsolidatedCategoryTrends, type CategoryTrends } from '../services/db_trends';
 
 export const useHistoryStore = defineStore('history', () => {
@@ -27,11 +32,34 @@ export const useHistoryStore = defineStore('history', () => {
     }
   }
 
+  async function deleteSession(id: string): Promise<void> {
+    try {
+      await dbDeleteSession(id);
+      await fetchHistory();
+    } catch (e) {
+      console.error('Failed to delete session:', e);
+      error.value = String(e);
+    }
+  }
+
+  async function deleteSessions(ids: string[]): Promise<void> {
+    if (ids.length === 0) return;
+    try {
+      await dbDeleteSessions(ids);
+      await fetchHistory();
+    } catch (e) {
+      console.error('Failed to delete sessions:', e);
+      error.value = String(e);
+    }
+  }
+
   return {
     sessions,
     trends,
     isLoading,
     error,
-    fetchHistory
+    fetchHistory,
+    deleteSession,
+    deleteSessions
   };
 });
