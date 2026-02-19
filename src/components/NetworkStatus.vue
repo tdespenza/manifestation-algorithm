@@ -18,15 +18,13 @@ const {
   manifestations, 
   avgScore, 
   percentile90, 
-  isConnected,
   init,
   cleanup
 } = useNetwork();
 
 const statusText = computed(() => {
   if (count.value > 0) return 'Online';
-  if (isConnected.value) return 'Searching...';
-  return 'Connecting...';
+  return 'Searching...';
 });
 
 onMounted(() => {

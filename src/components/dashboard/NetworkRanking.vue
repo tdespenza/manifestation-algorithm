@@ -2,10 +2,10 @@
   <div class="network-stats-panel">
     <h3>Network Rankings</h3>
     
-    <div v-if="!isConnected" class="loading">
-      Connecting to network...
+    <div v-if="count === 0 && manifestations === 0" class="loading">
+      Searching for peers...
     </div>
-    
+
     <div v-else class="stats-grid">
       <div class="stat-box primary">
         <span class="label">Global Average</span>
@@ -72,7 +72,6 @@ const {
   percentile90, 
   categoryStats,
   bandwidthStats,
-  isConnected,
   init
 } = useNetwork();
 
