@@ -80,9 +80,9 @@
 
     <!-- Submit -->
     <div class="submit-actions">
-      <div v-if="!isComplete" class="completion-hint">Complete all questions to save results.</div>
-      <button class="submit-button" :disabled="!isComplete" @click="submit">
-        {{ isComplete ? 'Complete Assessment' : 'Assessment Incomplete' }}
+      <div v-if="submitError" class="completion-hint error-hint">{{ submitError }}</div>
+      <button class="submit-button" :disabled="isSubmitting" @click="submit">
+        {{ isSubmitting ? 'Saving...' : 'Complete Assessment' }}
       </button>
     </div>
   </div>
@@ -90,6 +90,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, nextTick } from 'vue';
+import { useRouter } from 'vue-router';
 import { useQuestionnaireStore } from '../../stores/questionnaire';
 import { questions as allTopLevelQuestions } from '../../data/questions';
 import { Question } from '../../types';
@@ -97,10 +98,13 @@ import QuestionItem from './QuestionItem.vue';
 import ResumeDialog from './ResumeDialog.vue';
 
 const store = useQuestionnaireStore();
+const router = useRouter();
 const containerRef = ref<HTMLElement | null>(null);
 const activeItemRef = ref<InstanceType<typeof QuestionItem> | null>(null);
 const questionRefs: Record<string, HTMLElement> = {};
 const mode = ref<'scroll' | 'step'>('scroll');
+const submitError = ref<string | null>(null);
+const isSubmitting = ref(false);
 
 // Flatten leaf questions for dot navigation
 function flattenLeaves(qs: Question[]): Question[] {
@@ -142,13 +146,16 @@ function handleGlobalKey(e: KeyboardEvent) {
 }
 
 const submit = async () => {
-  if (!isComplete.value) return;
-  if (!confirm('Are you sure you want to complete this session?')) return;
+  if (!isComplete.value || isSubmitting.value) return;
+  submitError.value = null;
+  isSubmitting.value = true;
   try {
     await store.submitSession();
-    alert('Session saved successfully!');
+    router.push('/dashboard');
   } catch (e) {
-    alert('Failed to save session: ' + e);
+    submitError.value = 'Failed to save session: ' + e;
+  } finally {
+    isSubmitting.value = false;
   }
 };
 
@@ -375,6 +382,7 @@ kbd {
 }
 
 .completion-hint { color: #666; font-size: 0.9em; font-style: italic; }
+.error-hint { color: #e53935; font-style: normal; font-weight: 500; }
 
 .submit-button {
   padding: 15px 40px;

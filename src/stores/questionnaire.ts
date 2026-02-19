@@ -138,8 +138,13 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
     if (!isComplete.value) throw new Error('Questionnaire is not complete');
     try {
       isSaving.value = true;
+      // Fill in default value of 1 for any questions the user never touched
+      const fullAnswers: Record<string, number> = {};
+      for (const q of allQuestions) {
+        fullAnswers[q.id] = answers.value[q.id] ?? 1;
+      }
       const finalScore = score.value;
-      const historyId = await saveHistoricalSession(finalScore, answers.value);
+      const historyId = await saveHistoricalSession(finalScore, fullAnswers);
       await clearSession(sessionId.value);
       answers.value = {};
       currentIndex.value = 0;
