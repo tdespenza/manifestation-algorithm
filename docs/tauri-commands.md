@@ -139,7 +139,7 @@ invoke<void>('publish_result', {
 **Returns:** `void` (rejects with validation error if score is out of range; rejects silently if sharing is disabled)
 
 **Validation (Rust-side):**
-- `score` must be in `[0.0, 10100.0]` — returns `Err("Invalid score")` otherwise.
+- `score` must be in `[0.0, 10000.0]` — returns `Err("Invalid score")` otherwise.
 - Each value in `categoryScores` must be in `[0.0, 10.0]` — returns `Err("Invalid category score")` otherwise.
 
 **Message format published to gossipsub:**

@@ -1,7 +1,7 @@
 # Manifestation Algorithm - Scoring Formula Specification
 
 ## Overview
-The application calculates a "Manifestation Score" based on user self-assessments across 40 distinct categories. The maximum possible score is **10,100 points**.
+The application calculates a "Manifestation Score" based on user self-assessments across 40 distinct categories. The maximum possible score is **10,000 points**.
 
 ## Core Formula
 
@@ -73,8 +73,8 @@ Table of weights extracted from the legacy system:
 | **20** | **Science of Personal Mastery Course** | **750** | **Input** |
 | **21** | **Watch the words you speak** | **200** | **Input** |
 | **22** | **Physiology / Dress for success** | **50** | **Input** |
-| **23** | **Clear Counter Intentions** | **1400** | **Container** |
-| 23a | Money Processes | 600 | Input |
+| **23** | **Clear Counter Intentions** | **1250** | **Container** |
+| 23a | Money Processes | 500 | Input |
 | 23b | Relationship Processes | 150 | Input |
 | 23c | Leadership Processes | 150 | Input |
 | 23d | Communication Processes | 100 | Input |
@@ -104,9 +104,9 @@ Table of weights extracted from the legacy system:
 
 | Scenario | Input | Logic | Expected Total |
 | :--- | :--- | :--- | :--- |
-| **Minimum** | 1 for all inputs | $\sum (\text{Point}_i \times 0.1)$ | 1,010 |
-| **Maximum** | 10 for all inputs | $\sum (\text{Point}_i \times 1.0)$ | 10,100 |
-| **Mid-range** | 5 for all inputs | $\sum (\text{Point}_i \times 0.5)$ | 5,050 |
+| **Minimum** | 1 for all inputs | $\sum (\text{Point}_i \times 0.1)$ | 1,000 |
+| **Maximum** | 10 for all inputs | $\sum (\text{Point}_i \times 1.0)$ | 10,000 |
+| **Mid-range** | 5 for all inputs | $\sum (\text{Point}_i \times 0.5)$ | 5,000 |
 | **Single Item** | Q2=10, rest=0 | $100 \times 1.0$ | 100 |
 
 Note: "0" rating is not possible in standard UI (min is 1), but effectively represents unanswered.
@@ -141,7 +141,7 @@ function getMaxPossibleScore(): number {
       allTen[t.id] = 10;
     }
   }
-  return calculateScore(allTen); // always 10,100
+  return calculateScore(allTen); // always 10,000
 }
 ```
 

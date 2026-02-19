@@ -102,9 +102,9 @@ impl ManifestationResult {
     }
 
     pub fn validate(&self) -> Result<(), String> {
-        // 1. Score validation — valid range is 0–10,100 (actual max from question weights)
-        if self.score < 0.0 || self.score > 10_100.0 {
-            return Err(format!("Score {} is out of range (0.0 - 10,100.0)", self.score));
+        // 1. Score validation — valid range is 0–10,000 (max from question weights)
+        if self.score < 0.0 || self.score > 10_000.0 {
+            return Err(format!("Score {} is out of range (0.0 - 10,000.0)", self.score));
         }
 
         // 2. Timestamp validation (not in future)
@@ -555,7 +555,7 @@ mod tests {
 
     #[test]
     fn test_validate_rejects_score_above_range() {
-        let r = make_result(10_101.0, vec![]);
+        let r = make_result(10_001.0, vec![]);
         assert!(r.validate().is_err());
     }
 

@@ -8,7 +8,9 @@ import NetworkStatus from './components/NetworkStatus.vue';
     <nav class="main-nav">
       <div class="nav-content">
         <div class="nav-left">
-          <router-link to="/" class="nav-logo">MA</router-link>
+          <router-link to="/" class="nav-logo">
+            <img src="./assets/logo.svg" alt="Manifestation Algorithm" class="nav-logo-img" />
+          </router-link>
           <div class="nav-links">
             <router-link to="/" active-class="active">Questionnaire</router-link>
             <router-link to="/dashboard" active-class="active">History</router-link>
@@ -68,11 +70,21 @@ import NetworkStatus from './components/NetworkStatus.vue';
 }
 
 .nav-logo {
-  font-weight: 900;
-  font-size: 1.5rem;
-  color: var(--true-cobalt, #0047ab);
+  display: flex;
+  align-items: center;
   text-decoration: none;
-  letter-spacing: -1px;
+  line-height: 0;
+}
+
+.nav-logo-img {
+  width: 36px;
+  height: 36px;
+  filter: drop-shadow(0 0 5px rgba(185, 148, 64, 0.3));
+  transition: filter 0.25s;
+}
+
+.nav-logo:hover .nav-logo-img {
+  filter: drop-shadow(0 0 10px rgba(185, 148, 64, 0.55));
 }
 
 .nav-links {

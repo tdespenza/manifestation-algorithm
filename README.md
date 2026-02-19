@@ -13,7 +13,7 @@ A **privacy-first** desktop application for tracking and scoring personal develo
 
 ## Features
 
-- **40-Category Questionnaire** – Weighted 1-10 slider inputs mapping to a 10,100-point score model
+- **40-Category Questionnaire** – Weighted 1-10 slider inputs mapping to a 10,000-point score model
 - **Local Encrypted Storage** – SQLite with automatic migration versioning
 - **Auto-Save** – Answers persist every time you move to the next question
 - **Session Recovery** – Resume or discard an in-progress session on startup

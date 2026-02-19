@@ -79,10 +79,10 @@ export const questions: Question[] = [
   {
     id: '23',
     description: 'Clear Counter Intentions',
-    points: 1350, // Corrected from 1400 based on subpoints sum
+    points: 1250,
     hasSubPoints: true,
     subPoints: [
-      { id: '23a', description: 'Money Processes', points: 600, hasSubPoints: false },
+      { id: '23a', description: 'Money Processes', points: 500, hasSubPoints: false },
       { id: '23b', description: 'Relationship Processes', points: 150, hasSubPoints: false },
       { id: '23c', description: 'Leadership Processes', points: 150, hasSubPoints: false },
       { id: '23d', description: 'Communication Processes', points: 100, hasSubPoints: false },
