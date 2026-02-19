@@ -6,7 +6,10 @@ describe('Score Calculation Engine', () => {
   it('should calculate specific score for a single question', () => {
     // Fill all questions to baseline 1, then override Q2 to 5
     const answers: Record<string, number> = {};
-    const fill = (q: any) => { if (q.subPoints) q.subPoints.forEach(fill); else answers[q.id] = 1; };
+    const fill = (q: any) => {
+      if (q.subPoints) q.subPoints.forEach(fill);
+      else answers[q.id] = 1;
+    };
     questions.forEach(fill);
     const baseline = calculateScore({ ...answers });
     answers['2'] = 5; // Q2 = 100 pts: (5-1)/10 * 100 = +40 pts over baseline
@@ -25,11 +28,11 @@ describe('Score Calculation Engine', () => {
       }
     };
     questions.forEach(fillAnswers);
-    
+
     // We expect 10% of max score
     const max = getMaxPossibleScore();
     const result = calculateScore(answers);
-    
+
     expect(result).toBeCloseTo(max * 0.1);
   });
 
@@ -43,10 +46,10 @@ describe('Score Calculation Engine', () => {
       }
     };
     questions.forEach(fillAnswers);
-    
+
     const result = calculateScore(answers);
     const max = getMaxPossibleScore();
-    
+
     expect(result).toBe(max);
   });
 
@@ -65,11 +68,14 @@ describe('Score Calculation Engine', () => {
     expect(max).toBeGreaterThan(9900);
     expect(max).toBeLessThanOrEqual(10200);
   });
-  
+
   it('should process sub-questions correctly (Q1)', () => {
     // Fill all answers to 1, then set Q1 sub-questions to 10
     const answers: Record<string, number> = {};
-    const fill = (q: any) => { if (q.subPoints) q.subPoints.forEach(fill); else answers[q.id] = 1; };
+    const fill = (q: any) => {
+      if (q.subPoints) q.subPoints.forEach(fill);
+      else answers[q.id] = 1;
+    };
     questions.forEach(fill);
     const baseline = calculateScore({ ...answers });
     answers['1a'] = 10; // 25 pts each

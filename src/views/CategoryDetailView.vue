@@ -1,5 +1,5 @@
 <template>
-  <div class="category-detail-view" v-if="categoryData.length > 0">
+  <div v-if="categoryData.length > 0" class="category-detail-view">
     <header class="view-header">
       <button class="back-btn" @click="$router.back()">← Back</button>
       <h1>{{ category }}</h1>
@@ -50,18 +50,10 @@ import {
   Title,
   Tooltip,
   Legend,
-  type ChartOptions
+  type ChartOptions,
 } from 'chart.js';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const route = useRoute();
 const historyStore = useHistoryStore();
@@ -85,9 +77,7 @@ const reversedHistory = computed(() => {
 
 const chartData = computed(() => {
   const data = categoryData.value;
-  const isUptrend = data.length > 1
-    ? data[data.length - 1].value >= data[0].value
-    : true;
+  const isUptrend = data.length > 1 ? data[data.length - 1].value >= data[0].value : true;
   const lineColor = isUptrend ? '#000000' : '#f44336';
   return {
     labels: data.map(d => new Date(d.date).toLocaleDateString()),
@@ -98,9 +88,9 @@ const chartData = computed(() => {
         borderColor: lineColor,
         backgroundColor: isUptrend ? 'rgba(0,0,0,0.08)' : 'rgba(244,67,54,0.1)',
         tension: 0.2,
-        fill: true
-      }
-    ]
+        fill: true,
+      },
+    ],
   };
 });
 
@@ -109,30 +99,30 @@ const chartOptions: ChartOptions<'line'> = {
   maintainAspectRatio: false,
   plugins: {
     legend: {
-      display: false
+      display: false,
     },
     tooltip: {
       mode: 'index',
-      intersect: false
-    }
+      intersect: false,
+    },
   },
   scales: {
     y: {
       min: 0,
       max: 10,
       ticks: {
-        stepSize: 1
+        stepSize: 1,
       },
       grid: {
-        color: '#333'
-      }
+        color: '#333',
+      },
     },
     x: {
       grid: {
-        display: false
-      }
-    }
-  }
+        display: false,
+      },
+    },
+  },
 };
 
 const formatDate = (dateStr: string) => {
@@ -215,9 +205,16 @@ const formatScore = (score: number) => Number(score).toFixed(2);
   font-weight: normal;
 }
 
-.high-score { color: #42b983; font-weight: bold; }
-.med-score { color: #f1c40f; }
-.low-score { color: #e74c3c; }
+.high-score {
+  color: #42b983;
+  font-weight: bold;
+}
+.med-score {
+  color: #f1c40f;
+}
+.low-score {
+  color: #e74c3c;
+}
 
 @media (max-width: 768px) {
   .detail-content {

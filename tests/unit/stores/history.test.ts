@@ -38,12 +38,14 @@ describe('History Store', () => {
 
   it('fetchHistory sets isLoading true during fetch and false after', async () => {
     const store = useHistoryStore();
-    const loadingStates: boolean[] = [];
+    const _loadingStates: boolean[] = [];
 
     // Intercept loading state changes by watching the value during execution
     let resolveLoad!: (v: unknown) => void;
     dbMocks.loadHistoricalSessions.mockReturnValue(
-      new Promise(r => { resolveLoad = r; })
+      new Promise(r => {
+        resolveLoad = r;
+      })
     );
 
     const fetchPromise = store.fetchHistory();

@@ -21,20 +21,26 @@ describe('Database Migrations', () => {
     await runMigrations(mockDb);
 
     // 1. Should create _migrations table
-    expect(mockDb.execute).toHaveBeenCalledWith(expect.stringContaining('CREATE TABLE IF NOT EXISTS _migrations'));
+    expect(mockDb.execute).toHaveBeenCalledWith(
+      expect.stringContaining('CREATE TABLE IF NOT EXISTS _migrations')
+    );
 
     // 2. Should query for applied migrations
     expect(mockDb.select).toHaveBeenCalledWith('SELECT id FROM _migrations');
 
     // 3. Should run migration 1 (initial schema) creation
     // Check for one of the tables
-    expect(mockDb.execute).toHaveBeenCalledWith(expect.stringContaining('CREATE TABLE IF NOT EXISTS stats'));
-    expect(mockDb.execute).toHaveBeenCalledWith(expect.stringContaining('CREATE TABLE IF NOT EXISTS questionnaire_responses'));
+    expect(mockDb.execute).toHaveBeenCalledWith(
+      expect.stringContaining('CREATE TABLE IF NOT EXISTS stats')
+    );
+    expect(mockDb.execute).toHaveBeenCalledWith(
+      expect.stringContaining('CREATE TABLE IF NOT EXISTS questionnaire_responses')
+    );
 
     // 4. Should record migration 1
     expect(mockDb.execute).toHaveBeenCalledWith(
-        'INSERT INTO _migrations (id, name) VALUES ($1, $2)', 
-        [1, 'initial_schema']
+      'INSERT INTO _migrations (id, name) VALUES ($1, $2)',
+      [1, 'initial_schema']
     );
   });
 
@@ -45,11 +51,15 @@ describe('Database Migrations', () => {
     await runMigrations(mockDb);
 
     // Should create _migrations table (always checked)
-    expect(mockDb.execute).toHaveBeenCalledWith(expect.stringContaining('CREATE TABLE IF NOT EXISTS _migrations'));
+    expect(mockDb.execute).toHaveBeenCalledWith(
+      expect.stringContaining('CREATE TABLE IF NOT EXISTS _migrations')
+    );
 
     // Should NOT run migration 1 logic — stats table NOT created
     const calls = (mockDb.execute as any).mock.calls;
-    const createStatsCall = calls.find((call: any[]) => call[0].includes('CREATE TABLE IF NOT EXISTS stats'));
+    const createStatsCall = calls.find((call: any[]) =>
+      call[0].includes('CREATE TABLE IF NOT EXISTS stats')
+    );
     expect(createStatsCall).toBeUndefined();
 
     // Should NOT insert ANY migration record for already-applied ones

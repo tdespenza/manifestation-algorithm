@@ -15,7 +15,7 @@ export const useHistoryStore = defineStore('history', () => {
     try {
       const [s, t] = await Promise.all([
         loadHistoricalSessions(),
-        loadConsolidatedCategoryTrends()
+        loadConsolidatedCategoryTrends(),
       ]);
       sessions.value = s;
       trends.value = t;
@@ -32,6 +32,6 @@ export const useHistoryStore = defineStore('history', () => {
     trends,
     isLoading,
     error,
-    fetchHistory
+    fetchHistory,
   };
 });

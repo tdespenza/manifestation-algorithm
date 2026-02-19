@@ -18,7 +18,8 @@ vi.mock('@/components/ui/QuestionItem.vue', () => ({
 }));
 vi.mock('@/components/ui/ResumeDialog.vue', () => ({
   default: {
-    template: '<div class="resume-dialog-stub"><button class="resume-btn" @click="$emit(\'resume\')">Resume</button><button class="fresh-btn" @click="$emit(\'fresh\')">Fresh</button></div>',
+    template:
+      '<div class="resume-dialog-stub"><button class="resume-btn" @click="$emit(\'resume\')">Resume</button><button class="fresh-btn" @click="$emit(\'fresh\')">Fresh</button></div>',
     emits: ['resume', 'fresh'],
   },
 }));
@@ -155,11 +156,11 @@ describe('Questionnaire.vue', () => {
     const pending = new Promise(() => {});
     (store.submitSession as ReturnType<typeof vi.fn>).mockReturnValue(pending);
     // First click sets isSubmitting = true internally; second click should bail
-    await wrapper.find('.submit-button').trigger('click');  // starts, isSubmitting = true
+    await wrapper.find('.submit-button').trigger('click'); // starts, isSubmitting = true
     await wrapper.vm.$nextTick();
-    await wrapper.find('.submit-button').trigger('click');  // should be no-op (disabled)
+    await wrapper.find('.submit-button').trigger('click'); // should be no-op (disabled)
     await wrapper.vm.$nextTick();
-    expect(store.submitSession).toHaveBeenCalledTimes(1);  // only once
+    expect(store.submitSession).toHaveBeenCalledTimes(1); // only once
   });
 
   // ── Keyboard navigation ───────────────────────────────────────────────────
@@ -215,7 +216,12 @@ describe('Questionnaire.vue', () => {
   it('handleGlobalKey: number key 1-9 sets answer in step mode', async () => {
     const wrapper = makeWrapper();
     const store = useQuestionnaireStore();
-    store.currentQuestion = { id: 'q1', description: 'Q1', points: 100, hasSubPoints: false } as unknown as typeof store.currentQuestion;
+    store.currentQuestion = {
+      id: 'q1',
+      description: 'Q1',
+      points: 100,
+      hasSubPoints: false,
+    } as unknown as typeof store.currentQuestion;
     const buttons = wrapper.findAll('.mode-toggle button');
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
@@ -226,7 +232,12 @@ describe('Questionnaire.vue', () => {
   it('handleGlobalKey: key 0 sets answer to 10 in step mode', async () => {
     const wrapper = makeWrapper();
     const store = useQuestionnaireStore();
-    store.currentQuestion = { id: 'q1', description: 'Q1', points: 100, hasSubPoints: false } as unknown as typeof store.currentQuestion;
+    store.currentQuestion = {
+      id: 'q1',
+      description: 'Q1',
+      points: 100,
+      hasSubPoints: false,
+    } as unknown as typeof store.currentQuestion;
     const buttons = wrapper.findAll('.mode-toggle button');
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
@@ -332,7 +343,7 @@ describe('Questionnaire.vue', () => {
   it('isAnswered returns false for out-of-bounds index (q is undefined)', async () => {
     const wrapper = makeWrapper();
     await wrapper.vm.$nextTick();
-    const vm = wrapper.vm as unknown as { isAnswered?: (idx: number) => boolean };
+
     // Switch to step mode to expose dot rendering, then check via vm
     // We can't directly call isAnswered but switching to step mode triggers it for each dot
     // Also check the step mode totalQuestions - let's verify the function works via behavior
@@ -370,7 +381,7 @@ describe('Questionnaire.vue', () => {
     // With a known answer set, the dot should have "answered" class
     if (dots.length > 0) {
       // Set answer for first leaf question
-      const { flattenLeaves } = await import('@/utils/analysis').catch(() => null) || {};
+      await import('@/utils/analysis').catch(() => null);
       // Check via store that answer exists
       await store.setAnswer('1a', 5);
       await wrapper.vm.$nextTick();

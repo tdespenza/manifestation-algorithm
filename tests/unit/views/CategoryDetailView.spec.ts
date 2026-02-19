@@ -17,9 +17,15 @@ const fetchHistoryMock = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 
 vi.mock('@/stores/history', () => ({
   useHistoryStore: () => ({
-    get isLoading() { return storeState.isLoading; },
-    get sessions() { return storeState.sessions; },
-    get trends() { return storeState.trends; },
+    get isLoading() {
+      return storeState.isLoading;
+    },
+    get sessions() {
+      return storeState.sessions;
+    },
+    get trends() {
+      return storeState.trends;
+    },
     fetchHistory: fetchHistoryMock,
   }),
 }));
@@ -225,4 +231,3 @@ describe('CategoryDetailView.vue', () => {
     expect(routerMocks.push).toHaveBeenCalledWith('/dashboard');
   });
 });
-

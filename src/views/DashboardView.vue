@@ -18,7 +18,7 @@ const ranges = [
   { label: '30 Days', value: '30d' },
   { label: '90 Days', value: '90d' },
   { label: '1 Year', value: '1y' },
-  { label: 'All Time', value: 'all' }
+  { label: 'All Time', value: 'all' },
 ];
 
 const getCutoffDate = () => {
@@ -40,8 +40,8 @@ const sessions = computed(() => {
 const trends = computed(() => {
   const cutoff = getCutoffDate();
   if (!cutoff) return rawTrends.value;
-  
-  const filtered: Record<string, typeof rawTrends.value[string]> = {};
+
+  const filtered: Record<string, (typeof rawTrends.value)[string]> = {};
   for (const [cat, points] of Object.entries(rawTrends.value)) {
     const p = points.filter(p => new Date(p.date) >= cutoff);
     if (p.length > 0) {
@@ -73,23 +73,23 @@ onMounted(() => {
     <div class="dashboard-header">
       <h1>Manifestation History</h1>
       <p class="subtitle">Track your progress over time</p>
-      
-      <div class="controls-bar" v-if="sessions.length > 0">
+
+      <div v-if="sessions.length > 0" class="controls-bar">
         <div class="range-selector">
           <label for="range-select">Range:</label>
           <select id="range-select" v-model="selectedRange">
-            <option v-for="range in ranges" :key="range.value" :value="range.value">{{ range.label }}</option>
+            <option v-for="range in ranges" :key="range.value" :value="range.value">
+              {{ range.label }}
+            </option>
           </select>
         </div>
-        <button @click="exportData" class="export-btn">
-          📥 Export CSV
-        </button>
+        <button class="export-btn" @click="exportData">📥 Export CSV</button>
       </div>
     </div>
-    
+
     <div class="dashboard-content">
       <div v-if="isLoading" class="loading">Loading history...</div>
-      
+
       <div v-else-if="sessions.length > 0" class="history-content">
         <div class="stats-overview">
           <StatsPanel :sessions="sessions" />
@@ -104,8 +104,8 @@ onMounted(() => {
         <div class="category-grid-section">
           <h2>Category Breakdown</h2>
           <div class="category-grid">
-            <CategoryCard 
-              v-for="cat in categories" 
+            <CategoryCard
+              v-for="cat in categories"
               :key="cat"
               :category="cat"
               :trend-data="trends[cat].map(t => t.value)"
@@ -114,14 +114,16 @@ onMounted(() => {
             />
           </div>
         </div>
-        
+
         <div class="recent-sessions">
           <h2>Recent Sessions</h2>
           <div class="session-list">
             <div v-for="session in sessions" :key="session.id" class="session-card">
               <div class="session-date">
                 {{ new Date(session.completed_at).toLocaleDateString() }}
-                <span class="session-time">{{ new Date(session.completed_at).toLocaleTimeString() }}</span>
+                <span class="session-time">{{
+                  new Date(session.completed_at).toLocaleTimeString()
+                }}</span>
               </div>
               <div class="session-score" :class="{ high: session.total_score > 5000 }">
                 {{ Math.round(session.total_score).toLocaleString() }}
@@ -130,7 +132,7 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      
+
       <div v-else class="empty-state">
         <p>No historical sessions found yet. Complete a questionnaire to see results here.</p>
         <router-link to="/" class="cta-button">Start New Assessment</router-link>
@@ -171,7 +173,7 @@ onMounted(() => {
   background: white;
   padding: 0.5rem 1rem;
   border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .range-selector select {
@@ -203,7 +205,7 @@ onMounted(() => {
 
 h1 {
   font-size: 2.5rem;
-  color: var(--true-cobalt, #0047AB);
+  color: var(--true-cobalt, #0047ab);
   margin-bottom: 0.5rem;
 }
 
@@ -254,14 +256,14 @@ h2 {
   background: white;
   padding: 24px;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
 .recent-sessions {
   background: white;
   padding: 24px;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
 .session-list {
@@ -277,14 +279,14 @@ h2 {
   padding: 16px;
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s;
-  border-left: 4px solid var(--true-cobalt, #0047AB);
+  border-left: 4px solid var(--true-cobalt, #0047ab);
 }
 
 .session-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .session-date {
@@ -323,7 +325,7 @@ h2 {
   display: inline-block;
   margin-top: 1rem;
   padding: 10px 20px;
-  background: var(--true-cobalt, #0047AB);
+  background: var(--true-cobalt, #0047ab);
   color: white;
   text-decoration: none;
   border-radius: 8px;

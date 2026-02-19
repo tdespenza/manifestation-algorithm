@@ -31,10 +31,7 @@ describe('StatsPanel.vue', () => {
   it('computes correct median for even count (two sessions)', () => {
     const wrapper = mount(StatsPanel, {
       props: {
-        sessions: [
-          makeSession({ total_score: 3000 }),
-          makeSession({ total_score: 5000 }),
-        ],
+        sessions: [makeSession({ total_score: 3000 }), makeSession({ total_score: 5000 })],
       },
     });
     // median = (3000 + 5000) / 2 = 4000

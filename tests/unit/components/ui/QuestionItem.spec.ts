@@ -9,7 +9,7 @@ describe('QuestionItem.vue', () => {
     id: '1',
     description: 'Test Question',
     points: 100,
-    hasSubPoints: false
+    hasSubPoints: false,
   };
 
   const parentQuestion = {
@@ -27,10 +27,12 @@ describe('QuestionItem.vue', () => {
     const wrapper = mount(QuestionItem, {
       props: { question: dummyQuestion },
       global: {
-        plugins: [createTestingPinia({
-          createSpy: vi.fn,
-        })]
-      }
+        plugins: [
+          createTestingPinia({
+            createSpy: vi.fn,
+          }),
+        ],
+      },
     });
 
     expect(wrapper.text()).toContain('Test Question');
@@ -43,18 +45,20 @@ describe('QuestionItem.vue', () => {
     const wrapper = mount(QuestionItem, {
       props: { question: dummyQuestion },
       global: {
-        plugins: [createTestingPinia({
-          createSpy: vi.fn,
-          stubActions: false
-        })]
-      }
+        plugins: [
+          createTestingPinia({
+            createSpy: vi.fn,
+            stubActions: false,
+          }),
+        ],
+      },
     });
-    
+
     const store = useQuestionnaireStore();
     const input = wrapper.find('input[type="range"]');
-    
+
     await input.setValue('5');
-    
+
     // Check if store action was called
     expect(store.setAnswer).toHaveBeenCalledWith('1', 5);
   });
@@ -86,7 +90,12 @@ describe('QuestionItem.vue', () => {
   });
 
   it('hides sub-points section when hasSubPoints=true but subPoints is undefined', () => {
-    const questionWithoutSubsArray = { id: 'q2', description: 'Parent no subs', points: 0, hasSubPoints: true };
+    const questionWithoutSubsArray = {
+      id: 'q2',
+      description: 'Parent no subs',
+      points: 0,
+      hasSubPoints: true,
+    };
     const wrapper = mount(QuestionItem, {
       props: { question: questionWithoutSubsArray },
       global: { plugins: [createTestingPinia({ createSpy: vi.fn })] },

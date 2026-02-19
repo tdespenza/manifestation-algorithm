@@ -38,9 +38,15 @@ const fetchHistoryMock = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 
 vi.mock('@/stores/history', () => ({
   useHistoryStore: () => ({
-    get isLoading() { return dashState.isLoading; },
-    get sessions() { return dashState.sessions; },
-    get trends() { return dashState.trends; },
+    get isLoading() {
+      return dashState.isLoading;
+    },
+    get sessions() {
+      return dashState.sessions;
+    },
+    get trends() {
+      return dashState.trends;
+    },
     fetchHistory: fetchHistoryMock,
   }),
 }));
@@ -121,10 +127,7 @@ describe('DashboardView.vue', () => {
   });
 
   it('filters sessions by 7d range', async () => {
-    dashState.sessions = [
-      makeSession('recent', 3, 5000),
-      makeSession('old', 10, 3000),
-    ];
+    dashState.sessions = [makeSession('recent', 3, 5000), makeSession('old', 10, 3000)];
     const wrapper = mount(DashboardView, { global: { plugins: [router] } });
     await wrapper.vm.$nextTick();
 
@@ -151,10 +154,7 @@ describe('DashboardView.vue', () => {
   });
 
   it('filters by 90d range', async () => {
-    dashState.sessions = [
-      makeSession('recent', 45, 5000),
-      makeSession('old', 120, 3000),
-    ];
+    dashState.sessions = [makeSession('recent', 45, 5000), makeSession('old', 120, 3000)];
     const wrapper = mount(DashboardView, { global: { plugins: [router] } });
     await wrapper.vm.$nextTick();
     (wrapper.vm as any).selectedRange = '90d';

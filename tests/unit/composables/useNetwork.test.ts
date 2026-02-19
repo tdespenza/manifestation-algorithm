@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ref } from 'vue';
 
 // ── Tauri API mocks ──────────────────────────────────────────────────────────
 const mockInvoke = vi.fn();
@@ -36,8 +35,12 @@ describe('useNetwork composable', () => {
     expect(network.isConnected.value).toBeDefined();
     expect(typeof network.count.value).toBe('number');
     expect(typeof network.manifestations.value).toBe('number');
-    expect(network.avgScore.value === null || typeof network.avgScore.value === 'number').toBe(true);
-    expect(network.percentile90.value === null || typeof network.percentile90.value === 'number').toBe(true);
+    expect(network.avgScore.value === null || typeof network.avgScore.value === 'number').toBe(
+      true
+    );
+    expect(
+      network.percentile90.value === null || typeof network.percentile90.value === 'number'
+    ).toBe(true);
   });
 
   it('init() invokes get_peer_count and get_network_sharing', async () => {
@@ -197,10 +200,7 @@ describe('useNetwork composable', () => {
     });
 
     await expect(toggleSharing(true)).resolves.toBeUndefined();
-    expect(consoleSpy).toHaveBeenCalledWith(
-      'Failed to update sharing setting:',
-      expect.any(Error)
-    );
+    expect(consoleSpy).toHaveBeenCalledWith('Failed to update sharing setting:', expect.any(Error));
     consoleSpy.mockRestore();
   });
 
@@ -337,7 +337,10 @@ describe('useNetwork composable', () => {
     await init();
     // Second init: isListening is false so we proceed, but connectTimeoutId is NOT null (FALSE branch!)
     await init();
-    expect(consoleSpy).toHaveBeenCalledWith('Failed to connect to network service:', expect.any(Error));
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Failed to connect to network service:',
+      expect.any(Error)
+    );
     consoleSpy.mockRestore();
     vi.useRealTimers();
   });

@@ -24,6 +24,6 @@ import Settings from '../components/ui/Settings.vue';
 
 h1 {
   font-size: 2.5rem;
-  color: var(--true-cobalt, #0047AB);
+  color: var(--true-cobalt, #0047ab);
 }
 </style>

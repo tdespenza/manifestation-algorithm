@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import NetworkRanking from '@/components/dashboard/NetworkRanking.vue';
 
 // ── Stub child components ────────────────────────────────────────────────────
@@ -119,7 +119,7 @@ describe('NetworkRanking.vue', () => {
     const wrapper = mount(NetworkRanking);
     await wrapper.vm.$nextTick();
     const boxes = wrapper.findAll('.stat-box .value');
-    const texts = boxes.map((b) => b.text());
+    const texts = boxes.map(b => b.text());
     expect(texts).toContain('12');
     expect(texts).toContain('99');
   });

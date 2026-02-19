@@ -3,7 +3,10 @@ import { mount } from '@vue/test-utils';
 
 // Stub the Settings component
 vi.mock('@/components/ui/Settings.vue', () => ({
-  default: { template: '<div class="settings-stub" @click="$emit(\'close\')" />', emits: ['close'] },
+  default: {
+    template: '<div class="settings-stub" @click="$emit(\'close\')" />',
+    emits: ['close'],
+  },
 }));
 
 import SettingsView from '@/views/SettingsView.vue';

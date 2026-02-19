@@ -31,17 +31,22 @@ describe('Database Service', () => {
   it('initTables should run migrations on first connect', async () => {
     await dbService.getDb();
     // Expect execute to be called for CREATE TABLE
-    expect(mocks.execute).toHaveBeenCalledWith(expect.stringContaining('CREATE TABLE IF NOT EXISTS stats'));
-    expect(mocks.execute).toHaveBeenCalledWith(expect.stringContaining('CREATE TABLE IF NOT EXISTS questionnaire_responses'));
+    expect(mocks.execute).toHaveBeenCalledWith(
+      expect.stringContaining('CREATE TABLE IF NOT EXISTS stats')
+    );
+    expect(mocks.execute).toHaveBeenCalledWith(
+      expect.stringContaining('CREATE TABLE IF NOT EXISTS questionnaire_responses')
+    );
   });
 
   it('saveAnswer should execute insert query', async () => {
     await dbService.saveAnswer('session1', 'q1', 5);
     // It should call execute with params
-    expect(mocks.execute).toHaveBeenCalledWith(
-      expect.stringContaining('INSERT OR REPLACE'),
-      ['session1', 'q1', 5]
-    );
+    expect(mocks.execute).toHaveBeenCalledWith(expect.stringContaining('INSERT OR REPLACE'), [
+      'session1',
+      'q1',
+      5,
+    ]);
   });
 
   it('loadAnswers should execute select query and return map', async () => {
@@ -51,23 +56,22 @@ describe('Database Service', () => {
     ]);
 
     const result = await dbService.loadAnswers('session1');
-    
-    expect(mocks.select).toHaveBeenCalledWith(
-        expect.stringContaining('SELECT question_number'),
-        ['session1']
-    );
-    
+
+    expect(mocks.select).toHaveBeenCalledWith(expect.stringContaining('SELECT question_number'), [
+      'session1',
+    ]);
+
     expect(result).toEqual({
-      'q1': 5,
-      'q2': 8
+      q1: 5,
+      q2: 8,
     });
   });
-  
+
   it('saveCompletion should save stats', async () => {
     await dbService.saveCompletion(5000);
     // expect.arrayContaining doesn't work well directly on args list for partial match
     // Check second argument array
-     expect(mocks.execute).toHaveBeenCalledWith(
+    expect(mocks.execute).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO stats'),
       expect.arrayContaining([5000])
     );
@@ -79,10 +83,9 @@ describe('Database Service', () => {
       expect.stringContaining('DELETE FROM questionnaire_responses'),
       ['sess-1']
     );
-    expect(mocks.execute).toHaveBeenCalledWith(
-      expect.stringContaining('DELETE FROM settings'),
-      ['last_active_sess-1']
-    );
+    expect(mocks.execute).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM settings'), [
+      'last_active_sess-1',
+    ]);
   });
 
   it('updateLastActive inserts current timestamp into settings', async () => {
@@ -151,7 +154,12 @@ describe('Database Service', () => {
 
   it('loadHistoricalSessions executes select and returns rows', async () => {
     const rows = [
-      { id: 's1', completed_at: '2024-01-01T00:00:00.000Z', total_score: 5000, duration_seconds: 120 },
+      {
+        id: 's1',
+        completed_at: '2024-01-01T00:00:00.000Z',
+        total_score: 5000,
+        duration_seconds: 120,
+      },
     ];
     mocks.select.mockResolvedValueOnce(rows);
 
@@ -169,10 +177,9 @@ describe('Database Service', () => {
 
     const result = await dbService.loadSessionResponses('sess-5');
 
-    expect(mocks.select).toHaveBeenCalledWith(
-      expect.stringContaining('SELECT question_id'),
-      ['sess-5']
-    );
+    expect(mocks.select).toHaveBeenCalledWith(expect.stringContaining('SELECT question_id'), [
+      'sess-5',
+    ]);
     expect(result).toEqual(rows);
   });
 

@@ -9,9 +9,9 @@ export type CategoryTrends = Record<string, TrendPoint[]>;
 
 export async function loadConsolidatedCategoryTrends(): Promise<CategoryTrends> {
   const db = await getDb();
-  
+
   // Optimized SQL aggregation
-  const results = await db.select<{date: string, category: string, score: number}[]>(`
+  const results = await db.select<{ date: string; category: string; score: number }[]>(`
     SELECT 
       s.completed_at as date,
       r.category,
@@ -32,7 +32,7 @@ export async function loadConsolidatedCategoryTrends(): Promise<CategoryTrends> 
     }
     trends[row.category].push({
       date: row.date,
-      value: Number(Number(row.score).toFixed(2))
+      value: Number(Number(row.score).toFixed(2)),
     });
   }
 

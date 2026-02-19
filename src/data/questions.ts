@@ -1,4 +1,4 @@
-import { Question } from '../types';
+import type { Question } from '../types';
 
 export const questions: Question[] = [
   {
@@ -21,15 +21,30 @@ export const questions: Question[] = [
   { id: '7', description: 'Get a burning desire for your goal', points: 200, hasSubPoints: false },
   { id: '8', description: 'Goal must be in Sweet Spot', points: 50, hasSubPoints: false },
   { id: '9', description: 'Make a Decision', points: 200, hasSubPoints: false },
-  { id: '10', description: 'See/Feel good in posssession of your goal', points: 300, hasSubPoints: false },
+  {
+    id: '10',
+    description: 'See/Feel good in posssession of your goal',
+    points: 300,
+    hasSubPoints: false,
+  },
   { id: '11', description: 'Release attachment to the outcome', points: 250, hasSubPoints: false },
   { id: '12', description: 'Allow the HOW to present itself', points: 100, hasSubPoints: false },
-  { id: '13', description: 'Know the difference between Dream & Chief Aim', points: 50, hasSubPoints: false },
+  {
+    id: '13',
+    description: 'Know the difference between Dream & Chief Aim',
+    points: 50,
+    hasSubPoints: false,
+  },
   { id: '14', description: 'Be Focused / Singleness of purpose', points: 50, hasSubPoints: false },
   { id: '15', description: 'Daily TO DO list of Priorities', points: 50, hasSubPoints: false },
   { id: '16', description: 'Chart Progress / Know the Score', points: 50, hasSubPoints: false },
   { id: '17', description: 'Use Momentum Cycle of Success', points: 50, hasSubPoints: false },
-  { id: '18', description: 'Dream Build - Dream Book & Vision Board', points: 200, hasSubPoints: false },
+  {
+    id: '18',
+    description: 'Dream Build - Dream Book & Vision Board',
+    points: 200,
+    hasSubPoints: false,
+  },
   {
     id: '19',
     description: 'Plug into System',
@@ -39,12 +54,27 @@ export const questions: Question[] = [
       { id: '19a', description: 'Read books', points: 100, hasSubPoints: false },
       { id: '19b', description: 'Listen to Audios', points: 100, hasSubPoints: false },
       { id: '19c', description: 'Attend Events (monthly)', points: 100, hasSubPoints: false },
-      { id: '19d', description: 'Give and receive Recognition / expanded Golden Rule', points: 100, hasSubPoints: false },
-      { id: '19e', description: 'Develop relationships with like minded people', points: 100, hasSubPoints: false },
+      {
+        id: '19d',
+        description: 'Give and receive Recognition / expanded Golden Rule',
+        points: 100,
+        hasSubPoints: false,
+      },
+      {
+        id: '19e',
+        description: 'Develop relationships with like minded people',
+        points: 100,
+        hasSubPoints: false,
+      },
     ],
   },
   { id: '20', description: 'Science of Personal Mastery Course', points: 750, hasSubPoints: false },
-  { id: '21', description: 'Watch the words you speak - what you say is what you get', points: 200, hasSubPoints: false },
+  {
+    id: '21',
+    description: 'Watch the words you speak - what you say is what you get',
+    points: 200,
+    hasSubPoints: false,
+  },
   { id: '22', description: 'Physiology / Dress for success', points: 50, hasSubPoints: false },
   {
     id: '23',
@@ -62,11 +92,21 @@ export const questions: Question[] = [
       { id: '23h', description: 'Organization & Focus Processes', points: 50, hasSubPoints: false },
     ],
   },
-  { id: '24', description: 'Awaken your Inner Power: Superpower Processes', points: 600, hasSubPoints: false },
+  {
+    id: '24',
+    description: 'Awaken your Inner Power: Superpower Processes',
+    points: 600,
+    hasSubPoints: false,
+  },
   { id: '25', description: 'Broadcast on Alpha-theta brainwave', points: 100, hasSubPoints: false },
   { id: '26', description: 'Stop Telling Your Story of woe', points: 100, hasSubPoints: false },
   { id: '27', description: 'Show Appreciation / Gratitude', points: 100, hasSubPoints: false },
-  { id: '28', description: 'Replace Failure Habits w/ Success Habits (Accelerator Processes)', points: 600, hasSubPoints: false },
+  {
+    id: '28',
+    description: 'Replace Failure Habits w/ Success Habits (Accelerator Processes)',
+    points: 600,
+    hasSubPoints: false,
+  },
   { id: '29', description: 'Create a Mastermind', points: 50, hasSubPoints: false },
   { id: '30', description: 'Watch Successful People/Apprentice', points: 250, hasSubPoints: false },
   { id: '31', description: 'Listen to/Read Success Stories', points: 50, hasSubPoints: false },
@@ -77,6 +117,16 @@ export const questions: Question[] = [
   { id: '36', description: 'Clear Samskaras from Field', points: 200, hasSubPoints: false },
   { id: '37', description: 'Take 100% Responsibility', points: 200, hasSubPoints: false },
   { id: '38', description: 'Attractor Field Generators', points: 800, hasSubPoints: false },
-  { id: '39', description: 'Join a Club that connects you to a Power Source', points: 1200, hasSubPoints: false },
-  { id: '40', description: 'Live life with deliberate intent - be in present time', points: 100, hasSubPoints: false },
+  {
+    id: '39',
+    description: 'Join a Club that connects you to a Power Source',
+    points: 1200,
+    hasSubPoints: false,
+  },
+  {
+    id: '40',
+    description: 'Live life with deliberate intent - be in present time',
+    points: 100,
+    hasSubPoints: false,
+  },
 ];

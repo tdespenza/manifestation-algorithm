@@ -10,7 +10,7 @@ import { questions } from '@/data/questions';
 
 // ── Mock entire DB layer ────────────────────────────────────────────────────
 
-const savedAnswers: Record<string, number> = {};
+const _savedAnswers: Record<string, number> = {};
 
 const dbMocks = vi.hoisted(() => ({
   saveAnswer: vi.fn(),
@@ -64,7 +64,11 @@ describe('E2E: Complete questionnaire flow', () => {
   });
 
   /** Helper: call setAnswer and advance past the 300ms save delay */
-  async function fastSetAnswer(store: ReturnType<typeof useQuestionnaireStore>, id: string, value: number) {
+  async function fastSetAnswer(
+    store: ReturnType<typeof useQuestionnaireStore>,
+    id: string,
+    value: number
+  ) {
     const p = store.setAnswer(id, value);
     await vi.advanceTimersByTimeAsync(301);
     await p;

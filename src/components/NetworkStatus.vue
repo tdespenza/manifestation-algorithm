@@ -3,9 +3,15 @@
     <div class="status-indicator"></div>
     <span class="status-text">{{ statusText }}</span>
     <span v-if="count > 0" class="peer-count">({{ count }} peers)</span>
-    <span v-if="manifestations > 0" class="manifestation-count">| {{ manifestations }} results</span>
-    <span v-if="avgScore && avgScore > 0" class="avg-score" title="Average Score">| μ: {{ avgScore.toFixed(1) }}</span>
-    <span v-if="percentile90 && percentile90 > 0" class="p90" title="90th Percentile">| P90: {{ percentile90.toFixed(1) }}</span>
+    <span v-if="manifestations > 0" class="manifestation-count"
+      >| {{ manifestations }} results</span
+    >
+    <span v-if="avgScore && avgScore > 0" class="avg-score" title="Average Score"
+      >| μ: {{ avgScore.toFixed(1) }}</span
+    >
+    <span v-if="percentile90 && percentile90 > 0" class="p90" title="90th Percentile"
+      >| P90: {{ percentile90.toFixed(1) }}</span
+    >
   </div>
 </template>
 
@@ -13,14 +19,7 @@
 import { onMounted, onUnmounted, computed } from 'vue';
 import { useNetwork } from '../composables/useNetwork';
 
-const { 
-  count, 
-  manifestations, 
-  avgScore, 
-  percentile90, 
-  init,
-  cleanup
-} = useNetwork();
+const { count, manifestations, avgScore, percentile90, init } = useNetwork();
 
 const statusText = computed(() => {
   if (count.value > 0) return 'Online';
@@ -49,7 +48,7 @@ onUnmounted(() => {
   gap: 8px;
   padding: 4px 8px;
   border-radius: 12px;
-  background: rgba(0,0,0,0.03);
+  background: rgba(0, 0, 0, 0.03);
   transition: all 0.3s ease;
 }
 
