@@ -44,8 +44,10 @@ test.describe('Settings page', () => {
 
 test.describe('Settings – sharing toggle', () => {
   test.beforeEach(async ({ settingsPage, resetDB }) => {
-    await resetDB();
+    // Navigate first so addInitScript has injected __tauriResetDB into the page
+    // context before we try to call it via page.evaluate().
     await settingsPage.goto();
+    await resetDB();
   });
 
   test('sharing toggle renders and defaults to disabled', async ({ page }) => {
