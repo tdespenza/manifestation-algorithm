@@ -6,8 +6,17 @@
     </header>
 
     <div class="detail-content">
-      <div class="main-chart-container">
-        <Line :data="chartData" :options="chartOptions" />
+      <div class="chart-section">
+        <ChartActions
+          target-id="category-chart-print-area"
+          :title="`${category} Trend`"
+          :data="exportData"
+          :filename="`${category.replace(/\\s+/g, '_')}_trend`"
+        />
+        <div id="category-chart-print-area" class="main-chart-container">
+          <h2 class="print-only">{{ category }} Trend</h2>
+          <Line :data="chartData" :options="chartOptions" />
+        </div>
       </div>
 
       <div class="data-table-container">
@@ -41,6 +50,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useHistoryStore } from '../stores/history';
 import { Line } from 'vue-chartjs';
+import ChartActions from '../components/charts/ChartActions.vue';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -140,9 +150,36 @@ const getScoreClass = (score: number) => {
 };
 
 const formatScore = (score: number) => Number(score).toFixed(2);
+
+const exportData = computed(() => {
+  return reversedHistory.value.map(entry => ({
+    Date: new Date(entry.date).toLocaleDateString(),
+    Time: new Date(entry.date).toLocaleTimeString(),
+    Score: Number(entry.value).toFixed(2)
+  }));
+});
 </script>
 
 <style scoped>
+.print-only {
+  display: none;
+}
+
+@media print {
+  .print-only {
+    display: block;
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--deep-twilight);
+  }
+  .main-chart-container {
+    height: 80vh !important;
+    width: 100vw !important;
+    padding: 20px;
+    background: white;
+  }
+}
+
 .category-detail-view {
   padding: 2rem;
   max-width: 1200px;
@@ -177,6 +214,12 @@ const formatScore = (score: number) => Number(score).toFixed(2);
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 2rem;
+}
+
+.chart-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .main-chart-container {

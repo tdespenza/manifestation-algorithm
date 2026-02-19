@@ -91,14 +91,16 @@ onMounted(() => {
       <div v-if="isLoading" class="loading">Loading history...</div>
 
       <div v-else-if="sessions.length > 0" class="history-content">
-        <div class="stats-overview">
-          <StatsPanel :sessions="sessions" />
-          <NetworkRanking />
-        </div>
+        <div class="top-row">
+          <div class="stats-overview">
+            <StatsPanel :sessions="sessions" />
+            <NetworkRanking />
+          </div>
 
-        <div class="chart-section">
-          <h2>Progress Trend</h2>
-          <ProgressChart :sessions="sessions" />
+          <div class="chart-section">
+            <h2>Progress Trend</h2>
+            <ProgressChart :sessions="sessions" />
+          </div>
         </div>
 
         <div class="category-grid-section">
@@ -154,7 +156,7 @@ onMounted(() => {
 }
 
 .dashboard-content {
-  max-width: 1600px;
+  max-width: 1800px;
   margin: 0 auto;
 }
 
@@ -218,11 +220,32 @@ h2 {
   font-size: 1.1rem;
 }
 
+/* ── Responsive layout ── */
+.history-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
 .stats-overview {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
   align-items: start;
+}
+
+/* Large screens: stats + chart share a row */
+@media (min-width: 1200px) {
+  .top-row {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .stats-overview {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 1000px) {
@@ -249,11 +272,29 @@ h2 {
   gap: 16px;
 }
 
+@media (min-width: 1400px) {
+  .category-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+}
+
+@media (min-width: 1800px) {
+  .category-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+}
+
 .chart-section {
   background: white;
   padding: 24px;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+@media (min-width: 1200px) {
+  .chart-section {
+    padding: 28px 32px;
+  }
 }
 
 .recent-sessions {
@@ -267,6 +308,12 @@ h2 {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 12px;
+}
+
+@media (min-width: 1400px) {
+  .session-list {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
 }
 
 .session-card {

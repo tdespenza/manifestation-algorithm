@@ -4,6 +4,26 @@
  * Covers: navigation, rendering of settings controls, and close/back behavior.
  */
 import { test, expect } from '../fixtures/base';
+import type { DBSeed } from '../fixtures/base';
+
+// Minimal seed so the dashboard renders sessions (required for NetworkRanking/SharingToggle)
+const DASHBOARD_SEED: DBSeed = {
+  historical_sessions: [
+    {
+      id: 'settings-e2e-session-001',
+      score: 7500,
+      completed_at: new Date().toISOString()
+    }
+  ],
+  historical_responses: [
+    {
+      session_id: 'settings-e2e-session-001',
+      question_number: '1a',
+      answer_value: 9,
+      recorded_at: new Date().toISOString()
+    }
+  ]
+};
 
 test.describe('Settings page', () => {
   test.beforeEach(async ({ settingsPage }) => {
@@ -43,17 +63,36 @@ test.describe('Settings page', () => {
 });
 
 test.describe('Settings – sharing toggle', () => {
-  test.beforeEach(async ({ settingsPage, resetDB }) => {
-    // Navigate first so addInitScript has injected __tauriResetDB into the page
-    // context before we try to call it via page.evaluate().
-    await settingsPage.goto();
-    await resetDB();
+  test.beforeEach(async ({ page }) => {
+    // Inject seed data as a persistent init script so it runs on every
+    // page load (including /dashboard navigation below), ensuring sessions
+    // exist and NetworkRanking / SharingToggle are rendered.
+    await page.addInitScript(
+      (data) => {
+        const seed = data;
+        const original = (window as Window & { __tauriSeedDB?: (d: unknown) => void }).__tauriSeedDB;
+        if (original) {
+          original(seed);
+        } else {
+          // Queue until mock is ready
+          (window as Window & { __pendingSeed?: unknown }).__pendingSeed = seed;
+          const interval = setInterval(() => {
+            const fn = (window as Window & { __tauriSeedDB?: (d: unknown) => void }).__tauriSeedDB;
+            if (fn) {
+              clearInterval(interval);
+              fn(seed);
+            }
+          }, 10);
+        }
+      },
+      DASHBOARD_SEED
+    );
   });
 
   test('sharing toggle renders and defaults to disabled', async ({ page }) => {
-    // Navigate to dashboard where SharingToggle lives
-    await page.goto('/');
-    await page.locator('.network-stats-panel, .sharing-toggle').first().waitFor({ timeout: 10_000 });
+    // The SharingToggle lives in NetworkRanking on the dashboard
+    await page.goto('/dashboard');
+    await page.locator('.network-stats-panel, .sharing-toggle').first().waitFor({ timeout: 15_000 });
     const checkbox = page.locator('[data-testid="sharing-checkbox"]');
     await expect(checkbox).toBeVisible();
     await expect(checkbox).not.toBeChecked();
@@ -62,8 +101,8 @@ test.describe('Settings – sharing toggle', () => {
   });
 
   test('enabling the toggle updates the UI immediately', async ({ page }) => {
-    await page.goto('/');
-    await page.locator('.sharing-toggle').waitFor({ timeout: 10_000 });
+    await page.goto('/dashboard');
+    await page.locator('.sharing-toggle').waitFor({ timeout: 15_000 });
     const checkbox = page.locator('[data-testid="sharing-checkbox"]');
     await checkbox.check();
     await expect(checkbox).toBeChecked();
@@ -72,8 +111,8 @@ test.describe('Settings – sharing toggle', () => {
   });
 
   test('disabling the toggle after enabling updates the UI', async ({ page }) => {
-    await page.goto('/');
-    await page.locator('.sharing-toggle').waitFor({ timeout: 10_000 });
+    await page.goto('/dashboard');
+    await page.locator('.sharing-toggle').waitFor({ timeout: 15_000 });
     const checkbox = page.locator('[data-testid="sharing-checkbox"]');
     await checkbox.check();
     await expect(checkbox).toBeChecked();
@@ -85,15 +124,15 @@ test.describe('Settings – sharing toggle', () => {
 
   test('enabled state persists across page navigation', async ({ page }) => {
     // Enable sharing on dashboard
-    await page.goto('/');
-    await page.locator('.sharing-toggle').waitFor({ timeout: 10_000 });
+    await page.goto('/dashboard');
+    await page.locator('.sharing-toggle').waitFor({ timeout: 15_000 });
     await page.locator('[data-testid="sharing-checkbox"]').check();
 
     // Navigate away then back — the mock persists _sharingEnabled in memory
     await page.goto('/settings');
     await page.locator('.settings-view').waitFor({ timeout: 10_000 });
-    await page.goto('/');
-    await page.locator('.sharing-toggle').waitFor({ timeout: 10_000 });
+    await page.goto('/dashboard');
+    await page.locator('.sharing-toggle').waitFor({ timeout: 15_000 });
 
     // SharingToggle loads state via get_network_sharing on mount
     const checkbox = page.locator('[data-testid="sharing-checkbox"]');
@@ -103,11 +142,12 @@ test.describe('Settings – sharing toggle', () => {
 
   test('mock get_network_sharing returns true when previously enabled', async ({ page }) => {
     // Pre-seed sharing as enabled via the mock
+    await page.goto('/dashboard');
     await page.evaluate(() =>
       (globalThis as unknown as { __tauriSeedDB: (d: unknown) => void }).__tauriSeedDB({ _sharingEnabled: true })
     );
-    await page.goto('/');
-    await page.locator('.sharing-toggle').waitFor({ timeout: 10_000 });
+    await page.reload();
+    await page.locator('.sharing-toggle').waitFor({ timeout: 15_000 });
     const checkbox = page.locator('[data-testid="sharing-checkbox"]');
     await expect(checkbox).toBeChecked();
   });

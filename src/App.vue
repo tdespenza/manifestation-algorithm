@@ -11,7 +11,6 @@ import logoUrl from './assets/logo.svg';
         <div class="nav-left">
           <router-link to="/" class="nav-logo">
             <img :src="logoUrl" alt="Manifestation Algorithm" class="nav-logo-img" />
-            <span class="nav-logo-text">Manifestation Algorithm</span>
           </router-link>
           <div class="nav-links">
             <router-link to="/" active-class="active">Questionnaire</router-link>
