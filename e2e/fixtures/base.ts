@@ -15,6 +15,7 @@ export interface DBSeed {
   settings?: Array<{ key: string; value: string }>;
   historical_sessions?: Array<{ id: string; score: number; completed_at: string; answers_snapshot?: string }>;
   historical_responses?: Array<{ session_id: string; question_number: string; answer_value: number; recorded_at: string }>;
+  _sharingEnabled?: boolean;
 }
 
 /**

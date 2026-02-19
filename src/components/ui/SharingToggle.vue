@@ -38,9 +38,17 @@
 </template>
 
 <script setup lang="ts">
-import { useNetwork } from '../../composables/useNetwork';
+import { onMounted } from 'vue';
+import { useNetwork, loadSharingState } from '../../composables/useNetwork';
 
 const { sharingEnabled, toggleSharing } = useNetwork();
+
+// Load the persisted value directly on mount so this component is always
+// initialised correctly regardless of whether useNetwork().init() has been
+// called by a parent (e.g. when navigating straight to the Settings page).
+onMounted(async () => {
+  await loadSharingState();
+});
 
 async function handleToggle(event: Event) {
   const target = event.target as HTMLInputElement;

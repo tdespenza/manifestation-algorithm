@@ -20,6 +20,7 @@ export const TAURI_MOCK_SCRIPT = String.raw`
     settings: [],                  // { key, value }
     historical_sessions: [],       // { id, score, completed_at, answers_snapshot }
     historical_responses: [],      // { session_id, question_number, answer_value, recorded_at }
+    _sharingEnabled: false,        // persisted sharing opt-in state
   };
 
   let nextResourceId = 1;
@@ -146,6 +147,19 @@ export const TAURI_MOCK_SCRIPT = String.raw`
         return null;
       }
 
+      case 'get_network_sharing': {
+        return memDB._sharingEnabled === true;
+      }
+
+      case 'set_network_sharing': {
+        memDB._sharingEnabled = payload.enabled === true;
+        return null;
+      }
+
+      case 'get_peer_count': {
+        return 0;
+      }
+
       default:
         console.warn('[TauriMock] Unknown command:', cmd, payload);
         return null;
@@ -182,6 +196,7 @@ export const TAURI_MOCK_SCRIPT = String.raw`
     memDB.settings = [];
     memDB.historical_sessions = [];
     memDB.historical_responses = [];
+    memDB._sharingEnabled = false;
   };
 
   // Expose helper to seed DB state for tests
@@ -190,6 +205,7 @@ export const TAURI_MOCK_SCRIPT = String.raw`
     if (data.settings) memDB.settings = [...data.settings];
     if (data.historical_sessions) memDB.historical_sessions = [...data.historical_sessions];
     if (data.historical_responses) memDB.historical_responses = [...data.historical_responses];
+    if (typeof data._sharingEnabled === 'boolean') memDB._sharingEnabled = data._sharingEnabled;
   };
 
   // Expose the in-memory store for test assertions

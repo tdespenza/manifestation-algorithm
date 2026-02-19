@@ -36,7 +36,8 @@ let connectTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
 let unlisten: UnlistenFn | null = null;
 
-async function loadSharingState(): Promise<void> {
+// Export so SharingToggle can call it directly on mount.
+export async function loadSharingState(): Promise<void> {
   try {
     sharingEnabled.value = await invoke<boolean>('get_network_sharing');
   } catch {
