@@ -17,15 +17,15 @@ layout: null
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg:          #06080f;
-      --bg-card:     #0c0f1a;
-      --border:      #1e2235;
-      --border-gold: rgba(185,148,64,.38);
-      --gold:        #b99440;
-      --gold-light:  #d4af5a;
-      --gold-dim:    #7a6128;
-      --text:        #e8e0cc;
-      --text-muted:  #7a7460;
+      --bg:          #f7f5f0;
+      --bg-card:     #ffffff;
+      --border:      #ddd9d0;
+      --border-gold: rgba(140,100,20,.28);
+      --gold:        #8a6a10;
+      --gold-light:  #9a7820;
+      --gold-dim:    #c8a84a;
+      --text:        #1a1714;
+      --text-muted:  #6b6456;
       --radius:      8px;
     }
     html { scroll-behavior: smooth; }
@@ -37,14 +37,15 @@ layout: null
       overflow-x: hidden;
     }
     a { color: var(--gold-light); text-decoration: none; }
-    a:hover { color: #e8c87a; }
+    a:hover { color: #5a4008; }
 
     /* ── NAV ── */
     nav {
       position: sticky; top: 0; z-index: 100;
       display: flex; align-items: center; justify-content: space-between;
       padding: 0 2.5rem; height: 60px;
-      background: rgba(6,8,15,.92); backdrop-filter: blur(16px);
+      background: rgba(247,245,240,.96); backdrop-filter: blur(16px);
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
       border-bottom: 1px solid var(--border-gold);
     }
     .nav-logo {
@@ -103,7 +104,7 @@ layout: null
     }
     .hero::before {
       content: ''; position: absolute; inset: 0; pointer-events: none;
-      background: radial-gradient(ellipse 70% 50% at 50% -5%, rgba(185,148,64,.13) 0%, transparent 65%);
+      background: radial-gradient(ellipse 70% 50% at 50% -5%, rgba(140,100,20,.07) 0%, transparent 65%);
     }
     .hero-eyebrow {
       display: inline-flex; align-items: center; gap: .5rem;
@@ -121,11 +122,11 @@ layout: null
     .hero h1 {
       font-family: 'Playfair Display', serif;
       font-size: clamp(2.4rem, 6vw, 4.5rem);
-      font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; color: #f0e8d0;
+      font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; color: #1a1714;
     }
     .hero h1 em {
       font-style: italic;
-      background: linear-gradient(135deg, #e8c87a 0%, var(--gold) 50%, #b07a20 100%);
+      background: linear-gradient(135deg, #a07010 0%, var(--gold) 50%, #6a4808 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
     .hero-lead {
@@ -149,31 +150,32 @@ layout: null
       padding: 1.25rem .9rem; border-radius: var(--radius);
       border: 1px solid var(--border); background: var(--bg-card);
       color: var(--text); font-size: .9rem; font-weight: 600; cursor: pointer;
-      transition: border-color .2s, transform .2s, background .2s;
+      transition: border-color .2s, transform .2s, background .2s, box-shadow .2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06);
       position: relative; overflow: hidden; letter-spacing: .02em;
     }
     .dl-btn::after {
       content: ''; position: absolute; inset: 0; pointer-events: none;
-      background: linear-gradient(180deg, rgba(255,255,255,.03) 0%, transparent 100%);
+      background: linear-gradient(180deg, rgba(255,255,255,.5) 0%, transparent 100%);
     }
     .dl-btn:hover { transform: translateY(-3px); }
     .dl-btn .os-icon { font-size: 1.75rem; }
     .dl-btn .sub { font-size: .72rem; font-weight: 400; color: var(--text-muted); }
     .dl-btn.win { border-color: rgba(0,120,212,.3); }
-    .dl-btn.win:hover { border-color: rgba(0,120,212,.65); background: rgba(0,120,212,.06); }
-    .dl-btn.mac { border-color: rgba(140,140,140,.25); }
-    .dl-btn.mac:hover { border-color: rgba(140,140,140,.55); background: rgba(140,140,140,.06); }
-    .dl-btn.linux { border-color: rgba(185,148,64,.25); }
-    .dl-btn.linux:hover { border-color: var(--border-gold); background: rgba(185,148,64,.06); }
+    .dl-btn.win:hover { border-color: rgba(0,120,212,.7); background: rgba(0,120,212,.05); box-shadow: 0 4px 12px rgba(0,120,212,.1); }
+    .dl-btn.mac { border-color: rgba(100,100,100,.25); }
+    .dl-btn.mac:hover { border-color: rgba(100,100,100,.5); background: rgba(100,100,100,.04); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+    .dl-btn.linux { border-color: rgba(138,106,16,.3); }
+    .dl-btn.linux:hover { border-color: var(--gold-light); background: rgba(138,106,16,.05); box-shadow: 0 4px 12px rgba(138,106,16,.1); }
     .dl-btn.highlighted {
-      border-color: var(--gold);
-      background: rgba(185,148,64,.06);
-      box-shadow: 0 0 0 1px rgba(185,148,64,.3), 0 8px 24px rgba(185,148,64,.06);
+      border-color: var(--gold-light);
+      background: rgba(138,106,16,.05);
+      box-shadow: 0 0 0 1px rgba(138,106,16,.2), 0 4px 16px rgba(138,106,16,.1);
     }
     .dl-btn .recommended-pill {
       display: none; position: absolute; top: .5rem; right: .5rem;
-      background: linear-gradient(135deg, var(--gold), #8a6015);
-      color: #06080f; font-size: .6rem; font-weight: 700;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: #fff; font-size: .6rem; font-weight: 700;
       letter-spacing: .07em; text-transform: uppercase;
       padding: .15rem .45rem; border-radius: 2px;
     }
@@ -193,7 +195,7 @@ layout: null
     .stat .val {
       font-family: 'Playfair Display', serif;
       font-size: 2.25rem; font-weight: 700; line-height: 1; margin-bottom: .3rem;
-      background: linear-gradient(135deg, #e8c87a, var(--gold));
+      background: linear-gradient(135deg, #a07010, var(--gold));
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
     .stat .lbl { font-size: .7rem; letter-spacing: .13em; text-transform: uppercase; color: var(--text-muted); font-weight: 500; }
@@ -209,7 +211,7 @@ layout: null
     .section h2 {
       font-family: 'Playfair Display', serif; text-align: center;
       font-size: clamp(1.65rem, 3.5vw, 2.5rem); font-weight: 700;
-      color: #f0e8d0; line-height: 1.2;
+      color: #1a1714; line-height: 1.2;
     }
     .section .sub {
       text-align: center; color: var(--text-muted); font-size: .95rem;
@@ -223,7 +225,7 @@ layout: null
       border-radius: var(--radius); padding: 1.75rem 1.5rem;
       transition: border-color .2s;
     }
-    .step:hover { border-color: var(--border-gold); }
+    .step:hover { border-color: var(--border-gold); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
     .step-num {
       display: inline-flex; align-items: center; justify-content: center;
       width: 34px; height: 34px;
@@ -232,7 +234,7 @@ layout: null
       font-size: .85rem; margin-bottom: 1rem;
       font-family: 'Playfair Display', serif;
     }
-    .step h3 { font-size: .95rem; font-weight: 600; color: #e8e0cc; margin-bottom: .5rem; letter-spacing: .02em; }
+    .step h3 { font-size: .95rem; font-weight: 600; color: #1a1714; margin-bottom: .5rem; letter-spacing: .02em; }
     .step p { font-size: .84rem; color: var(--text-muted); line-height: 1.65; font-weight: 300; }
 
     /* ── FORMULA ── */
@@ -271,7 +273,7 @@ layout: null
       border: 1px solid rgba(185,148,64,.2); border-radius: 6px;
       font-size: 1.2rem; margin-bottom: .9rem;
     }
-    .feature h3 { font-size: .92rem; font-weight: 600; color: #e8e0cc; margin-bottom: .4rem; letter-spacing: .02em; }
+    .feature h3 { font-size: .92rem; font-weight: 600; color: #1a1714; margin-bottom: .4rem; letter-spacing: .02em; }
     .feature p { font-size: .83rem; color: var(--text-muted); line-height: 1.65; font-weight: 300; }
 
     /* ── PRIVACY ── */
@@ -288,7 +290,7 @@ layout: null
       background: rgba(185,148,64,.08); border: 1px solid rgba(185,148,64,.18);
       border-radius: 4px; font-size: 1.05rem;
     }
-    .privacy-item h4 { font-size: .88rem; font-weight: 600; color: #e8e0cc; margin-bottom: .25rem; }
+    .privacy-item h4 { font-size: .88rem; font-weight: 600; color: #1a1714; margin-bottom: .25rem; }
     .privacy-item p { font-size: .8rem; color: var(--text-muted); font-weight: 300; line-height: 1.6; }
 
     /* ── CTA ── */
@@ -302,7 +304,7 @@ layout: null
     .cta-section h2 {
       font-family: 'Playfair Display', serif;
       font-size: clamp(1.6rem, 3.5vw, 2.5rem); font-weight: 700;
-      color: #f0e8d0; margin-bottom: 1rem;
+      color: #1a1714; margin-bottom: 1rem;
     }
     .cta-section p { color: var(--text-muted); max-width: 480px; margin: 0 auto 2.5rem; font-weight: 300; }
 
@@ -379,7 +381,7 @@ layout: null
       <a class="dl-btn mac" id="btn-mac"
          href="https://github.com/tdespenza/manifestation-algorithm/releases/latest">
         <span class="recommended-pill">Recommended</span>
-        <span class="os-icon"></span>
+        <span class="os-icon">🖥</span>
         <strong>macOS</strong>
         <span class="sub">.dmg &middot; Intel &amp; Apple Silicon</span>
       </a>
@@ -576,7 +578,7 @@ layout: null
       </a>
       <a class="dl-btn mac"
          href="https://github.com/tdespenza/manifestation-algorithm/releases/latest">
-        <span class="os-icon"></span>
+        <span class="os-icon">🖥</span>
         <strong>macOS</strong>
         <span class="sub">.dmg &middot; Intel &amp; Apple Silicon</span>
       </a>
