@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
+    "build": "npm run sync-version && vue-tsc --noEmit && vite build",
     "preview": "vite preview",
+    "sync-version": "node scripts/sync-version.js",
+    "preversion": "npm run sync-version",
     "tauri": "tauri"
   },
   "dependencies": {

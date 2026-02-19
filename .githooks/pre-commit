@@ -1,0 +1,16 @@
+#!/bin/sh
+# Pre-commit hook: Sync version across all config files
+
+echo "🔄 Syncing version across package.json, Cargo.toml, and tauri.conf.json..."
+node scripts/sync-version.js
+
+if [ $? -ne 0 ]; then
+  echo "❌ Version sync failed!"
+  exit 1
+fi
+
+# Stage the updated config files so they're included in the commit
+git add src-tauri/Cargo.toml src-tauri/tauri.conf.json
+
+echo "✅ Version synced and staged"
+exit 0
