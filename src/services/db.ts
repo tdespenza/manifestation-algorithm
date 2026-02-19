@@ -106,14 +106,21 @@ export async function saveHistoricalSession(
     [id, completedAt, totalScore, durationSeconds, notes || null]
   );
 
-  // 2. Save responses
-  for (const [qId, val] of Object.entries(answers)) {
-    const category = getCategory(qId);
-    await db.execute(
-      `INSERT INTO historical_responses (session_id, question_id, category, answer_value) 
-       VALUES ($1, $2, $3, $4)`,
-      [id, qId, category, val]
-    );
+  // 2. Save responses in a single transaction for performance
+  await db.execute('BEGIN TRANSACTION', []);
+  try {
+    for (const [qId, val] of Object.entries(answers)) {
+      const category = getCategory(qId);
+      await db.execute(
+        `INSERT INTO historical_responses (session_id, question_id, category, answer_value) 
+         VALUES ($1, $2, $3, $4)`,
+        [id, qId, category, val]
+      );
+    }
+    await db.execute('COMMIT', []);
+  } catch (e) {
+    await db.execute('ROLLBACK', []);
+    throw e;
   }
 
   // Legacy support: also save to stats table if we want to keep it sync'd or just abandon it.
@@ -167,16 +174,4 @@ export async function loadCategoryTrend(category: string): Promise<CategoryTrend
      ORDER BY s.completed_at ASC`,
     [category]
   );
-}
-
-/**
- * @deprecated Use saveHistoricalSession instead
- */
-export async function saveCompletion(totalScore: number) {
-  const db = await getDb();
-  const date = new Date().toISOString();
-  await db.execute('INSERT INTO stats (completion_date, total_score) VALUES ($1, $2)', [
-    date,
-    totalScore
-  ]);
 }

@@ -17,7 +17,7 @@ use lru::LruCache;
 use std::num::NonZeroUsize;
 use sha2::{Sha256, Digest};
 use cid::Cid;
-use multihash::{Code, MultihashDigest};
+use multihash::Multihash;
 
 
 #[derive(NetworkBehaviour)]
@@ -88,18 +88,23 @@ pub struct ManifestationResult {
 impl ManifestationResult {
     pub fn get_cid(&self) -> Result<String, String> {
         let json_bytes = serde_json::to_vec(self).map_err(|e| e.to_string())?;
-        
-        let hash = Code::Sha2_256.digest(&json_bytes);
-        
+
+        // Compute SHA2-256 digest using the sha2 crate, then wrap into a Multihash.
+        // multihash v0.19 removed Code/MultihashDigest from the root; use Multihash::wrap
+        // instead. SHA2-256 multicodec value is 0x12.
+        let digest = Sha256::digest(&json_bytes);
+        let hash = Multihash::<64>::wrap(0x12, &digest)
+            .map_err(|e| e.to_string())?;
+
         // Use DAG-JSON (0x0129)
         let cid = Cid::new_v1(0x0129, hash);
         Ok(cid.to_string())
     }
 
     pub fn validate(&self) -> Result<(), String> {
-        // 1. Score validation — max possible score is 10,000
+        // 1. Score validation — valid range is 0–10,000 (max from question weights)
         if self.score < 0.0 || self.score > 10_000.0 {
-            return Err(format!("Score {} is out of range (0.0 - 10000.0)", self.score));
+            return Err(format!("Score {} is out of range (0.0 - 10,000.0)", self.score));
         }
 
         // 2. Timestamp validation (not in future)
@@ -115,14 +120,15 @@ impl ManifestationResult {
 
         // 3. Category scores validation
         for (category, &score) in &self.category_scores {
-            if score < 0.0 || score > 10_000.0 {
-                return Err(format!("Category '{}' score {} is out of range", category, score));
-            }
-
-            // 4. Privacy validation (PII check in keys)
-            if category.contains('@') || category.contains("http") { 
+            // 4. Privacy validation (PII check in keys) — must run before range check
+            // so that malformed keys return the correct error regardless of score value
+            if category.contains('@') || category.contains("http") {
                 // Basic heuristic for email/url which might contain PII
                 return Err(format!("Category '{}' contains potential PII or invalid characters", category));
+            }
+
+            if score < 0.0 || score > 10.0 {
+                return Err(format!("Category '{}' score {} is out of range (0.0 - 10.0)", category, score));
             }
         }
 
@@ -494,7 +500,6 @@ fn calculate_percentile(scores: &[f64], percentile: f64) -> Option<f64> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::collections::HashMap;
 
     // ── Percentile tests ──────────────────────────────────────────────────────
 
@@ -544,13 +549,13 @@ mod tests {
 
     #[test]
     fn test_validate_accepts_valid_result() {
-        let r = make_result(75.0, vec![("focus", 80.0), ("gratitude", 60.0)]);
+        let r = make_result(7500.0, vec![("focus", 8.0), ("gratitude", 6.0)]);
         assert!(r.validate().is_ok());
     }
 
     #[test]
     fn test_validate_rejects_score_above_range() {
-        let r = make_result(101.0, vec![]);
+        let r = make_result(10_001.0, vec![]);
         assert!(r.validate().is_err());
     }
 
@@ -561,8 +566,8 @@ mod tests {
     }
 
     #[test]
-    fn test_validate_rejects_category_score_above_100() {
-        let r = make_result(50.0, vec![("focus", 150.0)]);
+    fn test_validate_rejects_category_score_above_10() {
+        let r = make_result(5000.0, vec![("focus", 11.0)]);
         assert!(r.validate().is_err());
     }
 
@@ -594,10 +599,10 @@ mod tests {
     #[test]
     fn test_validate_accepts_normal_category_keys() {
         // Normal category keys should not trigger PII check
-        let r = make_result(50.0, vec![
-            ("meditation", 80.0),
-            ("gratitude_practice", 70.0),
-            ("focus-level", 90.0),
+        let r = make_result(5000.0, vec![
+            ("meditation", 8.0),
+            ("gratitude_practice", 7.0),
+            ("focus-level", 9.0),
         ]);
         assert!(r.validate().is_ok());
     }
@@ -607,7 +612,7 @@ mod tests {
     #[test]
     fn test_signed_manifestation_verifies_correctly() {
         let identity = crate::identity::UserIdentity::generate();
-        let payload = make_result(60.0, vec![("clarity", 55.0)]);
+        let payload = make_result(6000.0, vec![("clarity", 5.5)]);
 
         let signed = SignedManifestation::new(payload, &identity)
             .expect("signing should succeed");
@@ -618,13 +623,13 @@ mod tests {
     #[test]
     fn test_signed_manifestation_rejects_tampered_payload() {
         let identity = crate::identity::UserIdentity::generate();
-        let payload = make_result(60.0, vec![("clarity", 55.0)]);
+        let payload = make_result(6000.0, vec![("clarity", 5.5)]);
 
         let mut signed = SignedManifestation::new(payload, &identity)
             .expect("signing should succeed");
 
         // Tamper with the score
-        signed.payload.score = 99.9;
+        signed.payload.score = 9999.9;
 
         assert!(!signed.verify(), "Signature should NOT verify after payload tampering");
     }
@@ -648,7 +653,7 @@ mod tests {
 
     #[test]
     fn test_cid_generation_is_deterministic() {
-        let r = make_result(75.0, vec![("focus", 80.0)]);
+        let r = make_result(7500.0, vec![("focus", 8.0)]);
         let cid1 = r.get_cid().expect("CID generation failed");
         let cid2 = r.get_cid().expect("CID generation failed");
         assert_eq!(cid1, cid2, "CID must be deterministic for the same payload");
@@ -656,8 +661,8 @@ mod tests {
 
     #[test]
     fn test_cid_changes_when_payload_changes() {
-        let r1 = make_result(75.0, vec![("focus", 80.0)]);
-        let r2 = make_result(76.0, vec![("focus", 80.0)]);
+        let r1 = make_result(7500.0, vec![("focus", 8.0)]);
+        let r2 = make_result(7600.0, vec![("focus", 8.0)]);
         let cid1 = r1.get_cid().unwrap();
         let cid2 = r2.get_cid().unwrap();
         assert_ne!(cid1, cid2, "Different payloads must have different CIDs");

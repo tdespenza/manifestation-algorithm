@@ -20,7 +20,7 @@ const storeMocks = vi.hoisted(() => ({
 vi.mock('@/stores/questionnaire', () => ({
   useQuestionnaireStore: () => ({
     sessionId: 'test-session-id',
-    $reset: storeMocks.reset,
+    reset: storeMocks.reset,
     init: storeMocks.init
   })
 }));

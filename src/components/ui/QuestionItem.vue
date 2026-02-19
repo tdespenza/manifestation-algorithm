@@ -72,7 +72,7 @@ const calculatedScore = computed(() => {
 
 function handleInput(e: Event) {
   const target = e.target as HTMLInputElement;
-  const val = parseInt(target.value);
+  const val = Number.parseInt(target.value);
   internalValue.value = val;
 }
 </script>

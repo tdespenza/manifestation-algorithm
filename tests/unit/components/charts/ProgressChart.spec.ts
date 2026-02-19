@@ -43,13 +43,39 @@ describe('ProgressChart.vue', () => {
     expect(vm.chartData.datasets[0].data).toEqual([3000, 5000, 7000]);
   });
 
-  it('chartData uses blue color', () => {
+  it('chartData uses black color for single points', () => {
     const sessions = [makeSession('s1', '2024-01-01T00:00:00.000Z', 4000)];
     const wrapper = mount(ProgressChart, { props: { sessions } });
     const vm = wrapper.vm as unknown as {
       chartData: { datasets: Array<{ borderColor: string }> };
     };
-    expect(vm.chartData.datasets[0].borderColor).toBe('#0047AB');
+    expect(vm.chartData.datasets[0].borderColor).toBe('#000000');
+  });
+
+  it('chartData uses black color for upward trend', () => {
+    const sessions = [
+      makeSession('s2', '2024-01-02T00:00:00.000Z', 5000), // Newer (Last)
+      makeSession('s1', '2024-01-01T00:00:00.000Z', 3000) // Older (First)
+    ]; // Sessions come DESC from parent
+    const wrapper = mount(ProgressChart, { props: { sessions } });
+    const vm = wrapper.vm as unknown as {
+      chartData: { datasets: Array<{ borderColor: string }> };
+    };
+    // 3000 -> 5000 is UP
+    expect(vm.chartData.datasets[0].borderColor).toBe('#000000');
+  });
+
+  it('chartData uses red color for downward trend', () => {
+    const sessions = [
+      makeSession('s2', '2024-01-02T00:00:00.000Z', 3000), // Newer (Last)
+      makeSession('s1', '2024-01-01T00:00:00.000Z', 5000) // Older (First)
+    ];
+    const wrapper = mount(ProgressChart, { props: { sessions } });
+    const vm = wrapper.vm as unknown as {
+      chartData: { datasets: Array<{ borderColor: string }> };
+    };
+    // 5000 -> 3000 is DOWN
+    expect(vm.chartData.datasets[0].borderColor).toBe('#d32f2f');
   });
 
   it('generates localeDateString labels', () => {

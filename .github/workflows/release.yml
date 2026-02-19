@@ -1,4 +1,4 @@
-name: Release
+name: Publish Release
 
 # Triggered by pushing a version tag, e.g. git tag v1.2.3 && git push --tags
 on:
@@ -7,12 +7,16 @@ on:
       - 'v*'
 
 permissions:
-  contents: write # needed to create the GitHub Release and upload assets
+  contents: write
 
 # Build all three platforms in parallel, then publish a single GitHub Release.
 jobs:
   build:
-    name: Build ${{ matrix.name }}
+    name: Build & Publish (${{ matrix.name }})
+    # Explicit job-level permission ensures GITHUB_TOKEN can create releases
+    # even in organisations that restrict workflow-level token inheritance.
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -27,23 +31,24 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v6
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Set Up Node.js
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'npm'
 
-      - name: Setup Rust (stable)
+      - name: Set Up Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache Rust build artifacts
+      - name: Cache Rust Dependencies
         uses: swatinem/rust-cache@v2
         with:
           workspaces: './src-tauri -> target'
 
-      - name: Install Linux system dependencies
+      - name: Install Linux System Dependencies
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
@@ -53,10 +58,10 @@ jobs:
             librsvg2-dev \
             patchelf
 
-      - name: Install frontend dependencies
+      - name: Install Dependencies
         run: npm ci
 
-      - name: Build Tauri app and publish release
+      - name: Build Tauri App and Publish Release
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

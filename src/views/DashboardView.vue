@@ -185,9 +185,6 @@ onMounted(() => {
 }
 
 .export-btn {
-  position: absolute;
-  right: 0;
-  top: 0;
   padding: 8px 16px;
   background: white;
   border: 1px solid #ddd;

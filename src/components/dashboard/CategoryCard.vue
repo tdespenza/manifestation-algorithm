@@ -29,7 +29,8 @@ import {
   PointElement,
   LineElement,
   Tooltip,
-  type ChartOptions
+  type ChartOptions,
+  type ScriptableLineSegmentContext
 } from 'chart.js';
 
 const props = defineProps<{
@@ -71,26 +72,28 @@ const scoreClass = computed(() => {
   return 'low';
 });
 
-const isUptrend = computed(() =>
-  props.trendData.length > 1
-    ? props.trendData[props.trendData.length - 1] >= props.trendData[0]
-    : true
-);
-
-const chartData = computed(() => ({
-  labels: props.dates,
-  datasets: [
-    {
-      data: props.trendData,
-      borderColor: isUptrend.value ? '#000000' : '#f44336',
-      borderWidth: 2,
-      pointRadius: 0,
-      pointHoverRadius: 4,
-      fill: false,
-      tension: 0.3
-    }
-  ]
-}));
+const chartData = computed(() => {
+  const isDowntrend =
+    props.trendData.length > 1 && props.trendData[props.trendData.length - 1] < props.trendData[0];
+  return {
+    labels: props.dates,
+    datasets: [
+      {
+        data: props.trendData,
+        borderColor: isDowntrend ? '#f44336' : '#000000',
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        fill: false,
+        tension: 0.3,
+        segment: {
+          borderColor: (ctx: ScriptableLineSegmentContext) =>
+            (ctx.p1.parsed.y ?? 0) >= (ctx.p0.parsed.y ?? 0) ? '#000000' : '#f44336'
+        }
+      }
+    ]
+  };
+});
 
 const chartOptions: ChartOptions<'line'> = {
   responsive: true,

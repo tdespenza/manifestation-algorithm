@@ -7,4 +7,10 @@ import './assets/main.css';
 const app = createApp(App);
 app.use(createPinia());
 app.use(router);
+
+// Global error handler — prevents uncaught component errors from crashing the whole app
+app.config.errorHandler = (err, _instance, info) => {
+  console.error('[Vue error]', info, err);
+};
+
 app.mount('#app');

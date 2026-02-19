@@ -12,7 +12,7 @@
  *   plugin:sql|close   → no-op
  *   plugin:opener|open_url → no-op
  */
-export const TAURI_MOCK_SCRIPT = `
+export const TAURI_MOCK_SCRIPT = String.raw`
 (function () {
   // ── In-memory database ─────────────────────────────────────────────
   const memDB = {
@@ -27,15 +27,15 @@ export const TAURI_MOCK_SCRIPT = `
   // ── SQL helpers ────────────────────────────────────────────────────
   function parseInsertOrReplace(sql, params) {
     // INSERT [OR REPLACE] INTO <table> (...) VALUES (...)
-    const tableMatch = sql.match(/INTO\\s+(\\w+)/i);
+    const tableMatch = sql.match(/INTO\s+(\w+)/i);
     if (!tableMatch) return;
     const table = tableMatch[1].toLowerCase();
     const rows = memDB[table];
     if (!rows) return;
 
     // Map $1,$2,... to actual params
-    const values = sql.match(/VALUES\\s*\\(([^)]+)\\)/i)?.[1].split(',') ?? [];
-    const colsMatch = sql.match(/\\(([^)]+)\\)\\s*VALUES/i)?.[1].split(',') ?? [];
+    const values = sql.match(/VALUES\s*\(([^)]+)\)/i)?.[1].split(',') ?? [];
+    const colsMatch = sql.match(/\(([^)]+)\)\s*VALUES/i)?.[1].split(',') ?? [];
     const cols = colsMatch.map(c => c.trim());
     const rowData = {};
     cols.forEach((col, i) => {
@@ -65,13 +65,13 @@ export const TAURI_MOCK_SCRIPT = `
   }
 
   function parseDelete(sql, params) {
-    const tableMatch = sql.match(/FROM\\s+(\\w+)/i);
+    const tableMatch = sql.match(/FROM\s+(\w+)/i);
     if (!tableMatch) return;
     const table = tableMatch[1].toLowerCase();
     const rows = memDB[table];
     if (!rows) return;
     
-    const whereMatch = sql.match(/WHERE\\s+(.+)/i);
+    const whereMatch = sql.match(/WHERE\s+(.+)/i);
     if (!whereMatch) { memDB[table] = []; return; }
     
     const condition = whereMatch[1].trim();
@@ -88,13 +88,13 @@ export const TAURI_MOCK_SCRIPT = `
   }
 
   function parseSelect(sql, params) {
-    const tableMatch = sql.match(/FROM\\s+(\\w+)/i);
+    const tableMatch = sql.match(/FROM\s+(\w+)/i);
     if (!tableMatch) return [];
     const table = tableMatch[1].toLowerCase();
     const rows = memDB[table];
     if (!rows) return [];
     
-    const whereMatch = sql.match(/WHERE\\s+(.+?)(\\s+ORDER|\\s+LIMIT|\\s+GROUP|$)/i);
+    const whereMatch = sql.match(/WHERE\s+(.+?)(\s+ORDER|\s+LIMIT|\s+GROUP|$)/i);
     if (!whereMatch) return rows.slice();
     
     const condition = whereMatch[1].trim();

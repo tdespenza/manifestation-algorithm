@@ -67,16 +67,6 @@ describe('Database Service', () => {
     });
   });
 
-  it('saveCompletion should save stats', async () => {
-    await dbService.saveCompletion(5000);
-    // expect.arrayContaining doesn't work well directly on args list for partial match
-    // Check second argument array
-    expect(mocks.execute).toHaveBeenCalledWith(
-      expect.stringContaining('INSERT INTO stats'),
-      expect.arrayContaining([5000])
-    );
-  });
-
   it('clearSession deletes responses and settings entries', async () => {
     await dbService.clearSession('sess-1');
     expect(mocks.execute).toHaveBeenCalledWith(
@@ -194,5 +184,19 @@ describe('Database Service', () => {
       ['Health']
     );
     expect(result).toEqual(rows);
+  });
+
+  it('saveHistoricalSession rolls back and rethrows on INSERT failure', async () => {
+    // Let the BEGIN TRANSACTION and session INSERT succeed, then fail on response INSERT
+    mocks.execute
+      .mockResolvedValueOnce([]) // BEGIN TRANSACTION
+      .mockResolvedValueOnce([]) // INSERT INTO historical_sessions
+      .mockRejectedValueOnce(new Error('Insert failed')); // INSERT INTO historical_responses
+
+    await expect(dbService.saveHistoricalSession(1000, { '1a': 5 })).rejects.toThrow(
+      'Insert failed'
+    );
+
+    expect(mocks.execute).toHaveBeenCalledWith('ROLLBACK', []);
   });
 });

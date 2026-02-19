@@ -25,7 +25,7 @@ describe('detectTrend', () => {
 
   it('returns "stable" for very small positive slope below threshold', () => {
     // Values oscillate very slightly – slope well within ±0.05
-    const nearFlat = [5.01, 5.0, 5.02, 5.01, 5.0, 5.01];
+    const nearFlat = [5.01, 5, 5.02, 5.01, 5, 5.01];
     expect(detectTrend(nearFlat)).toBe('stable');
   });
 

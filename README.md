@@ -1,8 +1,13 @@
 # Manifestation Algorithm
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-violet.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/tests-267%20passing-brightgreen)](#testing)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
+[![Tauri](https://img.shields.io/badge/Tauri-2.x-orange)](https://tauri.app/)
 
-A privacy-first desktop application for tracking and scoring personal development practices, built with **Tauri + Vue 3 + TypeScript**.
+A **privacy-first** desktop application for tracking and scoring personal development practices across 40 weighted categories, built with **Tauri 2 + Vue 3 + TypeScript** on the frontend and **Rust + libp2p** on the backend.
+
+> **Offline-first.** All data is stored locally in SQLite — nothing leaves your machine unless you explicitly opt in to anonymous peer ranking.
 
 ---
 
@@ -158,6 +163,6 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 Copyright © 2026 Global Information Network
 
-Created By Giovanni Ilacqua
+Created by Giovanni Ilacqua
 
 Updated by Tyshawn Despenza

@@ -26,7 +26,7 @@
       </div>
 
       <div class="score-summary">
-        <div class="max-info">Max: 10,000</div>
+        <div class="max-info">Max: {{ maxScore.toLocaleString() }}</div>
         <div class="current-score" :class="{ success: score >= 5000 }">{{ formattedScore }}</div>
         <div class="score-label">Current Score</div>
       </div>
@@ -54,7 +54,6 @@
       </div>
       <QuestionItem
         v-if="store.currentQuestion"
-        ref="activeItemRef"
         :question="store.currentQuestion"
         :highlighted="true"
       />
@@ -106,6 +105,7 @@ import { computed, onMounted, ref, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuestionnaireStore } from '../../stores/questionnaire';
 import { questions as allTopLevelQuestions } from '../../data/questions';
+import { getMaxPossibleScore } from '../../services/scoring';
 import type { Question } from '../../types';
 import QuestionItem from './QuestionItem.vue';
 import ResumeDialog from './ResumeDialog.vue';
@@ -113,7 +113,6 @@ import ResumeDialog from './ResumeDialog.vue';
 const store = useQuestionnaireStore();
 const router = useRouter();
 const containerRef = ref<HTMLElement | null>(null);
-const activeItemRef = ref<InstanceType<typeof QuestionItem> | null>(null);
 const questionRefs: Record<string, HTMLElement> = {};
 const mode = ref<'scroll' | 'step'>('scroll');
 const submitError = ref<string | null>(null);
@@ -129,6 +128,7 @@ const leafQuestions = flattenLeaves(allTopLevelQuestions);
 
 const isSaving = computed(() => store.isSaving);
 const score = computed(() => store.score);
+const maxScore = getMaxPossibleScore();
 const formattedScore = computed(() => Math.round(score.value).toLocaleString());
 const isComplete = computed(() => store.isComplete);
 const answeredCount = computed(
@@ -154,7 +154,7 @@ function handleGlobalKey(e: KeyboardEvent) {
     e.preventDefault();
     store.goToPrev();
   } else if (e.key >= '1' && e.key <= '9') {
-    const val = parseInt(e.key);
+    const val = Number.parseInt(e.key);
     if (store.currentQuestion) store.setAnswer(store.currentQuestion.id, val);
   } else if (e.key === '0') {
     // '0' key = 10
@@ -163,7 +163,10 @@ function handleGlobalKey(e: KeyboardEvent) {
 }
 
 const submit = async () => {
+  // Allow submission even if 0% complete (defaults apply)
+  // However, check isComplete just in case store logic changes later (currently always true)
   if (!isComplete.value || isSubmitting.value) return;
+
   submitError.value = null;
   isSubmitting.value = true;
   try {

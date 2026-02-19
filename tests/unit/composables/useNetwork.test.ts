@@ -137,15 +137,15 @@ describe('useNetwork composable', () => {
         peer_count: 2,
         connected_peers: [],
         total_manifestations: 10,
-        avg_score: 60.0,
-        percentile_90: 80.0,
-        category_stats: { focus: { avg: 70.0, p90: 85.0 } },
+        avg_score: 60,
+        percentile_90: 80,
+        category_stats: { focus: { avg: 70, p90: 85 } },
         bandwidth_in: 100,
         bandwidth_out: 50
       }
     });
 
-    expect(categoryStats.value['focus']).toEqual({ avg: 70.0, p90: 85.0 });
+    expect(categoryStats.value['focus']).toEqual({ avg: 70, p90: 85 });
   });
 
   it('cleanup() calls the unlisten function', async () => {

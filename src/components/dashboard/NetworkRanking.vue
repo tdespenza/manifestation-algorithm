@@ -81,7 +81,7 @@ function formatBytes(bytes: number, decimals = 2) {
   const dm = decimals;
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+  return `${Number.parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
 </script>
 
@@ -112,6 +112,12 @@ h4 {
   gap: 1rem;
 }
 
+@media (max-width: 600px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .stat-box {
   background: #f8f9fa;
   padding: 1rem;
@@ -122,7 +128,7 @@ h4 {
 
 .stat-box.primary {
   background: #e3f2fd;
-  color: #1976d2;
+  color: #0d47a1;
 }
 
 .stat-box.accent {
@@ -151,6 +157,19 @@ h4 {
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+@media (max-width: 600px) {
+  .category-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .cat-name {
+    width: 100%;
+    margin-bottom: 0.25rem;
+  }
 }
 
 .cat-name {
