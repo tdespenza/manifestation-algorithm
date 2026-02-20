@@ -30,6 +30,9 @@ describe('Database Service', () => {
 
   it('initTables should run migrations on first connect', async () => {
     await dbService.getDb();
+    // WAL mode and busy_timeout are set before migrations to prevent SQLITE_BUSY
+    expect(mocks.execute).toHaveBeenCalledWith('PRAGMA journal_mode=WAL', []);
+    expect(mocks.execute).toHaveBeenCalledWith('PRAGMA busy_timeout=5000', []);
     // Expect execute to be called for CREATE TABLE
     expect(mocks.execute).toHaveBeenCalledWith(
       expect.stringContaining('CREATE TABLE IF NOT EXISTS stats')
@@ -186,10 +189,12 @@ describe('Database Service', () => {
     expect(result).toEqual(rows);
   });
 
-  it('saveHistoricalSession rolls back and rethrows on INSERT failure', async () => {
-    // Let the BEGIN TRANSACTION and session INSERT succeed, then fail on response INSERT
+  it('saveHistoricalSession rethrows on INSERT failure', async () => {
+    // Session INSERT succeeds, then response INSERT fails.
+    // No BEGIN/COMMIT/ROLLBACK — those were removed because tauri-plugin-sql's
+    // connection pool dispatches execute() calls across connections, making
+    // manual transaction statements unreliable (SQLITE_BUSY, code 5).
     mocks.execute
-      .mockResolvedValueOnce([]) // BEGIN TRANSACTION
       .mockResolvedValueOnce([]) // INSERT INTO historical_sessions
       .mockRejectedValueOnce(new Error('Insert failed')); // INSERT INTO historical_responses
 
@@ -197,7 +202,7 @@ describe('Database Service', () => {
       'Insert failed'
     );
 
-    expect(mocks.execute).toHaveBeenCalledWith('ROLLBACK', []);
+    expect(mocks.execute).not.toHaveBeenCalledWith('ROLLBACK', []);
   });
 
   it('deleteSession deletes responses then session row', async () => {

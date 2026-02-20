@@ -10,6 +10,12 @@ export async function getDb(): Promise<Database> {
     // Basic SQLite connection string.
     // Usually 'sqlite:manifestation.db' creates the file in AppData directory managed by Tauri.
     db = await Database.load('sqlite:manifestation.db');
+    // WAL mode allows concurrent reads alongside writes and is far less prone to
+    // SQLITE_BUSY (code 5) errors.  The busy_timeout gives the writer up to
+    // 5 seconds to retry before surfacing an error, which covers any momentary
+    // lock from another pool connection or in-flight query.
+    await db.execute('PRAGMA journal_mode=WAL', []);
+    await db.execute('PRAGMA busy_timeout=5000', []);
     await runMigrations(db);
   }
   return db;
@@ -106,21 +112,18 @@ export async function saveHistoricalSession(
     [id, completedAt, totalScore, durationSeconds, notes || null]
   );
 
-  // 2. Save responses in a single transaction for performance
-  await db.execute('BEGIN TRANSACTION', []);
-  try {
-    for (const [qId, val] of Object.entries(answers)) {
-      const category = getCategory(qId);
-      await db.execute(
-        `INSERT INTO historical_responses (session_id, question_id, category, answer_value) 
-         VALUES ($1, $2, $3, $4)`,
-        [id, qId, category, val]
-      );
-    }
-    await db.execute('COMMIT', []);
-  } catch (e) {
-    await db.execute('ROLLBACK', []);
-    throw e;
+  // 2. Save responses – run individual inserts without an explicit
+  // BEGIN/COMMIT wrapper.  tauri-plugin-sql uses a connection pool and manual
+  // transaction statements (BEGIN/COMMIT via db.execute) can be dispatched
+  // to different pool connections, causing SQLITE_BUSY.  With WAL mode +
+  // busy_timeout (set in getDb) each auto-committed insert is safe and fast.
+  for (const [qId, val] of Object.entries(answers)) {
+    const category = getCategory(qId);
+    await db.execute(
+      `INSERT INTO historical_responses (session_id, question_id, category, answer_value) 
+       VALUES ($1, $2, $3, $4)`,
+      [id, qId, category, val]
+    );
   }
 
   // Legacy support: also save to stats table if we want to keep it sync'd or just abandon it.
