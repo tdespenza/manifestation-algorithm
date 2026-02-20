@@ -140,17 +140,25 @@ jobs:
         with:
           name: installers-${{ matrix.name }}
           path: ${{ matrix.artifact-paths }}
-          if-no-files-found: error
+          # warn (not error) so a failed build doesn't block the other platforms
+          # from uploading and doesn't prevent the release job from running.
+          if-no-files-found: warn
           retention-days: 1
 
   # ── 3. Create release and upload all installers in one atomic step ────────
-  # Runs only after every platform build succeeds.  All artifacts are already
-  # in Actions storage, so we delete any stale release, then create a fresh
-  # published release with all files in a single gh release create call.
-  # No draft-to-published transition, no race condition, no immutable errors.
+  # Runs after every platform build completes (success or failure).  Only the
+  # artifacts from successful builds are uploaded.  If every build failed the
+  # job exits early without creating a release.
   release:
     name: Publish Release
     needs: [resolve-tag, build]
+    # always() lets this job run even when some build matrix entries failed.
+    # We still require resolve-tag to have succeeded and at least one build
+    # to have run (result is 'success' or 'failure', never 'skipped').
+    if: |
+      always() &&
+      needs.resolve-tag.result == 'success' &&
+      (needs.build.result == 'success' || needs.build.result == 'failure')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -180,7 +188,20 @@ jobs:
       - name: List downloaded files
         run: find dist -type f | sort
 
+      - name: Check whether any artifacts were downloaded
+        id: guard
+        run: |
+          count=$(find dist -type f 2>/dev/null | wc -l | tr -d ' ')
+          if [ "$count" -eq 0 ]; then
+            echo "::warning::No installer artifacts from any build — skipping release creation."
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "$count installer file(s) ready for release."
+            echo "has_files=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Delete any existing release for this tag
+        if: steps.guard.outputs.has_files == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -195,6 +216,7 @@ jobs:
             --yes 2>/dev/null || true
 
       - name: Create and publish release with all installers
+        if: steps.guard.outputs.has_files == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
