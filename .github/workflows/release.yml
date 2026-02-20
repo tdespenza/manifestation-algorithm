@@ -161,7 +161,11 @@ jobs:
             PRERELEASE_FLAG="--prerelease"
           fi
 
-          gh release create "$TAG" $(find dist -type f) \
+          # Create the release without assets first.
+          # Assets are uploaded separately via xargs -0 so that filenames
+          # containing spaces (e.g. "Manifestation Algorithm_0.1.0.dmg")
+          # are handled correctly — $(find …) word-splits on spaces.
+          gh release create "$TAG" \
             --repo "${{ github.repository }}" \
             --title "Manifestation Algorithm $TAG" \
             --notes "## What's new
@@ -170,4 +174,8 @@ jobs:
           ## Installation
           Download the installer for your platform below." \
             $PRERELEASE_FLAG
+
+          # Upload all installer files, preserving spaces in filenames.
+          find dist -type f -print0 | xargs -0 gh release upload "$TAG" \
+            --repo "${{ github.repository }}"
 
