@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+# Pre-push hook — pull latest from remote before pushing to avoid conflicts.
+
+set -e
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  Pre-push: pulling latest changes"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+BRANCH="$(git symbolic-ref --short HEAD)"
+echo ""
+echo "▶ Pulling origin/$BRANCH..."
+git pull origin "$BRANCH" --rebase
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  ✓ Pull complete. Proceeding with push."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
