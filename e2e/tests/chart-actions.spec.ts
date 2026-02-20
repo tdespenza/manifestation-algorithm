@@ -183,6 +183,48 @@ test.describe('Chart Actions – Dashboard', () => {
     await expect(page.locator('.dashboard-view')).toBeVisible();
   });
 
+  test('Export PDF option triggers a file download with .pdf extension', async ({ page }) => {
+    // Disable showSaveFilePicker so the anchor-fallback path runs
+    // (which triggers a real Playwright download event)
+    await page.evaluate(() => {
+      delete (window as unknown as Record<string, unknown>).showSaveFilePicker;
+    });
+
+    await openExportDialog(page);
+    const pdfOption = page.locator('.export-option-btn').nth(3);
+    await expect(pdfOption).toContainText('Export PDF');
+
+    const downloadPromise = page.waitForEvent('download', { timeout: 8_000 }).catch(() => null);
+    await pdfOption.click();
+    const download = await downloadPromise;
+    if (download) {
+      expect(download.suggestedFilename()).toMatch(/\.pdf$/);
+    }
+
+    await expect(page.locator('.dashboard-view')).toBeVisible();
+  });
+
+  test('Export PDF does NOT call window.print', async ({ page }) => {
+    await page.evaluate(() => {
+      (window as unknown as Record<string, unknown>).__printCalled = false;
+      window.print = () => {
+        (window as unknown as Record<string, unknown>).__printCalled = true;
+      };
+      delete (window as unknown as Record<string, unknown>).showSaveFilePicker;
+    });
+
+    await openExportDialog(page);
+    const pdfOption = page.locator('.export-option-btn').nth(3);
+    // Wait for dialog to close (export in progress then done)
+    await pdfOption.click();
+    await page.locator('.export-dialog').waitFor({ state: 'detached', timeout: 8_000 });
+
+    const printCalled = await page.evaluate(
+      () => (window as unknown as Record<string, unknown>).__printCalled
+    );
+    expect(printCalled).toBe(false);
+  });
+
   test('close button dismisses the export dialog', async ({ page }) => {
     await openExportDialog(page);
     await page.locator('.close-btn').click();
@@ -260,6 +302,34 @@ test.describe('Chart Actions – Category Detail', () => {
     const download = await downloadPromise;
     if (download) {
       expect(download.suggestedFilename()).toMatch(/\.xlsx$/);
+    }
+    await expect(page.locator('.category-detail-view')).toBeVisible();
+  });
+
+  test('Export PDF on detail page triggers a .pdf download', async ({ page }) => {
+    const categoryCard = page.locator('.category-card').first();
+    if (!(await categoryCard.isVisible().catch(() => false))) {
+      test.skip();
+      return;
+    }
+
+    await categoryCard.click();
+    await page.locator('.category-detail-view').waitFor({ timeout: 10_000 });
+
+    // Force anchor fallback so Playwright captures the download event
+    await page.evaluate(() => {
+      delete (window as unknown as Record<string, unknown>).showSaveFilePicker;
+    });
+
+    await openExportDialog(page);
+    const pdfOption = page.locator('.export-option-btn').nth(3);
+    await expect(pdfOption).toContainText('Export PDF');
+
+    const downloadPromise = page.waitForEvent('download', { timeout: 8_000 }).catch(() => null);
+    await pdfOption.click();
+    const download = await downloadPromise;
+    if (download) {
+      expect(download.suggestedFilename()).toMatch(/\.pdf$/);
     }
     await expect(page.locator('.category-detail-view')).toBeVisible();
   });

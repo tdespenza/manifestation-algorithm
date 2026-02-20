@@ -18,7 +18,7 @@ const mockExportToCSV = vi
   .mockResolvedValue({ success: true, message: 'Saved my_export.csv' });
 const mockExportToPDF = vi
   .fn()
-  .mockReturnValue({ success: true, message: 'Print-to-PDF dialog opened' });
+  .mockResolvedValue({ success: true, message: 'My_PDF.pdf saved to Downloads' });
 const mockExportToHTML = vi.fn().mockResolvedValue({ success: true, message: 'Saved chart.html' });
 const mockCopyChart = vi.fn().mockResolvedValue(true);
 
@@ -140,6 +140,7 @@ describe('ChartActions.vue', () => {
     await nextTick();
     const buttons = document.querySelectorAll('.export-option-btn');
     (buttons[3] as HTMLButtonElement).click();
+    await flushPromises();
     await nextTick();
     expect(mockExportToPDF).toHaveBeenCalledWith('my-chart', 'My Chart Title');
     expect(document.querySelector('.export-dialog')).toBeNull();
@@ -289,12 +290,13 @@ describe('ChartActions.vue', () => {
   });
 
   it('handlePDFExport shows error toast when exportToPDF returns success: false', async () => {
-    mockExportToPDF.mockReturnValueOnce({ success: false, message: 'PDF failed' });
+    mockExportToPDF.mockResolvedValueOnce({ success: false, message: 'PDF failed' });
     const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
     await wrapper.find('.export-trigger-btn').trigger('click');
     await nextTick();
     const buttons = document.querySelectorAll('.export-option-btn');
     (buttons[3] as HTMLButtonElement).click(); // PDF is button index 3
+    await flushPromises();
     await nextTick();
     expect(mockAddToast).toHaveBeenCalledWith('PDF failed', 'error');
     wrapper.unmount();

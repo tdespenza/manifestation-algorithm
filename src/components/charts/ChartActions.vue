@@ -112,11 +112,8 @@ const handleExcelExport = () =>
 const handleCSVExport = () =>
   runExport('Preparing CSV', () => exportToCSV(props.data, props.filename));
 
-const handlePDFExport = () => {
-  const result = exportToPDF(props.targetId, props.title);
-  showDialog.value = false;
-  addToast(result.message, result.success ? 'info' : 'error');
-};
+const handlePDFExport = () =>
+  runExport('Preparing PDF', () => exportToPDF(props.targetId, props.title));
 
 const handleHTMLExport = () =>
   runExport('Preparing HTML', () => exportToHTML(props.targetId, props.title));
