@@ -175,3 +175,24 @@ export async function loadCategoryTrend(category: string): Promise<CategoryTrend
     [category]
   );
 }
+
+/**
+ * Delete a single historical session and all its responses.
+ */
+export async function deleteSession(id: string): Promise<void> {
+  const db = await getDb();
+  // Delete responses first (explicit, avoids relying on SQLite FK pragma)
+  await db.execute('DELETE FROM historical_responses WHERE session_id = $1', [id]);
+  await db.execute('DELETE FROM historical_sessions WHERE id = $1', [id]);
+}
+
+/**
+ * Delete multiple historical sessions and all their responses.
+ */
+export async function deleteSessions(ids: string[]): Promise<void> {
+  if (ids.length === 0) return;
+  const db = await getDb();
+  const placeholders = ids.map((_, i) => `$${i + 1}`).join(', ');
+  await db.execute(`DELETE FROM historical_responses WHERE session_id IN (${placeholders})`, ids);
+  await db.execute(`DELETE FROM historical_sessions WHERE id IN (${placeholders})`, ids);
+}

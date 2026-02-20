@@ -13,8 +13,7 @@ permissions:
   contents: write
 
 jobs:
-  # Resolve the version tag from package.json on main so the matrix jobs
-  # share a single consistent value.
+  # ── 1. Resolve the version tag ────────────────────────────────────────────
   resolve-tag:
     name: Resolve Version Tag
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
@@ -31,10 +30,38 @@ jobs:
         id: version
         run: echo "tag=v$(jq -r .version package.json)" >> "$GITHUB_OUTPUT"
 
-  # Build all three platforms in parallel, then publish a single GitHub Release.
-  build:
-    name: Build & Publish (${{ matrix.name }})
+  # ── 2. Create a single draft release before any builds start ─────────────
+  # All three build jobs upload into this one release so they never race to
+  # create it themselves, which causes the "immutable release" error.
+  create-release:
+    name: Create Draft Release
     needs: resolve-tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      release-id: ${{ steps.create.outputs.id }}
+    steps:
+      - name: Create draft GitHub release
+        id: create
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.resolve-tag.outputs.tag }}
+          name: 'Manifestation Algorithm ${{ needs.resolve-tag.outputs.tag }}'
+          body: |
+            ## What's new
+            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ needs.resolve-tag.outputs.tag }}/CHANGELOG.md) for full release notes.
+
+            ## Installation
+            Download the installer for your platform below.
+          draft: true
+          prerelease: ${{ contains(needs.resolve-tag.outputs.tag, '-') }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  # ── 3. Build all three platforms in parallel ─────────────────────────────
+  build:
+    name: Build (${{ matrix.name }})
+    needs: [resolve-tag, create-release]
     permissions:
       contents: write
     strategy:
@@ -87,18 +114,27 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Build Tauri App and Publish Release
+      - name: Build and Upload Assets
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: ${{ needs.resolve-tag.outputs.tag }}
-          releaseName: 'Manifestation Algorithm ${{ needs.resolve-tag.outputs.tag }}'
-          releaseBody: |
-            ## What's new
-            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ needs.resolve-tag.outputs.tag }}/CHANGELOG.md) for full release notes.
+          # Attach to the existing draft release instead of creating a new one.
+          # This prevents all three matrix jobs racing to create the same release
+          # which causes "Cannot upload assets to an immutable release".
+          releaseId: ${{ needs.create-release.outputs.release-id }}
 
-            ## Installation
-            Download the installer for your platform below.
-          releaseDraft: false
-          prerelease: ${{ contains(needs.resolve-tag.outputs.tag, '-') }}
+  # ── 4. Publish the release once all builds have uploaded their assets ─────
+  publish-release:
+    name: Publish Release
+    needs: [resolve-tag, create-release, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Publish draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.resolve-tag.outputs.tag }}
+          draft: false
+          token: ${{ secrets.GITHUB_TOKEN }}

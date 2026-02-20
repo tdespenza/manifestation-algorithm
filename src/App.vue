@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router';
+import { RouterLink, RouterView, useRoute } from 'vue-router';
+import { computed } from 'vue';
 import NetworkStatus from './components/NetworkStatus.vue';
+import AppToast from './components/ui/AppToast.vue';
 import logoUrl from './assets/logo.svg';
+
+const route = useRoute();
+const mainClass = computed(() => (route.name === 'dashboard' ? 'full-width-main' : 'container'));
 </script>
 
 <template>
@@ -9,9 +14,8 @@ import logoUrl from './assets/logo.svg';
     <nav class="main-nav">
       <div class="nav-content">
         <div class="nav-left">
-          <router-link to="/" class="nav-logo">
+          <router-link to="/" class="nav-logo" aria-label="Manifestation Algorithm">
             <img :src="logoUrl" alt="Manifestation Algorithm" class="nav-logo-img" />
-            <span class="nav-logo-text">Manifestation Algorithm</span>
           </router-link>
           <div class="nav-links">
             <router-link to="/" active-class="active">Questionnaire</router-link>
@@ -31,7 +35,7 @@ import logoUrl from './assets/logo.svg';
       </div>
     </nav>
 
-    <main class="container">
+    <main :class="mainClass">
       <router-view v-slot="{ Component }">
         <transition name="fade" mode="out-in">
           <component :is="Component" />
@@ -39,6 +43,7 @@ import logoUrl from './assets/logo.svg';
       </router-view>
     </main>
   </div>
+  <AppToast />
 </template>
 
 <style scoped>
@@ -134,6 +139,12 @@ import logoUrl from './assets/logo.svg';
 }
 
 .container {
+  padding-top: 20px;
+  padding-bottom: 40px;
+}
+
+.full-width-main {
+  width: 100%;
   padding-top: 20px;
   padding-bottom: 40px;
 }

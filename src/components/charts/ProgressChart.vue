@@ -1,11 +1,21 @@
 <template>
-  <div class="chart-container">
-    <Line :data="chartData" :options="chartOptions" />
+  <div class="progress-chart-wrapper">
+    <ChartActions
+      target-id="progress-chart-print-area"
+      title="Progress Trend"
+      :data="exportData"
+      filename="progress_trend"
+    />
+    <div id="progress-chart-print-area" class="chart-container">
+      <h2 class="print-only">Progress Trend</h2>
+      <Line :data="chartData" :options="chartOptions" />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import ChartActions from './ChartActions.vue';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -57,6 +67,31 @@ const chartData = computed(() => {
 const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      display: true,
+      labels: {
+        generateLabels: () => [
+          {
+            text: 'Improving',
+            strokeStyle: '#000000',
+            fillStyle: '#000000',
+            lineWidth: 2,
+            hidden: false,
+            datasetIndex: 0
+          },
+          {
+            text: 'Declining',
+            strokeStyle: '#d32f2f',
+            fillStyle: '#d32f2f',
+            lineWidth: 2,
+            hidden: false,
+            datasetIndex: 0
+          }
+        ]
+      }
+    }
+  },
   scales: {
     y: {
       beginAtZero: true,
@@ -64,11 +99,43 @@ const chartOptions = {
     }
   }
 };
+
+const exportData = computed(() => {
+  const sorted = [...props.sessions].reverse();
+  return sorted.map(s => ({
+    Date: new Date(s.completed_at).toLocaleDateString(),
+    Time: new Date(s.completed_at).toLocaleTimeString(),
+    'Total Score': s.total_score
+  }));
+});
 </script>
 
 <style scoped>
+.progress-chart-wrapper {
+  width: 100%;
+}
+
 .chart-container {
   height: 400px;
   width: 100%;
+  background: white;
+}
+
+.print-only {
+  display: none;
+}
+
+@media print {
+  .print-only {
+    display: block;
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--deep-twilight);
+  }
+  .chart-container {
+    height: 80vh !important;
+    width: 100vw !important;
+    padding: 20px;
+  }
 }
 </style>

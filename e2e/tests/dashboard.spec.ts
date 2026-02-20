@@ -43,7 +43,7 @@ test.describe('Dashboard – with historical data', () => {
     await page.locator('.dashboard-view').waitFor({ timeout: 10_000 });
     await seedDB({
       historical_sessions: [
-        { id: SESSION_ID, score: 6500, completed_at: now },
+        { id: SESSION_ID, total_score: 6500, completed_at: now },
       ],
       historical_responses: [
         { session_id: SESSION_ID, question_number: '1a', answer_value: 8, recorded_at: now },
@@ -100,5 +100,81 @@ test.describe('Dashboard – navigation', () => {
       await page.waitForURL('/dashboard', { timeout: 5_000 });
       await expect(page.locator('.dashboard-view')).toBeVisible();
     }
+  });
+});
+
+test.describe('Dashboard – session deletion', () => {
+  const SESSION_A = 'e2e-delete-session-a';
+  const SESSION_B = 'e2e-delete-session-b';
+  const now = new Date().toISOString();
+  const yesterday = new Date(Date.now() - 86_400_000).toISOString();
+
+  test.beforeEach(async ({ page }) => {
+    // Use addInitScript so seed data persists across every page load/reload
+    await page.addInitScript(
+      (data) => {
+        (window as unknown as { __tauriSeedDB?: (d: unknown) => void }).__tauriSeedDB?.(data);
+      },
+      {
+        historical_sessions: [
+          { id: SESSION_A, total_score: 7000, completed_at: now },
+          { id: SESSION_B, total_score: 5000, completed_at: yesterday }
+        ]
+      } as unknown as Record<string, unknown>
+    );
+    await page.goto('/dashboard');
+    await page.locator('.dashboard-view').waitFor({ timeout: 10_000 });
+    await page.waitForTimeout(500);
+  });
+
+  test('Select button appears in the sessions header', async ({ dashboardPage }) => {
+    await expect(dashboardPage.selectModeBtn).toBeVisible();
+  });
+
+  test('entering selection mode shows Cancel button and hides Select button', async ({ dashboardPage }) => {
+    await dashboardPage.enterSelectionMode();
+    await expect(dashboardPage.cancelSelectBtn).toBeVisible();
+    await expect(dashboardPage.selectModeBtn).not.toBeVisible();
+  });
+
+  test('Cancel button exits selection mode and shows Select button again', async ({ dashboardPage }) => {
+    await dashboardPage.enterSelectionMode();
+    await dashboardPage.exitSelectionMode();
+    await expect(dashboardPage.selectModeBtn).toBeVisible();
+    await expect(dashboardPage.cancelSelectBtn).not.toBeVisible();
+  });
+
+  test('clicking a session card in selection mode shows the check badge', async ({ dashboardPage }) => {
+    await dashboardPage.enterSelectionMode();
+    await dashboardPage.clickSessionCard(0);
+    const firstCard = dashboardPage.sessionCards.first();
+    await expect(firstCard.locator('.session-check.checked')).toBeVisible();
+  });
+
+  test('Delete button appears after selecting a session', async ({ dashboardPage }) => {
+    await dashboardPage.enterSelectionMode();
+    await dashboardPage.clickSessionCard(0);
+    await expect(dashboardPage.deleteSelectedBtn).toBeVisible();
+  });
+
+  test('bulk delete removes selected sessions from the list', async ({ dashboardPage, page }) => {
+    const countBefore = await dashboardPage.sessionCards.count();
+    await dashboardPage.enterSelectionMode();
+    await dashboardPage.clickSessionCard(0); // select first session
+    await dashboardPage.deleteSelected();
+    // Wait for the list to update
+    await page.waitForTimeout(800);
+    const countAfter = await dashboardPage.sessionCards.count();
+    expect(countAfter).toBeLessThan(countBefore);
+  });
+
+  test('inline delete button removes a single session', async ({ dashboardPage, page }) => {
+    const countBefore = await dashboardPage.sessionCards.count();
+    // Hover over first session card to reveal inline delete button
+    await dashboardPage.sessionCards.first().hover();
+    await dashboardPage.clickInlineDelete(0);
+    await page.waitForTimeout(800);
+    const countAfter = await dashboardPage.sessionCards.count();
+    expect(countAfter).toBeLessThan(countBefore);
   });
 });

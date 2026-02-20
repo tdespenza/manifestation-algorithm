@@ -23,7 +23,6 @@
     "test:all": "npm run test && npm run test:e2e",
     "ci": "npm run lint:check && npm run format:check && npm run deps:validate && vue-tsc --noEmit && npm run test && npx playwright test --project=chromium",
     "prepare": "husky",
-
     "lint": "eslint src tests --fix",
     "lint:check": "eslint src tests",
     "format": "prettier --write \"src/**/*.{ts,vue}\" \"tests/**/*.ts\"",
@@ -51,7 +50,8 @@
     "uuid": "^13.0.0",
     "vue": "^3.5.13",
     "vue-chartjs": "^5.3.3",
-    "vue-router": "^5.0.2"
+    "vue-router": "^5.0.2",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

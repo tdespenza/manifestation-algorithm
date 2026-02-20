@@ -2,6 +2,7 @@
   <!-- Resume Dialog -->
   <ResumeDialog
     v-if="store.hasSavedSession"
+    :is-historical="store.isHistoricalPreFill"
     @resume="store.resumeSession()"
     @fresh="store.startFresh()"
   />

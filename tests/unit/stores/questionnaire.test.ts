@@ -59,8 +59,35 @@ describe('Questionnaire Store', () => {
       await store.init();
 
       expect(store.answers['1a']).toBe(9);
-      // But HAS NOT set hasSavedSession=true (because it's fresh start with pre-fill)
-      expect(store.hasSavedSession).toBe(false);
+      // NOW sets hasSavedSession=true so ResumeDialog appears and user can start fresh
+      expect(store.hasSavedSession).toBe(true);
+      expect(store.isHistoricalPreFill).toBe(true);
+    });
+
+    it('init skips prefill when historical responses have no valid question IDs', async () => {
+      // No current session
+      dbMocks.loadAnswers.mockResolvedValue({});
+      // History exists but responses only contain unknown question IDs
+      dbMocks.loadHistoricalSessions.mockResolvedValue([{ id: 'hist-old' }]);
+      dbMocks.loadSessionResponses.mockResolvedValue([
+        { question_id: 'invalid-unknown-id', category: 'Old', answer_value: 7 }
+      ]);
+
+      const store = useQuestionnaireStore();
+      await store.init();
+
+      // historyAnswers is empty → answers stays empty
+      expect(store.answers).toEqual({});
+    });
+
+    it('init skips prefill when no historical sessions exist', async () => {
+      dbMocks.loadAnswers.mockResolvedValue({});
+      dbMocks.loadHistoricalSessions.mockResolvedValue([]); // empty history
+
+      const store = useQuestionnaireStore();
+      await store.init();
+
+      expect(store.answers).toEqual({});
     });
 
     it('init should clear answers if session expired', async () => {

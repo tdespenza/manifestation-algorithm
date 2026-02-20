@@ -124,7 +124,7 @@ test.describe('Questionnaire – step-by-step mode', () => {
     expect(text).toMatch(/Question 3 of/);
   });
 
-  test('next button is disabled on last question', async ({ questionnairePage, page }) => {
+  test('next button is disabled on last question', async ({ questionnairePage }) => {
     // Navigate to the last question using the keyboard shortcut loop
     const text = await questionnairePage.stepCounter.textContent() ?? '';
     const total = Number.parseInt(text.match(/of (\d+)/)?.[1] ?? '1');
@@ -188,7 +188,7 @@ test.describe('Questionnaire – submission', () => {
 });
 
 test.describe('Questionnaire – resume dialog', () => {
-  test('shows resume dialog when a saved session exists', async ({ page, seedDB, resetDB }) => {
+  test('shows resume dialog when a saved session exists', async ({ page, seedDB }) => {
     // Seed a recent last_active so the session is NOT expired
     const session_id = 'e2e-test-session';
     await page.goto('/');
