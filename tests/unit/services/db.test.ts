@@ -30,6 +30,9 @@ describe('Database Service', () => {
 
   it('initTables should run migrations on first connect', async () => {
     await dbService.getDb();
+    // WAL mode and busy_timeout are set before migrations to prevent SQLITE_BUSY
+    expect(mocks.execute).toHaveBeenCalledWith('PRAGMA journal_mode=WAL', []);
+    expect(mocks.execute).toHaveBeenCalledWith('PRAGMA busy_timeout=5000', []);
     // Expect execute to be called for CREATE TABLE
     expect(mocks.execute).toHaveBeenCalledWith(
       expect.stringContaining('CREATE TABLE IF NOT EXISTS stats')
@@ -65,16 +68,6 @@ describe('Database Service', () => {
       q1: 5,
       q2: 8
     });
-  });
-
-  it('saveCompletion should save stats', async () => {
-    await dbService.saveCompletion(5000);
-    // expect.arrayContaining doesn't work well directly on args list for partial match
-    // Check second argument array
-    expect(mocks.execute).toHaveBeenCalledWith(
-      expect.stringContaining('INSERT INTO stats'),
-      expect.arrayContaining([5000])
-    );
   });
 
   it('clearSession deletes responses and settings entries', async () => {
@@ -194,5 +187,51 @@ describe('Database Service', () => {
       ['Health']
     );
     expect(result).toEqual(rows);
+  });
+
+  it('saveHistoricalSession rethrows on INSERT failure', async () => {
+    // Session INSERT succeeds, then response INSERT fails.
+    // No BEGIN/COMMIT/ROLLBACK — those were removed because tauri-plugin-sql's
+    // connection pool dispatches execute() calls across connections, making
+    // manual transaction statements unreliable (SQLITE_BUSY, code 5).
+    mocks.execute
+      .mockResolvedValueOnce([]) // INSERT INTO historical_sessions
+      .mockRejectedValueOnce(new Error('Insert failed')); // INSERT INTO historical_responses
+
+    await expect(dbService.saveHistoricalSession(1000, { '1a': 5 })).rejects.toThrow(
+      'Insert failed'
+    );
+
+    expect(mocks.execute).not.toHaveBeenCalledWith('ROLLBACK', []);
+  });
+
+  it('deleteSession deletes responses then session row', async () => {
+    await dbService.deleteSession('sess-del');
+    expect(mocks.execute).toHaveBeenCalledWith(
+      expect.stringContaining('DELETE FROM historical_responses'),
+      ['sess-del']
+    );
+    expect(mocks.execute).toHaveBeenCalledWith(
+      expect.stringContaining('DELETE FROM historical_sessions'),
+      ['sess-del']
+    );
+  });
+
+  it('deleteSessions deletes responses and sessions for all ids', async () => {
+    await dbService.deleteSessions(['s1', 's2']);
+    expect(mocks.execute).toHaveBeenCalledWith(
+      expect.stringContaining('DELETE FROM historical_responses'),
+      ['s1', 's2']
+    );
+    expect(mocks.execute).toHaveBeenCalledWith(
+      expect.stringContaining('DELETE FROM historical_sessions'),
+      ['s1', 's2']
+    );
+  });
+
+  it('deleteSessions does nothing when given an empty array', async () => {
+    const callsBefore = mocks.execute.mock.calls.length;
+    await dbService.deleteSessions([]);
+    expect(mocks.execute.mock.calls.length).toBe(callsBefore);
   });
 });

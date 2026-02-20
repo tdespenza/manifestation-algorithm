@@ -3,16 +3,17 @@ import { ref, computed } from 'vue';
 import { calculateScore } from '../services/scoring';
 import { questions } from '../data/questions';
 import type { Question } from '../types';
+import { SESSION_TIMEOUT_MS } from '../constants';
 import {
   saveAnswer as dbSaveAnswer,
   loadAnswers,
   getLastActive,
   updateLastActive,
   clearSession,
-  saveHistoricalSession
+  saveHistoricalSession,
+  loadHistoricalSessions,
+  loadSessionResponses
 } from '../services/db';
-
-const SESSION_TIMEOUT_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 function getLeafQuestions(qs: Question[]): Question[] {
   let leaves: Question[] = [];
@@ -42,16 +43,12 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
     return Math.floor((answered / TOTAL_QUESTIONS_COUNT) * 100);
   });
 
-  const isComplete = computed(() =>
-    // All questions default to 1, so they are always "complete" in a sense.
-    // We only check if explicit answers are valid (1-10).
-    // If no answer is present, it's implicitly 1.
-    allQuestions.every(q => {
-      const val = answers.value[q.id];
-      if (val === undefined) return true;
-      return typeof val === 'number' && val >= 1 && val <= 10;
-    })
-  );
+  const isComplete = computed(() => {
+    // Return true to allow immediate submission (all defaults = 1)
+    // The previous logic required every question to be explicitly answered,
+    // which prevented users from accepting defaults.
+    return true;
+  });
 
   /** Total leaf question count */
   const totalQuestions = computed(() => TOTAL_QUESTIONS_COUNT);
@@ -79,12 +76,14 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
 
   /** True if there's a saved session with data (for resume dialog) */
   const hasSavedSession = ref(false);
+  /** True when hasSavedSession was triggered by a historical pre-fill (not an in-progress session) */
+  const isHistoricalPreFill = ref(false);
 
   async function init() {
     try {
       const lastActive = await getLastActive(sessionId.value);
       if (lastActive) {
-        const timeSince = Date.now() - parseInt(lastActive, 10);
+        const timeSince = Date.now() - Number.parseInt(lastActive, 10);
         if (timeSince > SESSION_TIMEOUT_MS) {
           await clearSession(sessionId.value);
           answers.value = {};
@@ -96,7 +95,35 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
 
       const saved = await loadAnswers(sessionId.value);
       hasSavedSession.value = Object.keys(saved).length > 0;
-      answers.value = saved;
+
+      // If no current session, try to load the most recent historical answers
+      // to pre-fill (per requirement: "questionnaire must remember the last scores")
+      if (Object.keys(saved).length === 0) {
+        const history = await loadHistoricalSessions();
+        if (history.length > 0) {
+          const lastSessionId = history[0].id; // Most recent due to DESC order
+          const lastResponses = await loadSessionResponses(lastSessionId);
+          const historyAnswers: Record<string, number> = {};
+
+          lastResponses.forEach(r => {
+            // Only load if valid question ID (in case questions changed)
+            if (allQuestions.some(q => q.id === r.question_id)) {
+              historyAnswers[r.question_id] = r.answer_value;
+            }
+          });
+
+          if (Object.keys(historyAnswers).length > 0) {
+            answers.value = historyAnswers;
+            // Show the ResumeDialog so the user can choose to continue from
+            // their last scores OR start completely blank (Start Fresh).
+            hasSavedSession.value = true;
+            isHistoricalPreFill.value = true;
+          }
+        }
+      } else {
+        answers.value = saved;
+      }
+
       await updateLastActive(sessionId.value);
     } catch (e) {
       console.error('Failed to init store:', e);
@@ -115,17 +142,22 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
     answers.value = {};
     currentIndex.value = 0;
     hasSavedSession.value = false;
+    isHistoricalPreFill.value = false;
     await updateLastActive(sessionId.value);
   }
 
   async function setAnswer(questionId: string, value: number) {
     if (value < 1 || value > 10) return;
+    // Validate that questionId exists in the known leaf questions
+    if (!allQuestions.some(q => q.id === questionId)) {
+      console.error('Invalid question ID:', questionId);
+      return;
+    }
     answers.value[questionId] = value;
     try {
       isSaving.value = true;
       await dbSaveAnswer(sessionId.value, questionId, value);
       updateLastActive(sessionId.value).catch(console.error);
-      await new Promise(r => setTimeout(r, 300));
     } catch (e) {
       console.error('Failed to save answer:', e);
     } finally {
@@ -141,7 +173,8 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
       for (const q of allQuestions) {
         fullAnswers[q.id] = answers.value[q.id] ?? 1;
       }
-      const finalScore = score.value;
+      // Recalculate score from the complete answer set (including default fills)
+      const finalScore = calculateScore(fullAnswers);
       const historyId = await saveHistoricalSession(finalScore, fullAnswers);
       await clearSession(sessionId.value);
       answers.value = {};
@@ -155,6 +188,14 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
     }
   }
 
+  /** Reset all in-memory state (for use after clearing a session). */
+  function reset() {
+    answers.value = {};
+    currentIndex.value = 0;
+    hasSavedSession.value = false;
+    isSaving.value = false;
+  }
+
   return {
     answers,
     score,
@@ -164,6 +205,7 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
     currentQuestion,
     currentIndex,
     hasSavedSession,
+    isHistoricalPreFill,
     init,
     resumeSession,
     startFresh,
@@ -172,6 +214,7 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
     goToIndex,
     setAnswer,
     submitSession,
+    reset,
     sessionId,
     isSaving
   };

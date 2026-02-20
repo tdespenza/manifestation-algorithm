@@ -6,8 +6,17 @@
     </header>
 
     <div class="detail-content">
-      <div class="main-chart-container">
-        <Line :data="chartData" :options="chartOptions" />
+      <div class="chart-section">
+        <ChartActions
+          target-id="category-chart-print-area"
+          :title="`${category} Trend`"
+          :data="exportData"
+          :filename="`${category.replace(/\\s+/g, '_')}_trend`"
+        />
+        <div id="category-chart-print-area" class="main-chart-container">
+          <h2 class="print-only">{{ category }} Trend</h2>
+          <Line :data="chartData" :options="chartOptions" />
+        </div>
       </div>
 
       <div class="data-table-container">
@@ -41,6 +50,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useHistoryStore } from '../stores/history';
 import { Line } from 'vue-chartjs';
+import ChartActions from '../components/charts/ChartActions.vue';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -50,7 +60,8 @@ import {
   Title,
   Tooltip,
   Legend,
-  type ChartOptions
+  type ChartOptions,
+  type ScriptableLineSegmentContext
 } from 'chart.js';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
@@ -77,18 +88,21 @@ const reversedHistory = computed(() => {
 
 const chartData = computed(() => {
   const data = categoryData.value;
-  const isUptrend = data.length > 1 ? data[data.length - 1].value >= data[0].value : true;
-  const lineColor = isUptrend ? '#000000' : '#f44336';
+  const isDowntrend = data.length > 1 && data[data.length - 1].value < data[0].value;
   return {
     labels: data.map(d => new Date(d.date).toLocaleDateString()),
     datasets: [
       {
         label: category.value,
         data: data.map(d => d.value),
-        borderColor: lineColor,
-        backgroundColor: isUptrend ? 'rgba(0,0,0,0.08)' : 'rgba(244,67,54,0.1)',
+        borderColor: isDowntrend ? '#f44336' : '#000000',
+        backgroundColor: 'transparent',
         tension: 0.2,
-        fill: true
+        fill: false,
+        segment: {
+          borderColor: (ctx: ScriptableLineSegmentContext) =>
+            (ctx.p1.parsed.y ?? 0) >= (ctx.p0.parsed.y ?? 0) ? '#000000' : '#f44336'
+        }
       }
     ]
   };
@@ -114,7 +128,7 @@ const chartOptions: ChartOptions<'line'> = {
         stepSize: 1
       },
       grid: {
-        color: '#333'
+        color: '#e0e0e0'
       }
     },
     x: {
@@ -136,14 +150,41 @@ const getScoreClass = (score: number) => {
 };
 
 const formatScore = (score: number) => Number(score).toFixed(2);
+
+const exportData = computed(() => {
+  return reversedHistory.value.map(entry => ({
+    Date: new Date(entry.date).toLocaleDateString(),
+    Time: new Date(entry.date).toLocaleTimeString(),
+    Score: Number(entry.value).toFixed(2)
+  }));
+});
 </script>
 
 <style scoped>
+.print-only {
+  display: none;
+}
+
+@media print {
+  .print-only {
+    display: block;
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--deep-twilight);
+  }
+  .main-chart-container {
+    height: 80vh !important;
+    width: 100vw !important;
+    padding: 20px;
+    background: white;
+  }
+}
+
 .category-detail-view {
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  color: #fff;
+  color: var(--deep-twilight, #0f0758);
 }
 
 .view-header {
@@ -154,17 +195,19 @@ const formatScore = (score: number) => Number(score).toFixed(2);
 }
 
 .back-btn {
-  background: none;
-  border: 1px solid #666;
-  color: #ccc;
+  background: white;
+  border: 1px solid #ddd;
+  color: #555;
   padding: 0.5rem 1rem;
   cursor: pointer;
   border-radius: 4px;
+  transition: all 0.2s;
 }
 
 .back-btn:hover {
-  background: #333;
-  color: #fff;
+  background: #f8f9fa;
+  color: #333;
+  border-color: #bbb;
 }
 
 .detail-content {
@@ -173,17 +216,25 @@ const formatScore = (score: number) => Number(score).toFixed(2);
   gap: 2rem;
 }
 
+.chart-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 .main-chart-container {
-  background: #1e1e1e;
+  background: white;
   padding: 1.5rem;
-  border-radius: 8px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   height: 400px;
 }
 
 .data-table-container {
-  background: #1e1e1e;
+  background: white;
   padding: 1.5rem;
-  border-radius: 8px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   max-height: 400px;
   overflow-y: auto;
 }
@@ -197,23 +248,33 @@ const formatScore = (score: number) => Number(score).toFixed(2);
 .history-table td {
   padding: 0.75rem;
   text-align: left;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid #eee;
+  color: #333;
 }
 
 .history-table th {
-  color: #888;
-  font-weight: normal;
+  color: #666;
+  font-weight: 600;
 }
 
 .high-score {
-  color: #42b983;
+  color: #2e7d32;
   font-weight: bold;
 }
 .med-score {
-  color: #f1c40f;
+  color: #e65100;
 }
 .low-score {
-  color: #e74c3c;
+  color: #c62828;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 4rem;
+  color: #666;
 }
 
 @media (max-width: 768px) {

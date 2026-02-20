@@ -40,7 +40,7 @@ export default tseslint.config(
 
   // --- Project-specific overrides ---
   {
-    files: ['src/**/*.{ts,tsx,vue}', 'tests/**/*.{ts,tsx}'],
+    files: ['src/**/*.{ts,tsx,vue}', 'tests/**/*.{ts,tsx}', 'e2e/**/*.{ts,tsx}'],
     languageOptions: {
       parserOptions: {
         parser: tseslint.parser,
@@ -76,7 +76,7 @@ export default tseslint.config(
 
   // --- Test files: relax some rules ---
   {
-    files: ['tests/**/*.{ts,tsx}'],
+    files: ['tests/**/*.{ts,tsx}', 'e2e/**/*.{ts,tsx}'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       'no-console': 'off',

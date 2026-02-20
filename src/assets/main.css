@@ -57,3 +57,46 @@ h1 {
 .fade-leave-to {
   opacity: 0;
 }
+
+/* Print Styles */
+@media print {
+  @page {
+    size: landscape;
+    margin: 0;
+  }
+
+  body.printing-chart {
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  body.printing-chart * {
+    visibility: hidden;
+  }
+
+  body.printing-chart .print-target,
+  body.printing-chart .print-target * {
+    visibility: visible;
+  }
+
+  body.printing-chart .print-target {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    padding: 40px;
+    box-sizing: border-box;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Hide non-essential elements during print */
+  .no-print {
+    display: none !important;
+  }
+}

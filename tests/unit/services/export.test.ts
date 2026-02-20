@@ -108,15 +108,16 @@ describe('Export Service', () => {
 
     // Mock DOM APIs
     const mockClick = vi.fn();
+    const mockRemove = vi.fn();
     const mockAppend = vi.spyOn(document.body, 'appendChild').mockImplementation(el => el);
-    const mockRemove = vi.spyOn(document.body, 'removeChild').mockImplementation(el => el);
     const mockCreateObjectURL = vi.fn().mockReturnValue('blob:test');
     const mockCreateElement = vi.spyOn(document, 'createElement').mockReturnValue({
       setAttribute: vi.fn(),
       style: {},
-      click: mockClick
+      click: mockClick,
+      remove: mockRemove
     } as unknown as HTMLElement);
-    global.URL.createObjectURL = mockCreateObjectURL;
+    globalThis.URL.createObjectURL = mockCreateObjectURL;
 
     await exportToCSV();
 
@@ -125,7 +126,6 @@ describe('Export Service', () => {
     expect(mockRemove).toHaveBeenCalled();
 
     mockAppend.mockRestore();
-    mockRemove.mockRestore();
     mockCreateElement.mockRestore();
   });
 });

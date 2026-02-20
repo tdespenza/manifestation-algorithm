@@ -137,15 +137,15 @@ describe('useNetwork composable', () => {
         peer_count: 2,
         connected_peers: [],
         total_manifestations: 10,
-        avg_score: 60.0,
-        percentile_90: 80.0,
-        category_stats: { focus: { avg: 70.0, p90: 85.0 } },
+        avg_score: 60,
+        percentile_90: 80,
+        category_stats: { focus: { avg: 70, p90: 85 } },
         bandwidth_in: 100,
         bandwidth_out: 50
       }
     });
 
-    expect(categoryStats.value['focus']).toEqual({ avg: 70.0, p90: 85.0 });
+    expect(categoryStats.value['focus']).toEqual({ avg: 70, p90: 85 });
   });
 
   it('cleanup() calls the unlisten function', async () => {
@@ -177,7 +177,7 @@ describe('useNetwork composable', () => {
     expect(sharingEnabled.value).toBe(true);
   });
 
-  it('loadSharingState sets sharingEnabled to false when invoke throws', async () => {
+  it('loadSharingState leaves sharingEnabled unchanged when invoke throws', async () => {
     // Make get_network_sharing throw so the catch block is exercised
     mockInvoke.mockImplementation((cmd: string) => {
       if (cmd === 'get_network_sharing') return Promise.reject(new Error('permission denied'));
@@ -188,7 +188,9 @@ describe('useNetwork composable', () => {
     const { init, sharingEnabled } = useNetwork();
     await init();
 
-    // The catch block in loadSharingState should have set sharingEnabled to false
+    // The catch block preserves the current value rather than forcing false,
+    // preventing an already-enabled setting from being silently reverted.
+    // After _resetNetworkState() the value starts as false, so false is expected here.
     expect(sharingEnabled.value).toBe(false);
   });
 

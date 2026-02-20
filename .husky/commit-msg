@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# Version bumping is handled by the auto-merge CI workflow so that
+# version files are never left in a dirty state during local development.
+# See .github/workflows/auto-merge.yml.

@@ -20,6 +20,14 @@ export class DashboardPage {
   readonly networkRanking: Locator;
   readonly progressChart: Locator;
 
+  /* Selection / delete */
+  readonly selectModeBtn: Locator;
+  readonly cancelSelectBtn: Locator;
+  readonly deleteSelectedBtn: Locator;
+  readonly sessionCards: Locator;
+  readonly sessionCheckBadges: Locator;
+  readonly inlineDeleteBtns: Locator;
+
   constructor(page: Page) {
     this.page = page;
 
@@ -34,6 +42,13 @@ export class DashboardPage {
     this.categoryCards = page.locator('.category-card');
     this.networkRanking = page.locator('.network-ranking');
     this.progressChart = page.locator('canvas').first();
+
+    this.selectModeBtn = page.locator('button.select-mode-btn');
+    this.cancelSelectBtn = page.locator('button.cancel-select-btn');
+    this.deleteSelectedBtn = page.locator('button.delete-selected-btn-sm');
+    this.sessionCards = page.locator('.session-card');
+    this.sessionCheckBadges = page.locator('.session-check');
+    this.inlineDeleteBtns = page.locator('.delete-btn-inline');
   }
 
   async goto() {
@@ -63,5 +78,30 @@ export class DashboardPage {
 
   async getCategoryCount(): Promise<number> {
     return this.categoryCards.count();
+  }
+
+  /** Enter selection mode by clicking the Select button. */
+  async enterSelectionMode() {
+    await this.selectModeBtn.click();
+  }
+
+  /** Cancel selection mode. */
+  async exitSelectionMode() {
+    await this.cancelSelectBtn.click();
+  }
+
+  /** Click a session card by 0-based index to toggle selection. */
+  async clickSessionCard(index: number) {
+    await this.sessionCards.nth(index).click();
+  }
+
+  /** Click the "Delete N" button in selection mode. */
+  async deleteSelected() {
+    await this.deleteSelectedBtn.click();
+  }
+
+  /** Click the inline hover-delete button for a session card by index. */
+  async clickInlineDelete(index: number) {
+    await this.inlineDeleteBtns.nth(index).click();
   }
 }

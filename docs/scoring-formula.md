@@ -73,8 +73,8 @@ Table of weights extracted from the legacy system:
 | **20** | **Science of Personal Mastery Course** | **750** | **Input** |
 | **21** | **Watch the words you speak** | **200** | **Input** |
 | **22** | **Physiology / Dress for success** | **50** | **Input** |
-| **23** | **Clear Counter Intentions** | **1400** | **Container** |
-| 23a | Money Processes | 600 | Input |
+| **23** | **Clear Counter Intentions** | **1250** | **Container** |
+| 23a | Money Processes | 500 | Input |
 | 23b | Relationship Processes | 150 | Input |
 | 23c | Leadership Processes | 150 | Input |
 | 23d | Communication Processes | 100 | Input |
@@ -110,3 +110,43 @@ Table of weights extracted from the legacy system:
 | **Single Item** | Q2=10, rest=0 | $100 \times 1.0$ | 100 |
 
 Note: "0" rating is not possible in standard UI (min is 1), but effectively represents unanswered.
+
+## Default Rating for Unanswered Questions
+
+When a session is submitted, any question that was never touched by the user receives a default rating of **1** (not 0). This is applied in `questionnaire` store's `submitSession()` before the score is calculated:
+
+```typescript
+// questionnaire.ts — submitSession()
+const fullAnswers: AnswerSheet = {};
+for (const q of questions) {
+  const subIds = q.subPoints?.map(s => s.id) ?? [q.id];
+  for (const id of subIds) {
+    fullAnswers[id] = answers.value[id] ?? 1; // default = 1, not 0
+  }
+}
+```
+
+This means a completely empty submission scores **1,000 points** (10% of maximum), not 0.
+
+## getMaxPossibleScore()
+
+The `scoring.ts` service exposes a helper that computes the theoretical maximum:
+
+```typescript
+function getMaxPossibleScore(): number {
+  const allTen: AnswerSheet = {};
+  for (const q of questions) {
+    const targets = q.subPoints ?? [q];
+    for (const t of targets) {
+      allTen[t.id] = 10;
+    }
+  }
+  return calculateScore(allTen); // always 10,000
+}
+```
+
+This is used by the dashboard percentage display:
+
+```typescript
+const percent = (score / getMaxPossibleScore()) * 100;
+```

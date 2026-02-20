@@ -1,6 +1,12 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router';
+import { RouterLink, RouterView, useRoute } from 'vue-router';
+import { computed } from 'vue';
 import NetworkStatus from './components/NetworkStatus.vue';
+import AppToast from './components/ui/AppToast.vue';
+import logoUrl from './assets/logo.svg';
+
+const route = useRoute();
+const mainClass = computed(() => (route.name === 'dashboard' ? 'full-width-main' : 'container'));
 </script>
 
 <template>
@@ -8,7 +14,9 @@ import NetworkStatus from './components/NetworkStatus.vue';
     <nav class="main-nav">
       <div class="nav-content">
         <div class="nav-left">
-          <router-link to="/" class="nav-logo">MA</router-link>
+          <router-link to="/" class="nav-logo" aria-label="Manifestation Algorithm">
+            <img :src="logoUrl" alt="Manifestation Algorithm" class="nav-logo-img" />
+          </router-link>
           <div class="nav-links">
             <router-link to="/" active-class="active">Questionnaire</router-link>
             <router-link to="/dashboard" active-class="active">History</router-link>
@@ -27,7 +35,7 @@ import NetworkStatus from './components/NetworkStatus.vue';
       </div>
     </nav>
 
-    <main class="container">
+    <main :class="mainClass">
       <router-view v-slot="{ Component }">
         <transition name="fade" mode="out-in">
           <component :is="Component" />
@@ -35,6 +43,7 @@ import NetworkStatus from './components/NetworkStatus.vue';
       </router-view>
     </main>
   </div>
+  <AppToast />
 </template>
 
 <style scoped>
@@ -68,11 +77,30 @@ import NetworkStatus from './components/NetworkStatus.vue';
 }
 
 .nav-logo {
-  font-weight: 900;
-  font-size: 1.5rem;
-  color: var(--true-cobalt, #0047ab);
+  display: flex;
+  align-items: center;
+  gap: 8px;
   text-decoration: none;
-  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.nav-logo-img {
+  width: 36px;
+  height: 36px;
+  filter: drop-shadow(0 0 5px rgba(185, 148, 64, 0.3));
+  transition: filter 0.25s;
+}
+
+.nav-logo-text {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #333;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.nav-logo:hover .nav-logo-img {
+  filter: drop-shadow(0 0 10px rgba(185, 148, 64, 0.55));
 }
 
 .nav-links {
@@ -111,6 +139,12 @@ import NetworkStatus from './components/NetworkStatus.vue';
 }
 
 .container {
+  padding-top: 20px;
+  padding-bottom: 40px;
+}
+
+.full-width-main {
+  width: 100%;
   padding-top: 20px;
   padding-bottom: 40px;
 }

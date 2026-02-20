@@ -7,29 +7,43 @@
 
     <div class="settings-group">
       <div class="setting-item">
-        <label>Reset Progress</label>
-        <button class="btn btn-danger" @click="confirmClear">Clear All Answers</button>
+        <span class="setting-label">Reset Progress</span>
+        <button id="clear-answers-btn" class="btn btn-danger" @click="confirmClear">
+          Clear All Answers
+        </button>
       </div>
 
       <div class="setting-about">
-        <p>Manifestation Algorithm v0.1.0</p>
+        <p>Manifestation Algorithm {{ appVersion }}</p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue';
+import { getVersion } from '@tauri-apps/api/app';
 import { useQuestionnaireStore } from '../../stores/questionnaire';
 import { clearSession } from '../../services/db';
 
-const emit = defineEmits(['close']); // Typo fix, was using string usage
+const emit = defineEmits(['close']);
+const appVersion = ref('...');
+onMounted(async () => {
+  try {
+    appVersion.value = `v${await getVersion()}`;
+  } catch {
+    appVersion.value = 'v0.2.2';
+  }
+});
+
+// Typo fix, was using string usage
 const store = useQuestionnaireStore();
 
 async function confirmClear() {
   if (confirm('Are you sure? This will delete all your answers.')) {
     await clearSession(store.sessionId);
-    store.$reset(); // Pinia reset
-    store.init(); // Reload clean state
+    store.reset();
+    store.init();
     emit('close');
   }
 }
@@ -52,6 +66,11 @@ async function confirmClear() {
   margin-bottom: 2rem;
   border-bottom: 1px solid #eee;
   padding-bottom: 1rem;
+}
+
+.setting-label {
+  font-weight: 500;
+  color: #374151;
 }
 
 .setting-item {

@@ -136,8 +136,8 @@ describe('NetworkRanking.vue', () => {
   it('shows category breakdown when categoryStats has entries', async () => {
     mockIsConnected.value = true;
     mockCategoryStats.value = {
-      Wellness: { avg: 72.5, p90: 88.0, count: 10 },
-      Career: { avg: 65.0, p90: 80.0, count: 5 }
+      Wellness: { avg: 72.5, p90: 88, count: 10 },
+      Career: { avg: 65, p90: 80, count: 5 }
     };
     const wrapper = mount(NetworkRanking);
     await wrapper.vm.$nextTick();

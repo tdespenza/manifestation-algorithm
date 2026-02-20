@@ -7,6 +7,11 @@ vi.mock('vue-chartjs', () => ({
   Line: { template: '<canvas class="line-chart-stub" />' }
 }));
 
+// ── Stub ChartActions ────────────────────────────────────────────────────────
+vi.mock('@/components/charts/ChartActions.vue', () => ({
+  default: { template: '<div class="chart-actions-stub" />' }
+}));
+
 // ── Mock history store using hoisted plain state ──────────────────────────────
 const storeState = vi.hoisted(() => ({
   isLoading: false,
@@ -229,5 +234,52 @@ describe('CategoryDetailView.vue', () => {
     expect(btn.exists()).toBe(true);
     await btn.trigger('click');
     expect(routerMocks.push).toHaveBeenCalledWith('/dashboard');
+  });
+
+  it('exportData returns formatted rows in reversed order', async () => {
+    storeState.trends = {
+      Health: [
+        { date: '2024-01-01T00:00:00.000Z', value: 7 },
+        { date: '2024-01-02T00:00:00.000Z', value: 9 }
+      ]
+    };
+    storeState.sessions = [{ id: 's1' }];
+    const wrapper = mount(CategoryDetailView);
+    await new Promise(r => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+    const vm = wrapper.vm as unknown as {
+      exportData: Array<{ Date: string; Time: string; Score: string }>;
+    };
+    expect(vm.exportData).toHaveLength(2);
+    // reversed: newest first
+    expect(vm.exportData[0].Score).toBe('9.00');
+    expect(vm.exportData[1].Score).toBe('7.00');
+    expect(typeof vm.exportData[0].Date).toBe('string');
+    expect(typeof vm.exportData[0].Time).toBe('string');
+  });
+
+  it('segment borderColor callback returns correct color for up/down/equal segments', async () => {
+    storeState.trends = {
+      Health: [
+        { date: '2024-01-01T00:00:00.000Z', value: 3 },
+        { date: '2024-01-02T00:00:00.000Z', value: 8 }
+      ]
+    };
+    storeState.sessions = [{ id: 's1' }];
+    const wrapper = mount(CategoryDetailView);
+    await new Promise(r => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+    const vm = wrapper.vm as unknown as {
+      chartData: { datasets: Array<{ segment: { borderColor: (ctx: unknown) => string } }> };
+    };
+    const segmentFn = vm.chartData.datasets[0].segment.borderColor;
+    // upward → black
+    expect(segmentFn({ p1: { parsed: { y: 8 } }, p0: { parsed: { y: 3 } } })).toBe('#000000');
+    // downward → red
+    expect(segmentFn({ p1: { parsed: { y: 2 } }, p0: { parsed: { y: 7 } } })).toBe('#f44336');
+    // equal → black
+    expect(segmentFn({ p1: { parsed: { y: 5 } }, p0: { parsed: { y: 5 } } })).toBe('#000000');
+    // null values → default to 0 via ??
+    expect(segmentFn({ p1: { parsed: { y: null } }, p0: { parsed: { y: null } } })).toBe('#000000');
   });
 });

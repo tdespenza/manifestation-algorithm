@@ -17,8 +17,7 @@ describe('Score Calculation Engine', () => {
   });
 
   it('should calculate minimum score (1 everywhere)', () => {
-    // 1 everywhere means 10% of total points
-    // If total points is roughly 10,000, score should be ~1,000
+    // rating=1 everywhere → 10% of total points = 1,000
     const answers: Record<string, number> = {};
     const fillAnswers = (q: any) => {
       if (q.subPoints) {
@@ -29,11 +28,8 @@ describe('Score Calculation Engine', () => {
     };
     questions.forEach(fillAnswers);
 
-    // We expect 10% of max score
-    const max = getMaxPossibleScore();
     const result = calculateScore(answers);
-
-    expect(result).toBeCloseTo(max * 0.1);
+    expect(result).toBe(1000);
   });
 
   it('should calculate maximum score (10 everywhere)', () => {
@@ -48,25 +44,18 @@ describe('Score Calculation Engine', () => {
     questions.forEach(fillAnswers);
 
     const result = calculateScore(answers);
-    const max = getMaxPossibleScore();
-
-    expect(result).toBe(max);
+    expect(result).toBe(10000);
   });
 
   it('should default missing answers to minimum rating (1)', () => {
-    // No answers → all default to 1 → 10% of max score
-    const max = getMaxPossibleScore();
+    // No answers → all default to 1 → min score = 1,000
     const score = calculateScore({});
-    expect(score).toBeCloseTo(max * 0.1);
+    expect(score).toBe(1000);
   });
 
-  it('should verify total max points matches expectation (approx 10,000)', () => {
+  it('should verify total max points is exactly 10,000', () => {
     const max = getMaxPossibleScore();
-    console.log('Total Max Score:', max);
-    // Due to the Q23 50 point discrepancy, we expect 9950 or close to 10000
-    // If we used my manual sum calculation (1350 for Q23), let's see.
-    expect(max).toBeGreaterThan(9900);
-    expect(max).toBeLessThanOrEqual(10200);
+    expect(max).toBe(10000);
   });
 
   it('should process sub-questions correctly (Q1)', () => {

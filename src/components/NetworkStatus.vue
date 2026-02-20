@@ -44,17 +44,17 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   font-size: 0.85rem;
-  color: #666;
+  color: #555;
   gap: 8px;
   padding: 4px 8px;
   border-radius: 12px;
-  background: rgba(0, 0, 0, 0.03);
+  background: rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
 }
 
 .network-status.connected {
-  color: #2e7d32;
-  background: rgba(46, 125, 50, 0.1);
+  color: #1b5e20;
+  background: rgba(46, 125, 50, 0.15);
 }
 
 .status-indicator {

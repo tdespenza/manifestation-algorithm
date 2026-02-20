@@ -12,7 +12,7 @@
  *   plugin:sql|close   → no-op
  *   plugin:opener|open_url → no-op
  */
-export const TAURI_MOCK_SCRIPT = `
+export const TAURI_MOCK_SCRIPT = String.raw`
 (function () {
   // ── In-memory database ─────────────────────────────────────────────
   const memDB = {
@@ -20,6 +20,7 @@ export const TAURI_MOCK_SCRIPT = `
     settings: [],                  // { key, value }
     historical_sessions: [],       // { id, score, completed_at, answers_snapshot }
     historical_responses: [],      // { session_id, question_number, answer_value, recorded_at }
+    _sharingEnabled: false,        // persisted sharing opt-in state
   };
 
   let nextResourceId = 1;
@@ -27,15 +28,15 @@ export const TAURI_MOCK_SCRIPT = `
   // ── SQL helpers ────────────────────────────────────────────────────
   function parseInsertOrReplace(sql, params) {
     // INSERT [OR REPLACE] INTO <table> (...) VALUES (...)
-    const tableMatch = sql.match(/INTO\\s+(\\w+)/i);
+    const tableMatch = sql.match(/INTO\s+(\w+)/i);
     if (!tableMatch) return;
     const table = tableMatch[1].toLowerCase();
     const rows = memDB[table];
     if (!rows) return;
 
     // Map $1,$2,... to actual params
-    const values = sql.match(/VALUES\\s*\\(([^)]+)\\)/i)?.[1].split(',') ?? [];
-    const colsMatch = sql.match(/\\(([^)]+)\\)\\s*VALUES/i)?.[1].split(',') ?? [];
+    const values = sql.match(/VALUES\s*\(([^)]+)\)/i)?.[1].split(',') ?? [];
+    const colsMatch = sql.match(/\(([^)]+)\)\s*VALUES/i)?.[1].split(',') ?? [];
     const cols = colsMatch.map(c => c.trim());
     const rowData = {};
     cols.forEach((col, i) => {
@@ -65,36 +66,49 @@ export const TAURI_MOCK_SCRIPT = `
   }
 
   function parseDelete(sql, params) {
-    const tableMatch = sql.match(/FROM\\s+(\\w+)/i);
+    const tableMatch = sql.match(/FROM\s+(\w+)/i);
     if (!tableMatch) return;
     const table = tableMatch[1].toLowerCase();
     const rows = memDB[table];
     if (!rows) return;
     
-    const whereMatch = sql.match(/WHERE\\s+(.+)/i);
+    const whereMatch = sql.match(/WHERE\s+(.+)/i);
     if (!whereMatch) { memDB[table] = []; return; }
     
     const condition = whereMatch[1].trim();
     
-    if (condition.includes('session_id') && condition.includes('=')) {
+    // Handle IN (...) bulk delete: DELETE FROM table WHERE col IN ($1, $2, ...)
+    if (/\bIN\s*\(/i.test(condition)) {
+      const colMatch = condition.match(/(\w+)\s+IN/i);
+      if (colMatch) {
+        const col = colMatch[1].toLowerCase();
+        const vals = new Set(params.map(String));
+        memDB[table] = rows.filter(r => !vals.has(String(r[col])));
+      }
+      return;
+    }
+
+    // Handle equality: WHERE session_id = $1 | WHERE key = $1 | WHERE id = $1
+    if (condition.includes('session_id') && /=/.test(condition)) {
       const val = params[0];
-      const filtered = rows.filter(r => r.session_id !== val);
-      memDB[table] = filtered;
-    } else if (condition.includes('key') && condition.includes('=')) {
+      memDB[table] = rows.filter(r => r.session_id !== val);
+    } else if (condition.toLowerCase().includes('key') && /=/.test(condition)) {
       const val = params[0];
-      const filtered = rows.filter(r => r.key !== val);
-      memDB[table] = filtered;
+      memDB[table] = rows.filter(r => r.key !== val);
+    } else if (/\bid\s*=/i.test(condition)) {
+      const val = params[0];
+      memDB[table] = rows.filter(r => r.id !== val);
     }
   }
 
   function parseSelect(sql, params) {
-    const tableMatch = sql.match(/FROM\\s+(\\w+)/i);
+    const tableMatch = sql.match(/FROM\s+(\w+)/i);
     if (!tableMatch) return [];
     const table = tableMatch[1].toLowerCase();
     const rows = memDB[table];
     if (!rows) return [];
     
-    const whereMatch = sql.match(/WHERE\\s+(.+?)(\\s+ORDER|\\s+LIMIT|\\s+GROUP|$)/i);
+    const whereMatch = sql.match(/WHERE\s+(.+?)(\s+ORDER|\s+LIMIT|\s+GROUP|$)/i);
     if (!whereMatch) return rows.slice();
     
     const condition = whereMatch[1].trim();
@@ -146,6 +160,19 @@ export const TAURI_MOCK_SCRIPT = `
         return null;
       }
 
+      case 'get_network_sharing': {
+        return memDB._sharingEnabled === true;
+      }
+
+      case 'set_network_sharing': {
+        memDB._sharingEnabled = payload.enabled === true;
+        return null;
+      }
+
+      case 'get_peer_count': {
+        return 0;
+      }
+
       default:
         console.warn('[TauriMock] Unknown command:', cmd, payload);
         return null;
@@ -182,6 +209,7 @@ export const TAURI_MOCK_SCRIPT = `
     memDB.settings = [];
     memDB.historical_sessions = [];
     memDB.historical_responses = [];
+    memDB._sharingEnabled = false;
   };
 
   // Expose helper to seed DB state for tests
@@ -190,6 +218,7 @@ export const TAURI_MOCK_SCRIPT = `
     if (data.settings) memDB.settings = [...data.settings];
     if (data.historical_sessions) memDB.historical_sessions = [...data.historical_sessions];
     if (data.historical_responses) memDB.historical_responses = [...data.historical_responses];
+    if (typeof data._sharingEnabled === 'boolean') memDB._sharingEnabled = data._sharingEnabled;
   };
 
   // Expose the in-memory store for test assertions

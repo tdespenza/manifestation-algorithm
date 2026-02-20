@@ -1,4 +1,5 @@
-import { test as base, expect, type Page } from '@playwright/test';
+import { test as base } from '@playwright/test';
+export { expect } from '@playwright/test';
 import { TAURI_MOCK_SCRIPT } from './tauri-mock';
 import { AppPage } from '../pages/app.page';
 import { HomePage } from '../pages/home.page';
@@ -6,16 +7,15 @@ import { DashboardPage } from '../pages/dashboard.page';
 import { SettingsPage } from '../pages/settings.page';
 import { QuestionnairePage } from '../pages/questionnaire.page';
 
-export { expect };
-
 /**
  * DB seed data type for pre-populating the in-memory Tauri mock
  */
 export interface DBSeed {
   questionnaire_responses?: Array<{ session_id: string; question_number: string; answer_value: number }>;
   settings?: Array<{ key: string; value: string }>;
-  historical_sessions?: Array<{ id: string; score: number; completed_at: string; answers_snapshot?: string }>;
+  historical_sessions?: Array<{ id: string; total_score: number; completed_at: string; answers_snapshot?: string }>;
   historical_responses?: Array<{ session_id: string; question_number: string; answer_value: number; recorded_at: string }>;
+  _sharingEnabled?: boolean;
 }
 
 /**
@@ -67,14 +67,14 @@ export const test = base.extend<E2EFixtures>({
 
   resetDB: async ({ page }, use) => {
     await use(async () => {
-      await page.evaluate(() => (window as unknown as { __tauriResetDB: () => void }).__tauriResetDB());
+      await page.evaluate(() => (globalThis as unknown as { __tauriResetDB: () => void }).__tauriResetDB());
     });
   },
 
   seedDB: async ({ page }, use) => {
     await use(async (data: DBSeed) => {
       await page.evaluate(
-        (seedData) => (window as unknown as { __tauriSeedDB: (d: unknown) => void }).__tauriSeedDB(seedData),
+        (seedData) => (globalThis as unknown as { __tauriSeedDB: (d: unknown) => void }).__tauriSeedDB(seedData),
         data
       );
     });
@@ -83,7 +83,7 @@ export const test = base.extend<E2EFixtures>({
   getDB: async ({ page }, use) => {
     await use(async () => {
       return page.evaluate(
-        () => (window as unknown as { __tauriGetDB: () => Record<string, unknown[]> }).__tauriGetDB()
+        () => (globalThis as unknown as { __tauriGetDB: () => Record<string, unknown[]> }).__tauriGetDB()
       );
     });
   },

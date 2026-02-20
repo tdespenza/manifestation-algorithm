@@ -46,7 +46,6 @@ test.describe('Questionnaire – scroll mode', () => {
   });
 
   test('moving a slider updates the current score', async ({ questionnairePage, page }) => {
-    const scoreBefore = await questionnairePage.getScore();
     const slider = page.locator('.slider').first();
     // Set to max to guarantee score increases
     await slider.fill('10');
@@ -125,10 +124,10 @@ test.describe('Questionnaire – step-by-step mode', () => {
     expect(text).toMatch(/Question 3 of/);
   });
 
-  test('next button is disabled on last question', async ({ questionnairePage, page }) => {
+  test('next button is disabled on last question', async ({ questionnairePage }) => {
     // Navigate to the last question using the keyboard shortcut loop
     const text = await questionnairePage.stepCounter.textContent() ?? '';
-    const total = parseInt(text.match(/of (\d+)/)?.[1] ?? '1');
+    const total = Number.parseInt(text.match(/of (\d+)/)?.[1] ?? '1');
     // Jump to last via dot nav (click last dot)
     const dots = questionnairePage.dotNav.locator('.dot');
     const lastDot = dots.nth(total - 1);
@@ -158,7 +157,7 @@ test.describe('Questionnaire – progress tracking', () => {
     // Progress should now be greater than 0
     const match = text.match(/(\d+)%/);
     expect(match).toBeTruthy();
-    const pct = parseInt(match![1]);
+    const pct = Number.parseInt(match![1]);
     expect(pct).toBeGreaterThan(0);
   });
 
@@ -180,7 +179,8 @@ test.describe('Questionnaire – submission', () => {
   });
 
   test('submit navigates to dashboard on success', async ({ questionnairePage, page }) => {
-    await questionnairePage.submit();
+    // Rate all questions first — the submit guard requires isComplete === true
+    await questionnairePage.rateAllAndSubmit();
     // After submit the store calls saveHistoricalSession and routes to /dashboard
     await page.waitForURL('/dashboard', { timeout: 15_000 });
     await expect(page.locator('.dashboard-view')).toBeVisible();
@@ -188,7 +188,7 @@ test.describe('Questionnaire – submission', () => {
 });
 
 test.describe('Questionnaire – resume dialog', () => {
-  test('shows resume dialog when a saved session exists', async ({ page, seedDB, resetDB }) => {
+  test('shows resume dialog when a saved session exists', async ({ page, seedDB }) => {
     // Seed a recent last_active so the session is NOT expired
     const session_id = 'e2e-test-session';
     await page.goto('/');
@@ -208,8 +208,6 @@ test.describe('Questionnaire – resume dialog', () => {
     await page.reload();
     await page.locator('.questionnaire').waitFor({ timeout: 10_000 });
 
-    // The resume dialog should appear because hasSavedSession is true
-    const dialog = page.locator('.overlay[role="dialog"]');
     // Not guaranteed without real DB implementation in mock, but the UI path is tested
     // We at minimum verify the questionnaire renders
     await expect(page.locator('.questionnaire')).toBeVisible();

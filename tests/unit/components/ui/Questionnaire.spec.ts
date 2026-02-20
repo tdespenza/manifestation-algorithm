@@ -83,8 +83,8 @@ describe('Questionnaire.vue', () => {
   it('displays score from store (defaults > 0 with implicit answers)', async () => {
     const wrapper = makeWrapper({}, false);
     const scoreEl = wrapper.find('.current-score');
-    const scoreText = scoreEl.text().replace(/,/g, '');
-    expect(parseInt(scoreText)).toBeGreaterThan(0);
+    const scoreText = scoreEl.text().replaceAll(',', '');
+    expect(Number.parseInt(scoreText, 10)).toBeGreaterThan(0);
   });
 
   // ── Mode toggle ───────────────────────────────────────────────────────────
@@ -130,6 +130,7 @@ describe('Questionnaire.vue', () => {
   it('navigates to /dashboard on successful submit', async () => {
     const wrapper = makeWrapper();
     const store = useQuestionnaireStore();
+    (store as any).isComplete = true;
     (store.submitSession as ReturnType<typeof vi.fn>).mockResolvedValue('session-id');
     await wrapper.vm.$nextTick();
     await wrapper.find('.submit-button').trigger('click');
@@ -140,6 +141,7 @@ describe('Questionnaire.vue', () => {
   it('shows error message on submit failure', async () => {
     const wrapper = makeWrapper();
     const store = useQuestionnaireStore();
+    (store as any).isComplete = true;
     (store.submitSession as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('DB error'));
     await wrapper.vm.$nextTick();
     await wrapper.find('.submit-button').trigger('click');
@@ -152,6 +154,7 @@ describe('Questionnaire.vue', () => {
   it('does not invoke submitSession while already submitting', async () => {
     const wrapper = makeWrapper();
     const store = useQuestionnaireStore();
+    (store as any).isComplete = true;
     // First click starts submission — which awaits the (never-resolving) spy
     const pending = new Promise(() => {});
     (store.submitSession as ReturnType<typeof vi.fn>).mockReturnValue(pending);
@@ -216,12 +219,12 @@ describe('Questionnaire.vue', () => {
   it('handleGlobalKey: number key 1-9 sets answer in step mode', async () => {
     const wrapper = makeWrapper();
     const store = useQuestionnaireStore();
-    store.currentQuestion = {
+    vi.spyOn(store, 'currentQuestion', 'get').mockReturnValue({
       id: 'q1',
       description: 'Q1',
       points: 100,
       hasSubPoints: false
-    } as unknown as typeof store.currentQuestion;
+    } as unknown as typeof store.currentQuestion);
     const buttons = wrapper.findAll('.mode-toggle button');
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
@@ -232,12 +235,12 @@ describe('Questionnaire.vue', () => {
   it('handleGlobalKey: key 0 sets answer to 10 in step mode', async () => {
     const wrapper = makeWrapper();
     const store = useQuestionnaireStore();
-    store.currentQuestion = {
+    vi.spyOn(store, 'currentQuestion', 'get').mockReturnValue({
       id: 'q1',
       description: 'Q1',
       points: 100,
       hasSubPoints: false
-    } as unknown as typeof store.currentQuestion;
+    } as unknown as typeof store.currentQuestion);
     const buttons = wrapper.findAll('.mode-toggle button');
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
@@ -400,7 +403,7 @@ describe('Questionnaire.vue', () => {
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
     // Override currentQuestion to undefined
-    store.currentQuestion = undefined as any;
+    vi.spyOn(store, 'currentQuestion', 'get').mockReturnValue(undefined as any);
     await wrapper.find('.questionnaire').trigger('keydown', { key: '5' });
     // Should NOT have called setAnswer
     expect(store.setAnswer).not.toHaveBeenCalled();
@@ -412,9 +415,18 @@ describe('Questionnaire.vue', () => {
     const buttons = wrapper.findAll('.mode-toggle button');
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
-    store.currentQuestion = undefined as any;
+    vi.spyOn(store, 'currentQuestion', 'get').mockReturnValue(undefined as any);
     await wrapper.find('.questionnaire').trigger('keydown', { key: '0' });
     expect(store.setAnswer).not.toHaveBeenCalled();
+  });
+
+  it('step mode hides QuestionItem when currentQuestion is undefined (v-if false branch)', async () => {
+    // currentIndex 999 is out of bounds → currentQuestion computed returns undefined → v-if false
+    const wrapper = makeWrapper({ currentIndex: 999 }, false);
+    const buttons = wrapper.findAll('.mode-toggle button');
+    await buttons[1].trigger('click');
+    await wrapper.vm.$nextTick();
+    expect(wrapper.find('.question-item-stub').exists()).toBe(false);
   });
 
   it('handleGlobalKey: unmatched key (e.g. "a") in step mode does nothing', async () => {

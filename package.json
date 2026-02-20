@@ -1,7 +1,7 @@
 {
   "name": "manifestation-app",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.2",
   "type": "module",
   "license": "MIT",
   "scripts": {
@@ -21,8 +21,8 @@
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:report": "playwright show-report playwright-report",
     "test:all": "npm run test && npm run test:e2e",
+    "ci": "npm run lint:check && npm run format:check && npm run deps:validate && vue-tsc --noEmit && npm run test && npx playwright test --project=chromium",
     "prepare": "husky",
-
     "lint": "eslint src tests --fix",
     "lint:check": "eslint src tests",
     "format": "prettier --write \"src/**/*.{ts,vue}\" \"tests/**/*.ts\"",
@@ -50,7 +50,8 @@
     "uuid": "^13.0.0",
     "vue": "^3.5.13",
     "vue-chartjs": "^5.3.3",
-    "vue-router": "^5.0.2"
+    "vue-router": "^5.0.2",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -58,8 +59,8 @@
     "@playwright/test": "^1.58.2",
     "@tauri-apps/cli": "^2",
     "@types/node": "^25.3.0",
-    "@types/uuid": "^10.0.0",
-    "@vitejs/plugin-vue": "^5.2.1",
+    "@types/uuid": "^11.0.0",
+    "@vitejs/plugin-vue": "^6.0.4",
     "@vitest/coverage-istanbul": "^4.0.18",
     "@vitest/coverage-v8": "^4.0.18",
     "@vue/eslint-config-typescript": "^14.7.0",
@@ -72,10 +73,10 @@
     "jsdom": "^28.1.0",
     "lint-staged": "^16.2.7",
     "prettier": "^3.8.1",
-    "typescript": "~5.6.2",
+    "typescript": "~5.9.3",
     "typescript-eslint": "^8.56.0",
-    "vite": "^6.0.3",
+    "vite": "^7.3.1",
     "vitest": "^4.0.18",
-    "vue-tsc": "^2.1.10"
+    "vue-tsc": "^3.2.4"
   }
 }

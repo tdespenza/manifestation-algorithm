@@ -10,6 +10,12 @@ export async function getDb(): Promise<Database> {
     // Basic SQLite connection string.
     // Usually 'sqlite:manifestation.db' creates the file in AppData directory managed by Tauri.
     db = await Database.load('sqlite:manifestation.db');
+    // WAL mode allows concurrent reads alongside writes and is far less prone to
+    // SQLITE_BUSY (code 5) errors.  The busy_timeout gives the writer up to
+    // 5 seconds to retry before surfacing an error, which covers any momentary
+    // lock from another pool connection or in-flight query.
+    await db.execute('PRAGMA journal_mode=WAL', []);
+    await db.execute('PRAGMA busy_timeout=5000', []);
     await runMigrations(db);
   }
   return db;
@@ -106,7 +112,11 @@ export async function saveHistoricalSession(
     [id, completedAt, totalScore, durationSeconds, notes || null]
   );
 
-  // 2. Save responses
+  // 2. Save responses – run individual inserts without an explicit
+  // BEGIN/COMMIT wrapper.  tauri-plugin-sql uses a connection pool and manual
+  // transaction statements (BEGIN/COMMIT via db.execute) can be dispatched
+  // to different pool connections, causing SQLITE_BUSY.  With WAL mode +
+  // busy_timeout (set in getDb) each auto-committed insert is safe and fast.
   for (const [qId, val] of Object.entries(answers)) {
     const category = getCategory(qId);
     await db.execute(
@@ -170,13 +180,22 @@ export async function loadCategoryTrend(category: string): Promise<CategoryTrend
 }
 
 /**
- * @deprecated Use saveHistoricalSession instead
+ * Delete a single historical session and all its responses.
  */
-export async function saveCompletion(totalScore: number) {
+export async function deleteSession(id: string): Promise<void> {
   const db = await getDb();
-  const date = new Date().toISOString();
-  await db.execute('INSERT INTO stats (completion_date, total_score) VALUES ($1, $2)', [
-    date,
-    totalScore
-  ]);
+  // Delete responses first (explicit, avoids relying on SQLite FK pragma)
+  await db.execute('DELETE FROM historical_responses WHERE session_id = $1', [id]);
+  await db.execute('DELETE FROM historical_sessions WHERE id = $1', [id]);
+}
+
+/**
+ * Delete multiple historical sessions and all their responses.
+ */
+export async function deleteSessions(ids: string[]): Promise<void> {
+  if (ids.length === 0) return;
+  const db = await getDb();
+  const placeholders = ids.map((_, i) => `$${i + 1}`).join(', ');
+  await db.execute(`DELETE FROM historical_responses WHERE session_id IN (${placeholders})`, ids);
+  await db.execute(`DELETE FROM historical_sessions WHERE id IN (${placeholders})`, ids);
 }

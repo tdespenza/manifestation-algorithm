@@ -18,8 +18,6 @@ import CategoryCard from '@/components/dashboard/CategoryCard.vue';
 const improvingData = [1, 2, 3, 4, 5, 6, 7];
 const decliningData = [7, 6, 5, 4, 3, 2, 1];
 const stableData = [5, 5, 5, 5, 5, 5, 5];
-const _shortData = [5, 6]; // length 2 — just enough for sparkline but not trend
-
 describe('CategoryCard.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -158,5 +156,23 @@ describe('CategoryCard.vue', () => {
     });
     const vm = wrapper.vm as unknown as { chartData: { datasets: Array<{ borderColor: string }> } };
     expect(vm.chartData.datasets[0].borderColor).toBe('#000000');
+  });
+
+  it('segment borderColor callback returns black for ascending segment', () => {
+    const wrapper = mount(CategoryCard, {
+      props: { category: 'Health', trendData: [3, 5], dates: ['Jan', 'Feb'] }
+    });
+    const vm = wrapper.vm as unknown as {
+      chartData: { datasets: Array<{ segment: { borderColor: (ctx: unknown) => string } }> };
+    };
+    const segmentFn = vm.chartData.datasets[0].segment.borderColor;
+    // p1.y > p0.y → black
+    expect(segmentFn({ p1: { parsed: { y: 6 } }, p0: { parsed: { y: 3 } } })).toBe('#000000');
+    // p1.y < p0.y → red
+    expect(segmentFn({ p1: { parsed: { y: 2 } }, p0: { parsed: { y: 8 } } })).toBe('#f44336');
+    // p1.y === p0.y → black
+    expect(segmentFn({ p1: { parsed: { y: 5 } }, p0: { parsed: { y: 5 } } })).toBe('#000000');
+    // null values default to 0 via ??
+    expect(segmentFn({ p1: { parsed: { y: null } }, p0: { parsed: { y: null } } })).toBe('#000000');
   });
 });

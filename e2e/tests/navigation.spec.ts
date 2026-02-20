@@ -16,9 +16,9 @@ test.describe('App navigation', () => {
     await expect(appPage.nav).toBeVisible();
   });
 
-  test('renders the MA logo link', async ({ appPage }) => {
+  test('renders the Manifestation Algorithm logo link', async ({ appPage }) => {
     await expect(appPage.navLogo).toBeVisible();
-    await expect(appPage.navLogo).toHaveText('MA');
+    await expect(appPage.navLogo).toHaveAttribute('aria-label', 'Manifestation Algorithm');
   });
 
   test('renders Questionnaire and History nav links', async ({ appPage }) => {

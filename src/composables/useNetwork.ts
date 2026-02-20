@@ -36,19 +36,24 @@ let connectTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
 let unlisten: UnlistenFn | null = null;
 
-async function loadSharingState(): Promise<void> {
+// Export so SharingToggle can call it directly on mount.
+export async function loadSharingState(): Promise<void> {
   try {
     sharingEnabled.value = await invoke<boolean>('get_network_sharing');
   } catch {
-    sharingEnabled.value = false;
+    // Leave sharingEnabled at its current value — do not force it back to false.
+    // Overwriting it here would silently revert a user-enabled setting if the
+    // backend is momentarily unavailable or if init() is called more than once.
   }
 }
 
 export async function toggleSharing(enabled: boolean): Promise<void> {
+  const previous = sharingEnabled.value;
+  sharingEnabled.value = enabled; // optimistic update so the UI reflects the user's intent immediately
   try {
     await invoke('set_network_sharing', { enabled });
-    sharingEnabled.value = enabled;
   } catch (e) {
+    sharingEnabled.value = previous; // revert on backend error
     console.error('Failed to update sharing setting:', e);
   }
 }
@@ -60,11 +65,10 @@ export function useNetwork() {
     // Mark as connected immediately — the P2P node is always running in the backend.
     // This prevents the UI from being stuck on "Connecting..." forever.
     isConnected.value = true;
-    if (connectTimeoutId === null) {
-      connectTimeoutId = setTimeout(() => {
-        isConnected.value = true;
-      }, 3000);
-    }
+    // ??= only sets if currently null/undefined, so no separate guard needed
+    connectTimeoutId ??= setTimeout(() => {
+      isConnected.value = true;
+    }, 3000);
 
     try {
       const initialCount = await invoke<number>('get_peer_count').catch(() => 0);

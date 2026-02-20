@@ -37,8 +37,8 @@ test.describe('Full user journey (smoke test)', () => {
     const score = await questionnairePage.getScore();
     expect(score).toMatch(/\d/);
 
-    // Step 4: Submit assessment
-    await questionnairePage.submit();
+    // Step 4: Submit assessment (rate all first to satisfy isComplete guard)
+    await questionnairePage.rateAllAndSubmit();
 
     // Step 5: Verify redirect to dashboard
     await page.waitForURL('/dashboard', { timeout: 15_000 });
@@ -54,7 +54,6 @@ test.describe('Full user journey (smoke test)', () => {
   });
 
   test('step-by-step mode: navigate all questions forward and back', async ({
-    page,
     questionnairePage,
   }) => {
     await questionnairePage.goto();
@@ -62,7 +61,7 @@ test.describe('Full user journey (smoke test)', () => {
 
     // Get the total number of questions
     const counterText = await questionnairePage.stepCounter.textContent() ?? '';
-    const total = parseInt(counterText.match(/of (\d+)/)?.[1] ?? '1');
+    const total = Number.parseInt(counterText.match(/of (\d+)/)?.[1] ?? '1');
     expect(total).toBeGreaterThan(0);
 
     // Navigate forward to question 3 (or total if less)

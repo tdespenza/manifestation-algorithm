@@ -51,6 +51,12 @@ impl UserIdentity {
             let file = std::fs::File::create(&path)?;
             serde_json::to_writer(file, &identity)
                 .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
+            // Restrict permissions to owner-only (rw-------) on Unix
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                let _ = std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o600));
+            }
             Ok(identity)
         }
     }
@@ -106,7 +112,6 @@ mod tests {
 
     #[test]
     fn test_serialization_roundtrip() {
-        use std::io::Write;
         let id = UserIdentity::generate();
         let pk = id.public_key_b64();
 
