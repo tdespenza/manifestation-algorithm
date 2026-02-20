@@ -1,5 +1,6 @@
 import { ref } from 'vue';
 import * as XLSX from 'xlsx';
+import { jsPDF } from 'jspdf';
 
 export interface ExportResult {
   success: boolean;
@@ -123,22 +124,44 @@ export function useChartExport() {
     }
   };
 
-  const exportToPDF = (elementId: string, title: string): ExportResult => {
+  const exportToPDF = async (elementId: string, title: string): Promise<ExportResult> => {
     const el = document.getElementById(elementId);
     if (!el) return { success: false, message: 'Chart element not found' };
 
-    document.body.classList.add('printing-chart');
-    el.classList.add('print-target');
+    const canvas = el.querySelector('canvas');
+    if (!canvas) return { success: false, message: 'No chart canvas found' };
 
-    const originalTitle = document.title;
-    document.title = title;
+    try {
+      isExporting.value = true;
+      const imgData = canvas.toDataURL('image/png');
 
-    window.print();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
 
-    document.title = originalTitle;
-    document.body.classList.remove('printing-chart');
-    el.classList.remove('print-target');
-    return { success: true, message: 'Print-to-PDF dialog opened' };
+      // Fit the image on an A4 page (595 x 842 pt) with a small margin
+      const pageWidth = 595;
+      const pageHeight = 842;
+      const margin = 40;
+      const maxW = pageWidth - margin * 2;
+      const maxH = pageHeight - margin * 2 - 30; // reserve space for title
+      const scale = Math.min(maxW / imgWidth, maxH / imgHeight, 1);
+      const drawW = imgWidth * scale;
+      const drawH = imgHeight * scale;
+
+      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+      doc.setFontSize(16);
+      doc.text(title, margin, margin);
+      doc.addImage(imgData, 'PNG', margin, margin + 20, drawW, drawH);
+
+      const arrayBuf = doc.output('arraybuffer');
+      const blob = new Blob([arrayBuf], { type: 'application/pdf' });
+      const safeName = title.replace(/\s+/g, '_');
+      return await saveWithPicker(blob, `${safeName}.pdf`, 'PDF Document', ['.pdf']);
+    } catch {
+      return { success: false, message: 'PDF export failed' };
+    } finally {
+      isExporting.value = false;
+    }
   };
 
   const exportToHTML = async (elementId: string, title: string): Promise<ExportResult> => {

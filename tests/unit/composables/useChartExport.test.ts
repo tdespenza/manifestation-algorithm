@@ -1,5 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
+// ── Mock jspdf before importing composable ───────────────────────────────────
+vi.mock('jspdf', () => {
+  class jsPDF {
+    setFontSize = vi.fn();
+    text = vi.fn();
+    addImage = vi.fn();
+    output = vi.fn().mockReturnValue(new ArrayBuffer(8));
+  }
+  return { jsPDF };
+});
+
 // ── Mock xlsx before importing composable ─────────────────────────────────────
 const xlsxMocks = vi.hoisted(() => ({
   json_to_sheet: vi.fn().mockReturnValue({ fakeSheet: true }),
@@ -222,22 +233,33 @@ describe('useChartExport', () => {
 
   // ── exportToPDF ──────────────────────────────────────────────────────────────
   describe('exportToPDF', () => {
-    it('returns failure result when element is not found', () => {
+    it('returns failure result when element is not found', async () => {
       const { exportToPDF } = useChartExport();
-      const result = exportToPDF('non-existent-id', 'My PDF');
+      const result = await exportToPDF('non-existent-id', 'My PDF');
       expect(result.success).toBe(false);
-      expect(printSpy).not.toHaveBeenCalled();
+      expect(result.message).toContain('not found');
     });
 
-    it('adds print classes, calls window.print, then cleans up', () => {
-      document.title = 'Original';
+    it('returns failure when no canvas is present', async () => {
+      mockEl.removeChild(mockCanvas);
       const { exportToPDF } = useChartExport();
-      const result = exportToPDF('test-chart-element', 'My PDF');
+      const result = await exportToPDF('test-chart-element', 'My PDF');
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('canvas');
+    });
+
+    it('generates a PDF and triggers download when element has a canvas', async () => {
+      const { exportToPDF } = useChartExport();
+      const result = await exportToPDF('test-chart-element', 'My PDF');
       expect(result.success).toBe(true);
-      expect(printSpy).toHaveBeenCalledOnce();
-      expect(document.title).toBe('Original');
-      expect(document.body.classList.contains('printing-chart')).toBe(false);
-      expect(mockEl.classList.contains('print-target')).toBe(false);
+      expect(mockCanvas.toDataURL).toHaveBeenCalledWith('image/png');
+      expect(URL.createObjectURL).toHaveBeenCalledWith(expect.any(Blob));
+    });
+
+    it('does not call window.print', async () => {
+      const { exportToPDF } = useChartExport();
+      await exportToPDF('test-chart-element', 'My PDF');
+      expect(printSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -369,6 +391,16 @@ describe('useChartExport', () => {
 
   // ── export error catch blocks ─────────────────────────────────────────────────
   describe('export error catch blocks', () => {
+    it('exportToPDF returns failure when toDataURL throws', async () => {
+      vi.spyOn(mockCanvas, 'toDataURL').mockImplementationOnce(() => {
+        throw new Error('Canvas render error');
+      });
+      const { exportToPDF } = useChartExport();
+      const result = await exportToPDF('test-chart-element', 'Bad PDF');
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('PDF export failed');
+    });
+
     it('exportToExcel returns failure when XLSX.write throws', async () => {
       xlsxMocks.write.mockImplementationOnce(() => {
         throw new Error('XLSX write failure');
