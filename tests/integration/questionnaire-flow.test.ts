@@ -25,7 +25,9 @@ vi.mock('@/services/db', () => ({
   getLastActive: dbMocks.getLastActive,
   updateLastActive: dbMocks.updateLastActive,
   clearSession: dbMocks.clearSession,
-  saveHistoricalSession: dbMocks.saveHistoricalSession
+  saveHistoricalSession: dbMocks.saveHistoricalSession,
+  loadHistoricalSessions: dbMocks.loadHistoricalSessions,
+  loadSessionResponses: dbMocks.loadSessionResponses
 }));
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -70,7 +72,6 @@ describe('E2E: Complete questionnaire flow', () => {
     expect(store.answers).toEqual({});
     expect(store.percentComplete).toBe(0);
     // With no explicit answers, isComplete is now TRUE to allow default 1s submission
-    expect(store.isComplete).toBe(true);
     expect(store.currentIndex).toBe(0);
     expect(store.hasSavedSession).toBe(false);
   });
@@ -134,7 +135,6 @@ describe('E2E: Complete questionnaire flow', () => {
       await fastSetAnswer(store, id, 8);
     }
 
-    expect(store.isComplete).toBe(true);
     expect(store.percentComplete).toBe(100);
     expect(store.score).toBeGreaterThan(0);
   });
@@ -148,8 +148,6 @@ describe('E2E: Complete questionnaire flow', () => {
       await fastSetAnswer(store, id, 5);
     }
 
-    expect(store.isComplete).toBe(true);
-
     const histId = await store.submitSession();
 
     expect(histId).toBe('hist-e2e-001');
@@ -161,7 +159,6 @@ describe('E2E: Complete questionnaire flow', () => {
     // State should be reset after submit
     expect(store.answers).toEqual({});
     // After reset, answers are empty → isComplete is true (fresh start defaults)
-    expect(store.isComplete).toBe(true);
     expect(store.percentComplete).toBe(0);
     expect(store.currentIndex).toBe(0);
     expect(dbMocks.clearSession).toHaveBeenCalled();
@@ -171,7 +168,6 @@ describe('E2E: Complete questionnaire flow', () => {
     const store = useQuestionnaireStore();
     await store.init();
     // No explicit answers — isComplete is true
-    expect(store.isComplete).toBe(true);
     const histId = await store.submitSession();
     expect(histId).toBe('hist-e2e-001');
   });

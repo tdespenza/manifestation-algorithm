@@ -131,7 +131,6 @@ const isSaving = computed(() => store.isSaving);
 const score = computed(() => store.score);
 const maxScore = getMaxPossibleScore();
 const formattedScore = computed(() => Math.round(score.value).toLocaleString());
-const isComplete = computed(() => store.isComplete);
 const answeredCount = computed(
   () => Object.keys(store.answers).filter(k => store.answers[k] >= 1).length
 );
@@ -165,8 +164,7 @@ function handleGlobalKey(e: KeyboardEvent) {
 
 const submit = async () => {
   // Allow submission even if 0% complete (defaults apply)
-  // However, check isComplete just in case store logic changes later (currently always true)
-  if (!isComplete.value || isSubmitting.value) return;
+  if (isSubmitting.value) return;
 
   submitError.value = null;
   isSubmitting.value = true;
@@ -197,16 +195,17 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   position: sticky;
   top: 0;
-  background: rgba(255, 255, 255, 0.97);
+  background: rgba(255, 255, 255, 0.96);
   padding: 12px 20px;
   border-radius: 12px;
   z-index: 10;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  backdrop-filter: blur(5px);
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.07);
+  backdrop-filter: blur(8px);
   gap: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
 .save-indicator {
@@ -265,7 +264,7 @@ onMounted(async () => {
 
 .progress-fill {
   height: 100%;
-  background: var(--true-cobalt, #0047ab);
+  background: var(--true-cobalt, #0a1f7d);
   border-radius: 3px;
   transition: width 0.4s ease;
 }
@@ -279,7 +278,7 @@ onMounted(async () => {
 .current-score {
   font-size: 2em;
   font-weight: 800;
-  color: var(--true-cobalt, #0047ab);
+  color: var(--true-cobalt, #0a1f7d);
   line-height: 1;
 }
 
@@ -297,27 +296,32 @@ onMounted(async () => {
   color: #aaa;
 }
 
-/* Mode Toggle */
+/* Mode Toggle — segmented pill */
 .mode-toggle {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
+  display: inline-flex;
+  background: #f0f2f8;
+  border-radius: 25px;
+  padding: 3px;
+  margin-bottom: 24px;
+  gap: 0;
 }
 
 .mode-toggle button {
-  padding: 6px 16px;
-  border: 2px solid #ddd;
-  border-radius: 20px;
-  background: white;
+  padding: 6px 18px;
+  border: none;
+  border-radius: 22px;
+  background: transparent;
   cursor: pointer;
   font-size: 0.85em;
-  transition: all 0.2s;
+  font-weight: 600;
+  color: #888;
+  transition: all 0.18s ease;
 }
 
 .mode-toggle button.active {
-  background: var(--true-cobalt, #0047ab);
-  color: white;
-  border-color: var(--true-cobalt, #0047ab);
+  background: white;
+  color: var(--true-cobalt, #0a1f7d);
+  box-shadow: 0 2px 8px rgba(10, 31, 125, 0.14);
 }
 
 /* Step Mode */
@@ -350,21 +354,21 @@ onMounted(async () => {
 .nav-btn {
   padding: 10px 24px;
   border-radius: 25px;
-  border: 2px solid var(--true-cobalt, #0047ab);
+  border: 2px solid var(--true-cobalt, #0a1f7d);
   background: white;
-  color: var(--true-cobalt, #0047ab);
+  color: var(--true-cobalt, #0a1f7d);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.18s ease;
 }
 
 .nav-btn:hover:not(:disabled) {
-  background: var(--true-cobalt, #0047ab);
+  background: var(--true-cobalt, #0a1f7d);
   color: white;
 }
 
 .nav-btn:disabled {
-  opacity: 0.35;
+  opacity: 0.3;
   cursor: not-allowed;
 }
 
@@ -386,10 +390,10 @@ onMounted(async () => {
 }
 
 .dot.answered {
-  background: #a0beff;
+  background: #c0caf7;
 }
 .dot.active {
-  background: var(--true-cobalt, #0047ab);
+  background: var(--true-cobalt, #0a1f7d);
   transform: scale(1.3);
 }
 
@@ -415,36 +419,36 @@ kbd {
   gap: 20px;
 }
 
-/* Submit Area */
 .submit-actions {
   margin: 40px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
 }
 
 .completion-hint {
-  color: #666;
-  font-size: 0.9em;
-  font-style: italic;
+  color: #999;
+  font-size: 0.85em;
 }
+
 .error-hint {
   color: #e53935;
-  font-style: normal;
   font-weight: 500;
 }
 
 .submit-button {
-  padding: 15px 40px;
-  background: var(--true-cobalt, #0047ab);
+  padding: 14px 44px;
+  background: var(--true-cobalt, #0a1f7d);
   color: white;
   border: none;
-  border-radius: 30px;
-  font-size: 1.2em;
+  border-radius: 32px;
+  font-size: 1.05em;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s;
-  box-shadow: 0 4px 15px rgba(0, 71, 171, 0.3);
+  letter-spacing: 0.02em;
+  transition: all 0.22s ease;
+  box-shadow: 0 4px 18px rgba(10, 31, 125, 0.32);
 }
 
 .submit-button:disabled {
@@ -455,6 +459,6 @@ kbd {
 
 .submit-button:not(:disabled):hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 71, 171, 0.4);
+  box-shadow: 0 7px 22px rgba(10, 31, 125, 0.42);
 }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div v-if="categoryData.length > 0" class="category-detail-view">
     <header class="view-header">
-      <button class="back-btn" @click="$router.back()">← Back</button>
+      <button class="back-btn" @click="$router.back()">‹ Back</button>
       <h1>{{ category }}</h1>
     </header>
 
@@ -195,19 +195,26 @@ const exportData = computed(() => {
 }
 
 .back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   background: white;
-  border: 1px solid #ddd;
+  border: 1px solid #e0e0e0;
   color: #555;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 1.1rem;
   cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.2s;
+  border-radius: 25px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: all 0.18s ease;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 .back-btn:hover {
-  background: #f8f9fa;
-  color: #333;
-  border-color: #bbb;
+  background: var(--true-cobalt, #0a1f7d);
+  border-color: var(--true-cobalt, #0a1f7d);
+  color: white;
+  transform: translateX(-2px);
 }
 
 .detail-content {
@@ -225,16 +232,16 @@ const exportData = computed(() => {
 .main-chart-container {
   background: white;
   padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
   height: 400px;
 }
 
 .data-table-container {
   background: white;
   padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
   max-height: 400px;
   overflow-y: auto;
 }
@@ -246,15 +253,26 @@ const exportData = computed(() => {
 
 .history-table th,
 .history-table td {
-  padding: 0.75rem;
+  padding: 0.62rem 0.75rem;
   text-align: left;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #f0f0f0;
   color: #333;
 }
 
 .history-table th {
-  color: #666;
-  font-weight: 600;
+  color: #888;
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.history-table tr:last-child td {
+  border-bottom: none;
+}
+
+.history-table tbody tr:hover {
+  background: #fafbff;
 }
 
 .high-score {

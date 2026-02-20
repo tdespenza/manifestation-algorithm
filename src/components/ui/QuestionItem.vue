@@ -1,13 +1,17 @@
 <template>
   <div
     class="question-item"
-    :class="{ 'parent-question': question.hasSubPoints, 'sub-question': isSubQuestion }"
+    :class="{
+      'parent-question': question.hasSubPoints,
+      'sub-question': isSubQuestion,
+      highlighted: props.highlighted && !question.hasSubPoints
+    }"
     :style="{ borderLeftColor: isSubQuestion ? '#C4923E' : '#0A1F7D' }"
   >
     <div class="question-header">
       <span class="question-number">{{ question.id }}</span>
       <div class="question-text">{{ question.description }}</div>
-      <span class="question-points">{{ question.points }} points</span>
+      <span class="question-points">{{ question.points }} pts</span>
     </div>
 
     <!-- Rating Slider -->
@@ -20,6 +24,7 @@
           min="1"
           max="10"
           :value="internalValue"
+          :style="{ '--fill-pct': sliderFillPct }"
           :aria-label="`Rate ${question.description}`"
           @input="handleInput"
         />
@@ -28,7 +33,7 @@
       </div>
 
       <div class="score-display">
-        Score: <span class="score-value">{{ calculatedScore }}</span> points
+        <span class="score-calc">{{ calculatedScore.toFixed(1) }} / {{ question.points }} pts</span>
       </div>
     </div>
 
@@ -52,6 +57,7 @@ import type { Question } from '../../types';
 const props = defineProps<{
   question: Question;
   isSubQuestion?: boolean;
+  highlighted?: boolean;
 }>();
 
 const store = useQuestionnaireStore();
@@ -70,6 +76,11 @@ const calculatedScore = computed(() => {
   return props.question.points * (internalValue.value / 10);
 });
 
+// Percentage fill for the slider track (0% at value=1, 100% at value=10)
+const sliderFillPct = computed(() => {
+  return `${Math.round(((internalValue.value - 1) / 9) * 100)}%`;
+});
+
 function handleInput(e: Event) {
   const target = e.target as HTMLInputElement;
   const val = Number.parseInt(target.value);
@@ -79,20 +90,27 @@ function handleInput(e: Event) {
 
 <style scoped>
 .question-item {
-  margin-bottom: 25px;
-  padding: 25px;
+  margin-bottom: 20px;
+  padding: 22px 24px;
   background: white;
   border-radius: 12px;
   border-left: 4px solid #0a1f7d;
   transition:
-    transform 0.2s,
-    box-shadow 0.2s;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .question-item:hover {
-  transform: translateX(5px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.09);
+}
+
+.question-item.highlighted {
+  box-shadow:
+    0 0 0 2px rgba(10, 31, 125, 0.2),
+    0 8px 28px rgba(10, 31, 125, 0.12);
+  transform: none;
 }
 
 .question-header {
@@ -105,89 +123,111 @@ function handleInput(e: Event) {
 }
 
 .question-number {
-  font-weight: bold;
-  color: var(--true-cobalt);
-  font-size: 1.2em;
-  min-width: 40px;
+  font-weight: 700;
+  color: var(--true-cobalt, #0a1f7d);
+  font-size: 0.95em;
+  min-width: 36px;
+  opacity: 0.65;
 }
 
 .question-text {
   flex: 1;
-  font-size: 1.1em;
-  font-weight: 500;
-  line-height: 1.4;
+  font-size: 1.05em;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #1a1a2e;
 }
 
 .question-points {
-  background: var(--true-cobalt);
+  background: var(--true-cobalt, #0a1f7d);
   color: white;
-  padding: 4px 12px;
+  padding: 3px 10px;
   border-radius: 20px;
-  font-size: 0.85em;
-  font-weight: bold;
+  font-size: 0.78em;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .sub-question {
-  margin-top: 15px;
+  margin-top: 12px;
   margin-bottom: 0;
-  background: rgba(248, 253, 255, 0.8);
+  background: #fafbff;
   border-left-width: 3px;
 }
 
 .slider-container {
   display: flex;
   align-items: center;
-  gap: 15px;
-  margin-top: 20px;
+  gap: 12px;
+  margin-top: 16px;
 }
 
+/* Filled slider track via CSS custom property --fill-pct */
 .slider {
   flex: 1;
-  height: 8px;
-  border-radius: 5px;
-  background: #eee;
+  height: 6px;
+  border-radius: 4px;
   outline: none;
   -webkit-appearance: none;
   cursor: pointer;
+  background: linear-gradient(
+    to right,
+    var(--true-cobalt, #0a1f7d) 0%,
+    var(--true-cobalt, #0a1f7d) var(--fill-pct, 44%),
+    #dde2f4 var(--fill-pct, 44%),
+    #dde2f4 100%
+  );
 }
 
 .slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  background: var(--true-cobalt);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  margin-top: -8px; /* specific to webkit */
+  background: var(--true-cobalt, #0a1f7d);
+  box-shadow: 0 2px 6px rgba(10, 31, 125, 0.35);
+  cursor: pointer;
+  border: 2px solid white;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+
+.slider:active::-webkit-slider-thumb,
+.slider:hover::-webkit-slider-thumb {
+  transform: scale(1.18);
+  box-shadow: 0 3px 10px rgba(10, 31, 125, 0.45);
 }
 
 .slider::-webkit-slider-runnable-track {
-  width: 100%;
-  height: 8px;
-  cursor: pointer;
-  background: #ddd;
-  border-radius: 5px;
+  height: 6px;
+  border-radius: 4px;
+}
+
+.slider-label {
+  font-size: 0.78em;
+  color: #bbb;
+  font-weight: 600;
+  min-width: 14px;
+  text-align: center;
 }
 
 .slider-value {
-  font-weight: bold;
-  color: var(--true-cobalt);
-  font-size: 1.2em;
-  min-width: 30px;
+  font-weight: 800;
+  color: var(--true-cobalt, #0a1f7d);
+  font-size: 1.25em;
+  min-width: 28px;
   text-align: center;
 }
 
 .score-display {
-  font-size: 0.9em;
-  color: var(--dusty-grape);
-  margin-top: 10px;
+  margin-top: 8px;
   text-align: right;
-  border-top: 1px solid #eee;
-  padding-top: 8px;
 }
 
-.score-value {
-  font-weight: bold;
-  color: var(--true-cobalt);
+.score-calc {
+  font-size: 0.82em;
+  color: #9499b8;
+  font-weight: 500;
 }
 </style>

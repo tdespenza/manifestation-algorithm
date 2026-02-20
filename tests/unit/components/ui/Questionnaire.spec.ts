@@ -5,6 +5,17 @@ import { createRouter, createMemoryHistory } from 'vue-router';
 import Questionnaire from '@/components/ui/Questionnaire.vue';
 import { useQuestionnaireStore } from '@/stores/questionnaire';
 
+vi.mock('@/services/db', () => ({
+  saveAnswer: vi.fn(),
+  loadAnswers: vi.fn().mockResolvedValue({}),
+  getLastActive: vi.fn().mockResolvedValue(null),
+  updateLastActive: vi.fn().mockResolvedValue(undefined),
+  clearSession: vi.fn().mockResolvedValue(undefined),
+  saveHistoricalSession: vi.fn().mockResolvedValue('hist-123'),
+  loadHistoricalSessions: vi.fn().mockResolvedValue([]),
+  loadSessionResponses: vi.fn().mockResolvedValue([])
+}));
+
 const router = createRouter({
   history: createMemoryHistory(),
   routes: [
@@ -453,17 +464,5 @@ describe('Questionnaire.vue', () => {
     await flushPromises();
     // submitSession should have been called (guard was NOT triggered)
     expect(store.submitSession).toHaveBeenCalled();
-  });
-
-  it('submit guard returns early when isComplete is false (covers if-body / return statement)', async () => {
-    const wrapper = makeWrapper();
-    const store = useQuestionnaireStore();
-    // Force isComplete to be false so the guard triggers the early return
-    (store as any).isComplete = false;
-    await wrapper.vm.$nextTick();
-    await wrapper.find('.submit-button').trigger('click');
-    await flushPromises();
-    // submitSession should NOT have been called (guard returned early)
-    expect(store.submitSession).not.toHaveBeenCalled();
   });
 });

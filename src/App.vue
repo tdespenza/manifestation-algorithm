@@ -1,13 +1,21 @@
 <script setup lang="ts">
 import { RouterLink, RouterView, useRoute } from 'vue-router';
-import { computed } from 'vue';
+import { computed, onErrorCaptured } from 'vue';
 import NetworkStatus from './components/NetworkStatus.vue';
 import AppToast from './components/ui/AppToast.vue';
 import UpdateNotification from './components/ui/UpdateNotification.vue';
 import logoUrl from './assets/logo.svg';
+import { useToast } from './composables/useToast';
 
 const route = useRoute();
 const mainClass = computed(() => (route.name === 'dashboard' ? 'full-width-main' : 'container'));
+const { addToast } = useToast();
+
+onErrorCaptured(err => {
+  console.error('Caught in App boundary:', err);
+  addToast('An unexpected error occurred.', 'error');
+  return false;
+});
 </script>
 
 <template>
@@ -30,8 +38,26 @@ const mainClass = computed(() => (route.name === 'dashboard' ? 'full-width-main'
             active-class="active"
             class="settings-link"
             aria-label="Settings"
-            >⚙️</router-link
+            title="Settings"
           >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+              />
+            </svg>
+          </router-link>
         </div>
       </div>
     </nav>
@@ -57,7 +83,7 @@ const mainClass = computed(() => (route.name === 'dashboard' ? 'full-width-main'
 
 .main-nav {
   background: white;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -116,18 +142,21 @@ const mainClass = computed(() => (route.name === 'dashboard' ? 'full-width-main'
   text-decoration: none;
   color: #666;
   font-weight: 500;
-  transition: color 0.2s;
-  padding: 5px 0;
+  transition: color var(--transition-fast, 0.15s ease);
+  padding: 6px 2px;
   border-bottom: 2px solid transparent;
+  font-size: 0.92rem;
+  letter-spacing: 0.01em;
 }
 
 .nav-links a:hover {
-  color: var(--true-cobalt, #0047ab);
+  color: var(--true-cobalt, #0a1f7d);
 }
 
 .nav-links a.active {
-  color: var(--true-cobalt, #0047ab);
-  border-bottom-color: var(--true-cobalt, #0047ab);
+  color: var(--true-cobalt, #0a1f7d);
+  border-bottom-color: var(--true-cobalt, #0a1f7d);
+  font-weight: 600;
 }
 
 .nav-right {
@@ -137,8 +166,27 @@ const mainClass = computed(() => (route.name === 'dashboard' ? 'full-width-main'
 }
 
 .settings-link {
-  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
   text-decoration: none;
+  color: #666;
+  transition:
+    color var(--transition-fast, 0.15s ease),
+    background var(--transition-fast, 0.15s ease);
+}
+
+.settings-link:hover {
+  color: var(--true-cobalt, #0a1f7d);
+  background: rgba(10, 31, 125, 0.08);
+}
+
+.settings-link.active {
+  color: var(--true-cobalt, #0a1f7d);
+  background: rgba(10, 31, 125, 0.1);
 }
 
 /* NetworkStatus in the nav bar is display-only; never let it intercept clicks */

@@ -3,8 +3,13 @@
  * Tracks active questionnaire sessions and provides utilities
  * for crash recovery and multi-session management.
  */
-import { getLastActive, updateLastActive, clearSession, loadHistoricalSessions } from './db';
-import { SESSION_TIMEOUT_MS } from '../constants';
+import {
+  getLastActive,
+  updateLastActive,
+  clearSession,
+  loadHistoricalSessions
+} from '../../src/services/db';
+import { SESSION_TIMEOUT_MS } from '../../src/constants';
 
 export interface SessionState {
   sessionId: string;

@@ -107,7 +107,7 @@ p {
 
 .btn-primary {
   padding: 12px 28px;
-  background: var(--true-cobalt, #0047ab);
+  background: var(--true-cobalt, #0a1f7d);
   color: white;
   border: none;
   border-radius: 25px;

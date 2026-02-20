@@ -6,6 +6,7 @@ import ProgressChart from '../components/charts/ProgressChart.vue';
 import CategoryCard from '../components/dashboard/CategoryCard.vue';
 import StatsPanel from '../components/dashboard/StatsPanel.vue';
 import NetworkRanking from '../components/dashboard/NetworkRanking.vue';
+import ConfirmDialog from '../components/ui/ConfirmDialog.vue';
 import { exportToCSV } from '../services/export';
 
 const historyStore = useHistoryStore();
@@ -33,6 +34,29 @@ const allSelected = computed(
   () => sessions.value.length > 0 && selectedIds.value.size === sessions.value.length
 );
 
+// ── Confirmation dialog state ─────────────────────────────────────────────────
+const confirmVisible = ref(false);
+const confirmTitle = ref('');
+const confirmMessage = ref('');
+const confirmAction = ref<(() => Promise<void>) | null>(null);
+
+function showConfirm(title: string, message: string, action: () => Promise<void>) {
+  confirmTitle.value = title;
+  confirmMessage.value = message;
+  confirmAction.value = action;
+  confirmVisible.value = true;
+}
+
+async function onConfirmed() {
+  confirmVisible.value = false;
+  if (confirmAction.value) await confirmAction.value();
+}
+
+function onCancelled() {
+  confirmVisible.value = false;
+  confirmAction.value = null;
+}
+
 function enterSelectionMode() {
   selectionMode.value = true;
 }
@@ -57,7 +81,7 @@ function toggleSelectAll() {
   }
 }
 
-async function handleDeleteSession(id: string) {
+async function doDeleteSession(id: string) {
   isDeleting.value = true;
   try {
     await historyStore.deleteSession(id);
@@ -72,9 +96,15 @@ async function handleDeleteSession(id: string) {
   }
 }
 
-async function handleDeleteSelected() {
-  if (selectedIds.value.size === 0) return;
-  const ids = [...selectedIds.value];
+function handleDeleteSession(id: string) {
+  showConfirm(
+    'Delete Session',
+    'Are you sure you want to permanently delete this session? This cannot be undone.',
+    () => doDeleteSession(id)
+  );
+}
+
+async function doDeleteSelected(ids: string[]) {
   isDeleting.value = true;
   try {
     await historyStore.deleteSessions(ids);
@@ -85,6 +115,17 @@ async function handleDeleteSelected() {
   } finally {
     isDeleting.value = false;
   }
+}
+
+function handleDeleteSelected() {
+  if (selectedIds.value.size === 0) return;
+  const ids = [...selectedIds.value];
+  const count = ids.length;
+  showConfirm(
+    `Delete ${count} Session${count === 1 ? '' : 's'}`,
+    `Are you sure you want to permanently delete ${count === 1 ? 'this session' : `these ${count} sessions`}? This cannot be undone.`,
+    () => doDeleteSelected(ids)
+  );
 }
 
 const getCutoffDate = () => {
@@ -136,6 +177,14 @@ onMounted(() => {
 
 <template>
   <div class="dashboard-view">
+    <ConfirmDialog
+      v-if="confirmVisible"
+      :title="confirmTitle"
+      :message="confirmMessage"
+      uid="delete-session"
+      @confirm="onConfirmed"
+      @cancel="onCancelled"
+    />
     <div class="dashboard-header">
       <h1>Manifestation History</h1>
       <p class="subtitle">Track your progress over time</p>
@@ -154,7 +203,10 @@ onMounted(() => {
     </div>
 
     <div class="dashboard-content">
-      <div v-if="isLoading" class="loading">Loading history...</div>
+      <div v-if="isLoading" class="loading">
+        <div class="loading-spinner-icon">⏳</div>
+        <p>Loading your history…</p>
+      </div>
 
       <div v-else-if="sessions.length > 0" class="history-content">
         <div class="top-row">
@@ -244,14 +296,34 @@ onMounted(() => {
               <div class="session-score" :class="{ high: session.total_score > 5000 }">
                 {{ Math.round(session.total_score).toLocaleString() }}
               </div>
+              <div
+                class="session-score-label"
+                :class="{
+                  'label-high': session.total_score > 7000,
+                  'label-mid': session.total_score >= 4000 && session.total_score <= 7000,
+                  'label-low': session.total_score < 4000
+                }"
+              >
+                {{
+                  session.total_score > 7000
+                    ? 'Excellent'
+                    : session.total_score >= 4000
+                      ? 'Good'
+                      : 'Needs Work'
+                }}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <div v-else class="empty-state">
-        <p>No historical sessions found yet. Complete a questionnaire to see results here.</p>
-        <router-link to="/" class="cta-button">Start New Assessment</router-link>
+        <div class="empty-icon">✨</div>
+        <h3 class="empty-title">No sessions yet</h3>
+        <p class="empty-desc">
+          Complete your first assessment to see your progress and trends here.
+        </p>
+        <router-link to="/" class="cta-button">Start First Assessment</router-link>
       </div>
     </div>
   </div>
@@ -350,8 +422,8 @@ onMounted(() => {
 }
 
 .select-mode-btn:hover {
-  border-color: var(--true-cobalt, #0047ab);
-  color: var(--true-cobalt, #0047ab);
+  border-color: var(--true-cobalt, #0a1f7d);
+  color: var(--true-cobalt, #0a1f7d);
 }
 
 .select-all-pill {
@@ -359,7 +431,7 @@ onMounted(() => {
   background: rgba(0, 71, 171, 0.08);
   border: none;
   border-radius: 20px;
-  color: var(--true-cobalt, #0047ab);
+  color: var(--true-cobalt, #0a1f7d);
   font-size: 0.82em;
   font-weight: 600;
   cursor: pointer;
@@ -414,7 +486,7 @@ onMounted(() => {
 
 h1 {
   font-size: 2.5rem;
-  color: var(--true-cobalt, #0047ab);
+  color: var(--true-cobalt, #0a1f7d);
   margin-bottom: 0.5rem;
 }
 
@@ -538,7 +610,7 @@ h2 {
     transform 0.2s,
     box-shadow 0.2s,
     border-color 0.2s;
-  border-left: 4px solid var(--true-cobalt, #0047ab);
+  border-left: 4px solid var(--true-cobalt, #0a1f7d);
   position: relative;
 }
 
@@ -650,26 +722,105 @@ h2 {
   color: #4caf50;
 }
 
+.session-score-label {
+  font-size: 0.72em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  display: inline-block;
+}
+
+.label-high {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.label-mid {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.label-low {
+  background: #ffebee;
+  color: #c62828;
+}
+
 .empty-state {
   text-align: center;
-  padding: 4rem;
-  background: #f8f9fa;
-  border-radius: 12px;
-  color: #666;
+  padding: 5rem 2rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.empty-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  line-height: 1;
+}
+
+.empty-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--true-cobalt, #0a1f7d);
+  margin-bottom: 0.5rem;
+}
+
+.empty-desc {
+  color: #888;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  max-width: 380px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.5;
 }
 
 .cta-button {
   display: inline-block;
-  margin-top: 1rem;
-  padding: 10px 20px;
-  background: var(--true-cobalt, #0047ab);
+  margin-top: 0.5rem;
+  padding: 12px 28px;
+  background: var(--true-cobalt, #0a1f7d);
   color: white;
   text-decoration: none;
-  border-radius: 8px;
-  transition: opacity 0.2s;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
+  box-shadow: 0 4px 14px rgba(10, 31, 125, 0.3);
 }
 
 .cta-button:hover {
   opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 4rem;
+  color: #999;
+  font-size: 0.95rem;
+}
+
+.loading-spinner-icon {
+  font-size: 2rem;
+  animation: spin 1.8s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

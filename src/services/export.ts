@@ -1,5 +1,7 @@
 // src/services/export.ts
 import { getDb } from './db';
+import { save } from '@tauri-apps/plugin-dialog';
+import { writeTextFile } from '@tauri-apps/plugin-fs';
 
 // Interfaces ensuring type safety
 export interface ExportSession {
@@ -78,22 +80,19 @@ export async function exportToCSV(): Promise<void> {
   // 3. Generate content
   const csvContent = generateCSV(sessions, responses);
 
-  // 4. Create Blob
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-
-  // 5. Download
-  const link = document.createElement('a');
-  const url = URL.createObjectURL(blob);
-
   // Create filename with date range
   const dates = sessions.map(s => new Date(s.completed_at).getTime());
   const minDate = new Date(Math.min(...dates)).toISOString().split('T')[0];
   const maxDate = new Date(Math.max(...dates)).toISOString().split('T')[0];
+  const defaultFilename = `manifestation_export_${minDate}_to_${maxDate}.csv`;
 
-  link.setAttribute('href', url);
-  link.setAttribute('download', `manifestation_export_${minDate}_to_${maxDate}.csv`);
-  link.style.visibility = 'hidden';
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
+  // 4. Save via Tauri dialog
+  const filePath = await save({
+    filters: [{ name: 'CSV', extensions: ['csv'] }],
+    defaultPath: defaultFilename
+  });
+
+  if (filePath) {
+    await writeTextFile(filePath, csvContent);
+  }
 }

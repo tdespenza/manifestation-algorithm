@@ -48,29 +48,39 @@ const stats = computed(() => {
 <style scoped>
 .stats-panel {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
   background: white;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.08));
 }
 
 .stat-item {
   text-align: center;
+  padding: 12px 8px;
+  border-radius: 8px;
+  background: #fafbff;
+  border: 1px solid #f0f0f0;
+  transition: box-shadow 0.15s ease;
+}
+
+.stat-item:hover {
+  box-shadow: 0 2px 8px rgba(10, 31, 125, 0.1);
 }
 
 .label {
-  font-size: 0.85em;
-  color: #888;
+  font-size: 0.72em;
+  color: #999;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 5px;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+  font-weight: 700;
 }
 
 .value {
-  font-size: 1.5em;
-  font-weight: 700;
-  color: var(--true-cobalt, #0047ab);
+  font-size: 1.45em;
+  font-weight: 800;
+  color: var(--true-cobalt, #0a1f7d);
 }
 </style>

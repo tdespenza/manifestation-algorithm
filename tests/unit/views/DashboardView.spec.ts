@@ -102,7 +102,7 @@ describe('DashboardView.vue', () => {
   it('shows loading indicator while isLoading', async () => {
     dashState.isLoading = true;
     const wrapper = mount(DashboardView, { global: { plugins: [router] } });
-    expect(wrapper.find('.loading').text()).toContain('Loading history');
+    expect(wrapper.find('.loading').text()).toContain('Loading');
   });
 
   it('shows empty state when no sessions', async () => {
@@ -118,6 +118,25 @@ describe('DashboardView.vue', () => {
     await wrapper.vm.$nextTick();
     expect(wrapper.find('.history-content').exists()).toBe(true);
     expect(wrapper.find('.empty-state').exists()).toBe(false);
+  });
+
+  it('session score label shows correct label for each score range', async () => {
+    dashState.sessions = [
+      makeSession('high', 1, 8000), // > 7000 → Excellent
+      makeSession('mid', 2, 5000), // 4000-7000 → Good
+      makeSession('low', 3, 2000) // < 4000 → Needs Work
+    ];
+    const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+    await wrapper.vm.$nextTick();
+    const labels = wrapper.findAll('.session-score-label');
+    expect(labels.length).toBe(3);
+    expect(labels[0].classes()).toContain('label-high');
+    expect(labels[0].text()).toBe('Excellent');
+    expect(labels[1].classes()).toContain('label-mid');
+    expect(labels[1].text()).toBe('Good');
+    expect(labels[2].classes()).toContain('label-low');
+    expect(labels[2].text()).toBe('Needs Work');
+    wrapper.unmount();
   });
 
   it('calls fetchHistory on mount', () => {
@@ -353,44 +372,65 @@ describe('DashboardView.vue', () => {
       wrapper.unmount();
     });
 
-    it('handleDeleteSession calls store.deleteSession and shows success toast', async () => {
+    it('handleDeleteSession opens the confirm dialog (does NOT delete immediately)', async () => {
       const wrapper = mount(DashboardView, { global: { plugins: [router] } });
       await wrapper.vm.$nextTick();
-      await (wrapper.vm as any).handleDeleteSession('s1');
+      const vm = wrapper.vm as any;
+      vm.handleDeleteSession('s1');
+      await wrapper.vm.$nextTick();
+      expect(vm.confirmVisible).toBe(true);
+      expect(vm.confirmTitle).toBe('Delete Session');
+      expect(deleteSessionMock).not.toHaveBeenCalled();
+      wrapper.unmount();
+    });
+
+    it('doDeleteSession calls store.deleteSession and shows success toast', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      await (wrapper.vm as any).doDeleteSession('s1');
       await flushPromises();
       expect(deleteSessionMock).toHaveBeenCalledWith('s1');
       expect(mockAddToast).toHaveBeenCalledWith('Session deleted', 'success');
       wrapper.unmount();
     });
 
-    it('handleDeleteSession shows error toast on store failure', async () => {
+    it('doDeleteSession shows error toast on store failure', async () => {
       deleteSessionMock.mockRejectedValueOnce(new Error('DB error'));
       const wrapper = mount(DashboardView, { global: { plugins: [router] } });
       await wrapper.vm.$nextTick();
-      await (wrapper.vm as any).handleDeleteSession('s1');
+      await (wrapper.vm as any).doDeleteSession('s1');
       await flushPromises();
       expect(mockAddToast).toHaveBeenCalledWith('Failed to delete session', 'error');
       wrapper.unmount();
     });
 
-    it('handleDeleteSelected calls store.deleteSessions with selected ids', async () => {
+    it('handleDeleteSelected opens the confirm dialog (does NOT delete immediately)', async () => {
       const wrapper = mount(DashboardView, { global: { plugins: [router] } });
       await wrapper.vm.$nextTick();
       const vm = wrapper.vm as any;
       vm.selectedIds = new Set(['s1', 's2']);
-      await vm.handleDeleteSelected();
+      vm.handleDeleteSelected();
+      await wrapper.vm.$nextTick();
+      expect(vm.confirmVisible).toBe(true);
+      expect(vm.confirmTitle).toContain('Delete');
+      expect(deleteSessionsMock).not.toHaveBeenCalled();
+      wrapper.unmount();
+    });
+
+    it('doDeleteSelected calls store.deleteSessions with selected ids', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      await (wrapper.vm as any).doDeleteSelected(['s1', 's2']);
       await flushPromises();
       expect(deleteSessionsMock).toHaveBeenCalledWith(['s1', 's2']);
       expect(mockAddToast).toHaveBeenCalledWith('Deleted 2 sessions', 'success');
       wrapper.unmount();
     });
 
-    it('handleDeleteSelected shows singular message when deleting 1 session', async () => {
+    it('doDeleteSelected shows singular message when deleting 1 session', async () => {
       const wrapper = mount(DashboardView, { global: { plugins: [router] } });
       await wrapper.vm.$nextTick();
-      const vm = wrapper.vm as any;
-      vm.selectedIds = new Set(['s1']);
-      await vm.handleDeleteSelected();
+      await (wrapper.vm as any).doDeleteSelected(['s1']);
       await flushPromises();
       expect(mockAddToast).toHaveBeenCalledWith('Deleted 1 session', 'success');
       wrapper.unmount();
@@ -399,33 +439,114 @@ describe('DashboardView.vue', () => {
     it('handleDeleteSelected is a no-op when nothing selected', async () => {
       const wrapper = mount(DashboardView, { global: { plugins: [router] } });
       await wrapper.vm.$nextTick();
-      await (wrapper.vm as any).handleDeleteSelected();
+      const vm = wrapper.vm as any;
+      vm.handleDeleteSelected();
+      await wrapper.vm.$nextTick();
+      expect(vm.confirmVisible).toBe(false);
       expect(deleteSessionsMock).not.toHaveBeenCalled();
       wrapper.unmount();
     });
 
-    it('handleDeleteSelected shows error toast on store failure', async () => {
+    it('doDeleteSelected shows error toast on store failure', async () => {
       deleteSessionsMock.mockRejectedValueOnce(new Error('bulk fail'));
       const wrapper = mount(DashboardView, { global: { plugins: [router] } });
       await wrapper.vm.$nextTick();
-      const vm = wrapper.vm as any;
-      vm.selectedIds = new Set(['s1', 's2']);
-      await vm.handleDeleteSelected();
+      await (wrapper.vm as any).doDeleteSelected(['s1', 's2']);
       await flushPromises();
       expect(mockAddToast).toHaveBeenCalledWith('Failed to delete sessions', 'error');
       wrapper.unmount();
     });
 
-    it('handleDeleteSelected calls exitSelectionMode after success', async () => {
+    it('doDeleteSelected calls exitSelectionMode after success', async () => {
       const wrapper = mount(DashboardView, { global: { plugins: [router] } });
       await wrapper.vm.$nextTick();
       const vm = wrapper.vm as any;
       vm.selectionMode = true;
       vm.selectedIds = new Set(['s1']);
-      await vm.handleDeleteSelected();
+      await vm.doDeleteSelected(['s1']);
       await flushPromises();
       expect(vm.selectionMode).toBe(false);
       expect(vm.selectedIds.size).toBe(0);
+      wrapper.unmount();
+    });
+
+    it('onConfirmed calls confirmAction and hides the dialog', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      const vm = wrapper.vm as any;
+      const action = vi.fn().mockResolvedValue(undefined);
+      vm.confirmAction = action;
+      vm.confirmVisible = true;
+      await vm.onConfirmed();
+      await flushPromises();
+      expect(action).toHaveBeenCalled();
+      expect(vm.confirmVisible).toBe(false);
+      wrapper.unmount();
+    });
+
+    it('onCancelled hides the dialog without deleting', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      const vm = wrapper.vm as any;
+      vm.confirmVisible = true;
+      vm.confirmAction = vi.fn();
+      vm.onCancelled();
+      await wrapper.vm.$nextTick();
+      expect(vm.confirmVisible).toBe(false);
+      expect(vm.confirmAction).toBeNull();
+      expect(deleteSessionMock).not.toHaveBeenCalled();
+      wrapper.unmount();
+    });
+
+    it('handleDeleteSession then onConfirmed executes the delete closure', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      const vm = wrapper.vm as any;
+      vm.handleDeleteSession('s1');
+      await wrapper.vm.$nextTick();
+      expect(vm.confirmVisible).toBe(true);
+      await vm.onConfirmed();
+      await flushPromises();
+      expect(deleteSessionMock).toHaveBeenCalledWith('s1');
+      wrapper.unmount();
+    });
+
+    it('onConfirmed when confirmAction is null does nothing gracefully', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      const vm = wrapper.vm as any;
+      vm.confirmVisible = true;
+      vm.confirmAction = null;
+      await vm.onConfirmed();
+      await flushPromises();
+      expect(vm.confirmVisible).toBe(false);
+      expect(deleteSessionMock).not.toHaveBeenCalled();
+      wrapper.unmount();
+    });
+
+    it('handleDeleteSelected builds singular title/message when 1 session selected', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      const vm = wrapper.vm as any;
+      vm.selectedIds = new Set(['s1']);
+      vm.handleDeleteSelected();
+      await wrapper.vm.$nextTick();
+      expect(vm.confirmTitle).toBe('Delete 1 Session');
+      expect(vm.confirmMessage).toContain('this session');
+      wrapper.unmount();
+    });
+
+    it('handleDeleteSelected then onConfirmed executes the bulk delete closure', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      const vm = wrapper.vm as any;
+      vm.selectedIds = new Set(['s1', 's2']);
+      vm.handleDeleteSelected();
+      await wrapper.vm.$nextTick();
+      expect(vm.confirmVisible).toBe(true);
+      await vm.onConfirmed();
+      await flushPromises();
+      expect(deleteSessionsMock).toHaveBeenCalledWith(['s1', 's2']);
       wrapper.unmount();
     });
 
@@ -478,15 +599,17 @@ describe('DashboardView.vue', () => {
       wrapper.unmount();
     });
 
-    it('inline delete button triggers handleDeleteSession when clicked', async () => {
+    it('inline delete button opens the confirm dialog when clicked', async () => {
       const wrapper = mount(DashboardView, { global: { plugins: [router] } });
       await wrapper.vm.$nextTick();
+      const vm = wrapper.vm as any;
       // selectionMode=false so delete-btn-inline is shown
       const deleteBtn = wrapper.find('.delete-btn-inline');
       expect(deleteBtn.exists()).toBe(true);
       await deleteBtn.trigger('click');
-      await flushPromises();
-      expect(deleteSessionMock).toHaveBeenCalledWith('s1');
+      await wrapper.vm.$nextTick();
+      expect(vm.confirmVisible).toBe(true);
+      expect(deleteSessionMock).not.toHaveBeenCalled();
       wrapper.unmount();
     });
   });

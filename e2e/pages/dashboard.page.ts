@@ -28,6 +28,13 @@ export class DashboardPage {
   readonly sessionCheckBadges: Locator;
   readonly inlineDeleteBtns: Locator;
 
+  /* Confirm dialog */
+  readonly confirmDialog: Locator;
+  readonly confirmDialogTitle: Locator;
+  readonly confirmDialogMessage: Locator;
+  readonly confirmDialogConfirmBtn: Locator;
+  readonly confirmDialogCancelBtn: Locator;
+
   constructor(page: Page) {
     this.page = page;
 
@@ -49,6 +56,12 @@ export class DashboardPage {
     this.sessionCards = page.locator('.session-card');
     this.sessionCheckBadges = page.locator('.session-check');
     this.inlineDeleteBtns = page.locator('.delete-btn-inline');
+
+    this.confirmDialog = page.locator('.confirm-dialog');
+    this.confirmDialogTitle = page.locator('.confirm-title');
+    this.confirmDialogMessage = page.locator('.confirm-message');
+    this.confirmDialogConfirmBtn = page.locator('.btn-confirm');
+    this.confirmDialogCancelBtn = page.locator('.btn-cancel');
   }
 
   async goto() {
@@ -103,5 +116,17 @@ export class DashboardPage {
   /** Click the inline hover-delete button for a session card by index. */
   async clickInlineDelete(index: number) {
     await this.inlineDeleteBtns.nth(index).click();
+  }
+
+  /** Confirm the delete confirmation dialog. */
+  async confirmDelete() {
+    await this.confirmDialogConfirmBtn.waitFor({ timeout: 3_000 });
+    await this.confirmDialogConfirmBtn.click();
+  }
+
+  /** Cancel the delete confirmation dialog. */
+  async cancelDelete() {
+    await this.confirmDialogCancelBtn.waitFor({ timeout: 3_000 });
+    await this.confirmDialogCancelBtn.click();
   }
 }

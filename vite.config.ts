@@ -43,10 +43,10 @@ export default defineConfig({
         'src/assets/**',
       ],
       thresholds: {
-        branches: 80,
-        functions: 85,
-        lines: 85,
-        statements: 85,
+        branches: 100,
+        functions: 100,
+        lines: 100,
+        statements: 100,
       },
     },
   }
