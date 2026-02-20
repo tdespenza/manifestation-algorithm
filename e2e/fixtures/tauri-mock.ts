@@ -21,6 +21,10 @@ export const TAURI_MOCK_SCRIPT = String.raw`
     historical_sessions: [],       // { id, score, completed_at, answers_snapshot }
     historical_responses: [],      // { session_id, question_number, answer_value, recorded_at }
     _sharingEnabled: false,        // persisted sharing opt-in state
+    // Optional fake update metadata returned by plugin:updater|check.
+    // Tests can pre-set window.__tauriPresetUpdate (init script) or call
+    // window.__setMockUpdate(data) at runtime.
+    _mockUpdate: window.__tauriPresetUpdate || null,
   };
 
   let nextResourceId = 1;
@@ -173,6 +177,17 @@ export const TAURI_MOCK_SCRIPT = String.raw`
         return 0;
       }
 
+      case 'plugin:updater|check': {
+        // Returns null by default (no update). Tests can call
+        // window.__setMockUpdate({ version, body, ... }) to simulate an update.
+        return memDB._mockUpdate || null;
+      }
+
+      case 'plugin:resources|close': {
+        // No-op: satisfies Resource.close() called by Update cleanup.
+        return null;
+      }
+
       default:
         console.warn('[TauriMock] Unknown command:', cmd, payload);
         return null;
@@ -210,6 +225,27 @@ export const TAURI_MOCK_SCRIPT = String.raw`
     memDB.historical_sessions = [];
     memDB.historical_responses = [];
     memDB._sharingEnabled = false;
+    memDB._mockUpdate = null;
+  };
+
+  /**
+   * Set or clear the fake update returned by plugin:updater|check.
+   * Call with null to simulate "no update available".
+   * Call with { version, body } to simulate an available update.
+   */
+  window.__setMockUpdate = function (data) {
+    if (!data) {
+      memDB._mockUpdate = null;
+      return;
+    }
+    memDB._mockUpdate = {
+      rid: 1,
+      version: data.version || '99.0.0',
+      currentVersion: '0.0.0',
+      date: null,
+      body: data.body || '',
+      rawJson: JSON.stringify(data),
+    };
   };
 
   // Expose helper to seed DB state for tests

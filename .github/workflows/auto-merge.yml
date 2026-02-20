@@ -44,7 +44,7 @@ jobs:
             -m "chore: auto-merge dev into main (CI passed on ${{ github.event.workflow_run.head_sha }})"
           git push origin main
 
-      - name: Setup Node
+      - name: Set Up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -86,7 +86,7 @@ jobs:
           git push origin "$TAG"
           echo "Pushed tag $TAG — release.yml will now build and publish."
 
-      - name: Sync version bump back to dev
+      - name: Sync Version Bump to Dev
         run: |
           git checkout dev
           git pull origin dev

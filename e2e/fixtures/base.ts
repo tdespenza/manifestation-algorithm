@@ -18,6 +18,12 @@ export interface DBSeed {
   _sharingEnabled?: boolean;
 }
 
+/** Fake update data shape for setMockUpdate */
+export interface MockUpdateData {
+  version: string;
+  body?: string;
+}
+
 /**
  * Extended test fixtures: exposes page object models and DB helpers.
  */
@@ -33,6 +39,12 @@ export type E2EFixtures = {
   seedDB: (data: DBSeed) => Promise<void>;
   /** Read the current in-memory DB state */
   getDB: () => Promise<Record<string, unknown[]>>;
+  /**
+   * Register a fake update in the Tauri mock BEFORE the page first loads.
+   * Must be called before page.goto() - uses addInitScript so it runs at page
+   * boot, after the tauri mock has already exposed window.__setMockUpdate.
+   */
+  presetMockUpdate: (data: MockUpdateData | null) => Promise<void>;
 };
 
 /**
@@ -85,6 +97,18 @@ export const test = base.extend<E2EFixtures>({
       return page.evaluate(
         () => (globalThis as unknown as { __tauriGetDB: () => Record<string, unknown[]> }).__tauriGetDB()
       );
+    });
+  },
+
+  presetMockUpdate: async ({ page }, use) => {
+    await use(async (data: MockUpdateData | null) => {
+      // addInitScript runs on every navigation AFTER the tauri mock has
+      // already registered window.__setMockUpdate via its own init script.
+      await page.addInitScript((updateData: unknown) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const w = globalThis as any;
+        if (typeof w.__setMockUpdate === 'function') w.__setMockUpdate(updateData);
+      }, data as unknown);
     });
   },
 });

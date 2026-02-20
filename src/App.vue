@@ -3,6 +3,7 @@ import { RouterLink, RouterView, useRoute } from 'vue-router';
 import { computed } from 'vue';
 import NetworkStatus from './components/NetworkStatus.vue';
 import AppToast from './components/ui/AppToast.vue';
+import UpdateNotification from './components/ui/UpdateNotification.vue';
 import logoUrl from './assets/logo.svg';
 
 const route = useRoute();
@@ -34,6 +35,8 @@ const mainClass = computed(() => (route.name === 'dashboard' ? 'full-width-main'
         </div>
       </div>
     </nav>
+
+    <UpdateNotification />
 
     <main :class="mainClass">
       <router-view v-slot="{ Component }">
@@ -136,6 +139,22 @@ const mainClass = computed(() => (route.name === 'dashboard' ? 'full-width-main'
 .settings-link {
   font-size: 1.2rem;
   text-decoration: none;
+}
+
+/* NetworkStatus in the nav bar is display-only; never let it intercept clicks */
+.network-status-nav {
+  pointer-events: none;
+}
+
+/* On narrow viewports hide all text inside NetworkStatus; show only the dot */
+@media (max-width: 520px) {
+  .network-status-nav :deep(.status-text),
+  .network-status-nav :deep(.peer-count),
+  .network-status-nav :deep(.manifestation-count),
+  .network-status-nav :deep(.avg-score),
+  .network-status-nav :deep(.p90) {
+    display: none;
+  }
 }
 
 .container {
