@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+# commit-msg hook — bump version based on conventional commit type, then sync.
+#
+# $1 = path to the file containing the commit message (set by git).
+# Files modified by this hook are staged with `git add` and included in the
+# current commit (the tree hasn't been snapshotted yet at commit-msg stage).
+
+set -e
+
+echo ""
+echo "▶ [version] Bumping version from commit type..."
+node scripts/bump-version.js "$1"
+
+# Stage the three version files so they are included in this commit.
+git add package.json src-tauri/Cargo.toml src-tauri/tauri.conf.json
+echo "  ✓ Version files staged."
+echo ""
