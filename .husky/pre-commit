@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Pre-commit hook — lint, format, and typecheck.
+# Pre-commit hook — bump version, lint, format, and typecheck.
 
 set -e
 
@@ -7,6 +7,14 @@ echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "  Pre-commit checks"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+echo ""
+echo "▶ [0/4] Bumping patch version & syncing config files..."
+node scripts/bump-version.js
+# Stage the three files that bump-version.js modifies so they are included
+# in this commit.  lint-staged's stash/restore cycle will then see them as
+# intentionally staged and leave them alone.
+git add package.json src-tauri/Cargo.toml src-tauri/tauri.conf.json
 
 echo ""
 echo "▶ [1/4] Lint-staged (auto-fix staged files)..."

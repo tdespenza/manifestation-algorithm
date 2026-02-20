@@ -47,10 +47,14 @@ jobs:
       - name: Tag and Push Release
         run: |
           TAG="${{ steps.version.outputs.tag }}"
+          # Every commit must have bumped the version via the pre-commit hook,
+          # so this tag should never already exist.  Fail loudly if it does so
+          # the developer knows to check whether the version was properly bumped.
           if git ls-remote --tags origin "$TAG" | grep -q .; then
-            echo "Tag $TAG already exists — skipping."
-          else
-            git tag "$TAG"
-            git push origin "$TAG"
-            echo "Pushed tag $TAG — release.yml will now build and publish."
+            echo "ERROR: Tag $TAG already exists on remote." >&2
+            echo "Every commit must bump the version (pre-commit hook runs scripts/bump-version.js)." >&2
+            exit 1
           fi
+          git tag "$TAG"
+          git push origin "$TAG"
+          echo "Pushed tag $TAG — release.yml will now build and publish."
