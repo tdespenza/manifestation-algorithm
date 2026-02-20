@@ -143,15 +143,19 @@ jobs:
       - name: List downloaded files
         run: find dist -type f | sort
 
-      - name: Delete any existing release and tag
+      - name: Delete any existing release for this tag
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Only delete the GitHub Release — do NOT delete the git tag.
+          # The tag was already created and pushed by the auto-merge workflow.
+          # Deleting the tag and trying to recreate it would hit repository
+          # ruleset restrictions ("Cannot create ref due to creations being
+          # restricted"). gh release create with a pre-existing tag simply
+          # attaches the new release to it without touching the tag ref.
           gh release delete "${{ needs.resolve-tag.outputs.tag }}" \
             --repo "${{ github.repository }}" \
             --yes 2>/dev/null || true
-          git push origin --delete "${{ needs.resolve-tag.outputs.tag }}" 2>/dev/null || true
-          git tag -d "${{ needs.resolve-tag.outputs.tag }}" 2>/dev/null || true
 
       - name: Create and publish release with all installers
         env:
