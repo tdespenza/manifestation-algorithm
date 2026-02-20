@@ -70,7 +70,7 @@ jobs:
             artifact-paths: |
               src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
               src-tauri/target/aarch64-apple-darwin/release/bundle/macos/*.app.tar.gz
-          - os: macos-13
+          - os: macos-14
             name: macOS-Intel
             rust_target: x86_64-apple-darwin
             tauri_args: --target x86_64-apple-darwin
