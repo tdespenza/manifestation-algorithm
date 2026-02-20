@@ -77,14 +77,27 @@ export const TAURI_MOCK_SCRIPT = String.raw`
     
     const condition = whereMatch[1].trim();
     
-    if (condition.includes('session_id') && condition.includes('=')) {
+    // Handle IN (...) bulk delete: DELETE FROM table WHERE col IN ($1, $2, ...)
+    if (/\bIN\s*\(/i.test(condition)) {
+      const colMatch = condition.match(/(\w+)\s+IN/i);
+      if (colMatch) {
+        const col = colMatch[1].toLowerCase();
+        const vals = new Set(params.map(String));
+        memDB[table] = rows.filter(r => !vals.has(String(r[col])));
+      }
+      return;
+    }
+
+    // Handle equality: WHERE session_id = $1 | WHERE key = $1 | WHERE id = $1
+    if (condition.includes('session_id') && /=/.test(condition)) {
       const val = params[0];
-      const filtered = rows.filter(r => r.session_id !== val);
-      memDB[table] = filtered;
-    } else if (condition.includes('key') && condition.includes('=')) {
+      memDB[table] = rows.filter(r => r.session_id !== val);
+    } else if (condition.toLowerCase().includes('key') && /=/.test(condition)) {
       const val = params[0];
-      const filtered = rows.filter(r => r.key !== val);
-      memDB[table] = filtered;
+      memDB[table] = rows.filter(r => r.key !== val);
+    } else if (/\bid\s*=/i.test(condition)) {
+      const val = params[0];
+      memDB[table] = rows.filter(r => r.id !== val);
     }
   }
 

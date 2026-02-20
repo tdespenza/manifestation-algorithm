@@ -25,15 +25,22 @@ const ranges = [
 
 // ── Selection state ──────────────────────────────────────────────────────────
 const selectedIds = ref<Set<string>>(new Set());
+const selectionMode = ref(false);
 const isDeleting = ref(false);
 
 const selectedCount = computed(() => selectedIds.value.size);
 const allSelected = computed(
   () => sessions.value.length > 0 && selectedIds.value.size === sessions.value.length
 );
-const someSelected = computed(
-  () => selectedIds.value.size > 0 && selectedIds.value.size < sessions.value.length
-);
+
+function enterSelectionMode() {
+  selectionMode.value = true;
+}
+
+function exitSelectionMode() {
+  selectionMode.value = false;
+  selectedIds.value = new Set();
+}
 
 function toggleSelect(id: string) {
   const updated = new Set(selectedIds.value);
@@ -71,7 +78,7 @@ async function handleDeleteSelected() {
   isDeleting.value = true;
   try {
     await historyStore.deleteSessions(ids);
-    selectedIds.value = new Set();
+    exitSelectionMode();
     addToast(`Deleted ${ids.length} session${ids.length === 1 ? '' : 's'}`, 'success');
   } catch {
     addToast('Failed to delete sessions', 'error');
@@ -143,14 +150,6 @@ onMounted(() => {
           </select>
         </div>
         <button class="export-btn" @click="exportData">📥 Export CSV</button>
-        <button
-          v-if="selectedCount > 0"
-          class="delete-selected-btn"
-          :disabled="isDeleting"
-          @click="handleDeleteSelected"
-        >
-          {{ isDeleting ? 'Deleting…' : `🗑 Delete ${selectedCount} Selected` }}
-        </button>
       </div>
     </div>
 
@@ -187,39 +186,55 @@ onMounted(() => {
         <div class="recent-sessions">
           <div class="recent-sessions-header">
             <h2>Recent Sessions</h2>
-            <label class="select-all-label">
-              <input
-                type="checkbox"
-                :checked="allSelected"
-                :indeterminate="someSelected"
-                @change="toggleSelectAll"
-              />
-              Select All
-            </label>
+            <div class="sessions-header-actions">
+              <template v-if="selectionMode">
+                <button class="select-all-pill" @click="toggleSelectAll">
+                  {{ allSelected ? 'Deselect All' : 'Select All' }}
+                </button>
+                <button
+                  v-if="selectedCount > 0"
+                  class="delete-selected-btn-sm"
+                  :disabled="isDeleting"
+                  @click="handleDeleteSelected"
+                >
+                  {{ isDeleting ? 'Deleting…' : `Delete ${selectedCount}` }}
+                </button>
+                <button class="cancel-select-btn" @click="exitSelectionMode">Cancel</button>
+              </template>
+              <button v-else class="select-mode-btn" @click="enterSelectionMode">Select</button>
+            </div>
           </div>
           <div class="session-list">
             <div
               v-for="session in sessions"
               :key="session.id"
               class="session-card"
-              :class="{ selected: selectedIds.has(session.id) }"
+              :class="{
+                selected: selectedIds.has(session.id),
+                'selection-mode': selectionMode
+              }"
+              @click="selectionMode ? toggleSelect(session.id) : undefined"
             >
-              <div class="session-card-top">
-                <input
-                  type="checkbox"
-                  class="session-checkbox"
-                  :checked="selectedIds.has(session.id)"
-                  @change="toggleSelect(session.id)"
-                />
-                <button
-                  class="delete-btn-inline"
-                  title="Delete session"
-                  :disabled="isDeleting"
-                  @click="handleDeleteSession(session.id)"
-                >
-                  ✕
-                </button>
+              <!-- Check badge (selection mode only) -->
+              <div
+                v-if="selectionMode"
+                class="session-check"
+                :class="{ checked: selectedIds.has(session.id) }"
+              >
+                <span v-if="selectedIds.has(session.id)" class="check-symbol">✓</span>
               </div>
+
+              <!-- Individual delete (normal mode, hover only) -->
+              <button
+                v-else
+                class="delete-btn-inline"
+                title="Delete session"
+                :disabled="isDeleting"
+                @click.stop="handleDeleteSession(session.id)"
+              >
+                ✕
+              </button>
+
               <div class="session-date">
                 {{ new Date(session.completed_at).toLocaleDateString() }}
                 <span class="session-time">{{
@@ -303,26 +318,97 @@ onMounted(() => {
   border-color: #ccc;
 }
 
-.delete-selected-btn {
-  padding: 8px 16px;
+/* ── Recent sessions header ── */
+.recent-sessions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.recent-sessions-header h2 {
+  margin: 0;
+}
+
+.sessions-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.select-mode-btn {
+  padding: 6px 16px;
+  background: transparent;
+  border: 1.5px solid #bbb;
+  border-radius: 20px;
+  color: #555;
+  font-size: 0.85em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.03em;
+}
+
+.select-mode-btn:hover {
+  border-color: var(--true-cobalt, #0047ab);
+  color: var(--true-cobalt, #0047ab);
+}
+
+.select-all-pill {
+  padding: 5px 12px;
+  background: rgba(0, 71, 171, 0.08);
+  border: none;
+  border-radius: 20px;
+  color: var(--true-cobalt, #0047ab);
+  font-size: 0.82em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.select-all-pill:hover {
+  background: rgba(0, 71, 171, 0.16);
+}
+
+.delete-selected-btn-sm {
+  padding: 5px 14px;
   background: #dc3545;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 20px;
+  font-size: 0.82em;
+  font-weight: 700;
   cursor: pointer;
-  font-size: 0.9em;
-  font-weight: 600;
-  transition: background 0.2s;
+  transition: background 0.15s;
 }
 
-.delete-selected-btn:hover:not(:disabled) {
+.delete-selected-btn-sm:hover:not(:disabled) {
   background: #b02a37;
 }
 
-.delete-selected-btn:disabled {
-  opacity: 0.6;
+.delete-selected-btn-sm:disabled {
+  opacity: 0.55;
   cursor: not-allowed;
 }
+
+.cancel-select-btn {
+  padding: 5px 12px;
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 0.82em;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 20px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.cancel-select-btn:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+/* ── Session card redesign ── */
 
 h1 {
   font-size: 2.5rem;
@@ -446,13 +532,9 @@ h2 {
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
   border-left: 4px solid var(--true-cobalt, #0047ab);
-}
-
-.session-card.selected {
-  border-left-color: #dc3545;
-  background: #fff8f8;
+  position: relative;
 }
 
 .session-card:hover {
@@ -460,52 +542,68 @@ h2 {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.recent-sessions-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-
-.recent-sessions-header h2 {
-  margin: 0;
-}
-
-.select-all-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.9em;
-  color: #555;
+.session-card.selection-mode {
   cursor: pointer;
-  user-select: none;
 }
 
-.session-card-top {
+.session-card.selection-mode:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+}
+
+.session-card.selected {
+  border-left-color: #43a047;
+  background: #f6fff7;
+}
+
+/* Circular check badge */
+.session-check {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  background: white;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  width: 100%;
-  margin-bottom: 8px;
+  justify-content: center;
+  transition: border-color 0.15s, background 0.15s;
+  flex-shrink: 0;
 }
 
-.session-checkbox {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-  accent-color: var(--true-cobalt, #0047ab);
+.session-check.checked {
+  border-color: #43a047;
+  background: #43a047;
 }
 
+.check-symbol {
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* Inline delete (hover-reveal, normal mode) */
 .delete-btn-inline {
+  position: absolute;
+  top: 8px;
+  right: 8px;
   background: none;
   border: none;
-  color: #ccc;
-  font-size: 0.85em;
+  color: #d0d0d0;
+  font-size: 0.8rem;
   cursor: pointer;
-  padding: 2px 6px;
+  padding: 4px 6px;
   border-radius: 4px;
-  transition: color 0.2s, background 0.2s;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
   line-height: 1;
+}
+
+.session-card:hover .delete-btn-inline {
+  opacity: 1;
 }
 
 .delete-btn-inline:hover:not(:disabled) {
@@ -514,7 +612,7 @@ h2 {
 }
 
 .delete-btn-inline:disabled {
-  opacity: 0.4;
+  opacity: 0.3;
   cursor: not-allowed;
 }
 

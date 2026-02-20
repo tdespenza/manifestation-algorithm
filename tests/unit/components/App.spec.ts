@@ -12,9 +12,17 @@ import App from '@/App.vue';
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
-    { path: '/', component: { template: '<div class="home-stub" />' } },
-    { path: '/dashboard', component: { template: '<div class="dash-stub" />' } },
-    { path: '/settings', component: { template: '<div class="settings-stub" />' } }
+    { path: '/', name: 'home', component: { template: '<div class="home-stub" />' } },
+    {
+      path: '/dashboard',
+      name: 'dashboard',
+      component: { template: '<div class="dash-stub" />' }
+    },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: { template: '<div class="settings-stub" />' }
+    }
   ]
 });
 
@@ -51,9 +59,24 @@ describe('App.vue', () => {
     expect(wrapper.find('.network-status-stub').exists()).toBe(true);
   });
 
-  it('renders the main container', async () => {
+  it('renders the main container (non-dashboard route)', async () => {
+    await router.push('/');
+    await router.isReady();
     const wrapper = mount(App, { global: { plugins: [router] } });
     await router.isReady();
     expect(wrapper.find('.container').exists()).toBe(true);
+    expect(wrapper.find('.full-width-main').exists()).toBe(false);
+  });
+
+  it('uses full-width-main class on the dashboard route', async () => {
+    await router.push('/dashboard');
+    await router.isReady();
+    const wrapper = mount(App, { global: { plugins: [router] } });
+    await router.isReady();
+    expect(wrapper.find('.full-width-main').exists()).toBe(true);
+    expect(wrapper.find('.container').exists()).toBe(false);
+    // Reset to home
+    await router.push('/');
   });
 });
+

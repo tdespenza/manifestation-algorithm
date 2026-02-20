@@ -316,5 +316,82 @@ describe('useChartExport', () => {
       expect(isExporting.value).toBe(false);
     });
   });
+
+  // ── showSaveFilePicker path ───────────────────────────────────────────────────
+  describe('saveWithPicker (via exportToCSV)', () => {
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it('uses showSaveFilePicker when available and returns success', async () => {
+      const mockWritable = {
+        write: vi.fn().mockResolvedValue(undefined),
+        close: vi.fn().mockResolvedValue(undefined)
+      };
+      const mockHandle = { createWritable: vi.fn().mockResolvedValue(mockWritable) };
+      vi.stubGlobal('showSaveFilePicker', vi.fn().mockResolvedValue(mockHandle));
+
+      const { exportToCSV } = useChartExport();
+      const result = await exportToCSV([{ A: 1 }], 'picker_test');
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('Saved as');
+      expect(mockWritable.write).toHaveBeenCalled();
+      expect(mockWritable.close).toHaveBeenCalled();
+    });
+
+    it('returns cancelled when picker throws AbortError', async () => {
+      const abortError = Object.assign(new Error('User cancelled'), { name: 'AbortError' });
+      vi.stubGlobal('showSaveFilePicker', vi.fn().mockRejectedValue(abortError));
+
+      const { exportToCSV } = useChartExport();
+      const result = await exportToCSV([{ A: 1 }], 'abort_test');
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('Save cancelled');
+    });
+
+    it('falls back to anchor download when picker throws non-abort error', async () => {
+      const networkError = new Error('Permission denied');
+      vi.stubGlobal('showSaveFilePicker', vi.fn().mockRejectedValue(networkError));
+
+      const { exportToCSV } = useChartExport();
+      const result = await exportToCSV([{ A: 1 }], 'fallback_test');
+      // Falls back to legacy anchor download, which succeeds
+      expect(result.success).toBe(true);
+      expect(URL.createObjectURL).toHaveBeenCalled();
+    });
+  });
+
+  // ── export error catch blocks ─────────────────────────────────────────────────
+  describe('export error catch blocks', () => {
+    it('exportToExcel returns failure when XLSX.write throws', async () => {
+      xlsxMocks.write.mockImplementationOnce(() => {
+        throw new Error('XLSX write failure');
+      });
+      const { exportToExcel } = useChartExport();
+      const result = await exportToExcel([{ A: 1 }], 'bad_excel');
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('Excel export failed');
+    });
+
+    it('exportToCSV returns failure when Blob constructor throws', async () => {
+      vi.spyOn(globalThis, 'Blob').mockImplementationOnce(() => {
+        throw new Error('Blob error');
+      });
+      const { exportToCSV } = useChartExport();
+      const result = await exportToCSV([{ Name: 'Test' }], 'bad_csv');
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('CSV export failed');
+    });
+
+    it('exportToHTML returns failure when toDataURL throws', async () => {
+      vi.spyOn(mockCanvas, 'toDataURL').mockImplementationOnce(() => {
+        throw new Error('Canvas error');
+      });
+      const { exportToHTML } = useChartExport();
+      const result = await exportToHTML('test-chart-element', 'Bad Chart');
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('HTML export failed');
+    });
+  });
 });
 

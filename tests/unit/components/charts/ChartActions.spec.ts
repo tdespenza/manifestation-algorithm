@@ -220,4 +220,83 @@ describe('ChartActions.vue', () => {
     expect(closeBtn.disabled).toBe(true);
     wrapper.unmount();
   });
+
+  it('runExport catch block: shows "Export failed unexpectedly" toast when export throws', async () => {
+    mockExportToExcel.mockRejectedValueOnce(new Error('network crash'));
+    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
+    await wrapper.find('.export-trigger-btn').trigger('click');
+    await nextTick();
+    const buttons = document.querySelectorAll('.export-option-btn');
+    (buttons[1] as HTMLButtonElement).click();
+    await nextTick();
+    await new Promise(r => setTimeout(r, 10));
+    expect(mockAddToast).toHaveBeenCalledWith('Export failed unexpectedly', 'error');
+    wrapper.unmount();
+  });
+
+  it('closeDialog while busy does not close the dialog', async () => {
+    mockExportToExcel.mockReturnValueOnce(new Promise(() => {})); // never resolves
+    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
+    await wrapper.find('.export-trigger-btn').trigger('click');
+    await nextTick();
+    const buttons = document.querySelectorAll('.export-option-btn');
+    (buttons[1] as HTMLButtonElement).click(); // triggers export → busy = true
+    await nextTick();
+    // Try to close via the overlay while busy — closeDialog returns early
+    const overlay = document.querySelector('.export-dialog-overlay') as HTMLElement;
+    overlay?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await nextTick();
+    expect(document.querySelector('.export-dialog')).not.toBeNull();
+    wrapper.unmount();
+  });
+
+  it('runExport shows error toast when export resolves with success: false', async () => {
+    mockExportToCSV.mockResolvedValueOnce({ success: false, message: 'Permission denied' });
+    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
+    await wrapper.find('.export-trigger-btn').trigger('click');
+    await nextTick();
+    const buttons = document.querySelectorAll('.export-option-btn');
+    (buttons[2] as HTMLButtonElement).click(); // CSV is button index 2
+    await nextTick();
+    await new Promise(r => setTimeout(r, 10));
+    expect(mockAddToast).toHaveBeenCalledWith('Permission denied', 'error');
+    wrapper.unmount();
+  });
+
+  it('runExport suppresses toast when message is "Save cancelled"', async () => {
+    mockExportToCSV.mockResolvedValueOnce({ success: false, message: 'Save cancelled' });
+    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
+    await wrapper.find('.export-trigger-btn').trigger('click');
+    await nextTick();
+    const buttons = document.querySelectorAll('.export-option-btn');
+    (buttons[2] as HTMLButtonElement).click();
+    await nextTick();
+    await new Promise(r => setTimeout(r, 10));
+    expect(mockAddToast).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
+  it('handlePrint shows error toast when printChart returns success: false', async () => {
+    mockPrintChart.mockReturnValueOnce({ success: false, message: 'Print failed' });
+    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
+    await wrapper.find('.export-trigger-btn').trigger('click');
+    await nextTick();
+    const buttons = document.querySelectorAll('.export-option-btn');
+    (buttons[0] as HTMLButtonElement).click(); // Print is button index 0
+    await nextTick();
+    expect(mockAddToast).toHaveBeenCalledWith('Print failed', 'error');
+    wrapper.unmount();
+  });
+
+  it('handlePDFExport shows error toast when exportToPDF returns success: false', async () => {
+    mockExportToPDF.mockReturnValueOnce({ success: false, message: 'PDF failed' });
+    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
+    await wrapper.find('.export-trigger-btn').trigger('click');
+    await nextTick();
+    const buttons = document.querySelectorAll('.export-option-btn');
+    (buttons[3] as HTMLButtonElement).click(); // PDF is button index 3
+    await nextTick();
+    expect(mockAddToast).toHaveBeenCalledWith('PDF failed', 'error');
+    wrapper.unmount();
+  });
 });

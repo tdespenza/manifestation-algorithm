@@ -22,8 +22,8 @@ const yesterday = new Date(Date.now() - 86_400_000).toISOString();
 // them in SELECT results that the app trend-loading service reads.
 const SEED = {
   historical_sessions: [
-    { id: SESSION_ID_1, score: 7200, completed_at: now },
-    { id: SESSION_ID_2, score: 6100, completed_at: yesterday }
+    { id: SESSION_ID_1, total_score: 7200, completed_at: now },
+    { id: SESSION_ID_2, total_score: 6100, completed_at: yesterday }
   ],
   historical_responses: [
     {

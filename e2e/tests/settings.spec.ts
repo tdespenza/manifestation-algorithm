@@ -11,7 +11,7 @@ const DASHBOARD_SEED: DBSeed = {
   historical_sessions: [
     {
       id: 'settings-e2e-session-001',
-      score: 7500,
+      total_score: 7500,
       completed_at: new Date().toISOString()
     }
   ],

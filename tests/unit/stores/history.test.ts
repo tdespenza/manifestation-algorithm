@@ -147,4 +147,13 @@ describe('History Store', () => {
     await store.deleteSessions([]);
     expect(dbMocks.deleteSessions).not.toHaveBeenCalled();
   });
+
+  it('deleteSessions sets error on failure', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    dbMocks.deleteSessions.mockRejectedValueOnce(new Error('bulk delete error'));
+    const store = useHistoryStore();
+    await store.deleteSessions(['s1', 's2']);
+    expect(store.error).toContain('bulk delete error');
+    consoleSpy.mockRestore();
+  });
 });

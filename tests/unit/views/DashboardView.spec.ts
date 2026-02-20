@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { mount } from '@vue/test-utils';
+import { mount, flushPromises } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import { createRouter, createWebHashHistory } from 'vue-router';
 
@@ -20,6 +20,12 @@ vi.mock('@/components/dashboard/NetworkRanking.vue', () => ({
   default: { template: '<div class="network-ranking-stub" />' }
 }));
 
+// ── Mock useToast ─────────────────────────────────────────────────────────────
+const mockAddToast = vi.fn();
+vi.mock('@/composables/useToast', () => ({
+  useToast: () => ({ addToast: mockAddToast, toasts: { value: [] }, dismissToast: vi.fn() })
+}));
+
 // ── Mock export service ───────────────────────────────────────────────────────
 const exportMocks = vi.hoisted(() => ({
   exportToCSV: vi.fn().mockResolvedValue(undefined)
@@ -35,6 +41,8 @@ const dashState = vi.hoisted(() => ({
   trends: {} as Record<string, any[]>
 }));
 const fetchHistoryMock = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
+const deleteSessionMock = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
+const deleteSessionsMock = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 
 vi.mock('@/stores/history', () => ({
   useHistoryStore: () => ({
@@ -47,7 +55,9 @@ vi.mock('@/stores/history', () => ({
     get trends() {
       return dashState.trends;
     },
-    fetchHistory: fetchHistoryMock
+    fetchHistory: fetchHistoryMock,
+    deleteSession: deleteSessionMock,
+    deleteSessions: deleteSessionsMock
   })
 }));
 
@@ -79,6 +89,8 @@ describe('DashboardView.vue', () => {
     dashState.sessions = [];
     dashState.trends = {};
     fetchHistoryMock.mockResolvedValue(undefined);
+    deleteSessionMock.mockResolvedValue(undefined);
+    deleteSessionsMock.mockResolvedValue(undefined);
     exportMocks.exportToCSV.mockResolvedValue(undefined);
     vi.stubGlobal('alert', vi.fn());
   });
@@ -255,5 +267,227 @@ describe('DashboardView.vue', () => {
     await new Promise(r => setTimeout(r, 10));
 
     expect(alertMock).toHaveBeenCalledWith(expect.stringContaining('Export failed'));
+  });
+
+  // ── Selection / delete ───────────────────────────────────────────────────────
+  describe('selection mode', () => {
+    beforeEach(() => {
+      dashState.sessions = [makeSession('s1', 1), makeSession('s2', 2), makeSession('s3', 3)];
+    });
+
+    it('shows Select button in normal mode and hides it in selection mode', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      expect(wrapper.find('.select-mode-btn').exists()).toBe(true);
+      await wrapper.find('.select-mode-btn').trigger('click');
+      await wrapper.vm.$nextTick();
+      expect((wrapper.vm as any).selectionMode).toBe(true);
+      expect(wrapper.find('.cancel-select-btn').exists()).toBe(true);
+      wrapper.unmount();
+    });
+
+    it('Cancel button calls exitSelectionMode — clears selection and mode', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      const vm = wrapper.vm as any;
+      vm.selectionMode = true;
+      vm.selectedIds = new Set(['s1']);
+      await wrapper.vm.$nextTick();
+      await wrapper.find('.cancel-select-btn').trigger('click');
+      await wrapper.vm.$nextTick();
+      expect(vm.selectionMode).toBe(false);
+      expect(vm.selectedIds.size).toBe(0);
+      wrapper.unmount();
+    });
+
+    it('toggleSelect adds id on first call and removes on second', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      const vm = wrapper.vm as any;
+      vm.toggleSelect('s1');
+      expect(vm.selectedIds.has('s1')).toBe(true);
+      vm.toggleSelect('s1');
+      expect(vm.selectedIds.has('s1')).toBe(false);
+      wrapper.unmount();
+    });
+
+    it('toggleSelectAll selects all then deselects all on second call', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      const vm = wrapper.vm as any;
+      vm.toggleSelectAll();
+      expect(vm.selectedIds.size).toBe(3);
+      vm.toggleSelectAll();
+      expect(vm.selectedIds.size).toBe(0);
+      wrapper.unmount();
+    });
+
+    it('allSelected computed returns true only when all sessions are selected', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      const vm = wrapper.vm as any;
+      expect(vm.allSelected).toBe(false);
+      vm.selectedIds = new Set(['s1', 's2', 's3']);
+      await wrapper.vm.$nextTick();
+      expect(vm.allSelected).toBe(true);
+      wrapper.unmount();
+    });
+
+    it('selectedCount computed returns size of selectedIds', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      const vm = wrapper.vm as any;
+      vm.selectedIds = new Set(['s1', 's2']);
+      await wrapper.vm.$nextTick();
+      expect(vm.selectedCount).toBe(2);
+      wrapper.unmount();
+    });
+
+    it('delete-selected-btn-sm is visible when selectedCount > 0 in selection mode', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      const vm = wrapper.vm as any;
+      vm.selectionMode = true;
+      vm.selectedIds = new Set(['s1']);
+      await wrapper.vm.$nextTick();
+      expect(wrapper.find('.delete-selected-btn-sm').exists()).toBe(true);
+      wrapper.unmount();
+    });
+
+    it('handleDeleteSession calls store.deleteSession and shows success toast', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      await (wrapper.vm as any).handleDeleteSession('s1');
+      await flushPromises();
+      expect(deleteSessionMock).toHaveBeenCalledWith('s1');
+      expect(mockAddToast).toHaveBeenCalledWith('Session deleted', 'success');
+      wrapper.unmount();
+    });
+
+    it('handleDeleteSession shows error toast on store failure', async () => {
+      deleteSessionMock.mockRejectedValueOnce(new Error('DB error'));
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      await (wrapper.vm as any).handleDeleteSession('s1');
+      await flushPromises();
+      expect(mockAddToast).toHaveBeenCalledWith('Failed to delete session', 'error');
+      wrapper.unmount();
+    });
+
+    it('handleDeleteSelected calls store.deleteSessions with selected ids', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      const vm = wrapper.vm as any;
+      vm.selectedIds = new Set(['s1', 's2']);
+      await vm.handleDeleteSelected();
+      await flushPromises();
+      expect(deleteSessionsMock).toHaveBeenCalledWith(['s1', 's2']);
+      expect(mockAddToast).toHaveBeenCalledWith('Deleted 2 sessions', 'success');
+      wrapper.unmount();
+    });
+
+    it('handleDeleteSelected shows singular message when deleting 1 session', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      const vm = wrapper.vm as any;
+      vm.selectedIds = new Set(['s1']);
+      await vm.handleDeleteSelected();
+      await flushPromises();
+      expect(mockAddToast).toHaveBeenCalledWith('Deleted 1 session', 'success');
+      wrapper.unmount();
+    });
+
+    it('handleDeleteSelected is a no-op when nothing selected', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      await (wrapper.vm as any).handleDeleteSelected();
+      expect(deleteSessionsMock).not.toHaveBeenCalled();
+      wrapper.unmount();
+    });
+
+    it('handleDeleteSelected shows error toast on store failure', async () => {
+      deleteSessionsMock.mockRejectedValueOnce(new Error('bulk fail'));
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      const vm = wrapper.vm as any;
+      vm.selectedIds = new Set(['s1', 's2']);
+      await vm.handleDeleteSelected();
+      await flushPromises();
+      expect(mockAddToast).toHaveBeenCalledWith('Failed to delete sessions', 'error');
+      wrapper.unmount();
+    });
+
+    it('handleDeleteSelected calls exitSelectionMode after success', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      const vm = wrapper.vm as any;
+      vm.selectionMode = true;
+      vm.selectedIds = new Set(['s1']);
+      await vm.handleDeleteSelected();
+      await flushPromises();
+      expect(vm.selectionMode).toBe(false);
+      expect(vm.selectedIds.size).toBe(0);
+      wrapper.unmount();
+    });
+
+    it('clicking session card in selection mode calls toggleSelect', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      const vm = wrapper.vm as any;
+      vm.selectionMode = true;
+      await wrapper.vm.$nextTick();
+      const card = wrapper.find('.session-card');
+      expect(card.exists()).toBe(true);
+      await card.trigger('click');
+      await wrapper.vm.$nextTick();
+      expect(vm.selectedIds.has('s1')).toBe(true);
+      wrapper.unmount();
+    });
+
+    it('clicking session card in normal mode does not call toggleSelect', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      const vm = wrapper.vm as any;
+      // selectionMode is false by default
+      await wrapper.find('.session-card').trigger('click');
+      await wrapper.vm.$nextTick();
+      expect(vm.selectedIds.size).toBe(0);
+      wrapper.unmount();
+    });
+
+    it('session-check badge is rendered when selectionMode is true', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      const vm = wrapper.vm as any;
+      vm.selectionMode = true;
+      vm.selectedIds = new Set(['s1']);
+      await wrapper.vm.$nextTick();
+      const check = wrapper.find('.session-check.checked');
+      expect(check.exists()).toBe(true);
+      expect(check.find('.check-symbol').text()).toBe('✓');
+      wrapper.unmount();
+    });
+
+    it('select-all-pill shows "Deselect All" text when allSelected is true', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      const vm = wrapper.vm as any;
+      vm.selectionMode = true;
+      vm.selectedIds = new Set(['s1', 's2', 's3']); // all 3 sessions selected
+      await wrapper.vm.$nextTick();
+      expect(wrapper.find('.select-all-pill').text()).toBe('Deselect All');
+      wrapper.unmount();
+    });
+
+    it('inline delete button triggers handleDeleteSession when clicked', async () => {
+      const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+      await wrapper.vm.$nextTick();
+      // selectionMode=false so delete-btn-inline is shown
+      const deleteBtn = wrapper.find('.delete-btn-inline');
+      expect(deleteBtn.exists()).toBe(true);
+      await deleteBtn.trigger('click');
+      await flushPromises();
+      expect(deleteSessionMock).toHaveBeenCalledWith('s1');
+      wrapper.unmount();
+    });
   });
 });

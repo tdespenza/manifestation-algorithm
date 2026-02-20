@@ -54,7 +54,6 @@ test.describe('Full user journey (smoke test)', () => {
   });
 
   test('step-by-step mode: navigate all questions forward and back', async ({
-    page,
     questionnairePage,
   }) => {
     await questionnairePage.goto();
