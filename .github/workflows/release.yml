@@ -51,19 +51,32 @@ jobs:
         include:
           - os: ubuntu-latest
             name: Linux
+            rust_target: ""
+            tauri_args: ""
             artifact-paths: |
               src-tauri/target/release/bundle/deb/*.deb
               src-tauri/target/release/bundle/appimage/*.AppImage
           - os: windows-latest
             name: Windows
+            rust_target: ""
+            tauri_args: ""
             artifact-paths: |
               src-tauri/target/release/bundle/msi/*.msi
               src-tauri/target/release/bundle/nsis/*.exe
           - os: macos-latest
-            name: macOS
+            name: macOS-Apple-Silicon
+            rust_target: aarch64-apple-darwin
+            tauri_args: --target aarch64-apple-darwin
             artifact-paths: |
-              src-tauri/target/release/bundle/macos/*.dmg
-              src-tauri/target/release/bundle/macos/*.app.tar.gz
+              src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
+              src-tauri/target/aarch64-apple-darwin/release/bundle/macos/*.app.tar.gz
+          - os: macos-13
+            name: macOS-Intel
+            rust_target: x86_64-apple-darwin
+            tauri_args: --target x86_64-apple-darwin
+            artifact-paths: |
+              src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/*.dmg
+              src-tauri/target/x86_64-apple-darwin/release/bundle/macos/*.app.tar.gz
 
     runs-on: ${{ matrix.os }}
 
@@ -104,9 +117,15 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Add Rust target
+        if: ${{ matrix.rust_target != '' }}
+        run: rustup target add ${{ matrix.rust_target }}
+
       - name: Build
         uses: tauri-apps/tauri-action@v0
         # No releaseId / tagName / releaseName — build only, no release management.
+        with:
+          args: ${{ matrix.tauri_args }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
