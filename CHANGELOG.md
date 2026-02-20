@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.5] - 2026-02-20
+### Features
+- Add updater and process plugins, implement update notification component
+### Refactoring
+- Update workflow step names for consistency and clarity; change process capability from allow-relaunch to allow-restart
+
 ## [0.4.4] - 2026-02-20
 ### Documentation
 - Remove redundant author update from README
