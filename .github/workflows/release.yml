@@ -289,12 +289,7 @@ jobs:
           add_platform() {
             local key="$1" sig="$2" url="$3"
             if [ -n "$sig" ] && [ -n "$url" ]; then
-              PLATFORMS=$(echo "$PLATFORMS" | python3 -c "
-import sys, json
-d = json.load(sys.stdin)
-d['$key'] = {'signature': '$sig', 'url': '$url'}
-print(json.dumps(d))
-")
+              PLATFORMS=$(printf '%s' "$PLATFORMS" | python3 -c "import sys,json;d=json.load(sys.stdin);d['$key']={'signature':'$sig','url':'$url'};print(json.dumps(d))")
             fi
           }
 
@@ -303,27 +298,8 @@ print(json.dumps(d))
           add_platform "darwin-aarch64" "$MAC_ARM_SIG" "$MAC_ARM_URL"
           add_platform "darwin-x86_64"  "$MAC_X64_SIG" "$MAC_X64_URL"
 
-          # Read release notes (strip header line added by cliff).
-          NOTES=$(cat /tmp/release-notes.txt 2>/dev/null | head -20 | python3 -c "
-import sys, json
-print(json.dumps(sys.stdin.read().strip()))
-" | tr -d '"')
-
-          python3 - <<PYEOF
-import json
-with open('/tmp/release-notes.txt') as f:
-    notes = f.read().strip()
-data = {
-    "version": "$VERSION",
-    "notes": notes,
-    "pub_date": "$PUB_DATE",
-    "platforms": $PLATFORMS
-}
-with open('website/latest.json', 'w') as f:
-    json.dump(data, f, indent=2)
-print("Generated website/latest.json:")
-print(json.dumps(data, indent=2))
-PYEOF
+          VERSION="$VERSION" PUB_DATE="$PUB_DATE" PLATFORMS="$PLATFORMS" \
+            python3 -c "import json,os; notes=open('/tmp/release-notes.txt').read().strip(); data={'version':os.environ['VERSION'],'notes':notes,'pub_date':os.environ['PUB_DATE'],'platforms':json.loads(os.environ['PLATFORMS'])}; f=open('website/latest.json','w'); json.dump(data,f,indent=2); f.close(); print('Generated website/latest.json:'); print(json.dumps(data,indent=2))"
 
           # Commit latest.json to main so the pages deployment picks it up.
           git config user.name  "github-actions[bot]"
