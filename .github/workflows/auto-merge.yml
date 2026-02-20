@@ -50,12 +50,24 @@ jobs:
           node-version: 20
 
       - name: Bump Version
-        run: node scripts/bump-version.js /tmp/dev-commit-msg.txt
+        id: bump
+        run: |
+          node scripts/bump-version.js /tmp/dev-commit-msg.txt
+          echo "version=$(jq -r .version package.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Generate Changelog
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --verbose --tag "v${{ steps.bump.outputs.version }}"
+        env:
+          OUTPUT: CHANGELOG.md
+          GITHUB_REPO: ${{ github.repository }}
 
       - name: Commit and Push Version Bump
         run: |
-          VERSION=$(jq -r .version package.json)
-          git add package.json src-tauri/Cargo.toml src-tauri/tauri.conf.json src-tauri/Cargo.lock
+          VERSION="${{ steps.bump.outputs.version }}"
+          git add package.json src-tauri/Cargo.toml src-tauri/tauri.conf.json src-tauri/Cargo.lock CHANGELOG.md
           git commit -m "chore(release): bump version to v${VERSION} [skip ci]"
           git push origin main
 
