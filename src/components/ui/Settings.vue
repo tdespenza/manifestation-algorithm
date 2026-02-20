@@ -14,17 +14,29 @@
       </div>
 
       <div class="setting-about">
-        <p>Manifestation Algorithm v0.1.0</p>
+        <p>Manifestation Algorithm {{ appVersion }}</p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue';
+import { getVersion } from '@tauri-apps/api/app';
 import { useQuestionnaireStore } from '../../stores/questionnaire';
 import { clearSession } from '../../services/db';
 
-const emit = defineEmits(['close']); // Typo fix, was using string usage
+const emit = defineEmits(['close']);
+const appVersion = ref('...');
+onMounted(async () => {
+  try {
+    appVersion.value = `v${await getVersion()}`;
+  } catch {
+    appVersion.value = 'v0.2.2';
+  }
+});
+
+// Typo fix, was using string usage
 const store = useQuestionnaireStore();
 
 async function confirmClear() {
