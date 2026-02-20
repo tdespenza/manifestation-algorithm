@@ -2,7 +2,9 @@
   <div class="overlay">
     <dialog open class="dialog" aria-labelledby="resume-title">
       <div class="icon">{{ isHistorical ? '📋' : '💡' }}</div>
-      <h2 id="resume-title">{{ isHistorical ? 'Continue from Last Session?' : 'Welcome Back!' }}</h2>
+      <h2 id="resume-title">
+        {{ isHistorical ? 'Continue from Last Session?' : 'Welcome Back!' }}
+      </h2>
 
       <p v-if="isHistorical">
         Your answers from your <strong>last completed session</strong> have been pre-loaded. Would
@@ -144,8 +146,14 @@ p {
 }
 
 @keyframes fadeConfirm {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .confirm-warning {

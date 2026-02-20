@@ -150,8 +150,12 @@ h4 {
   line-height: 1;
 }
 
-.stat-box.primary .label { color: #3a5cc5; }
-.stat-box.accent .label  { color: #6061a4; }
+.stat-box.primary .label {
+  color: #3a5cc5;
+}
+.stat-box.accent .label {
+  color: #6061a4;
+}
 
 .value {
   font-size: 1.75rem;
@@ -160,8 +164,12 @@ h4 {
   color: #1a2233;
 }
 
-.stat-box.primary .value { color: #0a1f7d; }
-.stat-box.accent .value  { color: #4a3b9c; }
+.stat-box.primary .value {
+  color: #0a1f7d;
+}
+.stat-box.accent .value {
+  color: #4a3b9c;
+}
 
 /* ── Category breakdown ── */
 .category-breakdown {

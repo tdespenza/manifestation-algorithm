@@ -14,7 +14,7 @@ const mainClass = computed(() => (route.name === 'dashboard' ? 'full-width-main'
     <nav class="main-nav">
       <div class="nav-content">
         <div class="nav-left">
-          <router-link to="/" class="nav-logo">
+          <router-link to="/" class="nav-logo" aria-label="Manifestation Algorithm">
             <img :src="logoUrl" alt="Manifestation Algorithm" class="nav-logo-img" />
           </router-link>
           <div class="nav-links">

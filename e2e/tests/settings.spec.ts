@@ -93,8 +93,8 @@ test.describe('Settings – sharing toggle', () => {
     // The SharingToggle lives in NetworkRanking on the dashboard
     await page.goto('/dashboard');
     await page.locator('.network-stats-panel, .sharing-toggle').first().waitFor({ timeout: 15_000 });
+    // The checkbox input is visually hidden (display:none) behind a custom toggle switch
     const checkbox = page.locator('[data-testid="sharing-checkbox"]');
-    await expect(checkbox).toBeVisible();
     await expect(checkbox).not.toBeChecked();
     const label = page.locator('.toggle-text');
     await expect(label).toContainText('Sharing disabled');
@@ -104,7 +104,8 @@ test.describe('Settings – sharing toggle', () => {
     await page.goto('/dashboard');
     await page.locator('.sharing-toggle').waitFor({ timeout: 15_000 });
     const checkbox = page.locator('[data-testid="sharing-checkbox"]');
-    await checkbox.check();
+    // Click the visible label to toggle (checkbox is display:none)
+    await page.locator('label.toggle-label').click();
     await expect(checkbox).toBeChecked();
     await expect(page.locator('.toggle-text')).toContainText('Sharing enabled');
     await expect(page.locator('.sharing-active-badge')).toBeVisible();
@@ -114,9 +115,10 @@ test.describe('Settings – sharing toggle', () => {
     await page.goto('/dashboard');
     await page.locator('.sharing-toggle').waitFor({ timeout: 15_000 });
     const checkbox = page.locator('[data-testid="sharing-checkbox"]');
-    await checkbox.check();
+    // Click the visible label to enable, then click again to disable
+    await page.locator('label.toggle-label').click();
     await expect(checkbox).toBeChecked();
-    await checkbox.uncheck();
+    await page.locator('label.toggle-label').click();
     await expect(checkbox).not.toBeChecked();
     await expect(page.locator('.toggle-text')).toContainText('Sharing disabled');
     await expect(page.locator('.sharing-off-note')).toBeVisible();
@@ -126,12 +128,16 @@ test.describe('Settings – sharing toggle', () => {
     // Enable sharing on dashboard
     await page.goto('/dashboard');
     await page.locator('.sharing-toggle').waitFor({ timeout: 15_000 });
-    await page.locator('[data-testid="sharing-checkbox"]').check();
+    // Click the visible label to enable sharing (checkbox is display:none)
+    await page.locator('label.toggle-label').click();
+    await expect(page.locator('[data-testid="sharing-checkbox"]')).toBeChecked();
 
-    // Navigate away then back — the mock persists _sharingEnabled in memory
-    await page.goto('/settings');
+    // Use in-app router navigation (client-side) so the mock's in-memory
+    // _sharingEnabled state is preserved (full page.goto() would reset the mock).
+    await page.locator('a.settings-link').click();
     await page.locator('.settings-view').waitFor({ timeout: 10_000 });
-    await page.goto('/dashboard');
+    // Navigate back via the History nav link
+    await page.locator('.nav-links a[href="/dashboard"]').click();
     await page.locator('.sharing-toggle').waitFor({ timeout: 15_000 });
 
     // SharingToggle loads state via get_network_sharing on mount
@@ -141,12 +147,14 @@ test.describe('Settings – sharing toggle', () => {
   });
 
   test('mock get_network_sharing returns true when previously enabled', async ({ page }) => {
-    // Pre-seed sharing as enabled via the mock
-    await page.goto('/dashboard');
-    await page.evaluate(() =>
-      (globalThis as unknown as { __tauriSeedDB: (d: unknown) => void }).__tauriSeedDB({ _sharingEnabled: true })
+    // Pre-seed sharing as enabled via addInitScript so it survives page reload
+    await page.addInitScript(
+      (data) => {
+        (window as unknown as { __tauriSeedDB?: (d: unknown) => void }).__tauriSeedDB?.(data);
+      },
+      { _sharingEnabled: true } as unknown as Record<string, unknown>
     );
-    await page.reload();
+    await page.goto('/dashboard');
     await page.locator('.sharing-toggle').waitFor({ timeout: 15_000 });
     const checkbox = page.locator('[data-testid="sharing-checkbox"]');
     await expect(checkbox).toBeChecked();

@@ -127,7 +127,10 @@ const handleCopyChart = async () => {
   try {
     const success = await copyChart(props.targetId);
     showDialog.value = false;
-    addToast(success ? 'Chart copied to clipboard' : 'Copy failed — clipboard not available', success ? 'success' : 'error');
+    addToast(
+      success ? 'Chart copied to clipboard' : 'Copy failed — clipboard not available',
+      success ? 'success' : 'error'
+    );
   } finally {
     busy.value = false;
   }
@@ -174,8 +177,12 @@ const handleCopyChart = async () => {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .export-dialog {
@@ -190,8 +197,14 @@ const handleCopyChart = async () => {
 }
 
 @keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .export-dialog-header {
@@ -254,8 +267,12 @@ const handleCopyChart = async () => {
 }
 
 @keyframes progressSlide {
-  0%   { transform: translateX(-100%); }
-  100% { transform: translateX(350%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(350%);
+  }
 }
 
 .progress-label {
@@ -304,7 +321,6 @@ const handleCopyChart = async () => {
   text-align: center;
 }
 </style>
-
 
 <style scoped>
 .chart-actions {

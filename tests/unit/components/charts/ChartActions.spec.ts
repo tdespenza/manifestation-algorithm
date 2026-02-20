@@ -10,9 +10,15 @@ vi.mock('@/composables/useToast', () => ({
 
 // ── Mock useChartExport ──────────────────────────────────────────────────────
 const mockPrintChart = vi.fn().mockReturnValue({ success: true, message: 'Print dialog opened' });
-const mockExportToExcel = vi.fn().mockResolvedValue({ success: true, message: 'Saved my_export.xlsx' });
-const mockExportToCSV = vi.fn().mockResolvedValue({ success: true, message: 'Saved my_export.csv' });
-const mockExportToPDF = vi.fn().mockReturnValue({ success: true, message: 'Print-to-PDF dialog opened' });
+const mockExportToExcel = vi
+  .fn()
+  .mockResolvedValue({ success: true, message: 'Saved my_export.xlsx' });
+const mockExportToCSV = vi
+  .fn()
+  .mockResolvedValue({ success: true, message: 'Saved my_export.csv' });
+const mockExportToPDF = vi
+  .fn()
+  .mockReturnValue({ success: true, message: 'Print-to-PDF dialog opened' });
 const mockExportToHTML = vi.fn().mockResolvedValue({ success: true, message: 'Saved chart.html' });
 const mockCopyChart = vi.fn().mockResolvedValue(true);
 
@@ -162,10 +168,7 @@ describe('ChartActions.vue', () => {
     await flushPromises();
     await nextTick();
     expect(mockCopyChart).toHaveBeenCalledWith('my-chart');
-    expect(mockAddToast).toHaveBeenCalledWith(
-      'Chart copied to clipboard',
-      'success'
-    );
+    expect(mockAddToast).toHaveBeenCalledWith('Chart copied to clipboard', 'success');
     wrapper.unmount();
   });
 
@@ -178,10 +181,7 @@ describe('ChartActions.vue', () => {
     (buttons[5] as HTMLButtonElement).click();
     await flushPromises();
     await nextTick();
-    expect(mockAddToast).toHaveBeenCalledWith(
-      'Copy failed — clipboard not available',
-      'error'
-    );
+    expect(mockAddToast).toHaveBeenCalledWith('Copy failed — clipboard not available', 'error');
     wrapper.unmount();
   });
 

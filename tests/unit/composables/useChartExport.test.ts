@@ -141,7 +141,10 @@ describe('useChartExport', () => {
         { fakeSheet: true },
         'Data'
       );
-      expect(xlsxMocks.write).toHaveBeenCalledWith({ fakeBook: true }, { bookType: 'xlsx', type: 'array' });
+      expect(xlsxMocks.write).toHaveBeenCalledWith(
+        { fakeBook: true },
+        { bookType: 'xlsx', type: 'array' }
+      );
       expect(result.success).toBe(true);
     });
 
@@ -208,7 +211,10 @@ describe('useChartExport', () => {
     it('converts null and undefined values to empty string', async () => {
       const { exportToCSV } = useChartExport();
       const BlobSpy = vi.spyOn(globalThis, 'Blob');
-      await exportToCSV([{ A: null, B: undefined }] as unknown as Record<string, unknown>[], 'nulls');
+      await exportToCSV(
+        [{ A: null, B: undefined }] as unknown as Record<string, unknown>[],
+        'nulls'
+      );
       const blobContent = BlobSpy.mock.calls[0][0] as string[];
       expect(blobContent[0]).toContain(',');
     });
@@ -394,4 +400,3 @@ describe('useChartExport', () => {
     });
   });
 });
-

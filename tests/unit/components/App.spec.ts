@@ -79,4 +79,3 @@ describe('App.vue', () => {
     await router.push('/');
   });
 });
-

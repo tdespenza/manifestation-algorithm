@@ -400,7 +400,9 @@ onMounted(() => {
   font-weight: 600;
   cursor: pointer;
   border-radius: 20px;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .cancel-select-btn:hover {
@@ -532,7 +534,10 @@ h2 {
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s,
+    border-color 0.2s;
   border-left: 4px solid var(--true-cobalt, #0047ab);
   position: relative;
 }
@@ -569,7 +574,9 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
   flex-shrink: 0;
 }
 
@@ -598,7 +605,10 @@ h2 {
   padding: 4px 6px;
   border-radius: 4px;
   opacity: 0;
-  transition: opacity 0.15s, color 0.15s, background 0.15s;
+  transition:
+    opacity 0.15s,
+    color 0.15s,
+    background 0.15s;
   line-height: 1;
 }
 

@@ -109,16 +109,20 @@ test.describe('Dashboard – session deletion', () => {
   const now = new Date().toISOString();
   const yesterday = new Date(Date.now() - 86_400_000).toISOString();
 
-  test.beforeEach(async ({ page, seedDB }) => {
+  test.beforeEach(async ({ page }) => {
+    // Use addInitScript so seed data persists across every page load/reload
+    await page.addInitScript(
+      (data) => {
+        (window as unknown as { __tauriSeedDB?: (d: unknown) => void }).__tauriSeedDB?.(data);
+      },
+      {
+        historical_sessions: [
+          { id: SESSION_A, total_score: 7000, completed_at: now },
+          { id: SESSION_B, total_score: 5000, completed_at: yesterday }
+        ]
+      } as unknown as Record<string, unknown>
+    );
     await page.goto('/dashboard');
-    await page.locator('.dashboard-view').waitFor({ timeout: 10_000 });
-    await seedDB({
-      historical_sessions: [
-        { id: SESSION_A, total_score: 7000, completed_at: now },
-        { id: SESSION_B, total_score: 5000, completed_at: yesterday }
-      ]
-    });
-    await page.reload();
     await page.locator('.dashboard-view').waitFor({ timeout: 10_000 });
     await page.waitForTimeout(500);
   });

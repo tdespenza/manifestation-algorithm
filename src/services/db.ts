@@ -193,9 +193,6 @@ export async function deleteSessions(ids: string[]): Promise<void> {
   if (ids.length === 0) return;
   const db = await getDb();
   const placeholders = ids.map((_, i) => `$${i + 1}`).join(', ');
-  await db.execute(
-    `DELETE FROM historical_responses WHERE session_id IN (${placeholders})`,
-    ids
-  );
+  await db.execute(`DELETE FROM historical_responses WHERE session_id IN (${placeholders})`, ids);
   await db.execute(`DELETE FROM historical_sessions WHERE id IN (${placeholders})`, ids);
 }
