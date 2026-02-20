@@ -33,6 +33,10 @@ jobs:
   # ── 2. Create a single draft release before any builds start ─────────────
   # All three build jobs upload into this one release so they never race to
   # create it themselves, which causes the "immutable release" error.
+  # We also delete any pre-existing release for the tag first: if a previous
+  # workflow run already published a release for this tag, softprops would
+  # return that published release's ID, and all asset uploads would fail with
+  # "Cannot upload assets to an immutable release."
   create-release:
     name: Create Draft Release
     needs: resolve-tag
@@ -42,6 +46,22 @@ jobs:
     outputs:
       release-id: ${{ steps.create.outputs.id }}
     steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Delete any existing release for this tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Delete the GitHub release (but keep the tag so the new draft can
+          # re-use it).  The || true prevents the step from failing when no
+          # release exists yet.
+          gh release delete "${{ needs.resolve-tag.outputs.tag }}" \
+            --repo "${{ github.repository }}" \
+            --yes 2>/dev/null || true
+
       - name: Create draft GitHub release
         id: create
         uses: softprops/action-gh-release@v2
