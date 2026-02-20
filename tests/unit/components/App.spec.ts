@@ -2,9 +2,12 @@ import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createRouter, createWebHashHistory } from 'vue-router';
 
-// Stub NetworkStatus
+// Stub NetworkStatus and UpdateNotification (both use Tauri APIs)
 vi.mock('@/components/NetworkStatus.vue', () => ({
   default: { template: '<div class="network-status-stub" />' }
+}));
+vi.mock('@/components/ui/UpdateNotification.vue', () => ({
+  default: { template: '<div class="update-notification-stub" />' }
 }));
 
 import App from '@/App.vue';

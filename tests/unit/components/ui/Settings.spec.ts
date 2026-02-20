@@ -7,6 +7,8 @@ vi.mock('@tauri-apps/api/app', () => ({
   getVersion: vi.fn().mockResolvedValue('0.2.2')
 }));
 
+import { getVersion } from '@tauri-apps/api/app';
+
 // ── DB mock ───────────────────────────────────────────────────────────────────
 const dbMocks = vi.hoisted(() => ({
   clearSession: vi.fn().mockResolvedValue(undefined)
@@ -81,5 +83,12 @@ describe('Settings.vue', () => {
 
     expect(dbMocks.clearSession).not.toHaveBeenCalled();
     expect(wrapper.emitted('close')).toBeFalsy();
+  });
+
+  it('falls back to v0.2.2 when getVersion rejects', async () => {
+    vi.mocked(getVersion).mockRejectedValueOnce(new Error('not in tauri'));
+    const wrapper = mount(Settings);
+    await flushPromises();
+    expect(wrapper.text()).toContain('v0.2.2');
   });
 });
