@@ -143,13 +143,15 @@ jobs:
       - name: List downloaded files
         run: find dist -type f | sort
 
-      - name: Delete any existing release for this tag
+      - name: Delete any existing release and tag
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release delete "${{ needs.resolve-tag.outputs.tag }}" \
             --repo "${{ github.repository }}" \
             --yes 2>/dev/null || true
+          git push origin --delete "${{ needs.resolve-tag.outputs.tag }}" 2>/dev/null || true
+          git tag -d "${{ needs.resolve-tag.outputs.tag }}" 2>/dev/null || true
 
       - name: Create and publish release with all installers
         env:
