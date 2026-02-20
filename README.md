@@ -168,5 +168,3 @@ Updated by Tyshawn Despenza
 ---
 
 > **Disclaimer**: This project is not affiliated with, endorsed by, or connected to GIN (Global Information Network) in any way.
-
-Updated by Tyshawn Despenza
