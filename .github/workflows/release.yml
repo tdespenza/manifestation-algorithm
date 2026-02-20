@@ -143,6 +143,13 @@ jobs:
           # This prevents all three matrix jobs racing to create the same release
           # which causes "Cannot upload assets to an immutable release".
           releaseId: ${{ needs.create-release.outputs.release-id }}
+          # Keep the release as a draft so that tauri-action does NOT publish it
+          # after uploading assets.  The dedicated publish-release job does that
+          # once every platform has finished.  Without this flag the first job to
+          # finish publishes the release, making it immutable, and the
+          # publish-release step then fails with "tag_name was used by an
+          # immutable release".
+          releaseDraft: true
 
   # ── 4. Publish the release once all builds have uploaded their assets ─────
   publish-release:
