@@ -13,6 +13,15 @@ permissions:
   contents: write
 
 jobs:
+  # ─────────────────────────────────────────────────────────────────────────
+  # DESIGN: tauri-action is used ONLY to build — no release-management inputs
+  # (releaseId / tagName / releaseName) are passed, so it never touches GitHub
+  # Releases.  Built installers are stashed in GitHub Actions artifact storage
+  # and collected by the release job below, which creates the release
+  # atomically with all files already present.  This eliminates the entire
+  # class of "immutable release" / draft-publish race errors.
+  # ─────────────────────────────────────────────────────────────────────────
+
   # ── 1. Resolve the version tag ────────────────────────────────────────────
   resolve-tag:
     name: Resolve Version Tag
@@ -30,58 +39,10 @@ jobs:
         id: version
         run: echo "tag=v$(jq -r .version package.json)" >> "$GITHUB_OUTPUT"
 
-  # ── 2. Create a single draft release before any builds start ─────────────
-  # All three build jobs upload into this one release so they never race to
-  # create it themselves, which causes the "immutable release" error.
-  # We also delete any pre-existing release for the tag first: if a previous
-  # workflow run already published a release for this tag, softprops would
-  # return that published release's ID, and all asset uploads would fail with
-  # "Cannot upload assets to an immutable release."
-  create-release:
-    name: Create Draft Release
-    needs: resolve-tag
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    outputs:
-      release-id: ${{ steps.create.outputs.id }}
-    steps:
-      - name: Checkout main
-        uses: actions/checkout@v4
-        with:
-          ref: main
-
-      - name: Delete any existing release for this tag
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Delete the GitHub release (but keep the tag so the new draft can
-          # re-use it).  The || true prevents the step from failing when no
-          # release exists yet.
-          gh release delete "${{ needs.resolve-tag.outputs.tag }}" \
-            --repo "${{ github.repository }}" \
-            --yes 2>/dev/null || true
-
-      - name: Create draft GitHub release
-        id: create
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ needs.resolve-tag.outputs.tag }}
-          name: 'Manifestation Algorithm ${{ needs.resolve-tag.outputs.tag }}'
-          body: |
-            ## What's new
-            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ needs.resolve-tag.outputs.tag }}/CHANGELOG.md) for full release notes.
-
-            ## Installation
-            Download the installer for your platform below.
-          draft: true
-          prerelease: ${{ contains(needs.resolve-tag.outputs.tag, '-') }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-  # ── 3. Build all three platforms in parallel ─────────────────────────────
+  # ── 2. Build all three platforms in parallel ──────────────────────────────
   build:
     name: Build (${{ matrix.name }})
-    needs: [resolve-tag, create-release]
+    needs: resolve-tag
     permissions:
       contents: write
     strategy:
@@ -90,10 +51,19 @@ jobs:
         include:
           - os: ubuntu-latest
             name: Linux
+            artifact-paths: |
+              src-tauri/target/release/bundle/deb/*.deb
+              src-tauri/target/release/bundle/appimage/*.AppImage
           - os: windows-latest
             name: Windows
+            artifact-paths: |
+              src-tauri/target/release/bundle/msi/*.msi
+              src-tauri/target/release/bundle/nsis/*.exe
           - os: macos-latest
             name: macOS
+            artifact-paths: |
+              src-tauri/target/release/bundle/macos/*.dmg
+              src-tauri/target/release/bundle/macos/*.app.tar.gz
 
     runs-on: ${{ matrix.os }}
 
@@ -134,35 +104,70 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Build and Upload Assets
+      - name: Build
         uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          # Attach to the existing draft release instead of creating a new one.
-          # This prevents all three matrix jobs racing to create the same release
-          # which causes "Cannot upload assets to an immutable release".
-          releaseId: ${{ needs.create-release.outputs.release-id }}
-          # Keep the release as a draft so that tauri-action does NOT publish it
-          # after uploading assets.  The dedicated publish-release job does that
-          # once every platform has finished.  Without this flag the first job to
-          # finish publishes the release, making it immutable, and the
-          # publish-release step then fails with "tag_name was used by an
-          # immutable release".
-          releaseDraft: true
+        # No releaseId / tagName / releaseName — build only, no release management.
 
-  # ── 4. Publish the release once all builds have uploaded their assets ─────
-  publish-release:
+      - name: Upload installers to Actions artifact storage
+        uses: actions/upload-artifact@v4
+        with:
+          name: installers-${{ matrix.name }}
+          path: ${{ matrix.artifact-paths }}
+          if-no-files-found: error
+          retention-days: 1
+
+  # ── 3. Create release and upload all installers in one atomic step ────────
+  # Runs only after every platform build succeeds.  All artifacts are already
+  # in Actions storage, so we delete any stale release, then create a fresh
+  # published release with all files in a single gh release create call.
+  # No draft-to-published transition, no race condition, no immutable errors.
+  release:
     name: Publish Release
-    needs: [resolve-tag, create-release, build]
+    needs: [resolve-tag, build]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - name: Publish draft release
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Download all installer artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: installers-*
+          path: dist
+          merge-multiple: true
+
+      - name: List downloaded files
+        run: find dist -type f | sort
+
+      - name: Delete any existing release for this tag
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release edit "${{ needs.resolve-tag.outputs.tag }}" \
+          gh release delete "${{ needs.resolve-tag.outputs.tag }}" \
             --repo "${{ github.repository }}" \
-            --draft=false
+            --yes 2>/dev/null || true
+
+      - name: Create and publish release with all installers
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ needs.resolve-tag.outputs.tag }}"
+          PRERELEASE_FLAG=""
+          if echo "$TAG" | grep -q '-'; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
+
+          gh release create "$TAG" dist/* \
+            --repo "${{ github.repository }}" \
+            --title "Manifestation Algorithm $TAG" \
+            --notes "## What's new
+          See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${TAG}/CHANGELOG.md) for full release notes.
+
+          ## Installation
+          Download the installer for your platform below." \
+            $PRERELEASE_FLAG
+
