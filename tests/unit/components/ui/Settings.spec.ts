@@ -1,6 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { mount } from '@vue/test-utils';
+import { mount, flushPromises } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
+
+// ── Tauri app API mock ────────────────────────────────────────────────────────
+vi.mock('@tauri-apps/api/app', () => ({
+  getVersion: vi.fn().mockResolvedValue('0.2.2')
+}));
 
 // ── DB mock ───────────────────────────────────────────────────────────────────
 const dbMocks = vi.hoisted(() => ({
@@ -38,10 +43,11 @@ describe('Settings.vue', () => {
     vi.unstubAllGlobals();
   });
 
-  it('renders the settings panel with a title', () => {
+  it('renders the settings panel with a title', async () => {
     const wrapper = mount(Settings);
+    await flushPromises();
     expect(wrapper.text()).toContain('App Settings');
-    expect(wrapper.text()).toContain('Manifestation Algorithm v0.1.0');
+    expect(wrapper.text()).toContain('Manifestation Algorithm v0.2.2');
   });
 
   it('emits "close" when X button is clicked', async () => {
