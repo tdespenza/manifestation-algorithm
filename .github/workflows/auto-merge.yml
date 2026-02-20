@@ -33,11 +33,30 @@ jobs:
           # GITHUB_TOKEN pushes are intentionally blocked from firing downstream events.
           git remote set-url origin "https://x-access-token:${{ secrets.PAT }}@github.com/${{ github.repository }}"
 
+      - name: Capture Dev Commit Message
+        id: devmsg
+        run: git log --format=%B -1 origin/dev > /tmp/dev-commit-msg.txt
+
       - name: Merge Dev into Main
         run: |
           git checkout main
           git merge --no-ff origin/dev \
             -m "chore: auto-merge dev into main (CI passed on ${{ github.event.workflow_run.head_sha }})"
+          git push origin main
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Bump Version
+        run: node scripts/bump-version.js /tmp/dev-commit-msg.txt
+
+      - name: Commit and Push Version Bump
+        run: |
+          VERSION=$(jq -r .version package.json)
+          git add package.json src-tauri/Cargo.toml src-tauri/tauri.conf.json src-tauri/Cargo.lock
+          git commit -m "chore(release): bump version to v${VERSION} [skip ci]"
           git push origin main
 
       - name: Read Version from package.json
@@ -47,12 +66,8 @@ jobs:
       - name: Tag and Push Release
         run: |
           TAG="${{ steps.version.outputs.tag }}"
-          # Every commit must have bumped the version via the pre-commit hook,
-          # so this tag should never already exist.  Fail loudly if it does so
-          # the developer knows to check whether the version was properly bumped.
           if git ls-remote --tags origin "$TAG" | grep -q .; then
             echo "ERROR: Tag $TAG already exists on remote." >&2
-            echo "Every commit must bump the version (pre-commit hook runs scripts/bump-version.js)." >&2
             exit 1
           fi
           git tag "$TAG"
