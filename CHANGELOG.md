@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.2] - 2026-02-20
 ### Bug Fixes
-- Bypass Jekyll — serve website/ as plain static files- Merge dev — bypass Jekyll for GitHub Pages deploy
+- Merge dev — bypass Jekyll for GitHub Pages deploy
+
+## [0.3.1] - 2026-02-20
+### Bug Fixes
+- Bypass Jekyll — serve website/ as plain static files- Publish with partial builds — skip failed platforms, release the rest
 ### Features
 - Build separate Intel + Apple Silicon DMGs, direct download links on website, sync dev after auto-merge
 
