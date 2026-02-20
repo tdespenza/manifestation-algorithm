@@ -1,6 +1,6 @@
 [package]
 name = "manifestation-app"
-version = "0.3.3"
+version = "0.3.4"
 description = "A Tauri App"
 authors = ["Tyshawn Despenza"]
 license = "MIT"
