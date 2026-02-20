@@ -35,20 +35,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set Up Pages
-        id: pages
-        uses: actions/configure-pages@v5
-
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
-        with:
-          source: ./website
-          destination: ./_site
-
       - name: Upload Site Artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: './_site'
+          # Upload the plain static files — no Jekyll processing.
+          # index.html already has all styles inline; Jekyll's baseurl
+          # rewriting was causing blank-page deployments.
+          path: './website'
 
   deploy:
     name: Deploy Site
