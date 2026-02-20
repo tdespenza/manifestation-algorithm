@@ -30,12 +30,12 @@ jobs:
     outputs:
       tag: ${{ steps.version.outputs.tag }}
     steps:
-      - name: Checkout main
+      - name: Checkout Main
         uses: actions/checkout@v4
         with:
           ref: main
 
-      - name: Read version from package.json
+      - name: Read Version from package.json
         id: version
         run: echo "tag=v$(jq -r .version package.json)" >> "$GITHUB_OUTPUT"
 
@@ -87,7 +87,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout main
+      - name: Checkout Main
         uses: actions/checkout@v4
         with:
           ref: main
@@ -123,7 +123,7 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Add Rust target
+      - name: Add Rust Target
         if: ${{ matrix.rust_target != '' }}
         run: rustup target add ${{ matrix.rust_target }}
 
@@ -143,7 +143,7 @@ jobs:
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
-      - name: Upload installers to Actions artifact storage
+      - name: Upload Installers to Actions Artifact Storage
         uses: actions/upload-artifact@v4
         with:
           name: installers-${{ matrix.name }}
@@ -158,7 +158,7 @@ jobs:
   # artifacts from successful builds are uploaded.  If every build failed the
   # job exits early without creating a release.
   release:
-    name: Publish Release
+    name: Create Release
     needs: [resolve-tag, build]
     # always() lets this job run even when some build matrix entries failed.
     # We still require resolve-tag to have succeeded and at least one build
@@ -171,7 +171,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout main
+      - name: Checkout Main
         uses: actions/checkout@v4
         with:
           ref: main
@@ -186,17 +186,17 @@ jobs:
           OUTPUT: /tmp/release-notes.txt
           GITHUB_REPO: ${{ github.repository }}
 
-      - name: Download all installer artifacts
+      - name: Download All Installer Artifacts
         uses: actions/download-artifact@v4
         with:
           pattern: installers-*
           path: dist
           merge-multiple: true
 
-      - name: List downloaded files
+      - name: List Downloaded Files
         run: find dist -type f | sort
 
-      - name: Check whether any artifacts were downloaded
+      - name: Check Whether Any Artifacts Were Downloaded
         id: guard
         run: |
           count=$(find dist -type f 2>/dev/null | wc -l | tr -d ' ')
@@ -208,7 +208,7 @@ jobs:
             echo "has_files=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Delete any existing release for this tag
+      - name: Delete Existing Release for This Tag
         if: steps.guard.outputs.has_files == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -223,7 +223,7 @@ jobs:
             --repo "${{ github.repository }}" \
             --yes 2>/dev/null || true
 
-      - name: Create and publish release with all installers
+      - name: Create and Publish Release with All Installers
         if: steps.guard.outputs.has_files == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -247,7 +247,7 @@ jobs:
           find dist -type f -print0 | xargs -0 gh release upload "$TAG" \
             --repo "${{ github.repository }}"
 
-      - name: Generate latest.json for in-app updater
+      - name: Generate latest.json for In-App Updater
         if: steps.guard.outputs.has_files == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
