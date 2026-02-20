@@ -38,4 +38,15 @@ tauriConf.version = version;
 fs.writeFileSync(tauriConfPath, JSON.stringify(tauriConf, null, 2) + '\n');
 console.log(`✓ Updated src-tauri/tauri.conf.json`);
 
+// Update Cargo.lock (root package entry only)
+const cargoLockPath = path.join(projectRoot, 'src-tauri', 'Cargo.lock');
+let cargoLockContent = fs.readFileSync(cargoLockPath, 'utf8');
+// Replace the version line that immediately follows the root package name declaration
+cargoLockContent = cargoLockContent.replace(
+  /(name = "manifestation-app"\nversion = )"[^"]+"/,
+  `$1"${version}"`
+);
+fs.writeFileSync(cargoLockPath, cargoLockContent);
+console.log(`✓ Updated src-tauri/Cargo.lock`);
+
 console.log(`\n✅ Version synced successfully!`);

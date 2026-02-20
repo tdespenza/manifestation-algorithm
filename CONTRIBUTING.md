@@ -74,13 +74,45 @@ cd src-tauri && cargo test
 
 We follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
 
-- `feat:` New feature
-- `fix:` Bug fix
-- `docs:` Documentation changes
-- `style:` Formatting, missing semi colons, etc
-- `refactor:` Refactoring production code
-- `test:` Adding tests, refactoring test
-- `chore:` Build scripts, no production code change
+| Type | Description |
+|---|---|
+| `feat:` | New feature |
+| `fix:` | Bug fix |
+| `docs:` | Documentation changes |
+| `style:` | Formatting, missing semi-colons, etc. |
+| `refactor:` | Refactoring production code |
+| `test:` | Adding tests, refactoring tests |
+| `perf:` | Performance improvements |
+| `ci:` | CI/CD changes |
+| `chore:` | Build scripts, no production code change |
+
+## Versioning
+
+This project uses [Semantic Versioning](https://semver.org/) (`MAJOR.MINOR.PATCH`).
+Version numbers are **bumped automatically** on every commit via the `commit-msg` git hook — you never need to edit `package.json`, `Cargo.toml`, or `tauri.conf.json` manually.
+
+### Bump Rules
+
+The bump level is inferred from your conventional commit type:
+
+| Commit type | Bump | Example |
+|---|---|---|
+| Any type with `!` or `BREAKING CHANGE` footer | **major** (`x.0.0`) | `feat!: redesign scoring API` |
+| `feat:` | **minor** (`0.x.0`) | `feat: add streak widget` |
+| All other types | **patch** (`0.0.x`) | `fix: correct null check` |
+
+### Override
+
+Force a specific bump level for one commit using the `BUMP_TYPE` env variable:
+
+```bash
+BUMP_TYPE=minor git commit -m "chore: restructure internals"
+```
+
+### How It Works
+
+1. **`pre-commit`** — runs ESLint, Prettier, and lint-staged
+2. **`commit-msg`** — reads the commit message, determines the bump level (major / minor / patch), updates `package.json`, then calls `scripts/sync-version.js` to propagate the new version to `src-tauri/Cargo.toml` and `src-tauri/tauri.conf.json`; all three files are staged and included in the commit automatically
 
 ## Architecture
 
