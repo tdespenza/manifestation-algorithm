@@ -63,20 +63,21 @@ jobs:
             artifact-paths: |
               src-tauri/target/release/bundle/msi/*.msi
               src-tauri/target/release/bundle/nsis/*.exe
-          - os: macos-latest
-            name: macOS-Apple-Silicon
-            rust_target: aarch64-apple-darwin
-            tauri_args: --target aarch64-apple-darwin
-            artifact-paths: |
-              src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
-              src-tauri/target/aarch64-apple-darwin/release/bundle/macos/*.app.tar.gz
-          - os: macos-13
-            name: macOS-Intel
-            rust_target: x86_64-apple-darwin
-            tauri_args: --target x86_64-apple-darwin
-            artifact-paths: |
-              src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/*.dmg
-              src-tauri/target/x86_64-apple-darwin/release/bundle/macos/*.app.tar.gz
+          # macOS builds temporarily disabled — re-enable when signing certs are ready
+          # - os: macos-latest
+          #   name: macOS-Apple-Silicon
+          #   rust_target: aarch64-apple-darwin
+          #   tauri_args: --target aarch64-apple-darwin
+          #   artifact-paths: |
+          #     src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
+          #     src-tauri/target/aarch64-apple-darwin/release/bundle/macos/*.app.tar.gz
+          # - os: macos-13
+          #   name: macOS-Intel
+          #   rust_target: x86_64-apple-darwin
+          #   tauri_args: --target x86_64-apple-darwin
+          #   artifact-paths: |
+          #     src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/*.dmg
+          #     src-tauri/target/x86_64-apple-darwin/release/bundle/macos/*.app.tar.gz
 
     runs-on: ${{ matrix.os }}
 
