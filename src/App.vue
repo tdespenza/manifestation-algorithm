@@ -1,15 +1,21 @@
 <script setup lang="ts">
 import { RouterLink, RouterView, useRoute } from 'vue-router';
-import { computed, onErrorCaptured } from 'vue';
+import { computed, onErrorCaptured, onMounted } from 'vue';
 import NetworkStatus from './components/NetworkStatus.vue';
 import AppToast from './components/ui/AppToast.vue';
 import UpdateNotification from './components/ui/UpdateNotification.vue';
 import logoUrl from './assets/logo.svg';
 import { useToast } from './composables/useToast';
+import { useNetwork, loadSharingState } from './composables/useNetwork';
 
 const route = useRoute();
 const mainClass = computed(() => (route.name === 'dashboard' ? 'full-width-main' : 'container'));
 const { addToast } = useToast();
+const { sharingEnabled } = useNetwork();
+
+onMounted(() => {
+  loadSharingState().catch(() => {});
+});
 
 onErrorCaptured(err => {
   console.error('Caught in App boundary:', err);
@@ -32,7 +38,7 @@ onErrorCaptured(err => {
           </div>
         </div>
         <div class="nav-right">
-          <NetworkStatus class="network-status-nav" />
+          <NetworkStatus v-if="sharingEnabled" class="network-status-nav" />
           <router-link
             to="/settings"
             active-class="active"

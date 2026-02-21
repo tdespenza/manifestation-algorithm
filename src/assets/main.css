@@ -30,6 +30,14 @@
   /* Brand fill */
   --cobalt-10: rgba(10, 31, 125, 0.1);
   --cobalt-15: rgba(10, 31, 125, 0.15);
+
+  /* Semantic colours */
+  --color-danger: #dc2626;
+  --color-danger-bg: rgba(220, 38, 38, 0.06);
+  --color-danger-border: rgba(220, 38, 38, 0.25);
+  --color-muted: #94a3b8;
+  --color-success-text: var(--success);
+  --color-warn: #f59e0b;
 }
 
 * {

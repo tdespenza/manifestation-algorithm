@@ -86,8 +86,17 @@ describe('Questionnaire.vue', () => {
 
   // ── Score display ─────────────────────────────────────────────────────────
 
-  it('displays score from store (defaults > 0 with implicit answers)', async () => {
+  it('displays "--" when no answers have been given yet', async () => {
     const wrapper = makeWrapper({}, false);
+    const scoreEl = wrapper.find('.current-score');
+    expect(scoreEl.text()).toBe('--');
+  });
+
+  it('displays a numeric score once at least one answer is given', async () => {
+    const wrapper = makeWrapper({}, false);
+    const store = useQuestionnaireStore();
+    await store.setAnswer('1a', 7);
+    await wrapper.vm.$nextTick();
     const scoreEl = wrapper.find('.current-score');
     const scoreText = scoreEl.text().replaceAll(',', '');
     expect(Number.parseInt(scoreText, 10)).toBeGreaterThan(0);
@@ -285,17 +294,43 @@ describe('Questionnaire.vue', () => {
 
   // ── Reset button ──────────────────────────────────────────────────────────
 
-  it('shows the reset button in the header', () => {
+  it('shows the reset button', () => {
     const wrapper = makeWrapper();
     expect(wrapper.find('.reset-btn').exists()).toBe(true);
-    expect(wrapper.find('.reset-btn').text()).toBe('Reset');
+    expect(wrapper.find('.reset-btn').text()).toBe('Reset all answers');
   });
 
-  it('clicking the reset button calls store.startFresh()', async () => {
+  it('clicking the reset button opens the confirm dialog', async () => {
     const wrapper = makeWrapper();
     const store = useQuestionnaireStore();
     await wrapper.find('.reset-btn').trigger('click');
+    await wrapper.vm.$nextTick();
+    expect((wrapper.vm as any).showResetConfirm).toBe(true);
+    expect(store.startFresh).not.toHaveBeenCalled();
+  });
+
+  it('confirming the reset dialog calls store.startFresh() and hides the dialog', async () => {
+    const wrapper = makeWrapper();
+    const store = useQuestionnaireStore();
+    (wrapper.vm as any).showResetConfirm = true;
+    await wrapper.vm.$nextTick();
+    const dialog = wrapper.findComponent({ name: 'ConfirmDialog' });
+    await dialog.vm.$emit('confirm');
+    await wrapper.vm.$nextTick();
     expect(store.startFresh).toHaveBeenCalled();
+    expect((wrapper.vm as any).showResetConfirm).toBe(false);
+  });
+
+  it('cancelling the reset dialog hides it without resetting', async () => {
+    const wrapper = makeWrapper();
+    const store = useQuestionnaireStore();
+    (wrapper.vm as any).showResetConfirm = true;
+    await wrapper.vm.$nextTick();
+    const dialog = wrapper.findComponent({ name: 'ConfirmDialog' });
+    await dialog.vm.$emit('cancel');
+    await wrapper.vm.$nextTick();
+    expect((wrapper.vm as any).showResetConfirm).toBe(false);
+    expect(store.startFresh).not.toHaveBeenCalled();
   });
 
   // ── Step mode button clicks ───────────────────────────────────────────────
@@ -478,8 +513,14 @@ describe('Questionnaire.vue', () => {
 
   // ── scoreQuality label ────────────────────────────────────────────────
 
-  it('shows "Manifesting" quality label when score >= 75% of max', async () => {
+  it('shows "Not Started" quality label when no answers have been given', async () => {
     const wrapper = makeWrapper();
+    await wrapper.vm.$nextTick();
+    expect(wrapper.find('.score-quality').text()).toContain('Not Started');
+  });
+
+  it('shows "Manifesting" quality label when score >= 75% of max', async () => {
+    const wrapper = makeWrapper({ answers: { '1a': 8 } });
     const store = useQuestionnaireStore();
     (store as any).score = 7500;
     await wrapper.vm.$nextTick();
@@ -487,7 +528,7 @@ describe('Questionnaire.vue', () => {
   });
 
   it('shows "Aligned" quality label when score is 50–74% of max', async () => {
-    const wrapper = makeWrapper();
+    const wrapper = makeWrapper({ answers: { '1a': 8 } });
     const store = useQuestionnaireStore();
     (store as any).score = 5500;
     await wrapper.vm.$nextTick();
@@ -495,7 +536,7 @@ describe('Questionnaire.vue', () => {
   });
 
   it('shows "Building" quality label when score is 25–49% of max', async () => {
-    const wrapper = makeWrapper();
+    const wrapper = makeWrapper({ answers: { '1a': 8 } });
     const store = useQuestionnaireStore();
     (store as any).score = 2600;
     await wrapper.vm.$nextTick();
@@ -503,11 +544,54 @@ describe('Questionnaire.vue', () => {
   });
 
   it('shows "Starting Out" quality label when score < 25% of max', async () => {
-    const wrapper = makeWrapper();
+    const wrapper = makeWrapper({ answers: { '1a': 1 } });
     const store = useQuestionnaireStore();
     (store as any).score = 100;
     await wrapper.vm.$nextTick();
     expect(wrapper.find('.score-quality').text()).toContain('Starting Out');
+  });
+
+  // ── submitButtonState ────────────────────────────────────────────────
+
+  it('submit button has "incomplete" class when no answers are given', async () => {
+    const wrapper = makeWrapper();
+    await wrapper.vm.$nextTick();
+    expect(wrapper.find('.submit-button').classes()).toContain('incomplete');
+  });
+
+  it('submit button has "partial" class when some but not all questions are answered', async () => {
+    // answeredCount > 0 but percentComplete < 100
+    const wrapper = makeWrapper({ answers: { '1a': 5 } });
+    await wrapper.vm.$nextTick();
+    expect(wrapper.find('.submit-button').classes()).toContain('partial');
+  });
+
+  it('submit button has "complete" class when all questions are answered (percentComplete = 100)', async () => {
+    const wrapper = makeWrapper({ answers: { '1a': 5 } });
+    const store = useQuestionnaireStore();
+    (store as any).percentComplete = 100;
+    await wrapper.vm.$nextTick();
+    expect(wrapper.find('.submit-button').classes()).toContain('complete');
+    const hint = wrapper.find('.completion-hint:not(.error-hint)');
+    expect(hint.text()).toContain('All questions answered');
+  });
+
+  it('submit button hint uses singular "question" when only 1 question remains', async () => {
+    const wrapper = makeWrapper({ answers: { '1a': 5 } });
+    const store = useQuestionnaireStore();
+    // Override totalQuestions to 2 so that remaining = 2 - 1 = 1 (singular)
+    (store as any).totalQuestions = 2;
+    await wrapper.vm.$nextTick();
+    const hint = wrapper.find('.completion-hint:not(.error-hint)');
+    expect(hint.text()).toMatch(/1 question remaining/);
+  });
+
+  it('submit button hint is shown below the button', async () => {
+    const wrapper = makeWrapper();
+    await wrapper.vm.$nextTick();
+    const hint = wrapper.find('.completion-hint:not(.error-hint)');
+    expect(hint.exists()).toBe(true);
+    expect(hint.text()).toContain('questions answered');
   });
 
   // ── sticky header ─────────────────────────────────────────────────────
