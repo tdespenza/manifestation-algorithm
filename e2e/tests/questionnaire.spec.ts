@@ -151,8 +151,8 @@ test.describe('Questionnaire – progress tracking', () => {
     const slider = page.locator('.slider').first();
     await slider.fill('7');
     await slider.dispatchEvent('input');
-    // Allow store update
-    await page.waitForTimeout(100);
+    // Wait for the store to propagate the answer into the progress text
+    await expect(questionnairePage.progressText).not.toContainText('0%');
     const text = await questionnairePage.getProgressText();
     // Progress should now be greater than 0
     const match = text.match(/(\d+)%/);
@@ -193,9 +193,9 @@ test.describe('Questionnaire – reset button', () => {
     await questionnairePage.switchToScrollMode();
   });
 
-  test('reset button is visible in the questionnaire header', async ({ page }) => {
+  test('reset button is visible in the questionnaire', async ({ page }) => {
     await expect(page.locator('.reset-btn')).toBeVisible();
-    await expect(page.locator('.reset-btn')).toHaveText('Reset');
+    await expect(page.locator('.reset-btn')).toHaveText('Reset all answers');
   });
 
   test('clicking reset clears all answers', async ({ questionnairePage, page }) => {
@@ -204,13 +204,16 @@ test.describe('Questionnaire – reset button', () => {
     const count = await sliders.count();
     if (count > 0) {
       await sliders.first().fill('8');
-      await page.waitForTimeout(100);
+      // Wait for the answer to be reflected in the progress text before resetting
+      await expect(page.locator('.progress-text')).not.toContainText('0/');
     }
     await page.locator('.reset-btn').click();
-    await page.waitForTimeout(200);
+    // Confirm the destructive action in the dialog
+    await page.locator('.btn-confirm').waitFor({ timeout: 5_000 });
+    await page.locator('.btn-confirm').click();
     // After reset, the questionnaire is still visible
     await expect(page.locator('.questionnaire')).toBeVisible();
-    // Progress shows 0% after reset
+    // Progress shows 0% after reset (wait for async reset to propagate)
     await expect(page.locator('.progress-text')).toContainText('0%');
   });
 
@@ -248,21 +251,25 @@ test.describe('Questionnaire – keyboard navigation', () => {
       const el = document.querySelector('.questionnaire') as HTMLElement;
       if (el) el.focus();
     });
-    await questionnairePage.page.waitForTimeout(50);
+    // Wait for step mode to be fully active
+    await questionnairePage.page.locator('.step-mode').waitFor({ state: 'visible' });
   });
 
   test('right arrow key advances to next question', async ({ questionnairePage }) => {
     await questionnairePage.page.keyboard.press('ArrowRight');
-    await questionnairePage.page.waitForTimeout(100);
+    // Wait for Vue to update the step counter
+    await expect(questionnairePage.stepCounter).toContainText('Question 2 of');
     const text = await questionnairePage.stepCounter.textContent();
     expect(text).toMatch(/Question 2 of/);
   });
 
   test('left arrow key goes to prev question after advancing', async ({ questionnairePage }) => {
     await questionnairePage.page.keyboard.press('ArrowRight');
-    await questionnairePage.page.waitForTimeout(50);
+    // Wait for advance before pressing back
+    await expect(questionnairePage.stepCounter).toContainText('Question 2 of');
     await questionnairePage.page.keyboard.press('ArrowLeft');
-    await questionnairePage.page.waitForTimeout(100);
+    // Wait for Vue to update
+    await expect(questionnairePage.stepCounter).toContainText('Question 1 of');
     const text = await questionnairePage.stepCounter.textContent();
     expect(text).toMatch(/Question 1 of/);
   });
@@ -275,9 +282,9 @@ test.describe('Questionnaire – keyboard navigation', () => {
         const el = document.querySelector('.questionnaire') as HTMLElement;
         if (el) el.focus();
       });
-      await page.waitForTimeout(50);
       await page.keyboard.press('7');
-      await page.waitForTimeout(150);
+      // Wait for the slider value to be set
+      await expect(slider).toHaveValue('7');
       const val = await slider.inputValue();
       expect(val).toBe('7');
     }
@@ -293,7 +300,8 @@ test.describe('Questionnaire – sticky header', () => {
   test('sticky header stays below the navbar after scrolling', async ({ page }) => {
     // Scroll down so the header sticks
     await page.evaluate(() => window.scrollBy(0, 300));
-    await page.waitForTimeout(100);
+    // Wait for scroll to settle before measuring sticky position
+    await page.waitForFunction(() => window.scrollY > 200);
 
     const header = page.locator('.header').first();
     await expect(header).toBeVisible();
@@ -311,7 +319,8 @@ test.describe('Questionnaire – sticky header', () => {
 
   test('sticky header is never hidden behind the navbar (top > 0)', async ({ page }) => {
     await page.evaluate(() => window.scrollBy(0, 500));
-    await page.waitForTimeout(100);
+    // Wait for scroll to settle before measuring sticky position
+    await page.waitForFunction(() => window.scrollY > 400);
 
     const header = page.locator('.header').first();
     await expect(header).toBeVisible();

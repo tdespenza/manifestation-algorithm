@@ -1,7 +1,7 @@
 # Manifestation Algorithm
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-violet.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-267%20passing-brightgreen)](#testing)
+[![Tests](https://img.shields.io/badge/tests-518%20unit%20%7C%20785%20E2E-brightgreen)](#testing)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
 [![Tauri](https://img.shields.io/badge/Tauri-2.x-orange)](https://tauri.app/)
 
@@ -13,13 +13,18 @@ A **privacy-first** desktop application for tracking and scoring personal develo
 
 ## Features
 
-- **40-Category Questionnaire** – Weighted 1-10 slider inputs mapping to a 10,000-point score model
-- **Local Encrypted Storage** – SQLite with automatic migration versioning
-- **Auto-Save** – Answers persist every time you move to the next question
+- **40-Category Questionnaire** – Weighted 1–10 slider inputs mapping to a 10,000-point score model
+- **Score Quality Tiers** – Real-time label (Not Started → Starting Out → Building → Aligned → Manifesting) with progress-gated submit button
+- **Local Encrypted Storage** – SQLite with WAL mode and automatic migration versioning
+- **Auto-Save** – Answers persist every keystroke; no data is lost on close
 - **Session Recovery** – Resume or discard an in-progress session on startup
-- **Dashboard & Statistics** – Track score history and category breakdowns over time
+- **Dashboard & Statistics** – Score history charts, category breakdowns, and trend analysis
+- **Category Drill-Down** – Per-category sparklines and historical trend views
+- **PDF Export** – Export your full score report as a PDF
+- **CSV Export** – Export session history as a spreadsheet
 - **Anonymous Network Ranking** – Opt-in P2P gossipsub network using libp2p for aggregate percentile rankings, with Ed25519 application-level signing (no node identity exposed)
-- **Privacy-First** – Zero PII; category keys are validated to reject emails/URLs
+- **Auto-Update** – Background update download with in-app notification and one-click install
+- **Privacy-First** – Zero PII; category keys are validated to reject emails/URLs; all data stays on your machine unless you opt in
 
 ---
 
