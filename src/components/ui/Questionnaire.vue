@@ -6,7 +6,6 @@
         <div class="save-indicator" :class="{ saving: isSaving, saved: !isSaving }">
           {{ isSaving ? 'Saving...' : 'Saved' }}
         </div>
-        <button class="reset-btn" @click="store.startFresh()">Reset</button>
       </div>
 
       <!-- Progress bar -->
@@ -14,15 +13,26 @@
         <div class="progress-text">
           {{ store.percentComplete }}% complete ({{ answeredCount }}/{{ store.totalQuestions }})
         </div>
-        <div class="progress-bar">
+        <div
+          class="progress-bar"
+          role="progressbar"
+          :aria-valuenow="store.percentComplete"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-label="Assessment completion progress"
+        >
           <div class="progress-fill" :style="{ width: store.percentComplete + '%' }"></div>
         </div>
       </div>
 
       <div class="score-summary">
         <div class="max-info">Max: {{ maxScore.toLocaleString() }}</div>
-        <div class="current-score" :class="{ success: score >= 5000 }">{{ formattedScore }}</div>
-        <div class="score-label">Current Score</div>
+        <div class="current-score" :class="{ success: answeredCount > 0 && score >= 5000 }">
+          {{ formattedScore }}
+        </div>
+        <div class="score-label">
+          {{ answeredCount === 0 ? 'Answer to score' : 'Current Score' }}
+        </div>
         <div class="score-quality" :style="{ color: scoreQuality.color }">
           {{ scoreQuality.label }}
         </div>
@@ -90,29 +100,64 @@
     <!-- Submit -->
     <div class="submit-actions">
       <div v-if="submitError" class="completion-hint error-hint">{{ submitError }}</div>
-      <button class="submit-button" :disabled="isSubmitting" @click="submit">
+      <button
+        class="submit-button"
+        :class="submitButtonState.cssClass"
+        :disabled="isSubmitting"
+        :title="submitButtonState.title"
+        @click="submit"
+      >
         {{ isSubmitting ? 'Saving...' : 'Complete Assessment' }}
       </button>
+      <div v-if="!isSubmitting && !submitError" class="completion-hint">
+        {{ submitButtonState.hint }}
+      </div>
     </div>
+
+    <!-- Reset danger zone -->
+    <div class="reset-zone">
+      <span class="reset-zone-label">Want to start fresh?</span>
+      <button class="reset-btn" @click="showResetConfirm = true">Reset all answers</button>
+    </div>
+
+    <!-- Reset confirmation dialog -->
+    <ConfirmDialog
+      v-if="showResetConfirm"
+      title="Reset All Answers?"
+      message="This will clear every answer and start from scratch. This cannot be undone."
+      confirm-label="Reset"
+      cancel-label="Keep Answers"
+      icon="🔄"
+      uid="questionnaire-reset"
+      @confirm="doReset"
+      @cancel="showResetConfirm = false"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, nextTick } from 'vue';
+import { computed, onMounted, reactive, ref, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuestionnaireStore } from '../../stores/questionnaire';
 import { questions as allTopLevelQuestions } from '../../data/questions';
 import { getMaxPossibleScore } from '../../services/scoring';
 import type { Question } from '../../types';
 import QuestionItem from './QuestionItem.vue';
+import ConfirmDialog from './ConfirmDialog.vue';
 
 const store = useQuestionnaireStore();
 const router = useRouter();
 const containerRef = ref<HTMLElement | null>(null);
-const questionRefs: Record<string, HTMLElement> = {};
+const questionRefs = reactive<Record<string, HTMLElement>>({});
 const mode = ref<'scroll' | 'step'>('scroll');
 const submitError = ref<string | null>(null);
 const isSubmitting = ref(false);
+const showResetConfirm = ref(false);
+
+function doReset() {
+  store.startFresh();
+  showResetConfirm.value = false;
+}
 
 // Flatten leaf questions for dot navigation
 function flattenLeaves(qs: Question[]): Question[] {
@@ -125,17 +170,44 @@ const leafQuestions = flattenLeaves(allTopLevelQuestions);
 const isSaving = computed(() => store.isSaving);
 const score = computed(() => store.score);
 const maxScore = getMaxPossibleScore();
-const formattedScore = computed(() => Math.round(score.value).toLocaleString());
 const answeredCount = computed(
   () => Object.keys(store.answers).filter(k => store.answers[k] >= 1).length
 );
+const formattedScore = computed(() =>
+  answeredCount.value === 0 ? '--' : Math.round(score.value).toLocaleString()
+);
 
 const scoreQuality = computed(() => {
+  if (answeredCount.value === 0) return { label: 'Not Started', color: '#94a3b8' };
   const pct = score.value / maxScore;
   if (pct >= 0.75) return { label: 'Manifesting ✦', color: '#1a8a3a' };
   if (pct >= 0.5) return { label: 'Aligned', color: '#0d7a5f' };
   if (pct >= 0.25) return { label: 'Building', color: '#6b5ca5' };
   return { label: 'Starting Out', color: '#94a3b8' };
+});
+
+const submitButtonState = computed(() => {
+  const pct = store.percentComplete;
+  const remaining = store.totalQuestions - answeredCount.value;
+  if (answeredCount.value === 0) {
+    return {
+      cssClass: 'incomplete',
+      title: 'Answer some questions to complete your assessment',
+      hint: `0 of ${store.totalQuestions} questions answered — unanswered questions default to minimum`
+    };
+  }
+  if (pct < 100) {
+    return {
+      cssClass: 'partial',
+      title: `${remaining} question${remaining === 1 ? '' : 's'} remaining`,
+      hint: `${remaining} question${remaining === 1 ? '' : 's'} remaining — unanswered questions default to minimum`
+    };
+  }
+  return {
+    cssClass: 'complete',
+    title: 'Submit your completed assessment',
+    hint: 'All questions answered — ready to submit!'
+  };
 });
 
 function isAnswered(idx: number): boolean {
@@ -237,19 +309,36 @@ onMounted(async () => {
   background: #4caf50;
 }
 
+.reset-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px 0 28px;
+  border-top: 1px dashed #e2e8f0;
+  margin-top: 8px;
+}
+
+.reset-zone-label {
+  font-size: 0.82em;
+  color: var(--color-muted, #94a3b8);
+  font-weight: 400;
+}
+
 .reset-btn {
-  padding: 4px 12px;
-  font-size: 0.78em;
-  font-weight: 600;
-  border: 1px solid #e0e0e0;
+  background: transparent;
+  border: 1px solid transparent;
   border-radius: 6px;
-  background: #fff;
-  color: #666;
+  color: var(--color-muted, #94a3b8);
+  font-size: 0.82em;
+  font-weight: 500;
   cursor: pointer;
+  padding: 5px 12px;
+  letter-spacing: 0.01em;
   transition:
-    background 0.15s,
-    color 0.15s,
-    border-color 0.15s;
+    color 0.18s,
+    background 0.18s,
+    border-color 0.18s;
 }
 
 .reset-btn::before {
@@ -258,9 +347,9 @@ onMounted(async () => {
 }
 
 .reset-btn:hover {
-  background: #fff3f3;
-  color: #d32f2f;
-  border-color: #d32f2f;
+  color: var(--color-danger, #dc2626);
+  background: var(--color-danger-bg, rgba(220, 38, 38, 0.06));
+  border-color: var(--color-danger-border, rgba(220, 38, 38, 0.25));
 }
 
 @keyframes pulse {
@@ -496,5 +585,23 @@ kbd {
 .submit-button:not(:disabled):hover {
   transform: translateY(-2px);
   box-shadow: 0 7px 22px rgba(10, 31, 125, 0.42);
+}
+
+.submit-button.incomplete {
+  background: var(--dusty-grape, #6061a4);
+  opacity: 0.75;
+  box-shadow: 0 4px 14px rgba(96, 97, 164, 0.28);
+}
+
+.submit-button.partial {
+  background: linear-gradient(135deg, var(--dusty-grape, #6061a4), var(--true-cobalt, #0a1f7d));
+}
+
+.submit-button.complete {
+  background: linear-gradient(135deg, var(--true-cobalt, #0a1f7d), #1a8a3a);
+}
+
+.submit-button.complete:not(:disabled):hover {
+  box-shadow: 0 7px 24px rgba(26, 138, 58, 0.38);
 }
 </style>

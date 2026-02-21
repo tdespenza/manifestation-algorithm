@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
-import { mount } from '@vue/test-utils';
+import { mount, flushPromises } from '@vue/test-utils';
 import { createRouter, createWebHashHistory } from 'vue-router';
+import { ref } from 'vue';
 
 // Stub NetworkStatus and UpdateNotification (both use Tauri APIs)
 vi.mock('@/components/NetworkStatus.vue', () => ({
@@ -8,6 +9,23 @@ vi.mock('@/components/NetworkStatus.vue', () => ({
 }));
 vi.mock('@/components/ui/UpdateNotification.vue', () => ({
   default: { template: '<div class="update-notification-stub" />' }
+}));
+
+// Control sharingEnabled from tests
+const mockSharingEnabled = ref(false);
+vi.mock('@/composables/useNetwork', () => ({
+  useNetwork: vi.fn(() => ({
+    sharingEnabled: mockSharingEnabled,
+    count: ref(0),
+    manifestations: ref(0),
+    avgScore: ref(null),
+    percentile90: ref(null),
+    isConnected: ref(false),
+    init: vi.fn(),
+    cleanup: vi.fn(),
+    toggleSharing: vi.fn()
+  })),
+  loadSharingState: vi.fn().mockResolvedValue(undefined)
 }));
 
 import App from '@/App.vue';
@@ -56,10 +74,31 @@ describe('App.vue', () => {
     expect(wrapper.find('.settings-link').exists()).toBe(true);
   });
 
-  it('renders the NetworkStatus stub in nav', async () => {
+  it('shows NetworkStatus in nav when sharing is enabled', async () => {
+    mockSharingEnabled.value = true;
     const wrapper = mount(App, { global: { plugins: [router] } });
     await router.isReady();
     expect(wrapper.find('.network-status-stub').exists()).toBe(true);
+    mockSharingEnabled.value = false;
+  });
+
+  it('hides NetworkStatus in nav when sharing is disabled', async () => {
+    mockSharingEnabled.value = false;
+    const wrapper = mount(App, { global: { plugins: [router] } });
+    await router.isReady();
+    expect(wrapper.find('.network-status-stub').exists()).toBe(false);
+  });
+
+  it('handles loadSharingState rejection without throwing', async () => {
+    const { loadSharingState } = await import('@/composables/useNetwork');
+    (loadSharingState as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+      new Error('network error')
+    );
+    const wrapper = mount(App, { global: { plugins: [router] } });
+    await router.isReady();
+    await flushPromises();
+    // App should still render normally after a rejected sharing state load
+    expect(wrapper.find('.app-layout').exists()).toBe(true);
   });
 
   it('renders the main container (non-dashboard route)', async () => {
