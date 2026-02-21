@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, computed } from 'vue';
+import { onMounted, computed } from 'vue';
 import { useNetwork } from '../composables/useNetwork';
 
 const { count, manifestations, avgScore, percentile90, init } = useNetwork();
@@ -28,14 +28,6 @@ const statusText = computed(() => {
 
 onMounted(() => {
   init();
-});
-
-onUnmounted(() => {
-  // We keep the listener active if there are multiple components using it,
-  // or we can structure useNetwork to manage singular subscription.
-  // For now, let's allow it to persist or be managed by the composable logic.
-  // If we want to strictly cleanup when no components are using it, we need a ref count.
-  // But given the app structure, global listener is fine.
 });
 </script>
 

@@ -43,13 +43,6 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
     return Math.floor((answered / TOTAL_QUESTIONS_COUNT) * 100);
   });
 
-  const isComplete = computed(() => {
-    // Return true to allow immediate submission (all defaults = 1)
-    // The previous logic required every question to be explicitly answered,
-    // which prevented users from accepting defaults.
-    return true;
-  });
-
   /** Total leaf question count */
   const totalQuestions = computed(() => TOTAL_QUESTIONS_COUNT);
 
@@ -149,7 +142,8 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
   async function setAnswer(questionId: string, value: number) {
     if (value < 1 || value > 10) return;
     // Validate that questionId exists in the known leaf questions
-    if (!allQuestions.some(q => q.id === questionId)) {
+    const validQuestionIds = new Set(allQuestions.map(q => q.id));
+    if (!validQuestionIds.has(questionId)) {
       console.error('Invalid question ID:', questionId);
       return;
     }
@@ -200,7 +194,6 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
     answers,
     score,
     percentComplete,
-    isComplete,
     totalQuestions,
     currentQuestion,
     currentIndex,

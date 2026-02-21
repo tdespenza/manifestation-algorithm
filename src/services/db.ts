@@ -2,6 +2,7 @@ import Database from '@tauri-apps/plugin-sql';
 import { runMigrations } from './migrations';
 import { v4 as uuidv4 } from 'uuid';
 import { questions } from '../data/questions';
+import type { Question } from '../types';
 
 let db: Database | null = null;
 
@@ -76,19 +77,18 @@ export async function getLastActive(sessionId: string): Promise<string | null> {
   return null;
 }
 
-function getCategory(questionId: string): string {
-  // Check top level
-  const top = questions.find(q => q.id === questionId);
-  if (top) return top.description; // Self is category if top-level has no subs? Actually let's just use description as category name.
-
-  // Check sub points
-  for (const q of questions) {
+function getCategory(
+  questionId: string,
+  qs: Question[] = questions,
+  parentCategory: string = 'General'
+): string {
+  for (const q of qs) {
+    if (q.id === questionId) return parentCategory === 'General' ? q.description : parentCategory;
     if (q.subPoints) {
-      const sub = q.subPoints.find(s => s.id === questionId);
-      if (sub) return q.description; // Return parent description as category
+      const found = getCategory(questionId, q.subPoints, q.description);
+      if (found !== 'General') return found;
     }
   }
-  // Fallback for independent top-level questions that might be their own category
   return 'General';
 }
 
@@ -112,18 +112,19 @@ export async function saveHistoricalSession(
     [id, completedAt, totalScore, durationSeconds, notes || null]
   );
 
-  // 2. Save responses – run individual inserts without an explicit
-  // BEGIN/COMMIT wrapper.  tauri-plugin-sql uses a connection pool and manual
-  // transaction statements (BEGIN/COMMIT via db.execute) can be dispatched
-  // to different pool connections, causing SQLITE_BUSY.  With WAL mode +
-  // busy_timeout (set in getDb) each auto-committed insert is safe and fast.
-  for (const [qId, val] of Object.entries(answers)) {
-    const category = getCategory(qId);
-    await db.execute(
-      `INSERT INTO historical_responses (session_id, question_id, category, answer_value) 
-       VALUES ($1, $2, $3, $4)`,
-      [id, qId, category, val]
-    );
+  // 2. Save responses – batch insert
+  const entries = Object.entries(answers);
+  if (entries.length > 0) {
+    const values: string[] = [];
+    const params: any[] = [];
+    let paramIdx = 1;
+    for (const [qId, val] of entries) {
+      const category = getCategory(qId);
+      values.push(`($${paramIdx++}, $${paramIdx++}, $${paramIdx++}, $${paramIdx++})`);
+      params.push(id, qId, category, val);
+    }
+    const query = `INSERT INTO historical_responses (session_id, question_id, category, answer_value) VALUES ${values.join(', ')}`;
+    await db.execute(query, params);
   }
 
   // Legacy support: also save to stats table if we want to keep it sync'd or just abandon it.

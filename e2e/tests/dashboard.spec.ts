@@ -162,19 +162,50 @@ test.describe('Dashboard – session deletion', () => {
     await dashboardPage.enterSelectionMode();
     await dashboardPage.clickSessionCard(0); // select first session
     await dashboardPage.deleteSelected();
+    // Confirm dialog should appear
+    await expect(dashboardPage.confirmDialog).toBeVisible({ timeout: 3_000 });
+    await expect(dashboardPage.confirmDialogTitle).toContainText('Delete');
+    await dashboardPage.confirmDelete();
     // Wait for the list to update
     await page.waitForTimeout(800);
     const countAfter = await dashboardPage.sessionCards.count();
     expect(countAfter).toBeLessThan(countBefore);
   });
 
-  test('inline delete button removes a single session', async ({ dashboardPage, page }) => {
+  test('bulk delete can be cancelled — session list unchanged', async ({ dashboardPage, page }) => {
+    const countBefore = await dashboardPage.sessionCards.count();
+    await dashboardPage.enterSelectionMode();
+    await dashboardPage.clickSessionCard(0);
+    await dashboardPage.deleteSelected();
+    await expect(dashboardPage.confirmDialog).toBeVisible({ timeout: 3_000 });
+    await dashboardPage.cancelDelete();
+    await page.waitForTimeout(400);
+    expect(await dashboardPage.sessionCards.count()).toBe(countBefore);
+    // Dialog closed, still in selection mode
+    await expect(dashboardPage.cancelSelectBtn).toBeVisible();
+  });
+
+  test('inline delete button removes a single session after confirmation', async ({ dashboardPage, page }) => {
     const countBefore = await dashboardPage.sessionCards.count();
     // Hover over first session card to reveal inline delete button
     await dashboardPage.sessionCards.first().hover();
     await dashboardPage.clickInlineDelete(0);
+    // Confirm dialog should appear
+    await expect(dashboardPage.confirmDialog).toBeVisible({ timeout: 3_000 });
+    await expect(dashboardPage.confirmDialogMessage).toContainText('permanently delete');
+    await dashboardPage.confirmDelete();
     await page.waitForTimeout(800);
     const countAfter = await dashboardPage.sessionCards.count();
     expect(countAfter).toBeLessThan(countBefore);
+  });
+
+  test('inline delete cancel does NOT remove the session', async ({ dashboardPage, page }) => {
+    const countBefore = await dashboardPage.sessionCards.count();
+    await dashboardPage.sessionCards.first().hover();
+    await dashboardPage.clickInlineDelete(0);
+    await expect(dashboardPage.confirmDialog).toBeVisible({ timeout: 3_000 });
+    await dashboardPage.cancelDelete();
+    await page.waitForTimeout(400);
+    expect(await dashboardPage.sessionCards.count()).toBe(countBefore);
   });
 });

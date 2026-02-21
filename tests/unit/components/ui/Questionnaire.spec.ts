@@ -5,6 +5,17 @@ import { createRouter, createMemoryHistory } from 'vue-router';
 import Questionnaire from '@/components/ui/Questionnaire.vue';
 import { useQuestionnaireStore } from '@/stores/questionnaire';
 
+vi.mock('@/services/db', () => ({
+  saveAnswer: vi.fn(),
+  loadAnswers: vi.fn().mockResolvedValue({}),
+  getLastActive: vi.fn().mockResolvedValue(null),
+  updateLastActive: vi.fn().mockResolvedValue(undefined),
+  clearSession: vi.fn().mockResolvedValue(undefined),
+  saveHistoricalSession: vi.fn().mockResolvedValue('hist-123'),
+  loadHistoricalSessions: vi.fn().mockResolvedValue([]),
+  loadSessionResponses: vi.fn().mockResolvedValue([])
+}));
+
 const router = createRouter({
   history: createMemoryHistory(),
   routes: [
@@ -455,15 +466,32 @@ describe('Questionnaire.vue', () => {
     expect(store.submitSession).toHaveBeenCalled();
   });
 
-  it('submit guard returns early when isComplete is false (covers if-body / return statement)', async () => {
+  it('submit shows error message when submitSession rejects', async () => {
     const wrapper = makeWrapper();
     const store = useQuestionnaireStore();
-    // Force isComplete to be false so the guard triggers the early return
-    (store as any).isComplete = false;
-    await wrapper.vm.$nextTick();
+    (store.submitSession as ReturnType<typeof vi.fn>).mockRejectedValue(
+      new Error('DB write failed')
+    );
     await wrapper.find('.submit-button').trigger('click');
     await flushPromises();
-    // submitSession should NOT have been called (guard returned early)
+    const errorEl = wrapper.find('.error-hint');
+    expect(errorEl.exists()).toBe(true);
+    expect(errorEl.text()).toContain('Failed to save session:');
+  });
+
+  it('submit is a no-op when already submitting (isSubmitting guard)', async () => {
+    const wrapper = makeWrapper();
+    const store = useQuestionnaireStore();
+
+    // Set the local isSubmitting ref through the component's public proxy
+    // (the proxy has a setter that delegates to the underlying Ref's .value)
+    (wrapper.vm as any).isSubmitting = true;
+    await wrapper.vm.$nextTick();
+
+    // Call submit() directly — trigger('click') is swallowed by the disabled button
+    await (wrapper.vm as any).submit();
+
+    // submitSession must NOT have been called — early return fired
     expect(store.submitSession).not.toHaveBeenCalled();
   });
 });

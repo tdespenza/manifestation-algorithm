@@ -20,7 +20,7 @@ test.describe('Home page', () => {
   });
 
   test('shows the instruction subtitle', async ({ homePage }) => {
-    await expect(homePage.subtitle).toContainText('Rate each item');
+    await expect(homePage.subtitle).toContainText('Rate each area');
   });
 
   test('mounts the Questionnaire component', async ({ homePage }) => {

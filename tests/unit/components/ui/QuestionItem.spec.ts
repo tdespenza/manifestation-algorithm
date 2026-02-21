@@ -6,7 +6,7 @@ import { useQuestionnaireStore } from '@/stores/questionnaire';
 
 describe('QuestionItem.vue', () => {
   const dummyQuestion = {
-    id: '1',
+    id: '2',
     description: 'Test Question',
     points: 100,
     hasSubPoints: false
@@ -36,7 +36,7 @@ describe('QuestionItem.vue', () => {
     });
 
     expect(wrapper.text()).toContain('Test Question');
-    expect(wrapper.text()).toContain('100 points');
+    expect(wrapper.text()).toContain('100 pts');
     expect(wrapper.find('input[type="range"]').exists()).toBe(true);
   });
 
@@ -60,7 +60,7 @@ describe('QuestionItem.vue', () => {
     await input.setValue('5');
 
     // Check if store action was called
-    expect(store.setAnswer).toHaveBeenCalledWith('1', 5);
+    expect(store.setAnswer).toHaveBeenCalledWith('2', 5);
   });
 
   it('does not show slider for a parent question (hasSubPoints=true)', () => {
@@ -116,6 +116,14 @@ describe('QuestionItem.vue', () => {
     await input.element.dispatchEvent(event);
     // setAnswer should not have been called because val 0 < 1
     expect(store.setAnswer).not.toHaveBeenCalled();
+  });
+
+  it('highlighted prop adds highlighted class on leaf question', () => {
+    const wrapper = mount(QuestionItem, {
+      props: { question: dummyQuestion, highlighted: true },
+      global: { plugins: [createTestingPinia({ createSpy: vi.fn })] }
+    });
+    expect(wrapper.find('.question-item').classes()).toContain('highlighted');
   });
 
   it('isSubQuestion prop adds sub-question class', () => {

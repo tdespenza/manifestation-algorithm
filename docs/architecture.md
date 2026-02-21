@@ -14,6 +14,7 @@ This document describes the overall design of the Manifestation Algorithm deskto
 - [Data Flow: Network Sharing](#data-flow-network-sharing)
 - [Key Design Decisions](#key-design-decisions)
 - [Architecture Decision Records](#architecture-decision-records)
+- [State Management Patterns](#state-management-patterns)
 
 ---
 
@@ -301,3 +302,16 @@ Full ADRs are in `_bmad-output/planning-artifacts/`:
 | ADR-004 | Frontend: Vue 3 (vs. React) |
 | ADR-005 | Zero-PII privacy design |
 | ADR-006 | Distribution: GitHub Releases |
+
+---
+
+## State Management Patterns
+
+### 1. Pinia Stores
+The application uses Pinia for global state management (`useQuestionnaireStore`, `useHistoryStore`). These stores handle complex business logic, database interactions, and state synchronization across views.
+
+### 2. Singleton Composables
+Certain composables, such as `useNetwork.ts` and `useToast.ts`, utilize module-level `ref`s to create true singletons. This means the state persists across component mounts and unmounts.
+- **Why:** This is intentional for shared global state (like network connection status or a global toast queue) in a single-instance desktop app.
+- **Testing:** Because the state is module-scoped, testing requires explicit reset functions (e.g., `_resetNetworkState()`) to ensure test isolation.
+- **Lifecycle:** Listeners attached in these composables or their consuming components (like `NetworkStatus.vue`) may remain active for the lifetime of the application, which is acceptable given the app's structure.

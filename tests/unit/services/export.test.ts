@@ -2,6 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ExportSession, ExportResponse } from '@/services/export';
 import { generateCSV, exportToCSV } from '@/services/export';
 
+vi.mock('@tauri-apps/plugin-dialog', () => ({
+  save: vi.fn().mockResolvedValue('mock-path.csv')
+}));
+
+vi.mock('@tauri-apps/plugin-fs', () => ({
+  writeTextFile: vi.fn().mockResolvedValue(undefined)
+}));
+
 // ── DB mock ──────────────────────────────────────────────────────────────────
 const mocks = vi.hoisted(() => {
   const execute = vi.fn().mockResolvedValue([]);
@@ -91,7 +99,29 @@ describe('Export Service', () => {
     await expect(exportToCSV()).rejects.toThrow('No data to export');
   });
 
-  it('exportToCSV creates download link and triggers click', async () => {
+  it('exportToCSV does NOT call writeTextFile when dialog is cancelled (save returns null)', async () => {
+    const { save } = await import('@tauri-apps/plugin-dialog');
+    const { writeTextFile } = await import('@tauri-apps/plugin-fs');
+    vi.mocked(save).mockResolvedValueOnce(null as any);
+
+    const sessions = [{ id: 's1', completed_at: '2023-06-15T12:00:00.000Z', total_score: 5000 }];
+    const responses = [
+      { session_id: 's1', question_id: 'q1', category: 'Health', answer_value: 8 }
+    ];
+    mocks.select.mockImplementation((query: string) => {
+      if (query.includes('_migrations')) return Promise.resolve([{ id: 1 }, { id: 2 }, { id: 3 }]);
+      if (query.includes('historical_sessions')) return Promise.resolve(sessions);
+      if (query.includes('historical_responses')) return Promise.resolve(responses);
+      return Promise.resolve([]);
+    });
+
+    await exportToCSV();
+
+    expect(save).toHaveBeenCalled();
+    expect(writeTextFile).not.toHaveBeenCalled();
+  });
+
+  it('exportToCSV calls save and writeTextFile', async () => {
     const sessions: ExportSession[] = [
       { id: 's1', completed_at: '2023-06-15T12:00:00.000Z', total_score: 5000 }
     ];
@@ -106,26 +136,12 @@ describe('Export Service', () => {
       return Promise.resolve([]);
     });
 
-    // Mock DOM APIs
-    const mockClick = vi.fn();
-    const mockRemove = vi.fn();
-    const mockAppend = vi.spyOn(document.body, 'appendChild').mockImplementation(el => el);
-    const mockCreateObjectURL = vi.fn().mockReturnValue('blob:test');
-    const mockCreateElement = vi.spyOn(document, 'createElement').mockReturnValue({
-      setAttribute: vi.fn(),
-      style: {},
-      click: mockClick,
-      remove: mockRemove
-    } as unknown as HTMLElement);
-    globalThis.URL.createObjectURL = mockCreateObjectURL;
+    const { save } = await import('@tauri-apps/plugin-dialog');
+    const { writeTextFile } = await import('@tauri-apps/plugin-fs');
 
     await exportToCSV();
 
-    expect(mockClick).toHaveBeenCalled();
-    expect(mockAppend).toHaveBeenCalled();
-    expect(mockRemove).toHaveBeenCalled();
-
-    mockAppend.mockRestore();
-    mockCreateElement.mockRestore();
+    expect(save).toHaveBeenCalled();
+    expect(writeTextFile).toHaveBeenCalledWith('mock-path.csv', expect.any(String));
   });
 });

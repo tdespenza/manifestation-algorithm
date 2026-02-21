@@ -1,5 +1,5 @@
 <template>
-  <div class="category-card" @click="goToDetail">
+  <div class="category-card" :class="`trend-${trend}`" @click="goToDetail">
     <div class="card-header">
       <h3>{{ category }}</h3>
       <div v-if="currentScore !== undefined" class="current-score" :class="scoreClass">
@@ -12,7 +12,7 @@
       <Line :data="chartData" :options="chartOptions" />
     </div>
     <div v-else class="no-trend">
-      <small>Not enough data for trend</small>
+      <small>Not enough data</small>
     </div>
   </div>
 </template>
@@ -118,57 +118,74 @@ const chartOptions: ChartOptions<'line'> = {
 <style scoped>
 .category-card {
   background: white;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
   height: 160px;
   cursor: pointer;
   transition:
-    transform 0.2s,
-    box-shadow 0.2s;
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  border-left: 3px solid #e0e0e0;
+}
+
+/* Trend-colored border */
+.category-card.trend-improving {
+  border-left-color: #4caf50;
+}
+
+.category-card.trend-declining {
+  border-left-color: #f44336;
+}
+
+.category-card.trend-stable {
+  border-left-color: #9e9e9e;
 }
 
 .category-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   gap: 8px;
 }
 
 h3 {
   margin: 0;
-  font-size: 0.95rem;
-  color: #555;
+  font-size: 0.88rem;
+  color: #444;
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.3;
 }
 
 .current-score {
   font-weight: 800;
   font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 2px;
 }
 
 .current-score.high {
-  color: #4caf50;
+  color: #2e7d32;
 }
 .current-score.medium {
-  color: #ff9800;
+  color: #e65100;
 }
 .current-score.low {
-  color: #f44336;
+  color: #c62828;
 }
 
 .trend-icon {
-  font-size: 0.8rem;
-  margin-left: 4px;
+  font-size: 0.75rem;
+  margin-left: 2px;
   vertical-align: middle;
 }
 .trend-up {
@@ -194,7 +211,8 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ccc;
+  color: #ddd;
+  font-size: 0.78rem;
   font-style: italic;
 }
 </style>

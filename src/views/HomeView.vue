@@ -6,7 +6,7 @@ import Questionnaire from '../components/ui/Questionnaire.vue';
   <div class="home-view">
     <div class="header-section">
       <h1>Manifestation Algorithm</h1>
-      <p class="subtitle">Rate each item from 1 to 10</p>
+      <p class="subtitle">Rate each area of your life — discover your alignment score</p>
     </div>
     <Questionnaire />
   </div>

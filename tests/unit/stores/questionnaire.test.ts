@@ -185,6 +185,21 @@ describe('Questionnaire Store', () => {
       expect(consoleSpy).toHaveBeenCalledWith('Failed to save answer:', expect.any(Error));
       consoleSpy.mockRestore();
     });
+
+    it('setAnswer ignores calls with an invalid (unknown) question ID', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const store = useQuestionnaireStore();
+
+      await store.setAnswer('totally-invalid-question-id', 5);
+
+      expect(store.answers['totally-invalid-question-id']).toBeUndefined();
+      expect(dbMocks.saveAnswer).not.toHaveBeenCalled();
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Invalid question ID:',
+        'totally-invalid-question-id'
+      );
+      consoleSpy.mockRestore();
+    });
   });
 
   it('calculateScore computed reflects answer changes', () => {

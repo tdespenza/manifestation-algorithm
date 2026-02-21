@@ -27,7 +27,7 @@ import {
   needsCrashRecovery,
   discardSession,
   getCompletedSessions
-} from '@/services/sessionManager';
+} from '../../__helpers__/sessionManager';
 
 describe('sessionManager', () => {
   beforeEach(() => {

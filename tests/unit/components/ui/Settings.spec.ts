@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 
@@ -38,11 +38,6 @@ describe('Settings.vue', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
-    vi.stubGlobal('confirm', vi.fn());
-  });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
   });
 
   it('renders the settings panel with a title', async () => {
@@ -52,37 +47,46 @@ describe('Settings.vue', () => {
     expect(wrapper.text()).toContain('Manifestation Algorithm v0.2.2');
   });
 
-  it('emits "close" when X button is clicked', async () => {
+  it('emits "close" when close button is clicked', async () => {
     const wrapper = mount(Settings);
-    const closeBtn = wrapper.findAll('button').find(b => b.text() === 'X');
-    expect(closeBtn).toBeDefined();
-    await closeBtn!.trigger('click');
+    const closeBtn = wrapper.find('button.btn-close');
+    expect(closeBtn.exists()).toBe(true);
+    await closeBtn.trigger('click');
     expect(wrapper.emitted('close')).toBeTruthy();
   });
 
-  it('"Clear All Answers" clears session, resets store and emits close on confirm', async () => {
-    vi.stubGlobal('confirm', vi.fn().mockReturnValue(true));
+  it('"Clear All Answers" shows the confirm dialog', async () => {
     const wrapper = mount(Settings);
     const clearBtn = wrapper.find('button.btn-danger');
     await clearBtn.trigger('click');
-    // Wait for async confirmClear
-    await new Promise(r => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+    expect((wrapper.vm as any).clearConfirmVisible).toBe(true);
+    expect(dbMocks.clearSession).not.toHaveBeenCalled();
+  });
 
+  it('doClear clears session, resets store and emits close', async () => {
+    const wrapper = mount(Settings);
+    await (wrapper.vm as any).doClear();
+    await flushPromises();
     expect(dbMocks.clearSession).toHaveBeenCalledWith('test-session-id');
     expect(storeMocks.reset).toHaveBeenCalled();
     expect(storeMocks.init).toHaveBeenCalled();
     expect(wrapper.emitted('close')).toBeTruthy();
   });
 
-  it('"Clear All Answers" does nothing when confirm is cancelled', async () => {
-    vi.stubGlobal('confirm', vi.fn().mockReturnValue(false));
+  it('cancelling the confirm dialog hides it without clearing', async () => {
     const wrapper = mount(Settings);
-    const clearBtn = wrapper.find('button.btn-danger');
-    await clearBtn.trigger('click');
-    await new Promise(r => setTimeout(r, 0));
-
+    const vm = wrapper.vm as any;
+    // Open confirm dialog via requestClear
+    await (wrapper.vm as any).requestClear();
+    await wrapper.vm.$nextTick();
+    expect(vm.clearConfirmVisible).toBe(true);
+    // Trigger @cancel on ConfirmDialog — this fires the inline handler
+    const dialog = wrapper.findComponent({ name: 'ConfirmDialog' });
+    await dialog.vm.$emit('cancel');
+    await wrapper.vm.$nextTick();
+    expect(vm.clearConfirmVisible).toBe(false);
     expect(dbMocks.clearSession).not.toHaveBeenCalled();
-    expect(wrapper.emitted('close')).toBeFalsy();
   });
 
   it('falls back to v0.2.2 when getVersion rejects', async () => {

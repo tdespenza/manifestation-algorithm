@@ -134,6 +134,17 @@ describe('Database Service', () => {
     );
   });
 
+  it('saveHistoricalSession with empty answers skips response INSERT', async () => {
+    const callsBefore = mocks.execute.mock.calls.length;
+    await dbService.saveHistoricalSession(0, {});
+    // Only the session INSERT should fire; no historical_responses INSERT
+    const newCalls = mocks.execute.mock.calls.slice(callsBefore);
+    expect(newCalls.some(c => String(c[0]).includes('INSERT INTO historical_responses'))).toBe(
+      false
+    );
+    expect(newCalls.some(c => String(c[0]).includes('INSERT INTO historical_sessions'))).toBe(true);
+  });
+
   it('saveHistoricalSession with top-level question ID (getCategory top-level branch)', async () => {
     // Question '2' is a top-level question with no sub-points
     const answers: Record<string, number> = { '2': 7 };
