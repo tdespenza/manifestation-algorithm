@@ -33,7 +33,8 @@
             aria-label="Toggle save last session"
             @click="store.setSaveLastSession(!store.saveLastSession)"
           >
-            {{ store.saveLastSession ? 'On' : 'Off' }}
+            <span class="toggle-track" aria-hidden="true"><span class="toggle-thumb"></span></span>
+            <span class="toggle-text-val">{{ store.saveLastSession ? 'On' : 'Off' }}</span>
           </button>
         </div>
         <div class="setting-item">
@@ -204,25 +205,55 @@ async function doClear() {
 }
 
 .btn-toggle {
-  min-width: 56px;
-  padding: 0.5rem 1.1rem;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  background: #f5f5f5;
-  color: #888;
-  font-weight: 600;
-  font-size: 0.88rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: none;
+  background: transparent;
   cursor: pointer;
-  transition:
-    background 0.15s,
-    color 0.15s,
-    border-color 0.15s;
+  flex-shrink: 0;
 }
 
-.btn-toggle.active {
+.toggle-track {
+  width: 48px;
+  height: 27px;
+  border-radius: 14px;
+  background: #d1d5db;
+  transition: background 0.25s ease;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  flex-shrink: 0;
+}
+
+.toggle-thumb {
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.22);
+  transition: transform 0.25s ease;
+}
+
+.btn-toggle.active .toggle-track {
   background: var(--true-cobalt, #0a1f7d);
-  border-color: var(--true-cobalt, #0a1f7d);
-  color: #fff;
+}
+
+.btn-toggle.active .toggle-thumb {
+  transform: translateX(21px);
+}
+
+.toggle-text-val {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #aaa;
+  min-width: 22px;
+  transition: color 0.2s;
+}
+
+.btn-toggle.active .toggle-text-val {
+  color: var(--true-cobalt, #0a1f7d);
 }
 
 .setting-about {

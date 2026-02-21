@@ -17,7 +17,7 @@
     <!-- Rating Slider -->
     <div v-if="!question.hasSubPoints" class="slider-wrapper">
       <div class="slider-container">
-        <span class="slider-label">1</span>
+        <span class="slider-label low-label">Low</span>
         <input
           type="range"
           class="slider"
@@ -28,8 +28,8 @@
           :aria-label="`Rate ${question.description}`"
           @input="handleInput"
         />
-        <span class="slider-label">10</span>
-        <span class="slider-value">{{ internalValue }}</span>
+        <span class="slider-label high-label">High</span>
+        <span class="slider-value" :class="sliderValueClass">{{ internalValue }}</span>
       </div>
 
       <div class="score-display">
@@ -79,6 +79,12 @@ const calculatedScore = computed(() => {
 // Percentage fill for the slider track (0% at value=1, 100% at value=10)
 const sliderFillPct = computed(() => {
   return `${Math.round(((internalValue.value - 1) / 9) * 100)}%`;
+});
+
+const sliderValueClass = computed(() => {
+  if (internalValue.value >= 8) return 'value-high';
+  if (internalValue.value >= 5) return 'value-mid';
+  return 'value-low';
 });
 
 function handleInput(e: Event) {
@@ -205,19 +211,40 @@ function handleInput(e: Event) {
 }
 
 .slider-label {
-  font-size: 0.78em;
-  color: #bbb;
-  font-weight: 600;
-  min-width: 14px;
+  font-size: 0.72em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  min-width: 28px;
   text-align: center;
+}
+
+.low-label {
+  color: #ef9a9a;
+}
+
+.high-label {
+  color: #81c784;
 }
 
 .slider-value {
   font-weight: 800;
-  color: var(--true-cobalt, #0a1f7d);
   font-size: 1.25em;
   min-width: 28px;
   text-align: center;
+  transition: color 0.2s;
+}
+
+.value-low {
+  color: #ef5350;
+}
+
+.value-mid {
+  color: #f9a825;
+}
+
+.value-high {
+  color: #2e7d32;
 }
 
 .score-display {

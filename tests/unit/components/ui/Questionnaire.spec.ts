@@ -476,6 +476,40 @@ describe('Questionnaire.vue', () => {
     expect(store.submitSession).not.toHaveBeenCalled();
   });
 
+  // ── scoreQuality label ────────────────────────────────────────────────
+
+  it('shows "Manifesting" quality label when score >= 75% of max', async () => {
+    const wrapper = makeWrapper();
+    const store = useQuestionnaireStore();
+    (store as any).score = 7500;
+    await wrapper.vm.$nextTick();
+    expect(wrapper.find('.score-quality').text()).toContain('Manifesting');
+  });
+
+  it('shows "Aligned" quality label when score is 50–74% of max', async () => {
+    const wrapper = makeWrapper();
+    const store = useQuestionnaireStore();
+    (store as any).score = 5500;
+    await wrapper.vm.$nextTick();
+    expect(wrapper.find('.score-quality').text()).toContain('Aligned');
+  });
+
+  it('shows "Building" quality label when score is 25–49% of max', async () => {
+    const wrapper = makeWrapper();
+    const store = useQuestionnaireStore();
+    (store as any).score = 2600;
+    await wrapper.vm.$nextTick();
+    expect(wrapper.find('.score-quality').text()).toContain('Building');
+  });
+
+  it('shows "Starting Out" quality label when score < 25% of max', async () => {
+    const wrapper = makeWrapper();
+    const store = useQuestionnaireStore();
+    (store as any).score = 100;
+    await wrapper.vm.$nextTick();
+    expect(wrapper.find('.score-quality').text()).toContain('Starting Out');
+  });
+
   // ── sticky header ─────────────────────────────────────────────────────
 
   it('header has position:sticky with top offset equal to the navbar height', async () => {
