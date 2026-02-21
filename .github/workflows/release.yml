@@ -340,8 +340,10 @@ jobs:
             }
 
           if not platforms:
-            print('::error::No updater artifacts detected in dist/ (missing .sig files or unsupported filenames).')
-            sys.exit(1)
+            print('::warning::No updater artifacts detected in dist/ (missing .sig files or unsupported filenames). Skipping latest.json generation.')
+            # Write a sentinel so the shell knows to skip the git commit.
+            pathlib.Path('/tmp/skip_latest_json').touch()
+            sys.exit(0)
 
           data = {
             'version': version,
@@ -358,6 +360,11 @@ jobs:
           PY
 
           # Commit latest.json to main so the pages deployment picks it up.
+          # Skip entirely if the Python script found no signed artifacts.
+          if [ -f /tmp/skip_latest_json ]; then
+            echo "No signed updater artifacts — skipping latest.json commit."
+            exit 0
+          fi
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git remote set-url origin "https://x-access-token:${PAT}@github.com/${REPO}"
