@@ -23,6 +23,9 @@
         <div class="max-info">Max: {{ maxScore.toLocaleString() }}</div>
         <div class="current-score" :class="{ success: score >= 5000 }">{{ formattedScore }}</div>
         <div class="score-label">Current Score</div>
+        <div class="score-quality" :style="{ color: scoreQuality.color }">
+          {{ scoreQuality.label }}
+        </div>
       </div>
     </div>
 
@@ -126,6 +129,14 @@ const formattedScore = computed(() => Math.round(score.value).toLocaleString());
 const answeredCount = computed(
   () => Object.keys(store.answers).filter(k => store.answers[k] >= 1).length
 );
+
+const scoreQuality = computed(() => {
+  const pct = score.value / maxScore;
+  if (pct >= 0.75) return { label: 'Manifesting ✦', color: '#1a8a3a' };
+  if (pct >= 0.5) return { label: 'Aligned', color: '#0d7a5f' };
+  if (pct >= 0.25) return { label: 'Building', color: '#6b5ca5' };
+  return { label: 'Starting Out', color: '#94a3b8' };
+});
 
 function isAnswered(idx: number): boolean {
   const q = leafQuestions[idx];
@@ -241,6 +252,11 @@ onMounted(async () => {
     border-color 0.15s;
 }
 
+.reset-btn::before {
+  content: '↺ ';
+  font-style: normal;
+}
+
 .reset-btn:hover {
   background: #fff3f3;
   color: #d32f2f;
@@ -303,6 +319,13 @@ onMounted(async () => {
   text-transform: uppercase;
   letter-spacing: 1px;
   color: #666;
+}
+.score-quality {
+  font-size: 0.72em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 2px;
 }
 .max-info {
   font-size: 0.7em;

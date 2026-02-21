@@ -133,4 +133,23 @@ describe('QuestionItem.vue', () => {
     });
     expect(wrapper.find('.question-item').classes()).toContain('sub-question');
   });
+
+  // ── sliderValueClass ──────────────────────────────────────────────────
+
+  it('sliderValueClass is value-high when answer is >= 8', async () => {
+    const wrapper = mount(QuestionItem, {
+      props: { question: dummyQuestion },
+      global: {
+        plugins: [
+          createTestingPinia({
+            createSpy: vi.fn,
+            stubActions: false,
+            initialState: { questionnaire: { answers: { '2': 9 } } }
+          })
+        ]
+      }
+    });
+    await wrapper.vm.$nextTick();
+    expect(wrapper.find('.slider-value').classes()).toContain('value-high');
+  });
 });

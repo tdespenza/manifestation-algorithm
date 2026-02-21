@@ -111,7 +111,7 @@ describe('UpdateNotification.vue', () => {
     expect(banner.classes()).toContain('ready');
     expect(banner.text()).toContain('3.0.0');
     expect(banner.text()).toContain('Restart Now');
-    expect(banner.text()).toContain('installed');
+    expect(banner.text()).toContain('ready to launch');
   });
 
   it('calls restart() when "Restart Now" is clicked', async () => {

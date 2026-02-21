@@ -24,10 +24,10 @@ const {
     >
       <!-- Downloading (auto-starts when update is found) -->
       <template v-if="state === 'downloading'">
-        <span class="update-icon">⬇️</span>
+        <span class="update-icon downloading-icon">⬇️</span>
         <span class="update-text">
-          <strong>Downloading update…</strong>
-          <span class="update-notes">v{{ newVersion }}</span>
+          <strong>Downloading v{{ newVersion }}…</strong>
+          <span class="update-notes">Update is being installed in the background</span>
         </span>
         <div class="update-progress-wrap">
           <div class="update-progress-bar">
@@ -39,9 +39,9 @@ const {
 
       <!-- Ready to restart -->
       <template v-else-if="state === 'ready'">
-        <span class="update-icon">✅</span>
+        <span class="update-icon">🚀</span>
         <span class="update-text">
-          <strong>v{{ newVersion }} installed!</strong>
+          <strong>v{{ newVersion }} ready to launch!</strong>
           <span class="update-notes">{{
             releaseNotes || 'Restart the app to apply the update.'
           }}</span>
@@ -84,13 +84,28 @@ const {
 }
 
 .update-banner.ready {
-  background: #f1fbf2;
+  background: linear-gradient(135deg, #e8f5e9 0%, #f1fbf2 100%);
   color: #1b5e20;
+  border-bottom-color: rgba(46, 125, 50, 0.15);
 }
 
 .update-icon {
   font-size: 1.05rem;
   flex-shrink: 0;
+}
+
+.downloading-icon {
+  animation: bounce-down 0.9s ease-in-out infinite;
+}
+
+@keyframes bounce-down {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(3px);
+  }
 }
 
 .update-text {
