@@ -259,47 +259,103 @@ jobs:
           REPO="${{ github.repository }}"
           BASE_URL="https://github.com/${REPO}/releases/download/${TAG}"
 
-          # Helper: read a .sig file from dist/ matching a glob pattern.
-          read_sig() {
-            local pattern="$1"
-            local file
-            file=$(find dist -type f -name "$pattern" 2>/dev/null | head -1)
-            [ -n "$file" ] && cat "$file" || echo ""
+          # Build the updater feed from whatever signed artifacts actually exist.
+          # Tauri expects a per-platform URL + detached signature.
+          TAG="$TAG" VERSION="$VERSION" PUB_DATE="$PUB_DATE" BASE_URL="$BASE_URL" python3 - <<'PY'
+          import json
+          import os
+          import pathlib
+          import sys
+
+          dist = pathlib.Path('dist')
+          notes_path = pathlib.Path('/tmp/release-notes.txt')
+
+          tag = os.environ['TAG']
+          version = os.environ['VERSION']
+          pub_date = os.environ['PUB_DATE']
+          base_url = os.environ['BASE_URL'].rstrip('/')
+
+          notes = notes_path.read_text().strip() if notes_path.exists() else ''
+
+          def iter_files(suffix: str):
+            if not dist.exists():
+              return []
+            return sorted([p for p in dist.rglob(f'*{suffix}') if p.is_file()])
+
+          def pick_signed_asset(preferred_suffixes: list[str], path_hint_tokens: list[str] | None = None):
+            """Return (asset_path, signature_text) or (None, None)."""
+            if path_hint_tokens is None:
+              path_hint_tokens = []
+            for suffix in preferred_suffixes:
+              candidates = [p for p in iter_files(suffix) if not str(p).endswith('.sig')]
+              if path_hint_tokens:
+                hinted = [p for p in candidates if any(tok in str(p) for tok in path_hint_tokens)]
+                if hinted:
+                  candidates = hinted
+              for asset in candidates:
+                sig = asset.with_name(asset.name + '.sig')
+                if sig.exists() and sig.is_file():
+                  sig_text = sig.read_text().strip()
+                  if sig_text:
+                    return asset, sig_text
+            return None, None
+
+          platforms: dict[str, dict[str, str]] = {}
+
+          # Linux: AppImage (preferred)
+          linux_asset, linux_sig = pick_signed_asset(['.AppImage'])
+          if linux_asset:
+            platforms['linux-x86_64'] = {
+              'signature': linux_sig,
+              'url': f"{base_url}/{linux_asset.name}",
+            }
+
+          # Windows: prefer MSI zip, fall back to NSIS zip, then raw EXE
+          win_asset, win_sig = pick_signed_asset(['.msi.zip', '.nsis.zip', '.exe'])
+          if win_asset:
+            platforms['windows-x86_64'] = {
+              'signature': win_sig,
+              'url': f"{base_url}/{win_asset.name}",
+            }
+
+          # macOS: separate builds per arch (aarch64 + x86_64)
+          mac_arm_asset, mac_arm_sig = pick_signed_asset(
+            ['.app.tar.gz'],
+            path_hint_tokens=['aarch64-apple-darwin', 'darwin-aarch64', 'aarch64'],
+          )
+          if mac_arm_asset:
+            platforms['darwin-aarch64'] = {
+              'signature': mac_arm_sig,
+              'url': f"{base_url}/{mac_arm_asset.name}",
+            }
+
+          mac_x64_asset, mac_x64_sig = pick_signed_asset(
+            ['.app.tar.gz'],
+            path_hint_tokens=['x86_64-apple-darwin', 'darwin-x86_64', 'x86_64'],
+          )
+          if mac_x64_asset:
+            platforms['darwin-x86_64'] = {
+              'signature': mac_x64_sig,
+              'url': f"{base_url}/{mac_x64_asset.name}",
+            }
+
+          if not platforms:
+            print('::error::No updater artifacts detected in dist/ (missing .sig files or unsupported filenames).')
+            sys.exit(1)
+
+          data = {
+            'version': version,
+            'notes': notes,
+            'pub_date': pub_date,
+            'platforms': platforms,
           }
 
-          # Helper: find the download URL for a file matching a glob.
-          asset_url() {
-            local pattern="$1"
-            local file
-            file=$(find dist -type f -name "$pattern" 2>/dev/null | head -1)
-            [ -n "$file" ] && echo "${BASE_URL}/$(basename "$file")" || echo ""
-          }
-
-          LINUX_SIG=$(read_sig     '*.AppImage.sig')
-          LINUX_URL=$(asset_url    '*.AppImage')
-          WIN_SIG=$(read_sig       '*.msi.zip.sig')
-          WIN_URL=$(asset_url      '*.msi.zip')
-          MAC_ARM_SIG=$(read_sig   '*aarch64*.app.tar.gz.sig')
-          MAC_ARM_URL=$(asset_url  '*aarch64*.app.tar.gz')
-          MAC_X64_SIG=$(read_sig   '*x86_64*.app.tar.gz.sig')
-          MAC_X64_URL=$(asset_url  '*x86_64*.app.tar.gz')
-
-          # Build platforms object — only include platforms that have both sig and URL.
-          PLATFORMS="{}"
-          add_platform() {
-            local key="$1" sig="$2" url="$3"
-            if [ -n "$sig" ] && [ -n "$url" ]; then
-              PLATFORMS=$(printf '%s' "$PLATFORMS" | python3 -c "import sys,json;d=json.load(sys.stdin);d['$key']={'signature':'$sig','url':'$url'};print(json.dumps(d))")
-            fi
-          }
-
-          add_platform "linux-x86_64"  "$LINUX_SIG"   "$LINUX_URL"
-          add_platform "windows-x86_64" "$WIN_SIG"    "$WIN_URL"
-          add_platform "darwin-aarch64" "$MAC_ARM_SIG" "$MAC_ARM_URL"
-          add_platform "darwin-x86_64"  "$MAC_X64_SIG" "$MAC_X64_URL"
-
-          VERSION="$VERSION" PUB_DATE="$PUB_DATE" PLATFORMS="$PLATFORMS" \
-            python3 -c "import json,os; notes=open('/tmp/release-notes.txt').read().strip(); data={'version':os.environ['VERSION'],'notes':notes,'pub_date':os.environ['PUB_DATE'],'platforms':json.loads(os.environ['PLATFORMS'])}; f=open('website/latest.json','w'); json.dump(data,f,indent=2); f.close(); print('Generated website/latest.json:'); print(json.dumps(data,indent=2))"
+          out = pathlib.Path('website/latest.json')
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(data, indent=2) + '\n')
+          print('Generated website/latest.json:')
+          print(json.dumps(data, indent=2))
+          PY
 
           # Commit latest.json to main so the pages deployment picks it up.
           git config user.name  "github-actions[bot]"
