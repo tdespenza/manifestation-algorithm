@@ -1,8 +1,15 @@
 /**
  * Chart Actions E2E tests.
  *
- * Covers: export dialog trigger, all export options, print behaviour,
- * and excel/csv/pdf/html exports on Dashboard and Category Detail views.
+ * Covers: export select visibility, all 6 format options, the save modal
+ * (filename, directory, confirm/cancel), print behaviour, and
+ * excel/csv/pdf/html exports on Dashboard and Category Detail views.
+ *
+ * UI model (post-redesign):
+ *   1. User picks a format from the `.export-select` <select> element.
+ *   2. A `.save-modal` appears with a filename input, directory chooser,
+ *      and Confirm / Cancel buttons.
+ *   3. Clicking `.save-confirm-btn` runs the export.
  *
  * Seed strategy: use page.addInitScript so data is available on every
  * page load — the Tauri mock IIFE exposes __tauriSeedDB which is called
@@ -49,10 +56,7 @@ const SEED = {
 
 type PageObj = Page;
 
-/**
- * Adds seed data as a persistent init script so data survives every
- * page navigation in the test.
- */
+/** Adds seed data as a persistent init script so data survives every navigation. */
 async function addSeedScript(page: PageObj, seed: DBSeed) {
   await page.addInitScript(
     data => {
@@ -62,12 +66,20 @@ async function addSeedScript(page: PageObj, seed: DBSeed) {
   );
 }
 
-/** Click the chart-actions trigger to open the export dialog. */
-async function openExportDialog(page: PageObj) {
-  const trigger = page.locator('.export-trigger-btn').first();
-  await expect(trigger).toBeVisible();
-  await trigger.click();
-  await page.locator('.export-dialog').waitFor({ timeout: 5_000 });
+/**
+ * Select an export format from the `.export-select` <select> element and
+ * wait for the `.save-modal` to appear.
+ */
+async function openSaveModal(page: PageObj, format: string) {
+  const select = page.locator('.export-select').first();
+  await expect(select).toBeVisible({ timeout: 8_000 });
+  await select.selectOption(format);
+  await page.locator('.save-modal').waitFor({ state: 'visible', timeout: 5_000 });
+}
+
+/** Click the confirm button in the save modal. */
+async function confirmSaveModal(page: PageObj) {
+  await page.locator('.save-confirm-btn').click();
 }
 
 // ── Dashboard tests ──────────────────────────────────────────────────────────
@@ -80,26 +92,92 @@ test.describe('Chart Actions – Dashboard', () => {
     await page.waitForTimeout(600);
   });
 
-  test('Export / Print trigger button is visible when chart data is present', async ({ page }) => {
+  test('Export select is visible when chart data is present', async ({ page }) => {
     await expect(page.locator('.chart-section')).toBeVisible();
-    const trigger = page.locator('.export-trigger-btn').first();
-    await expect(trigger).toBeVisible();
-    await expect(trigger).toContainText('Export');
+    const select = page.locator('.export-select').first();
+    await expect(select).toBeVisible();
   });
 
-  test('clicking trigger opens the export dialog with all 6 options', async ({ page }) => {
-    await openExportDialog(page);
-    const options = page.locator('.export-option-btn');
-    await expect(options).toHaveCount(6);
-    await expect(options.nth(0)).toContainText('Print');
-    await expect(options.nth(1)).toContainText('Export Excel');
-    await expect(options.nth(2)).toContainText('Export CSV');
-    await expect(options.nth(3)).toContainText('Export PDF');
-    await expect(options.nth(4)).toContainText('Export HTML');
-    await expect(options.nth(5)).toContainText('Copy Chart');
+  test('export select contains all 6 format options plus the placeholder', async ({ page }) => {
+    const select = page.locator('.export-select').first();
+    await expect(select).toBeVisible();
+
+    // 7 <option> elements: 1 placeholder + 6 formats
+    const options = select.locator('option');
+    await expect(options).toHaveCount(7);
+    await expect(options.nth(1)).toHaveText(/Print/);
+    await expect(options.nth(2)).toHaveText(/Excel/);
+    await expect(options.nth(3)).toHaveText(/CSV/);
+    await expect(options.nth(4)).toHaveText(/PDF/);
+    await expect(options.nth(5)).toHaveText(/HTML/);
+    await expect(options.nth(6)).toHaveText(/Copy/);
   });
 
-  test('Print option calls window.print and closes dialog', async ({ page }) => {
+  test('selecting a format opens the save modal', async ({ page }) => {
+    await openSaveModal(page, 'excel');
+    await expect(page.locator('.save-modal')).toBeVisible();
+    await expect(page.locator('.save-modal-header h3')).toContainText('Export Excel');
+  });
+
+  test('save modal shows filename input and directory row for file exports', async ({ page }) => {
+    await openSaveModal(page, 'pdf');
+    await expect(page.locator('.save-filename-input')).toBeVisible();
+    await expect(page.locator('.save-directory-path')).toBeVisible();
+    await expect(page.locator('.save-browse-btn')).toBeVisible();
+    await expect(page.locator('.save-confirm-btn')).toBeVisible();
+    await expect(page.locator('.save-cancel-btn')).toBeVisible();
+  });
+
+  test('filename input is pre-populated and editable', async ({ page }) => {
+    await openSaveModal(page, 'pdf');
+    const input = page.locator('.save-filename-input');
+    const initial = await input.inputValue();
+    expect(initial.length).toBeGreaterThan(0);
+    expect(initial).toMatch(/\.pdf$/i);
+
+    await input.fill('my_custom_chart.pdf');
+    await expect(input).toHaveValue('my_custom_chart.pdf');
+  });
+
+  test('cancel button closes the save modal without exporting', async ({ page }) => {
+    await openSaveModal(page, 'csv');
+    await page.locator('.save-cancel-btn').click();
+    await expect(page.locator('.save-modal')).toHaveCount(0);
+  });
+
+  test('close (✕) button also dismisses the save modal', async ({ page }) => {
+    await openSaveModal(page, 'excel');
+    await page.locator('.close-btn').click();
+    await expect(page.locator('.save-modal')).toHaveCount(0);
+  });
+
+  test('clicking the overlay background closes the modal', async ({ page }) => {
+    await openSaveModal(page, 'html');
+    // Click outside the modal box (on the overlay)
+    await page.locator('.save-modal-overlay').click({ position: { x: 5, y: 5 } });
+    await expect(page.locator('.save-modal')).toHaveCount(0);
+  });
+
+  test('select resets to placeholder after modal is dismissed', async ({ page }) => {
+    await openSaveModal(page, 'csv');
+    await page.locator('.save-cancel-btn').click();
+    // The <select> value should be empty (placeholder selected)
+    const val = await page.locator('.export-select').first().inputValue();
+    expect(val).toBe('');
+  });
+
+  // ── Print ──────────────────────────────────────────────────────────────────
+
+  test('Print option — save modal shows Print label and no file fields', async ({ page }) => {
+    await openSaveModal(page, 'print');
+    await expect(page.locator('.save-modal-header h3')).toContainText('Print');
+    // Print has no filename/directory UI
+    await expect(page.locator('.save-filename-input')).toHaveCount(0);
+    await expect(page.locator('.save-directory-path')).toHaveCount(0);
+    await expect(page.locator('.save-confirm-btn')).toContainText('Print');
+  });
+
+  test('Print confirm calls window.print and closes modal', async ({ page }) => {
     await page.evaluate(() => {
       (window as unknown as Record<string, unknown>).__printCalled = false;
       window.print = () => {
@@ -107,19 +185,17 @@ test.describe('Chart Actions – Dashboard', () => {
       };
     });
 
-    await openExportDialog(page);
-    await page.locator('.export-option-btn').first().click();
+    await openSaveModal(page, 'print');
+    await confirmSaveModal(page);
 
     const called = await page.evaluate(
       () => (window as unknown as Record<string, unknown>).__printCalled
     );
     expect(called).toBe(true);
-
-    // Dialog should be closed after clicking
-    await expect(page.locator('.export-dialog')).toHaveCount(0);
+    await expect(page.locator('.save-modal')).toHaveCount(0);
   });
 
-  test('Print adds printing-chart to body and removes it after print', async ({ page }) => {
+  test('Print adds printing-chart class to body and removes it after', async ({ page }) => {
     await page.evaluate(() => {
       (window as unknown as Record<string, unknown>).__printHadClass = false;
       window.print = () => {
@@ -128,17 +204,15 @@ test.describe('Chart Actions – Dashboard', () => {
       };
     });
 
-    await openExportDialog(page);
-    await page.locator('.export-option-btn').first().click();
+    await openSaveModal(page, 'print');
+    await confirmSaveModal(page);
 
     const hadClass = await page.evaluate(
       () => (window as unknown as Record<string, unknown>).__printHadClass as boolean
     );
     expect(hadClass).toBe(true);
 
-    const stillHas = await page.evaluate(() =>
-      document.body.classList.contains('printing-chart')
-    );
+    const stillHas = await page.evaluate(() => document.body.classList.contains('printing-chart'));
     expect(stillHas).toBe(false);
   });
 
@@ -152,8 +226,8 @@ test.describe('Chart Actions – Dashboard', () => {
       };
     });
 
-    await openExportDialog(page);
-    await page.locator('.export-option-btn').first().click();
+    await openSaveModal(page, 'print');
+    await confirmSaveModal(page);
 
     const had = await page.evaluate(
       () => (window as unknown as Record<string, unknown>).__targetHadClass as boolean
@@ -168,39 +242,35 @@ test.describe('Chart Actions – Dashboard', () => {
     expect(elStillHas).toBe(false);
   });
 
-  test('Export Excel option is clickable and keeps page alive', async ({ page }) => {
-    await openExportDialog(page);
-    const excelOption = page.locator('.export-option-btn').nth(1);
-    await expect(excelOption).toContainText('Export Excel');
+  // ── Excel ──────────────────────────────────────────────────────────────────
 
+  test('Export Excel — confirming keeps page alive', async ({ page }) => {
+    await openSaveModal(page, 'excel');
     const downloadPromise = page.waitForEvent('download', { timeout: 5_000 }).catch(() => null);
-    await excelOption.click();
+    await confirmSaveModal(page);
     const download = await downloadPromise;
     if (download) {
       expect(download.suggestedFilename()).toMatch(/\.xlsx$/);
     }
-
     await expect(page.locator('.dashboard-view')).toBeVisible();
   });
 
-  test('Export PDF option triggers a file download with .pdf extension', async ({ page }) => {
-    // Disable showSaveFilePicker so the anchor-fallback path runs
-    // (which triggers a real Playwright download event)
+  // ── PDF ────────────────────────────────────────────────────────────────────
+
+  test('Export PDF — confirming triggers a .pdf download', async ({ page }) => {
     await page.evaluate(() => {
       delete (window as unknown as Record<string, unknown>).showSaveFilePicker;
     });
 
-    await openExportDialog(page);
-    const pdfOption = page.locator('.export-option-btn').nth(3);
-    await expect(pdfOption).toContainText('Export PDF');
+    await openSaveModal(page, 'pdf');
+    await expect(page.locator('.save-filename-input')).toHaveValue(/\.pdf$/i);
 
     const downloadPromise = page.waitForEvent('download', { timeout: 8_000 }).catch(() => null);
-    await pdfOption.click();
+    await confirmSaveModal(page);
     const download = await downloadPromise;
     if (download) {
       expect(download.suggestedFilename()).toMatch(/\.pdf$/);
     }
-
     await expect(page.locator('.dashboard-view')).toBeVisible();
   });
 
@@ -213,22 +283,14 @@ test.describe('Chart Actions – Dashboard', () => {
       delete (window as unknown as Record<string, unknown>).showSaveFilePicker;
     });
 
-    await openExportDialog(page);
-    const pdfOption = page.locator('.export-option-btn').nth(3);
-    // Wait for dialog to close (export in progress then done)
-    await pdfOption.click();
-    await page.locator('.export-dialog').waitFor({ state: 'detached', timeout: 8_000 });
+    await openSaveModal(page, 'pdf');
+    await confirmSaveModal(page);
+    await page.locator('.save-modal').waitFor({ state: 'detached', timeout: 8_000 });
 
     const printCalled = await page.evaluate(
       () => (window as unknown as Record<string, unknown>).__printCalled
     );
     expect(printCalled).toBe(false);
-  });
-
-  test('close button dismisses the export dialog', async ({ page }) => {
-    await openExportDialog(page);
-    await page.locator('.close-btn').click();
-    await expect(page.locator('.export-dialog')).toHaveCount(0);
   });
 });
 
@@ -242,7 +304,7 @@ test.describe('Chart Actions – Category Detail', () => {
     await page.waitForTimeout(600);
   });
 
-  test('export trigger button appears on category detail page', async ({ page }) => {
+  test('export select appears on category detail page', async ({ page }) => {
     const categoryCard = page.locator('.category-card').first();
     if (!(await categoryCard.isVisible().catch(() => false))) {
       test.skip();
@@ -252,12 +314,11 @@ test.describe('Chart Actions – Category Detail', () => {
     await categoryCard.click();
     await page.locator('.category-detail-view').waitFor({ timeout: 10_000 });
 
-    const trigger = page.locator('.export-trigger-btn').first();
-    await expect(trigger).toBeVisible();
-    await expect(trigger).toContainText('Export');
+    const select = page.locator('.export-select').first();
+    await expect(select).toBeVisible();
   });
 
-  test('Print option on category detail calls window.print', async ({ page }) => {
+  test('Print on category detail calls window.print', async ({ page }) => {
     const categoryCard = page.locator('.category-card').first();
     if (!(await categoryCard.isVisible().catch(() => false))) {
       test.skip();
@@ -274,8 +335,8 @@ test.describe('Chart Actions – Category Detail', () => {
       };
     });
 
-    await openExportDialog(page);
-    await page.locator('.export-option-btn').first().click();
+    await openSaveModal(page, 'print');
+    await confirmSaveModal(page);
 
     const called = await page.evaluate(
       () => (window as unknown as Record<string, unknown>).__printCalled
@@ -283,7 +344,7 @@ test.describe('Chart Actions – Category Detail', () => {
     expect(called).toBe(true);
   });
 
-  test('Export Excel on detail page is clickable and keeps page alive', async ({ page }) => {
+  test('Export Excel on detail page keeps page alive', async ({ page }) => {
     const categoryCard = page.locator('.category-card').first();
     if (!(await categoryCard.isVisible().catch(() => false))) {
       test.skip();
@@ -293,12 +354,9 @@ test.describe('Chart Actions – Category Detail', () => {
     await categoryCard.click();
     await page.locator('.category-detail-view').waitFor({ timeout: 10_000 });
 
-    await openExportDialog(page);
-    const excelOption = page.locator('.export-option-btn').nth(1);
-    await expect(excelOption).toContainText('Export Excel');
-
+    await openSaveModal(page, 'excel');
     const downloadPromise = page.waitForEvent('download', { timeout: 5_000 }).catch(() => null);
-    await excelOption.click();
+    await confirmSaveModal(page);
     const download = await downloadPromise;
     if (download) {
       expect(download.suggestedFilename()).toMatch(/\.xlsx$/);
@@ -316,17 +374,13 @@ test.describe('Chart Actions – Category Detail', () => {
     await categoryCard.click();
     await page.locator('.category-detail-view').waitFor({ timeout: 10_000 });
 
-    // Force anchor fallback so Playwright captures the download event
     await page.evaluate(() => {
       delete (window as unknown as Record<string, unknown>).showSaveFilePicker;
     });
 
-    await openExportDialog(page);
-    const pdfOption = page.locator('.export-option-btn').nth(3);
-    await expect(pdfOption).toContainText('Export PDF');
-
+    await openSaveModal(page, 'pdf');
     const downloadPromise = page.waitForEvent('download', { timeout: 8_000 }).catch(() => null);
-    await pdfOption.click();
+    await confirmSaveModal(page);
     const download = await downloadPromise;
     if (download) {
       expect(download.suggestedFilename()).toMatch(/\.pdf$/);

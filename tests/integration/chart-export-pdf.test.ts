@@ -236,6 +236,22 @@ describe('useChartExport.exportToPDF integration', () => {
 // ── ChartActions component integration ───────────────────────────────────────
 
 describe('ChartActions – Export PDF button (component integration)', () => {
+  /** Open the save modal for PDF via the select element. */
+  async function openPDFModal(wrapper: ReturnType<typeof mount>) {
+    const select = wrapper.find<HTMLSelectElement>('.export-select');
+    select.element.value = 'pdf';
+    await select.trigger('change');
+    await nextTick();
+  }
+
+  /** Click the confirm button in the save modal. */
+  async function confirmModal() {
+    const btn = document.querySelector('.save-confirm-btn') as HTMLButtonElement;
+    btn.click();
+    await flushPromises();
+    await nextTick();
+  }
+
   it('clicking Export PDF shows progress bar while exporting', async () => {
     // Use a never-resolving promise to freeze the busy state so we can assert
     const neverResolves = new Promise<{ success: boolean; message: string }>(() => {});
@@ -247,11 +263,9 @@ describe('ChartActions – Export PDF button (component integration)', () => {
     }));
 
     const wrapper = mount(ChartActions, { props: DEFAULT_PROPS, attachTo: document.body });
-    await wrapper.find('.export-trigger-btn').trigger('click');
-    await nextTick();
-
-    const buttons = document.querySelectorAll('.export-option-btn');
-    (buttons[3] as HTMLButtonElement).click();
+    await openPDFModal(wrapper);
+    const confirmBtn = document.querySelector('.save-confirm-btn') as HTMLButtonElement;
+    confirmBtn.click();
     await nextTick();
 
     expect(document.querySelector('.export-progress')).not.toBeNull();
@@ -260,15 +274,10 @@ describe('ChartActions – Export PDF button (component integration)', () => {
 
   it('successful PDF export closes dialog and shows success toast', async () => {
     const wrapper = mount(ChartActions, { props: DEFAULT_PROPS, attachTo: document.body });
-    await wrapper.find('.export-trigger-btn').trigger('click');
-    await nextTick();
+    await openPDFModal(wrapper);
+    await confirmModal();
 
-    const buttons = document.querySelectorAll('.export-option-btn');
-    (buttons[3] as HTMLButtonElement).click();
-    await flushPromises();
-    await nextTick();
-
-    expect(document.querySelector('.export-dialog')).toBeNull();
+    expect(document.querySelector('.save-modal')).toBeNull();
     expect(mockAddToast).toHaveBeenCalledWith(expect.stringMatching(/saved|pdf/i), 'success');
     wrapper.unmount();
   });
@@ -278,15 +287,10 @@ describe('ChartActions – Export PDF button (component integration)', () => {
     vi.stubGlobal('showSaveFilePicker', vi.fn().mockRejectedValue(abortErr));
 
     const wrapper = mount(ChartActions, { props: DEFAULT_PROPS, attachTo: document.body });
-    await wrapper.find('.export-trigger-btn').trigger('click');
-    await nextTick();
+    await openPDFModal(wrapper);
+    await confirmModal();
 
-    const buttons = document.querySelectorAll('.export-option-btn');
-    (buttons[3] as HTMLButtonElement).click();
-    await flushPromises();
-    await nextTick();
-
-    expect(document.querySelector('.export-dialog')).toBeNull();
+    expect(document.querySelector('.save-modal')).toBeNull();
     expect(mockAddToast).not.toHaveBeenCalled();
     wrapper.unmount();
   });
