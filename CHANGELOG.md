@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-02-21
+### Features
+- Enhance UI components with improved labels and styles for better user experience
+
 ## [0.7.0] - 2026-02-21
 ### Features
 - Implement PDF export functionality with integration and E2E tests
