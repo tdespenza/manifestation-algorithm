@@ -11,7 +11,9 @@ const dbMocks = vi.hoisted(() => ({
   clearSession: vi.fn(),
   loadHistoricalSessions: vi.fn().mockResolvedValue([]),
   loadSessionResponses: vi.fn().mockResolvedValue([]),
-  saveHistoricalSession: vi.fn().mockResolvedValue('uuid-1')
+  saveHistoricalSession: vi.fn().mockResolvedValue('uuid-1'),
+  getSetting: vi.fn().mockResolvedValue(null),
+  setSetting: vi.fn().mockResolvedValue(undefined)
 }));
 
 vi.mock('@/services/db', () => ({
@@ -22,7 +24,9 @@ vi.mock('@/services/db', () => ({
   clearSession: dbMocks.clearSession,
   loadHistoricalSessions: dbMocks.loadHistoricalSessions,
   loadSessionResponses: dbMocks.loadSessionResponses,
-  saveHistoricalSession: dbMocks.saveHistoricalSession
+  saveHistoricalSession: dbMocks.saveHistoricalSession,
+  getSetting: dbMocks.getSetting,
+  setSetting: dbMocks.setSetting
 }));
 
 describe('Questionnaire Store', () => {
@@ -33,6 +37,7 @@ describe('Questionnaire Store', () => {
     dbMocks.loadAnswers.mockResolvedValue({});
     dbMocks.loadHistoricalSessions.mockResolvedValue([]);
     dbMocks.getLastActive.mockResolvedValue(null);
+    dbMocks.getSetting.mockResolvedValue(null);
   });
 
   describe('Initialization', () => {
@@ -199,6 +204,69 @@ describe('Questionnaire Store', () => {
         'totally-invalid-question-id'
       );
       consoleSpy.mockRestore();
+    });
+  });
+
+  describe('Save Last Session Setting', () => {
+    it('saveLastSession defaults to true', () => {
+      const store = useQuestionnaireStore();
+      expect(store.saveLastSession).toBe(true);
+    });
+
+    it('setSaveLastSession updates the ref and persists to DB', async () => {
+      const store = useQuestionnaireStore();
+      await store.setSaveLastSession(false);
+      expect(store.saveLastSession).toBe(false);
+      expect(dbMocks.setSetting).toHaveBeenCalledWith('save_last_session', 'false');
+    });
+
+    it('setSaveLastSession(true) persists true string to DB', async () => {
+      const store = useQuestionnaireStore();
+      await store.setSaveLastSession(true);
+      expect(store.saveLastSession).toBe(true);
+      expect(dbMocks.setSetting).toHaveBeenCalledWith('save_last_session', 'true');
+    });
+
+    it('init loads save_last_session setting from DB', async () => {
+      dbMocks.getSetting.mockResolvedValueOnce('false');
+      const store = useQuestionnaireStore();
+      await store.init();
+      expect(store.saveLastSession).toBe(false);
+      expect(dbMocks.getSetting).toHaveBeenCalledWith('save_last_session');
+    });
+
+    it('init keeps saveLastSession true when setting is not persisted (null)', async () => {
+      dbMocks.getSetting.mockResolvedValueOnce(null);
+      const store = useQuestionnaireStore();
+      await store.init();
+      expect(store.saveLastSession).toBe(true);
+    });
+
+    it('init skips historical pre-fill when saveLastSession is false', async () => {
+      dbMocks.getSetting.mockResolvedValueOnce('false');
+      dbMocks.loadAnswers.mockResolvedValue({});
+      dbMocks.loadHistoricalSessions.mockResolvedValue([{ id: 'hist-1' }]);
+      dbMocks.loadSessionResponses.mockResolvedValue([
+        { question_id: '1a', category: 'General', answer_value: 9 }
+      ]);
+
+      const store = useQuestionnaireStore();
+      await store.init();
+
+      expect(store.answers).toEqual({});
+      expect(store.hasSavedSession).toBe(false);
+      expect(store.isHistoricalPreFill).toBe(false);
+      expect(dbMocks.loadHistoricalSessions).not.toHaveBeenCalled();
+    });
+
+    it('init auto-resumes in-progress session regardless of saveLastSession setting', async () => {
+      dbMocks.getSetting.mockResolvedValueOnce('false');
+      dbMocks.loadAnswers.mockResolvedValue({ '1a': 7 });
+      const store = useQuestionnaireStore();
+      await store.init();
+      expect(store.answers['1a']).toBe(7);
+      expect(store.hasSavedSession).toBe(true);
+      expect(store.isHistoricalPreFill).toBe(false);
     });
   });
 

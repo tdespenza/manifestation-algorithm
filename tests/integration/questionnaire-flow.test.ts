@@ -18,7 +18,9 @@ const dbMocks = vi.hoisted(() => ({
   clearSession: vi.fn().mockResolvedValue(undefined),
   saveHistoricalSession: vi.fn().mockResolvedValue('hist-e2e-001'),
   loadHistoricalSessions: vi.fn().mockResolvedValue([]),
-  loadSessionResponses: vi.fn().mockResolvedValue([])
+  loadSessionResponses: vi.fn().mockResolvedValue([]),
+  getSetting: vi.fn().mockResolvedValue(null),
+  setSetting: vi.fn().mockResolvedValue(undefined)
 }));
 
 vi.mock('@/services/db', () => ({
@@ -29,7 +31,9 @@ vi.mock('@/services/db', () => ({
   clearSession: dbMocks.clearSession,
   saveHistoricalSession: dbMocks.saveHistoricalSession,
   loadHistoricalSessions: dbMocks.loadHistoricalSessions,
-  loadSessionResponses: dbMocks.loadSessionResponses
+  loadSessionResponses: dbMocks.loadSessionResponses,
+  getSetting: dbMocks.getSetting,
+  setSetting: dbMocks.setSetting
 }));
 
 // ── Helpers ──────────────────────────────────────────────────────────────────

@@ -4,6 +4,9 @@
   --white: #f8fdff;
   --deep-twilight: #0f0758;
   --dusty-grape: #6061a4;
+
+  /* Layout */
+  --navbar-height: 60px;
   --bg-gradient: linear-gradient(135deg, var(--true-cobalt) 0%, var(--deep-twilight) 100%);
   --success: #4caf50;
   --failure: #f44336;

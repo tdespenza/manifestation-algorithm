@@ -1,78 +1,16 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { check } from '@tauri-apps/plugin-updater';
-import { relaunch } from '@tauri-apps/plugin-process';
+import { useUpdateService } from '@/composables/useUpdateService';
 
-type UpdateState = 'idle' | 'available' | 'downloading' | 'ready' | 'error';
-
-const state = ref<UpdateState>('idle');
-const newVersion = ref('');
-const releaseNotes = ref('');
-const downloadProgress = ref(0);
-const errorMessage = ref('');
-const dismissed = ref(false);
-
-// Only runs inside the Tauri shell — not in a plain browser.
-const isTauri = () => typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
-
-onMounted(async () => {
-  if (!isTauri()) return;
-
-  // Small delay so it doesn't block app startup UI.
-  await new Promise(r => setTimeout(r, 3000));
-
-  try {
-    const update = await check();
-    if (!update) return;
-
-    newVersion.value = update.version;
-    releaseNotes.value = update.body ?? '';
-    state.value = 'available';
-  } catch (err) {
-    // Silently swallow — updater failures must never break the app.
-    console.warn('[updater] check failed:', err);
-  }
-});
-
-async function install() {
-  if (!isTauri()) return;
-  state.value = 'downloading';
-  downloadProgress.value = 0;
-
-  try {
-    const update = await check();
-    if (!update) return;
-
-    let downloaded = 0;
-    let total = 0;
-
-    await update.downloadAndInstall(event => {
-      if (event.event === 'Started') {
-        total = event.data.contentLength ?? 0;
-      } else if (event.event === 'Progress') {
-        downloaded += event.data.chunkLength;
-        downloadProgress.value = total > 0 ? Math.round((downloaded / total) * 100) : 0;
-      } else if (event.event === 'Finished') {
-        downloadProgress.value = 100;
-      }
-    });
-
-    state.value = 'ready';
-  } catch (err) {
-    errorMessage.value = String(err);
-    state.value = 'error';
-  }
-}
-
-async function restart() {
-  if (!isTauri()) return;
-  try {
-    await relaunch();
-  } catch {
-    // Fallback: let the user restart manually.
-    state.value = 'ready';
-  }
-}
+const {
+  state,
+  newVersion,
+  releaseNotes,
+  downloadProgress,
+  errorMessage,
+  dismissed,
+  restart,
+  dismiss
+} = useUpdateService();
 </script>
 
 <template>
@@ -84,21 +22,8 @@ async function restart() {
       role="status"
       aria-live="polite"
     >
-      <!-- Available -->
-      <template v-if="state === 'available'">
-        <span class="update-icon">🆕</span>
-        <span class="update-text">
-          <strong>Update available — v{{ newVersion }}</strong>
-          <span v-if="releaseNotes" class="update-notes">{{ releaseNotes }}</span>
-        </span>
-        <div class="update-actions">
-          <button class="btn-primary" @click="install">Update Now</button>
-          <button class="btn-dismiss" aria-label="Dismiss" @click="dismissed = true">✕</button>
-        </div>
-      </template>
-
-      <!-- Downloading -->
-      <template v-else-if="state === 'downloading'">
+      <!-- Downloading (auto-starts when update is found) -->
+      <template v-if="state === 'downloading'">
         <span class="update-icon">⬇️</span>
         <span class="update-text">
           <strong>Downloading update…</strong>
@@ -117,11 +42,13 @@ async function restart() {
         <span class="update-icon">✅</span>
         <span class="update-text">
           <strong>v{{ newVersion }} installed!</strong>
-          <span class="update-notes">Restart the app to apply the update.</span>
+          <span class="update-notes">{{
+            releaseNotes || 'Restart the app to apply the update.'
+          }}</span>
         </span>
         <div class="update-actions">
           <button class="btn-primary" @click="restart">Restart Now</button>
-          <button class="btn-dismiss" aria-label="Dismiss" @click="dismissed = true">✕</button>
+          <button class="btn-dismiss" aria-label="Dismiss" @click="dismiss">✕</button>
         </div>
       </template>
 
@@ -132,7 +59,7 @@ async function restart() {
           <strong>Update failed.</strong>
           <span class="update-notes">{{ errorMessage }}</span>
         </span>
-        <button class="btn-dismiss" aria-label="Dismiss" @click="dismissed = true">✕</button>
+        <button class="btn-dismiss" aria-label="Dismiss" @click="dismiss">✕</button>
       </template>
     </div>
   </Transition>

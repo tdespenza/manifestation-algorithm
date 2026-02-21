@@ -101,6 +101,30 @@ describe('Database Service', () => {
     expect(result).toBe('1700000000000');
   });
 
+  it('getSetting returns null when no row found', async () => {
+    mocks.select.mockResolvedValueOnce([]);
+    const result = await dbService.getSetting('save_last_session');
+    expect(result).toBeNull();
+    expect(mocks.select).toHaveBeenCalledWith(
+      expect.stringContaining('SELECT value FROM settings WHERE key'),
+      ['save_last_session']
+    );
+  });
+
+  it('getSetting returns the stored value when row exists', async () => {
+    mocks.select.mockResolvedValueOnce([{ value: 'false' }]);
+    const result = await dbService.getSetting('save_last_session');
+    expect(result).toBe('false');
+  });
+
+  it('setSetting inserts value into settings table', async () => {
+    await dbService.setSetting('save_last_session', 'true');
+    expect(mocks.execute).toHaveBeenCalledWith(
+      expect.stringContaining('INSERT OR REPLACE INTO settings'),
+      ['save_last_session', 'true']
+    );
+  });
+
   it('saveHistoricalSession inserts session and per-question responses', async () => {
     const answers: Record<string, number> = { '1a': 8, '1b': 6 };
     const id = await dbService.saveHistoricalSession(4800, answers, 90, 'test note');

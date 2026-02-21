@@ -77,6 +77,20 @@ export async function getLastActive(sessionId: string): Promise<string | null> {
   return null;
 }
 
+export async function getSetting(key: string): Promise<string | null> {
+  const db = await getDb();
+  const rows = await db.select<{ value: string }[]>('SELECT value FROM settings WHERE key = $1', [
+    key
+  ]);
+  if (rows.length > 0) return rows[0].value;
+  return null;
+}
+
+export async function setSetting(key: string, value: string): Promise<void> {
+  const db = await getDb();
+  await db.execute('INSERT OR REPLACE INTO settings (key, value) VALUES ($1, $2)', [key, value]);
+}
+
 function getCategory(
   questionId: string,
   qs: Question[] = questions,

@@ -22,6 +22,22 @@
         <h3 class="section-title">Data Management</h3>
         <div class="setting-item">
           <div class="setting-info">
+            <span class="setting-label">Save Last Session</span>
+            <span class="setting-desc"
+              >Pre-fill answers from your most recent completed session.</span
+            >
+          </div>
+          <button
+            class="btn-toggle"
+            :class="{ active: store.saveLastSession }"
+            aria-label="Toggle save last session"
+            @click="store.setSaveLastSession(!store.saveLastSession)"
+          >
+            {{ store.saveLastSession ? 'On' : 'Off' }}
+          </button>
+        </div>
+        <div class="setting-item">
+          <div class="setting-info">
             <span class="setting-label">Reset Progress</span>
             <span class="setting-desc">Delete all saved answers and start fresh.</span>
           </div>
@@ -185,6 +201,28 @@ async function doClear() {
 
 .btn-danger:hover {
   background-color: #dc2626;
+}
+
+.btn-toggle {
+  min-width: 56px;
+  padding: 0.5rem 1.1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: #f5f5f5;
+  color: #888;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+
+.btn-toggle.active {
+  background: var(--true-cobalt, #0a1f7d);
+  border-color: var(--true-cobalt, #0a1f7d);
+  color: #fff;
 }
 
 .setting-about {
