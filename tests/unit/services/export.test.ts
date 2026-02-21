@@ -99,6 +99,28 @@ describe('Export Service', () => {
     await expect(exportToCSV()).rejects.toThrow('No data to export');
   });
 
+  it('exportToCSV does NOT call writeTextFile when dialog is cancelled (save returns null)', async () => {
+    const { save } = await import('@tauri-apps/plugin-dialog');
+    const { writeTextFile } = await import('@tauri-apps/plugin-fs');
+    vi.mocked(save).mockResolvedValueOnce(null as any);
+
+    const sessions = [{ id: 's1', completed_at: '2023-06-15T12:00:00.000Z', total_score: 5000 }];
+    const responses = [
+      { session_id: 's1', question_id: 'q1', category: 'Health', answer_value: 8 }
+    ];
+    mocks.select.mockImplementation((query: string) => {
+      if (query.includes('_migrations')) return Promise.resolve([{ id: 1 }, { id: 2 }, { id: 3 }]);
+      if (query.includes('historical_sessions')) return Promise.resolve(sessions);
+      if (query.includes('historical_responses')) return Promise.resolve(responses);
+      return Promise.resolve([]);
+    });
+
+    await exportToCSV();
+
+    expect(save).toHaveBeenCalled();
+    expect(writeTextFile).not.toHaveBeenCalled();
+  });
+
   it('exportToCSV calls save and writeTextFile', async () => {
     const sessions: ExportSession[] = [
       { id: 's1', completed_at: '2023-06-15T12:00:00.000Z', total_score: 5000 }

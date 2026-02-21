@@ -81,4 +81,23 @@ describe('App.vue', () => {
     // Reset to home
     await router.push('/');
   });
+
+  it('onErrorCaptured logs the error, adds a toast, and returns false', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const wrapper = mount(App, { global: { plugins: [router] } });
+    await router.isReady();
+
+    // Access the registered onErrorCaptured hook via Vue 3 internals (instance.ec)
+    const instance = (wrapper.vm as any).$;
+    const hooks: Array<(err: unknown, vm: unknown, info: string) => boolean | undefined> =
+      instance.ec ?? [];
+    expect(hooks.length).toBeGreaterThan(0);
+
+    const testError = new Error('test-boundary-error');
+    const result = hooks[0](testError, wrapper.vm, 'render');
+
+    expect(consoleSpy).toHaveBeenCalledWith('Caught in App boundary:', testError);
+    expect(result).toBe(false);
+    consoleSpy.mockRestore();
+  });
 });

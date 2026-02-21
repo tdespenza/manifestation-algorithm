@@ -465,4 +465,33 @@ describe('Questionnaire.vue', () => {
     // submitSession should have been called (guard was NOT triggered)
     expect(store.submitSession).toHaveBeenCalled();
   });
+
+  it('submit shows error message when submitSession rejects', async () => {
+    const wrapper = makeWrapper();
+    const store = useQuestionnaireStore();
+    (store.submitSession as ReturnType<typeof vi.fn>).mockRejectedValue(
+      new Error('DB write failed')
+    );
+    await wrapper.find('.submit-button').trigger('click');
+    await flushPromises();
+    const errorEl = wrapper.find('.error-hint');
+    expect(errorEl.exists()).toBe(true);
+    expect(errorEl.text()).toContain('Failed to save session:');
+  });
+
+  it('submit is a no-op when already submitting (isSubmitting guard)', async () => {
+    const wrapper = makeWrapper();
+    const store = useQuestionnaireStore();
+
+    // Set the local isSubmitting ref through the component's public proxy
+    // (the proxy has a setter that delegates to the underlying Ref's .value)
+    (wrapper.vm as any).isSubmitting = true;
+    await wrapper.vm.$nextTick();
+
+    // Call submit() directly — trigger('click') is swallowed by the disabled button
+    await (wrapper.vm as any).submit();
+
+    // submitSession must NOT have been called — early return fired
+    expect(store.submitSession).not.toHaveBeenCalled();
+  });
 });

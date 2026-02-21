@@ -16,7 +16,9 @@ const dbMocks = vi.hoisted(() => ({
   getLastActive: vi.fn().mockResolvedValue(null),
   updateLastActive: vi.fn().mockResolvedValue(undefined),
   clearSession: vi.fn().mockResolvedValue(undefined),
-  saveHistoricalSession: vi.fn().mockResolvedValue('hist-e2e-001')
+  saveHistoricalSession: vi.fn().mockResolvedValue('hist-e2e-001'),
+  loadHistoricalSessions: vi.fn().mockResolvedValue([]),
+  loadSessionResponses: vi.fn().mockResolvedValue([])
 }));
 
 vi.mock('@/services/db', () => ({
