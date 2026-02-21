@@ -12,7 +12,9 @@ import {
   clearSession,
   saveHistoricalSession,
   loadHistoricalSessions,
-  loadSessionResponses
+  loadSessionResponses,
+  getSetting,
+  setSetting
 } from '../services/db';
 
 function getLeafQuestions(qs: Question[]): Question[] {
@@ -71,9 +73,17 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
   const hasSavedSession = ref(false);
   /** True when hasSavedSession was triggered by a historical pre-fill (not an in-progress session) */
   const isHistoricalPreFill = ref(false);
+  /** Whether to automatically pre-fill from the last completed session */
+  const saveLastSession = ref(true);
 
   async function init() {
     try {
+      // Load persisted setting before doing any session work
+      const settingVal = await getSetting('save_last_session');
+      if (settingVal !== null) {
+        saveLastSession.value = settingVal === 'true';
+      }
+
       const lastActive = await getLastActive(sessionId.value);
       if (lastActive) {
         const timeSince = Date.now() - Number.parseInt(lastActive, 10);
@@ -87,34 +97,36 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
       }
 
       const saved = await loadAnswers(sessionId.value);
-      hasSavedSession.value = Object.keys(saved).length > 0;
 
       // If no current session, try to load the most recent historical answers
-      // to pre-fill (per requirement: "questionnaire must remember the last scores")
+      // to pre-fill — only when the "save last session" setting is enabled
       if (Object.keys(saved).length === 0) {
-        const history = await loadHistoricalSessions();
-        if (history.length > 0) {
-          const lastSessionId = history[0].id; // Most recent due to DESC order
-          const lastResponses = await loadSessionResponses(lastSessionId);
-          const historyAnswers: Record<string, number> = {};
+        if (saveLastSession.value) {
+          const history = await loadHistoricalSessions();
+          if (history.length > 0) {
+            const lastSessionId = history[0].id; // Most recent due to DESC order
+            const lastResponses = await loadSessionResponses(lastSessionId);
+            const historyAnswers: Record<string, number> = {};
 
-          lastResponses.forEach(r => {
-            // Only load if valid question ID (in case questions changed)
-            if (allQuestions.some(q => q.id === r.question_id)) {
-              historyAnswers[r.question_id] = r.answer_value;
+            lastResponses.forEach(r => {
+              // Only load if valid question ID (in case questions changed)
+              if (allQuestions.some(q => q.id === r.question_id)) {
+                historyAnswers[r.question_id] = r.answer_value;
+              }
+            });
+
+            if (Object.keys(historyAnswers).length > 0) {
+              answers.value = historyAnswers;
+              hasSavedSession.value = true;
+              isHistoricalPreFill.value = true;
             }
-          });
-
-          if (Object.keys(historyAnswers).length > 0) {
-            answers.value = historyAnswers;
-            // Show the ResumeDialog so the user can choose to continue from
-            // their last scores OR start completely blank (Start Fresh).
-            hasSavedSession.value = true;
-            isHistoricalPreFill.value = true;
           }
         }
       } else {
+        // In-progress session found — auto-resume without a dialog
         answers.value = saved;
+        hasSavedSession.value = true;
+        isHistoricalPreFill.value = false;
       }
 
       await updateLastActive(sessionId.value);
@@ -137,6 +149,12 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
     hasSavedSession.value = false;
     isHistoricalPreFill.value = false;
     await updateLastActive(sessionId.value);
+  }
+
+  /** Persist and update the "save last session" setting */
+  async function setSaveLastSession(value: boolean) {
+    saveLastSession.value = value;
+    await setSetting('save_last_session', value.toString());
   }
 
   async function setAnswer(questionId: string, value: number) {
@@ -199,9 +217,11 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
     currentIndex,
     hasSavedSession,
     isHistoricalPreFill,
+    saveLastSession,
     init,
     resumeSession,
     startFresh,
+    setSaveLastSession,
     goToNext,
     goToPrev,
     goToIndex,

@@ -113,10 +113,9 @@ export class QuestionnairePage {
     for (const slider of sliders) {
       await slider.fill(String(value));
       await slider.dispatchEvent('input');
-      await slider.dispatchEvent('change');
-      // Small pause to let the saving debounce run
-      await this.page.waitForTimeout(50);
     }
+    // Allow the reactive store to process all answers before proceeding
+    await this.page.waitForTimeout(100);
   }
 
   /** Submit the assessment (assumes all questions are already rated) */

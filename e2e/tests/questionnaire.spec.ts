@@ -187,14 +187,39 @@ test.describe('Questionnaire – submission', () => {
   });
 });
 
-test.describe('Questionnaire – resume dialog', () => {
-  test('shows resume dialog when a saved session exists', async ({ page, seedDB }) => {
-    // Seed a recent last_active so the session is NOT expired
+test.describe('Questionnaire – reset button', () => {
+  test.beforeEach(async ({ questionnairePage }) => {
+    await questionnairePage.goto();
+    await questionnairePage.switchToScrollMode();
+  });
+
+  test('reset button is visible in the questionnaire header', async ({ page }) => {
+    await expect(page.locator('.reset-btn')).toBeVisible();
+    await expect(page.locator('.reset-btn')).toHaveText('Reset');
+  });
+
+  test('clicking reset clears all answers', async ({ questionnairePage, page }) => {
+    // Rate a question then reset
+    const sliders = page.locator('.questions-list input[type="range"]');
+    const count = await sliders.count();
+    if (count > 0) {
+      await sliders.first().fill('8');
+      await page.waitForTimeout(100);
+    }
+    await page.locator('.reset-btn').click();
+    await page.waitForTimeout(200);
+    // After reset, the questionnaire is still visible
+    await expect(page.locator('.questionnaire')).toBeVisible();
+    // Progress shows 0% after reset
+    await expect(page.locator('.progress-text')).toContainText('0%');
+  });
+
+  test('questionnaire loads without a resume dialog on startup', async ({ page, seedDB }) => {
+    // Even with a seeded session, there is no blocking resume dialog
     const session_id = 'e2e-test-session';
     await page.goto('/');
     await page.locator('.questionnaire').waitFor({ timeout: 10_000 });
 
-    // Seed settings AFTER page load so the mock DB has it
     await seedDB({
       questionnaire_responses: [
         { session_id, question_number: '1a', answer_value: 7 },
@@ -204,13 +229,13 @@ test.describe('Questionnaire – resume dialog', () => {
       ],
     });
 
-    // Reload so store.init() picks up the seeded data
     await page.reload();
     await page.locator('.questionnaire').waitFor({ timeout: 10_000 });
 
-    // Not guaranteed without real DB implementation in mock, but the UI path is tested
-    // We at minimum verify the questionnaire renders
+    // No blocking resume modal — the questionnaire renders directly
     await expect(page.locator('.questionnaire')).toBeVisible();
+    // No resume dialog stub or overlay blocking the UI
+    await expect(page.locator('.resume-dialog')).not.toBeVisible();
   });
 });
 
@@ -258,3 +283,46 @@ test.describe('Questionnaire – keyboard navigation', () => {
     }
   });
 });
+
+test.describe('Questionnaire – sticky header', () => {
+  test.beforeEach(async ({ questionnairePage }) => {
+    await questionnairePage.goto();
+    await questionnairePage.switchToScrollMode();
+  });
+
+  test('sticky header stays below the navbar after scrolling', async ({ page }) => {
+    // Scroll down so the header sticks
+    await page.evaluate(() => window.scrollBy(0, 300));
+    await page.waitForTimeout(100);
+
+    const header = page.locator('.header').first();
+    await expect(header).toBeVisible();
+
+    // The header's top edge must be at or below the navbar bottom (60 px).
+    // getBoundingClientRect().top gives the distance from the viewport top.
+    const top = await header.evaluate(
+      (el: HTMLElement) => el.getBoundingClientRect().top,
+    );
+
+    // After scrolling, a sticky element with top: 60px should have its top
+    // edge at approximately 60 px (the navbar height), NOT at 0.
+    expect(top).toBeGreaterThanOrEqual(50); // allow ±10 px for sub-pixel rendering and Mobile Safari DPR
+  });
+
+  test('sticky header is never hidden behind the navbar (top > 0)', async ({ page }) => {
+    await page.evaluate(() => window.scrollBy(0, 500));
+    await page.waitForTimeout(100);
+
+    const header = page.locator('.header').first();
+    await expect(header).toBeVisible();
+
+    const top = await header.evaluate(
+      (el: HTMLElement) => el.getBoundingClientRect().top,
+    );
+
+    // The header must NEVER be at top: 0 — that would mean it scrolls under
+    // the navbar (which has z-index: 100 and sticks at 0 itself).
+    expect(top).toBeGreaterThan(0);
+  });
+});
+

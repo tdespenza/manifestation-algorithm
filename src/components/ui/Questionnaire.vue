@@ -1,12 +1,4 @@
 <template>
-  <!-- Resume Dialog -->
-  <ResumeDialog
-    v-if="store.hasSavedSession"
-    :is-historical="store.isHistoricalPreFill"
-    @resume="store.resumeSession()"
-    @fresh="store.startFresh()"
-  />
-
   <div ref="containerRef" class="questionnaire" tabindex="-1" @keydown="handleGlobalKey">
     <!-- Sticky Header -->
     <div class="header">
@@ -14,6 +6,7 @@
         <div class="save-indicator" :class="{ saving: isSaving, saved: !isSaving }">
           {{ isSaving ? 'Saving...' : 'Saved' }}
         </div>
+        <button class="reset-btn" @click="store.startFresh()">Reset</button>
       </div>
 
       <!-- Progress bar -->
@@ -109,7 +102,6 @@ import { questions as allTopLevelQuestions } from '../../data/questions';
 import { getMaxPossibleScore } from '../../services/scoring';
 import type { Question } from '../../types';
 import QuestionItem from './QuestionItem.vue';
-import ResumeDialog from './ResumeDialog.vue';
 
 const store = useQuestionnaireStore();
 const router = useRouter();
@@ -197,7 +189,7 @@ onMounted(async () => {
   align-items: center;
   margin-bottom: 20px;
   position: sticky;
-  top: 0;
+  top: var(--navbar-height, 60px);
   background: rgba(255, 255, 255, 0.96);
   padding: 12px 20px;
   border-radius: 12px;
@@ -232,6 +224,27 @@ onMounted(async () => {
 
 .save-indicator.saved::before {
   background: #4caf50;
+}
+
+.reset-btn {
+  padding: 4px 12px;
+  font-size: 0.78em;
+  font-weight: 600;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background: #fff;
+  color: #666;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+
+.reset-btn:hover {
+  background: #fff3f3;
+  color: #d32f2f;
+  border-color: #d32f2f;
 }
 
 @keyframes pulse {

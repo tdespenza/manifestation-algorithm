@@ -183,6 +183,25 @@ export const TAURI_MOCK_SCRIPT = String.raw`
         return memDB._mockUpdate || null;
       }
 
+      case 'plugin:updater|download_and_install': {
+        // 'payload.onEvent' is the Channel object created by the SDK.
+        // Its 'id' property is the key under which window[id] holds the
+        // callback registered by Channel via transformCallback.
+        // Fire mock download-progress events so the composable transitions
+        // through downloading -> ready correctly in E2E tests.
+        const channel = payload.onEvent;
+        if (channel && channel.id && typeof window[channel.id] === 'function') {
+          const cb = window[channel.id];
+          cb({ index: 0, message: { event: 'Started', data: { contentLength: 1024 } } });
+          cb({ index: 1, message: { event: 'Progress', data: { chunkLength: 512 } } });
+          cb({ index: 2, message: { event: 'Progress', data: { chunkLength: 512 } } });
+          cb({ index: 3, message: { event: 'Finished', data: {} } });
+          // Signal end-of-channel so Channel cleans up its callback
+          cb({ index: 4, end: true });
+        }
+        return null;
+      }
+
       case 'plugin:resources|close': {
         // No-op: satisfies Resource.close() called by Update cleanup.
         return null;
@@ -207,6 +226,9 @@ export const TAURI_MOCK_SCRIPT = String.raw`
       const id = Math.random().toString(36).slice(2);
       window[id] = fn;
       return id;
+    },
+    unregisterCallback: (id) => {
+      delete window[id];
     },
     convertFileSrc: (src) => src,
     isTauri: true,

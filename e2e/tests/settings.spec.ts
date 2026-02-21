@@ -160,3 +160,26 @@ test.describe('Settings – sharing toggle', () => {
     await expect(checkbox).toBeChecked();
   });
 });
+
+test.describe('Settings – save last session toggle', () => {
+  test.beforeEach(async ({ settingsPage }) => {
+    await settingsPage.goto();
+  });
+
+  test('Save Last Session toggle is visible', async ({ page }) => {
+    await expect(page.locator('button.btn-toggle')).toBeVisible();
+  });
+
+  test('Save Last Session toggle shows "On" by default', async ({ page }) => {
+    const toggle = page.locator('button.btn-toggle');
+    await expect(toggle).toHaveText('On');
+    await expect(toggle).toHaveClass(/active/);
+  });
+
+  test('clicking the Save Last Session toggle switches it Off', async ({ page }) => {
+    const toggle = page.locator('button.btn-toggle');
+    await toggle.click();
+    await page.waitForTimeout(100);
+    await expect(toggle).toHaveText('Off');
+  });
+});

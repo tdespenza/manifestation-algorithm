@@ -21,14 +21,20 @@ vi.mock('@/services/db', () => ({
 // ── Store mock ────────────────────────────────────────────────────────────────
 const storeMocks = vi.hoisted(() => ({
   reset: vi.fn(),
-  init: vi.fn().mockResolvedValue(undefined)
+  init: vi.fn().mockResolvedValue(undefined),
+  setSaveLastSession: vi.fn().mockResolvedValue(undefined),
+  saveLastSession: true as boolean
 }));
 
 vi.mock('@/stores/questionnaire', () => ({
   useQuestionnaireStore: () => ({
     sessionId: 'test-session-id',
+    get saveLastSession() {
+      return storeMocks.saveLastSession;
+    },
     reset: storeMocks.reset,
-    init: storeMocks.init
+    init: storeMocks.init,
+    setSaveLastSession: storeMocks.setSaveLastSession
   })
 }));
 
@@ -94,5 +100,32 @@ describe('Settings.vue', () => {
     const wrapper = mount(Settings);
     await flushPromises();
     expect(wrapper.text()).toContain('v0.2.2');
+  });
+
+  it('renders the Save Last Session toggle', async () => {
+    const wrapper = mount(Settings);
+    await flushPromises();
+    const toggle = wrapper.find('button.btn-toggle');
+    expect(toggle.exists()).toBe(true);
+    expect(toggle.text()).toBe('On');
+    expect(toggle.classes()).toContain('active');
+  });
+
+  it('clicking the Save Last Session toggle calls store.setSaveLastSession', async () => {
+    const wrapper = mount(Settings);
+    await flushPromises();
+    const toggle = wrapper.find('button.btn-toggle');
+    await toggle.trigger('click');
+    expect(storeMocks.setSaveLastSession).toHaveBeenCalledWith(false);
+  });
+
+  it('Save Last Session toggle shows "Off" when saveLastSession is false', async () => {
+    storeMocks.saveLastSession = false;
+    const wrapper = mount(Settings);
+    await flushPromises();
+    const toggle = wrapper.find('button.btn-toggle');
+    expect(toggle.text()).toBe('Off');
+    expect(toggle.classes()).not.toContain('active');
+    storeMocks.saveLastSession = true; // restore for subsequent tests
   });
 });
