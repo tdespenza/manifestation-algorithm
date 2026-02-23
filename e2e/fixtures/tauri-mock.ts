@@ -10,7 +10,8 @@
  *   plugin:sql|execute → persists rows in memDB
  *   plugin:sql|select  → queries rows from memDB
  *   plugin:sql|close   → no-op
- *   plugin:opener|open_url → no-op
+ *   plugin:opener|open_url → records URL in memDB._openCalls
+ *   plugin:updater|check → returns memDB._mockUpdate or null
  */
 export const TAURI_MOCK_SCRIPT = String.raw`
 (function () {
@@ -24,6 +25,7 @@ export const TAURI_MOCK_SCRIPT = String.raw`
     historical_responses: [],      // { session_id, question_number, answer_value, recorded_at }
     _sharingEnabled: false,        // persisted sharing opt-in state
     _publishCalls: [],             // records each publish_result invocation for test assertions
+    _openCalls: [],                // records each plugin:opener|open_url invocation for test assertions
     // Optional fake update metadata returned by plugin:updater|check.
     // Tests can pre-set window.__tauriPresetUpdate (init script) or call
     // window.__setMockUpdate(data) at runtime.
@@ -164,6 +166,7 @@ export const TAURI_MOCK_SCRIPT = String.raw`
       }
 
       case 'plugin:opener|open_url': {
+        memDB._openCalls.push(payload.url ?? '');
         return null;
       }
 
@@ -195,30 +198,6 @@ export const TAURI_MOCK_SCRIPT = String.raw`
         // Returns null by default (no update). Tests can call
         // window.__setMockUpdate({ version, body, ... }) to simulate an update.
         return memDB._mockUpdate || null;
-      }
-
-      case 'plugin:updater|download_and_install': {
-        // 'payload.onEvent' is the Channel object created by the SDK.
-        // Its 'id' property is the key under which window[id] holds the
-        // callback registered by Channel via transformCallback.
-        // Fire mock download-progress events so the composable transitions
-        // through downloading -> ready correctly in E2E tests.
-        const channel = payload.onEvent;
-        if (channel && channel.id && typeof window[channel.id] === 'function') {
-          const cb = window[channel.id];
-          cb({ index: 0, message: { event: 'Started', data: { contentLength: 1024 } } });
-          cb({ index: 1, message: { event: 'Progress', data: { chunkLength: 512 } } });
-          cb({ index: 2, message: { event: 'Progress', data: { chunkLength: 512 } } });
-          cb({ index: 3, message: { event: 'Finished', data: {} } });
-          // Signal end-of-channel so Channel cleans up its callback
-          cb({ index: 4, end: true });
-        }
-        return null;
-      }
-
-      case 'plugin:resources|close': {
-        // No-op: satisfies Resource.close() called by Update cleanup.
-        return null;
       }
 
       default:
@@ -262,6 +241,7 @@ export const TAURI_MOCK_SCRIPT = String.raw`
     memDB.historical_responses = [];
     memDB._sharingEnabled = false;
     memDB._publishCalls = [];
+    memDB._openCalls = [];
     memDB._mockUpdate = null;
   };
 

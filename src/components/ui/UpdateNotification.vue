@@ -1,16 +1,7 @@
 <script setup lang="ts">
 import { useUpdateService } from '@/composables/useUpdateService';
 
-const {
-  state,
-  newVersion,
-  releaseNotes,
-  downloadProgress,
-  errorMessage,
-  dismissed,
-  restart,
-  dismiss
-} = useUpdateService();
+const { state, newVersion, releaseNotes, dismissed, openReleasePage, dismiss } = useUpdateService();
 </script>
 
 <template>
@@ -22,44 +13,19 @@ const {
       role="status"
       aria-live="polite"
     >
-      <!-- Downloading (auto-starts when update is found) -->
-      <template v-if="state === 'downloading'">
-        <span class="update-icon downloading-icon">⬇️</span>
-        <span class="update-text">
-          <strong>Downloading v{{ newVersion }}…</strong>
-          <span class="update-notes">Update is being installed in the background</span>
-        </span>
-        <div class="update-progress-wrap">
-          <div class="update-progress-bar">
-            <div class="update-progress-fill" :style="{ width: downloadProgress + '%' }" />
-          </div>
-          <span class="update-pct">{{ downloadProgress }}%</span>
-        </div>
-      </template>
-
-      <!-- Ready to restart -->
-      <template v-else-if="state === 'ready'">
+      <!-- New release available — send user to the download page -->
+      <template v-if="state === 'ready'">
         <span class="update-icon">🚀</span>
         <span class="update-text">
-          <strong>v{{ newVersion }} ready to launch!</strong>
+          <strong>v{{ newVersion }} is available!</strong>
           <span class="update-notes">{{
-            releaseNotes || 'Restart the app to apply the update.'
+            releaseNotes || 'Visit the release page to download the latest version.'
           }}</span>
         </span>
         <div class="update-actions">
-          <button class="btn-primary" @click="restart">Restart Now</button>
+          <button class="btn-primary" @click="openReleasePage">Get Update</button>
           <button class="btn-dismiss" aria-label="Dismiss" @click="dismiss">✕</button>
         </div>
-      </template>
-
-      <!-- Error -->
-      <template v-else-if="state === 'error'">
-        <span class="update-icon">⚠️</span>
-        <span class="update-text">
-          <strong>Update failed.</strong>
-          <span class="update-notes">{{ errorMessage }}</span>
-        </span>
-        <button class="btn-dismiss" aria-label="Dismiss" @click="dismiss">✕</button>
       </template>
     </div>
   </Transition>
