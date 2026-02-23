@@ -1,8 +1,8 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { check } from '@tauri-apps/plugin-updater';
-import { relaunch } from '@tauri-apps/plugin-process';
+import { openUrl } from '@tauri-apps/plugin-opener';
 
-export type UpdateState = 'idle' | 'downloading' | 'ready' | 'error';
+export type UpdateState = 'idle' | 'ready';
 
 /** Delay before the first update check (ms). Exported for test control. */
 export const INITIAL_DELAY_MS = 3_000;
@@ -10,18 +10,20 @@ export const INITIAL_DELAY_MS = 3_000;
 /** How often to re-check for updates after the first check (ms). */
 export const CHECK_INTERVAL_MS = 60 * 60 * 1_000; // 1 hour
 
+/** Release page URL — opened when the user clicks "Get Update". */
+export const RELEASE_PAGE_URL = 'https://tdespenza.github.io/manifestation-algorithm/';
+
 /** True when the page is running inside the Tauri shell. */
 export function isTauri(): boolean {
   return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 }
 
 /**
- * Background auto-update service.
+ * Background update-notification service.
  *
  * On mount it waits INITIAL_DELAY_MS, then calls checkForUpdates().
- * If an update is found it immediately begins downloading + installing it in
- * the background — no user click required.  Once ready the caller should show
- * a "Restart Now" prompt.
+ * When a new release is found it transitions to 'ready' state so the UI
+ * can show a banner directing users to the release download page.
  *
  * An hourly interval keeps looking for subsequent releases.
  */
@@ -29,21 +31,19 @@ export function useUpdateService() {
   const state = ref<UpdateState>('idle');
   const newVersion = ref('');
   const releaseNotes = ref('');
-  const downloadProgress = ref(0);
-  const errorMessage = ref('');
   const dismissed = ref(false);
 
   let initialTimer: ReturnType<typeof setTimeout> | null = null;
   let pollInterval: ReturnType<typeof setInterval> | null = null;
 
   /**
-   * Check for an update and, if one exists, download + install it automatically.
-   * Skips silently when already downloading or when not inside Tauri.
+   * Check for a new release. When one is found, transition to ready state.
+   * Skips silently when already ready or when not inside Tauri.
    */
   async function checkForUpdates(): Promise<void> {
     if (!isTauri()) return;
-    // Don't start a second download while one is in progress or already done.
-    if (state.value === 'downloading' || state.value === 'ready') return;
+    // Don't check again while already displaying an update notification.
+    if (state.value === 'ready') return;
 
     let update;
     try {
@@ -62,45 +62,27 @@ export function useUpdateService() {
 
     newVersion.value = update.version;
     releaseNotes.value = update.body ?? '';
-    state.value = 'downloading';
-    downloadProgress.value = 0;
-
-    try {
-      let downloaded = 0;
-      let total = 0;
-
-      await update.downloadAndInstall(event => {
-        if (event.event === 'Started') {
-          total = event.data.contentLength ?? 0;
-        } else if (event.event === 'Progress') {
-          downloaded += event.data.chunkLength;
-          downloadProgress.value = total > 0 ? Math.round((downloaded / total) * 100) : 0;
-        } else if (event.event === 'Finished') {
-          downloadProgress.value = 100;
-        }
-      });
-
-      state.value = 'ready';
-    } catch (dlErr) {
-      console.error(dlErr);
-      errorMessage.value = String(dlErr);
-      state.value = 'error';
-    }
+    state.value = 'ready';
   }
 
-  /** Relaunch the app to apply the installed update. */
-  async function restart(): Promise<void> {
-    if (!isTauri()) return;
+  /**
+   * Open the release page in the user's default browser so they can
+   * download the new version.  Uses the Tauri opener plugin inside the
+   * desktop shell and falls back to window.open() in a plain browser.
+   */
+  async function openReleasePage(): Promise<void> {
     try {
-      await relaunch();
+      if (isTauri()) {
+        await openUrl(RELEASE_PAGE_URL);
+      } else {
+        window.open(RELEASE_PAGE_URL, '_blank');
+      }
     } catch (err) {
       console.error(err);
-      // Fallback: keep the ready banner in case relaunch fails.
-      state.value = 'ready';
     }
   }
 
-  /** Dismiss the error or ready banner without restarting. */
+  /** Dismiss the update banner without visiting the release page. */
   function dismiss(): void {
     dismissed.value = true;
   }
@@ -122,10 +104,8 @@ export function useUpdateService() {
     state,
     newVersion,
     releaseNotes,
-    downloadProgress,
-    errorMessage,
     dismissed,
-    restart,
+    openReleasePage,
     dismiss,
     checkForUpdates
   };

@@ -17,7 +17,7 @@ body = """
 ## [Unreleased]
 {% endif %}\
 {% for group, commits in commits | group_by(attribute="group") %}\
-### {{ group | upper_first }}
+### {{ group }}
 {% for commit in commits %}\
 - {{ commit.message | upper_first }}\
 {% endfor %}
@@ -28,8 +28,18 @@ footer = ""
 
 [git]
 conventional_commits = true
-filter_unconventional = true
+# false = include commits that don't follow the conventional commit format
+filter_unconventional = false
 commit_parsers = [
+  # ── skip auto-generated noise ──────────────────────────────────────────
+  { message = "^chore\\(release\\)", skip = true },
+  { message = "^chore: auto-merge", skip = true },
+  { message = "^chore: sync version", skip = true },
+  { message = "^chore: update latest\\.json", skip = true },
+  { message = "\\[skip ci\\]", skip = true },
+  { message = "^Merge remote-tracking branch", skip = true },
+  { message = "^Merge branch", skip = true },
+  # ── group real commits ─────────────────────────────────────────────────
   { message = "^feat", group = "Features" },
   { message = "^fix", group = "Bug Fixes" },
   { message = "^perf", group = "Performance" },
@@ -37,12 +47,11 @@ commit_parsers = [
   { message = "^docs?", group = "Documentation" },
   { message = "^style", group = "Styling" },
   { message = "^test", group = "Testing" },
-  { message = "^revert", group = "Reverted" },
-  # skip noise
-  { message = "^chore\\(release\\)", skip = true },
-  { message = "^chore: auto-merge", skip = true },
-  { message = "^chore", skip = true },
-  { message = "^ci", skip = true },
+  { message = "^revert", group = "Reverted Changes" },
+  { message = "^chore", group = "Maintenance" },
+  { message = "^ci", group = "CI/CD" },
+  # ── catch-all for non-conventional commits ─────────────────────────────
+  { message = ".*", group = "Other Changes" },
 ]
 filter_commits = false
 tag_pattern = "v[0-9].*"

@@ -3,10 +3,10 @@
  *
  * The composable (useUpdateService) mounts in App.vue via UpdateNotification,
  * waits 3 seconds after startup, then calls check() from
- * @tauri-apps/plugin-updater.  When an update is found it immediately begins
- * downloading and installing it — no user click required.  The Tauri mock
- * (tauri-mock.ts) handles both `plugin:updater|check` and
- * `plugin:updater|download_and_install`, simulating instant downloads.
+ * @tauri-apps/plugin-updater.  When an update is found it shows a banner
+ * directing the user to the release page — no auto-download.  The Tauri mock
+ * (tauri-mock.ts) handles `plugin:updater|check` and records
+ * `plugin:opener|open_url` calls in memDB._openCalls.
  *
  * Fixture: `presetMockUpdate(data)` registers an addInitScript that calls
  * window.__setMockUpdate() so the update is present from the very first check.
@@ -44,7 +44,7 @@ test.describe('UpdateNotification', () => {
 
     await page.goto('/');
 
-    // Auto-download fires immediately after check; expect the ready banner.
+    // Check fires after 3 s; expect the ready banner.
     const banner = page.locator('.update-banner.ready');
     await expect(banner).toBeVisible({ timeout: BANNER_WAIT });
   });
@@ -73,7 +73,7 @@ test.describe('UpdateNotification', () => {
     await expect(page.locator('.update-notes')).toContainText('Performance improvements');
   });
 
-  test('"Restart Now" button is visible when update is ready', async ({
+  test('"Get Update" button is visible when update is ready', async ({
     page,
     presetMockUpdate,
   }) => {
@@ -82,10 +82,10 @@ test.describe('UpdateNotification', () => {
     await page.goto('/');
 
     await expect(page.locator('.update-banner.ready')).toBeVisible({ timeout: BANNER_WAIT });
-    await expect(page.locator('.update-banner .btn-primary')).toHaveText('Restart Now');
+    await expect(page.locator('.update-banner .btn-primary')).toHaveText('Get Update');
   });
 
-  test('"Update Now" button is not rendered (update downloads automatically)', async ({
+  test('"Get Update" button opens the release page', async ({
     page,
     presetMockUpdate,
   }) => {
@@ -94,7 +94,12 @@ test.describe('UpdateNotification', () => {
     await page.goto('/');
 
     await expect(page.locator('.update-banner.ready')).toBeVisible({ timeout: BANNER_WAIT });
-    await expect(page.locator('text=Update Now')).toHaveCount(0);
+    await page.locator('.update-banner .btn-primary').click();
+
+    const db = await page.evaluate(() =>
+      (window as unknown as { __tauriGetDB: () => Record<string, unknown> }).__tauriGetDB()
+    );
+    expect((db._openCalls as string[])[0]).toContain('tdespenza.github.io');
   });
 
   // ─── Dismiss ────────────────────────────────────────────────────────────
@@ -261,7 +266,7 @@ test.describe('UpdateNotification – comprehensive', () => {
     await expect(page.locator('.update-notes')).toContainText('Performance improvements');
   });
 
-  test('"Restart Now" button is visible when update is ready', async ({
+  test('"Get Update" button is visible when update is ready', async ({
     page,
     presetMockUpdate,
   }) => {
@@ -269,9 +274,9 @@ test.describe('UpdateNotification – comprehensive', () => {
 
     await page.goto('/');
 
-    // Mock auto-downloads instantly → banner shows 'Restart Now' in ready state.
+    // Check fires after 3 s → banner shows ‘Get Update’ in ready state.
     await expect(page.locator('.update-banner.ready')).toBeVisible({ timeout: BANNER_WAIT });
-    await expect(page.locator('.update-banner .btn-primary')).toHaveText('Restart Now');
+    await expect(page.locator('.update-banner .btn-primary')).toHaveText('Get Update');
   });
 
   // ─── Dismiss ────────────────────────────────────────────────────────────

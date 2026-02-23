@@ -9,9 +9,9 @@ vi.mock('@tauri-apps/plugin-updater', () => ({
   check: (...args: unknown[]) => mockCheck(...args)
 }));
 
-const mockRelaunch = vi.fn();
-vi.mock('@tauri-apps/plugin-process', () => ({
-  relaunch: (...args: unknown[]) => mockRelaunch(...args)
+const mockOpen = vi.fn();
+vi.mock('@tauri-apps/plugin-opener', () => ({
+  openUrl: (...args: unknown[]) => mockOpen(...args)
 }));
 
 // ── Import after mocks ──────────────────────────────────────────────────────
@@ -20,7 +20,8 @@ import {
   useUpdateService,
   isTauri,
   INITIAL_DELAY_MS,
-  CHECK_INTERVAL_MS
+  CHECK_INTERVAL_MS,
+  RELEASE_PAGE_URL
 } from '@/composables/useUpdateService';
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -51,10 +52,9 @@ function mountService(): { service: ServiceResult; wrapper: ReturnType<typeof mo
   return { service, wrapper };
 }
 
-/** Simulate an update object with configurable downloadAndInstall behaviour. */
+/** Simulate an update object returned by check(). */
 function makeUpdate(version = '1.9.0', body = 'Bug fixes') {
-  const downloadAndInstall = vi.fn();
-  return { version, body, downloadAndInstall };
+  return { version, body };
 }
 
 /** Advance fake timers AND flush all microtasks/promises. */
@@ -87,6 +87,10 @@ describe('exported constants', () => {
   it('CHECK_INTERVAL_MS is 3 600 000 (1 hour)', () => {
     expect(CHECK_INTERVAL_MS).toBe(60 * 60 * 1_000);
   });
+
+  it('RELEASE_PAGE_URL is the release page URL', () => {
+    expect(RELEASE_PAGE_URL).toBe('https://tdespenza.github.io/manifestation-algorithm/');
+  });
 });
 
 describe('useUpdateService()', () => {
@@ -94,7 +98,7 @@ describe('useUpdateService()', () => {
     vi.useFakeTimers();
     vi.clearAllMocks();
     mockCheck.mockResolvedValue(null);
-    mockRelaunch.mockResolvedValue(undefined);
+    mockOpen.mockResolvedValue(undefined);
     withTauri();
   });
 
@@ -110,8 +114,6 @@ describe('useUpdateService()', () => {
     expect(service.state.value).toBe('idle');
     expect(service.newVersion.value).toBe('');
     expect(service.releaseNotes.value).toBe('');
-    expect(service.downloadProgress.value).toBe(0);
-    expect(service.errorMessage.value).toBe('');
     expect(service.dismissed.value).toBe(false);
   });
 
@@ -152,19 +154,10 @@ describe('useUpdateService()', () => {
     expect(service.state.value).toBe('idle');
   });
 
-  // ── auto-download flow ────────────────────────────────────────────────
+  // ── update found flow ─────────────────────────────────────────────────
 
-  it('transitions idle → downloading → ready when update is found', async () => {
+  it('transitions idle → ready when a new release is found', async () => {
     const update = makeUpdate('2.0.0', 'Great release');
-    update.downloadAndInstall.mockImplementation(
-      (cb: (e: { event: string; data: Record<string, number> }) => void) => {
-        cb({ event: 'Started', data: { contentLength: 1000 } });
-        cb({ event: 'Progress', data: { chunkLength: 500 } });
-        cb({ event: 'Progress', data: { chunkLength: 500 } });
-        cb({ event: 'Finished', data: {} });
-        return Promise.resolve();
-      }
-    );
     mockCheck.mockResolvedValue(update);
 
     const { service } = mountService();
@@ -173,113 +166,16 @@ describe('useUpdateService()', () => {
     expect(service.state.value).toBe('ready');
     expect(service.newVersion.value).toBe('2.0.0');
     expect(service.releaseNotes.value).toBe('Great release');
-    expect(service.downloadProgress.value).toBe(100);
-  });
-
-  it('sets downloadProgress correctly from progress events', async () => {
-    let capturedCb: ((e: { event: string; data: Record<string, number> }) => void) | null = null;
-    const update = makeUpdate('2.1.0');
-    update.downloadAndInstall.mockImplementation(
-      (cb: (e: { event: string; data: Record<string, number> }) => void) => {
-        capturedCb = cb;
-        return new Promise(() => {}); // never resolves until we fire events
-      }
-    );
-    mockCheck.mockResolvedValue(update);
-
-    const { service } = mountService();
-    await tick();
-
-    capturedCb!({ event: 'Started', data: { contentLength: 200 } });
-    capturedCb!({ event: 'Progress', data: { chunkLength: 100 } });
-    await flushPromises();
-
-    expect(service.state.value).toBe('downloading');
-    expect(service.downloadProgress.value).toBe(50);
-  });
-
-  it('clamps progress to 0 during Progress events when contentLength is 0 (division guard)', async () => {
-    let capturedCb: ((e: { event: string; data: Record<string, number> }) => void) | null = null;
-    const update = makeUpdate('2.2.0');
-    update.downloadAndInstall.mockImplementation(
-      (cb: (e: { event: string; data: Record<string, number> }) => void) => {
-        capturedCb = cb;
-        return new Promise(() => {}); // never auto-resolves
-      }
-    );
-    mockCheck.mockResolvedValue(update);
-
-    const { service } = mountService();
-    await tick();
-
-    capturedCb!({ event: 'Started', data: { contentLength: 0 } });
-    capturedCb!({ event: 'Progress', data: { chunkLength: 100 } });
-    await flushPromises();
-
-    // With total=0 the guard `total > 0` is false — progress stays 0
-    expect(service.state.value).toBe('downloading');
-    expect(service.downloadProgress.value).toBe(0);
-  });
-
-  it('handles contentLength undefined via nullish coalescing (treated as 0)', async () => {
-    const update = makeUpdate('2.3.0');
-    update.downloadAndInstall.mockImplementation(
-      (cb: (e: { event: string; data: Record<string, number | undefined> }) => void) => {
-        cb({ event: 'Started', data: {} }); // no contentLength → undefined → ?? 0
-        cb({ event: 'Progress', data: { chunkLength: 50 } });
-        cb({ event: 'Finished', data: {} });
-        return Promise.resolve();
-      }
-    );
-    mockCheck.mockResolvedValue(update);
-
-    const { service } = mountService();
-    await tick();
-
-    expect(service.state.value).toBe('ready');
-  });
-
-  it('ignores unknown event types without crashing', async () => {
-    const update = makeUpdate('2.4.0');
-    update.downloadAndInstall.mockImplementation(
-      (cb: (e: { event: string; data: Record<string, number> }) => void) => {
-        cb({ event: 'Started', data: { contentLength: 100 } });
-        cb({ event: 'UnknownEvent', data: {} } as never);
-        cb({ event: 'Finished', data: {} });
-        return Promise.resolve();
-      }
-    );
-    mockCheck.mockResolvedValue(update);
-
-    const { service } = mountService();
-    await tick();
-
-    expect(service.state.value).toBe('ready');
   });
 
   it('uses empty string for releaseNotes when body is undefined', async () => {
-    const update = { version: '2.5.0', body: undefined, downloadAndInstall: vi.fn() };
-    update.downloadAndInstall.mockResolvedValue(undefined);
+    const update = { version: '2.5.0', body: undefined };
     mockCheck.mockResolvedValue(update);
 
     const { service } = mountService();
     await tick();
 
     expect(service.releaseNotes.value).toBe('');
-  });
-
-  // ── error state ───────────────────────────────────────────────────────
-
-  it('transitions to error state when downloadAndInstall throws', async () => {
-    const update = makeUpdate('3.0.0');
-    update.downloadAndInstall.mockRejectedValue(new Error('disk full'));
-    mockCheck.mockResolvedValue(update);
-
-    const { service } = mountService();
-    await tick();
-
-    expect(service.state.value).toBe('error');
-    expect(service.errorMessage.value).toBe('Error: disk full');
   });
 
   it('silently swallows check() errors — state stays idle, no error banner', async () => {
@@ -290,35 +186,12 @@ describe('useUpdateService()', () => {
 
     // check() errors are silently swallowed so they never disrupt the app
     expect(service.state.value).toBe('idle');
-    expect(service.errorMessage.value).toBe('');
   });
 
   // ── idempotency guards ─────────────────────────────────────────────────
 
-  it('skips a new check when already in downloading state', async () => {
-    let resolveDl!: () => void;
-    const update = makeUpdate('4.0.0');
-    update.downloadAndInstall.mockImplementation(() => new Promise<void>(res => (resolveDl = res)));
-    mockCheck.mockResolvedValue(update);
-
-    const { service } = mountService();
-    await tick(); // fires first check → state = 'downloading'
-
-    expect(service.state.value).toBe('downloading');
-
-    // Advance the poll interval — should NOT call check() again
-    vi.advanceTimersByTime(CHECK_INTERVAL_MS + 100);
-    await flushPromises();
-
-    // check() was called once (from first tick), NOT a second time
-    expect(mockCheck).toHaveBeenCalledTimes(1);
-
-    resolveDl();
-  });
-
   it('skips a new check when already in ready state', async () => {
     const update = makeUpdate('4.1.0');
-    update.downloadAndInstall.mockResolvedValue(undefined);
     mockCheck.mockResolvedValue(update);
 
     const { service } = mountService();
@@ -336,10 +209,9 @@ describe('useUpdateService()', () => {
 
   // ── polling ───────────────────────────────────────────────────────────
 
-  it('polls again after CHECK_INTERVAL_MS when not in ready/downloading state', async () => {
+  it('polls again after CHECK_INTERVAL_MS when not in ready state', async () => {
     // First check returns null, second returns an update
     const update = makeUpdate('5.0.0');
-    update.downloadAndInstall.mockResolvedValue(undefined);
     mockCheck.mockResolvedValueOnce(null).mockResolvedValueOnce(update);
 
     const { service } = mountService();
@@ -364,36 +236,28 @@ describe('useUpdateService()', () => {
     expect(service.dismissed.value).toBe(true);
   });
 
-  // ── restart ───────────────────────────────────────────────────────────
+  // ── openReleasePage ───────────────────────────────────────────────────
 
-  it('restart() calls relaunch() when inside Tauri', async () => {
+  it('openReleasePage() calls open(RELEASE_PAGE_URL) when inside Tauri', async () => {
     const { service } = mountService();
-    await service.restart();
-    expect(mockRelaunch).toHaveBeenCalled();
+    await service.openReleasePage();
+    expect(mockOpen).toHaveBeenCalledWith(RELEASE_PAGE_URL);
   });
 
-  it('restart() is a no-op when not inside Tauri', async () => {
-    const { service } = mountService();
+  it('openReleasePage() uses window.open() when not inside Tauri', async () => {
     withoutTauri();
-    await service.restart();
-    expect(mockRelaunch).not.toHaveBeenCalled();
+    const mockWindowOpen = vi.spyOn(window, 'open').mockImplementation(() => null);
+    const { service } = mountService();
+    await service.openReleasePage();
+    expect(mockWindowOpen).toHaveBeenCalledWith(RELEASE_PAGE_URL, '_blank');
+    mockWindowOpen.mockRestore();
   });
 
-  it('restart() stays in ready state when relaunch() throws', async () => {
-    mockRelaunch.mockRejectedValue(new Error('no process plugin'));
-    const update = makeUpdate('5.1.0');
-    update.downloadAndInstall.mockResolvedValue(undefined);
-    mockCheck.mockResolvedValue(update);
-
+  it('openReleasePage() handles open() throwing without crashing', async () => {
+    mockOpen.mockRejectedValue(new Error('opener unavailable'));
     const { service } = mountService();
-    await tick();
-    expect(service.state.value).toBe('ready');
-
-    await service.restart();
-    await flushPromises();
-
-    // Catch block sets state back to 'ready'
-    expect(service.state.value).toBe('ready');
+    await expect(service.openReleasePage()).resolves.toBeUndefined();
+    expect(service.state.value).toBe('idle');
   });
 
   // ── cleanup ───────────────────────────────────────────────────────────
