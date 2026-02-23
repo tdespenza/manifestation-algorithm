@@ -1,4 +1,4 @@
-import type { CategoryTrends } from '../services/db_trends';
+import type { CategoryTrends } from '../types';
 
 export interface FocusArea {
   category: string;
