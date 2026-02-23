@@ -4,17 +4,48 @@ import { v4 as uuidv4 } from 'uuid';
 import { questions } from '../data/questions';
 import type { Question } from '../types';
 
+// ─── Connection-pooling rationale ──────────────────────────────────────────
+//
+// **Short answer: pooling is already handled lower in the stack; we must NOT
+// add another pool here.**
+//
+// `@tauri-apps/plugin-sql` is backed by sqlx (Rust).  sqlx opens a
+// `SqlitePool` with a configurable max_connections (default 5 in the plugin).
+// Every call that crosses the Tauri IPC bridge already acquires a connection
+// from that pool and releases it when the query completes.
+//
+// Why adding JS-side pooling would be wrong for this app:
+//
+//  1. SQLite is an *embedded* file database — there is no network round-trip
+//     to amortise.  Connection "setup" costs ~microseconds, not milliseconds.
+//
+//  2. This is a **single-user desktop app**.  There is exactly one JS
+//     execution context (one Vue app), so there are no competing callers that
+//     would benefit from holding multiple warm connections.
+//
+//  3. All DB calls from the frontend are already serialised through Tauri's
+//     async IPC channel.  A JS-side pool would queue callers in JS *before*
+//     they even reach the Rust layer where the real pool lives.
+//
+//  4. WAL journal mode (set below) eliminates most write-contention between
+//     the JS frontend and the Rust network layer; `busy_timeout` covers the
+//     rare case where a write briefly blocks a read.
+//
+// The correct pattern here is the module-level singleton `db` below: open
+// once, reuse forever, let sqlx manage the underlying Rust-side pool.
+// ───────────────────────────────────────────────────────────────────────────
+
 let db: Database | null = null;
 
 export async function getDb(): Promise<Database> {
   if (!db) {
-    // Basic SQLite connection string.
-    // Usually 'sqlite:manifestation.db' creates the file in AppData directory managed by Tauri.
+    // 'sqlite:manifestation.db' resolves to the OS app-data directory managed
+    // by Tauri (e.g. ~/Library/Application Support/com.manifestation.algorithm.app/).
     db = await Database.load('sqlite:manifestation.db');
     // WAL mode allows concurrent reads alongside writes and is far less prone to
     // SQLITE_BUSY (code 5) errors.  The busy_timeout gives the writer up to
     // 5 seconds to retry before surfacing an error, which covers any momentary
-    // lock from another pool connection or in-flight query.
+    // lock contention between the JS frontend and the Rust network layer.
     await db.execute('PRAGMA journal_mode=WAL', []);
     await db.execute('PRAGMA busy_timeout=5000', []);
     await runMigrations(db);
@@ -130,7 +161,7 @@ export async function saveHistoricalSession(
   const entries = Object.entries(answers);
   if (entries.length > 0) {
     const values: string[] = [];
-    const params: any[] = [];
+    const params: (string | number)[] = [];
     let paramIdx = 1;
     for (const [qId, val] of entries) {
       const category = getCategory(qId);
@@ -163,6 +194,27 @@ export async function loadHistoricalSessions(): Promise<SessionSummary[]> {
   );
 }
 
+/** Load a paginated slice of historical sessions. */
+export async function loadHistoricalSessionsPage(
+  limit: number,
+  offset: number
+): Promise<SessionSummary[]> {
+  const db = await getDb();
+  return await db.select<SessionSummary[]>(
+    'SELECT * FROM historical_sessions ORDER BY completed_at DESC LIMIT $1 OFFSET $2',
+    [limit, offset]
+  );
+}
+
+/** Return the total number of saved historical sessions. */
+export async function countHistoricalSessions(): Promise<number> {
+  const db = await getDb();
+  const rows = await db.select<[{ total: number }]>(
+    'SELECT COUNT(*) as total FROM historical_sessions'
+  );
+  return rows[0]?.total ?? 0;
+}
+
 export interface DetailedResponse {
   question_id: string;
   category: string;
@@ -175,6 +227,22 @@ export async function loadSessionResponses(sessionId: string): Promise<DetailedR
     'SELECT question_id, category, answer_value FROM historical_responses WHERE session_id = $1',
     [sessionId]
   );
+}
+
+export interface SessionCategoryScore {
+  session_id: string;
+  category: string;
+  avg_score: number;
+}
+
+export async function loadAllSessionCategoryScores(): Promise<SessionCategoryScore[]> {
+  const db = await getDb();
+  return await db.select<SessionCategoryScore[]>(`
+    SELECT session_id, category, ROUND(AVG(answer_value), 2) as avg_score
+    FROM historical_responses
+    GROUP BY session_id, category
+    ORDER BY session_id
+  `);
 }
 
 export interface CategoryTrendPoint {

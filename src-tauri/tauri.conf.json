@@ -41,7 +41,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkLWtleS1wbGVhc2UtcmVwbGFjZQ==",
+      "pubkey": "RWSrn3Vba2C40pgXLz+K7c0BGpo9XjbpIGKmiO7p363ymPxROU6y5Kv2",
       "endpoints": [
         "https://tdespenza.github.io/manifestation-algorithm/latest.json"
       ]

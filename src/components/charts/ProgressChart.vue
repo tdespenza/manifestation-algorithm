@@ -1,13 +1,12 @@
 <template>
   <div class="progress-chart-wrapper">
     <ChartActions
-      target-id="progress-chart-print-area"
+      target-id="progress-chart-area"
       title="Progress Trend"
       :data="exportData"
       filename="progress_trend"
     />
-    <div id="progress-chart-print-area" class="chart-container">
-      <h2 class="print-only">Progress Trend</h2>
+    <div id="progress-chart-area" class="chart-container">
       <Line :data="chartData" :options="chartOptions" />
     </div>
   </div>
@@ -113,29 +112,14 @@ const exportData = computed(() => {
 <style scoped>
 .progress-chart-wrapper {
   width: 100%;
+  min-width: 0;
 }
 
 .chart-container {
+  position: relative;
   height: 400px;
   width: 100%;
+  min-width: 0;
   background: white;
-}
-
-.print-only {
-  display: none;
-}
-
-@media print {
-  .print-only {
-    display: block;
-    text-align: center;
-    margin-bottom: 20px;
-    color: var(--deep-twilight);
-  }
-  .chart-container {
-    height: 80vh !important;
-    width: 100vw !important;
-    padding: 20px;
-  }
 }
 </style>

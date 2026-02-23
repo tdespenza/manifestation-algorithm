@@ -1,7 +1,7 @@
 # Manifestation Algorithm
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-violet.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-518%20unit%20%7C%20785%20E2E-brightgreen)](#testing)
+[![Tests](https://img.shields.io/badge/tests-581%20unit%20%7C%20735%20E2E-brightgreen)](#testing)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
 [![Tauri](https://img.shields.io/badge/Tauri-2.x-orange)](https://tauri.app/)
 
@@ -15,13 +15,18 @@ A **privacy-first** desktop application for tracking and scoring personal develo
 
 - **40-Category Questionnaire** – Weighted 1–10 slider inputs mapping to a 10,000-point score model
 - **Score Quality Tiers** – Real-time label (Not Started → Starting Out → Building → Aligned → Manifesting) with progress-gated submit button
+- **Keyboard Shortcuts** – Press digit keys 1–0 to instantly set the current question rating while in step mode
 - **Local Encrypted Storage** – SQLite with WAL mode and automatic migration versioning
 - **Auto-Save** – Answers persist every keystroke; no data is lost on close
 - **Session Recovery** – Resume or discard an in-progress session on startup
-- **Dashboard & Statistics** – Score history charts, category breakdowns, and trend analysis
-- **Category Drill-Down** – Per-category sparklines and historical trend views
+- **Dashboard & Statistics** – Score history charts, category breakdowns, trend analysis with date-range filtering (7d / 30d / 90d / 1y / All Time / custom)
+- **Category Drill-Down** – Per-category sparklines with trend detection (improving / stable / declining)
+- **Chart Fullscreen** – Expand any chart to fullscreen with one click
+- **Chart Clipboard Copy** – Copy any chart as a PNG to the system clipboard
+- **Excel Export** – Export session history as a `.xlsx` spreadsheet
+- **CSV Export** – Export session history as a plain CSV file
 - **PDF Export** – Export your full score report as a PDF
-- **CSV Export** – Export session history as a spreadsheet
+- **HTML Export** – Export a chart and score as a self-contained HTML file
 - **Anonymous Network Ranking** – Opt-in P2P gossipsub network using libp2p for aggregate percentile rankings, with Ed25519 application-level signing (no node identity exposed)
 - **Auto-Update** – Background update download with in-app notification and one-click install
 - **Privacy-First** – Zero PII; category keys are validated to reject emails/URLs; all data stays on your machine unless you opt in
@@ -145,8 +150,13 @@ src/
 src-tauri/
   src/
     lib.rs        # Tauri commands + app setup
-    network.rs    # libp2p gossipsub node + aggregation
+    main.rs       # Entry point
     identity.rs   # Ed25519 user identity (persistent, separate from node ID)
+    network/      # libp2p gossipsub node + aggregation
+      mod.rs      # Public API surface
+      node.rs     # GossipSub behaviour + swarm lifecycle
+      types.rs    # Shared types (PeerStats, AggregatedScore)
+      utils.rs    # Helpers (topic hashing, peer ID formatting)
 ```
 
 ---

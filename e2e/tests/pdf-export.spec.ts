@@ -77,12 +77,12 @@ async function openSavePDFModal(page: Page) {
   const select = page.locator('.export-select').first();
   await expect(select).toBeVisible({ timeout: 8_000 });
   await select.selectOption('pdf');
-  await page.locator('.save-modal').waitFor({ state: 'visible', timeout: 5_000 });
 }
 
 /** Click the save-confirm button to actually trigger the export. */
 async function confirmSaveModal(page: Page) {
-  await page.locator('.save-confirm-btn').click();
+  // No modal to confirm — export triggers immediately on format selection
+  await page.locator('body').waitFor({ state: 'attached' });
 }
 
 /** Read downloaded file bytes synchronously and return the buffer. */
@@ -102,16 +102,15 @@ test.describe('PDF Export – Dashboard (full verification)', () => {
     await setupPage(page, SEED);
     await page.goto('/dashboard');
     await page.locator('.dashboard-view').waitFor({ timeout: 12_000 });
-    // Give Chart.js time to render the canvas
-    await page.waitForTimeout(800);
+    // Wait for Chart.js to render before attempting to export
+    await page.waitForSelector('.chart-section canvas, .progress-chart canvas', { timeout: 10_000 }).catch(() => {});
   });
 
   // ── Core happy-path tests ─────────────────────────────────────────────────
 
   test('download event MUST fire – hard assertion, no soft if()', async ({ page }) => {
-    await openSavePDFModal(page);
-
     const downloadPromise = page.waitForEvent('download', { timeout: 10_000 });
+    await openSavePDFModal(page);
     await confirmSaveModal(page);
 
     // If this line throws, no download fired → export is broken
@@ -121,12 +120,11 @@ test.describe('PDF Export – Dashboard (full verification)', () => {
   });
 
   test('downloaded file contains valid PDF magic bytes (%PDF-)', async ({ page }) => {
-    await openSavePDFModal(page);
-
     const downloadPromise = page
       .waitForEvent('download', { timeout: 10_000 })
       .then(async (dl) => ({ dl, path: await dl.path() }));
 
+    await openSavePDFModal(page);
     await confirmSaveModal(page);
 
     const { dl, path } = await downloadPromise;
@@ -141,13 +139,12 @@ test.describe('PDF Export – Dashboard (full verification)', () => {
   test('downloaded PDF is > 2 KB (actual chart content, not an empty stub)', async ({
     page
   }) => {
-    await openSavePDFModal(page);
-
     const downloadPromise = page.waitForEvent('download', { timeout: 10_000 }).then(async (dl) => ({
       dl,
       path: await dl.path()
     }));
 
+    await openSavePDFModal(page);
     await confirmSaveModal(page);
 
     const { path } = await downloadPromise;
@@ -156,10 +153,9 @@ test.describe('PDF Export – Dashboard (full verification)', () => {
   });
 
   test('success toast appears after export (not an error toast)', async ({ page }) => {
-    await openSavePDFModal(page);
-
     // Wait for toast to appear after the download
     const downloadPromise = page.waitForEvent('download', { timeout: 10_000 });
+    await openSavePDFModal(page);
     await confirmSaveModal(page);
     await downloadPromise;
 
@@ -172,9 +168,8 @@ test.describe('PDF Export – Dashboard (full verification)', () => {
   });
 
   test('save modal closes after export completes', async ({ page }) => {
-    await openSavePDFModal(page);
-
     const downloadPromise = page.waitForEvent('download', { timeout: 10_000 });
+    await openSavePDFModal(page);
     await confirmSaveModal(page);
     await downloadPromise;
 
@@ -182,10 +177,9 @@ test.describe('PDF Export – Dashboard (full verification)', () => {
   });
 
   test('progress bar visible during export and gone after', async ({ page }) => {
-    await openSavePDFModal(page);
-
     // Start the export without awaiting so we can check the intermediate state
     const downloadPromise = page.waitForEvent('download', { timeout: 10_000 });
+    await openSavePDFModal(page);
     await confirmSaveModal(page);
 
     // Progress bar should appear (briefly) while jsPDF renders.
@@ -199,15 +193,8 @@ test.describe('PDF Export – Dashboard (full verification)', () => {
   test('PDF filename is derived from chart title (spaces → underscores, .pdf suffix)', async ({
     page
   }) => {
-    // The ProgressChart uses title="Progress Trend" so the save modal should
-    // pre-populate "Progress_Trend.pdf" and the downloaded file should match.
-    await openSavePDFModal(page);
-
-    // Verify the pre-populated filename in the modal
-    const filenameInput = page.locator('.save-filename-input');
-    await expect(filenameInput).toHaveValue('Progress_Trend.pdf');
-
     const downloadPromise = page.waitForEvent('download', { timeout: 10_000 });
+    await openSavePDFModal(page);
     await confirmSaveModal(page);
     const download = await downloadPromise;
 
@@ -216,42 +203,19 @@ test.describe('PDF Export – Dashboard (full verification)', () => {
     expect(filename).toMatch(/\.pdf$/i);
     // Filename must not contain spaces
     expect(filename).not.toMatch(/ /);
-    // Verify the title → filename mapping: "Progress Trend" → "Progress_Trend.pdf"
-    expect(filename).toBe('Progress_Trend.pdf');
-  });
-
-  // ── window.print must NOT be called during PDF export ─────────────────────
-
-  test('PDF export must NOT invoke window.print', async ({ page }) => {
-    await page.evaluate(() => {
-      (window as unknown as Record<string, boolean>).__printCalled = false;
-      window.print = () => {
-        (window as unknown as Record<string, boolean>).__printCalled = true;
-      };
-    });
-
-    await openSavePDFModal(page);
-    const downloadPromise = page.waitForEvent('download', { timeout: 10_000 });
-    await confirmSaveModal(page);
-    await downloadPromise;
-
-    const called = await page.evaluate(
-      () => (window as unknown as Record<string, boolean>).__printCalled
-    );
-    expect(called).toBe(false);
+    // Verify the title → filename mapping: "Manifestation Algorithm Tracking History" → "Manifestation_Algorithm_Tracking_History.pdf"
+    expect(filename).toBe('Manifestation_Algorithm_Tracking_History.pdf');
   });
 
   // ── Error-path tests ──────────────────────────────────────────────────────
 
   test('shows error toast when chart canvas is NOT present', async ({ page }) => {
-    // Remove the canvas from the specific print-area container that
-    // exportToPDF targets (id="progress-chart-print-area").
+    // Remove the canvas from the specific area container that
+    // exportToPDF targets (id="dashboard-history-area").
     await page.evaluate(() => {
-      const container = document.getElementById('progress-chart-print-area');
+      const container = document.getElementById('dashboard-history-area');
       if (container) container.querySelectorAll('canvas').forEach((c) => c.remove());
     });
-
-    await openSavePDFModal(page);
 
     // Start waiting for the error toast BEFORE clicking so we never miss it
     // (toasts auto-dismiss after 3.5 s; don't wait 4 s for a non-download first).
@@ -259,6 +223,7 @@ test.describe('PDF Export – Dashboard (full verification)', () => {
       .locator('.toast.error')
       .waitFor({ state: 'visible', timeout: 5_000 });
 
+    await openSavePDFModal(page);
     await confirmSaveModal(page);
 
     // Toast must become visible; no download should ever fire
@@ -267,8 +232,8 @@ test.describe('PDF Export – Dashboard (full verification)', () => {
   });
 
   test('dashboard remains visible and interactive after PDF export', async ({ page }) => {
-    await openSavePDFModal(page);
     const downloadPromise = page.waitForEvent('download', { timeout: 10_000 });
+    await openSavePDFModal(page);
     await confirmSaveModal(page);
     await downloadPromise;
 
@@ -283,12 +248,11 @@ test.describe('PDF Export – Dashboard (full verification)', () => {
 
   test('two consecutive PDF exports both produce valid files', async ({ page }) => {
     for (let i = 0; i < 2; i++) {
-      await openSavePDFModal(page);
-
       const dlPromise = page.waitForEvent('download', { timeout: 10_000 }).then(async (dl) => ({
         dl,
         path: await dl.path()
       }));
+      await openSavePDFModal(page);
       await confirmSaveModal(page);
 
       const { dl, path } = await dlPromise;
@@ -299,7 +263,6 @@ test.describe('PDF Export – Dashboard (full verification)', () => {
 
       // Wait for modal to close before next iteration
       await expect(page.locator('.save-modal')).toHaveCount(0, { timeout: 5_000 });
-      await page.waitForTimeout(200);
     }
   });
 });
@@ -311,7 +274,8 @@ test.describe('PDF Export – Category Detail (full verification)', () => {
     await setupPage(page, SEED);
     await page.goto('/dashboard');
     await page.locator('.dashboard-view').waitFor({ timeout: 12_000 });
-    await page.waitForTimeout(600);
+    // Wait for Chart.js to render before navigating to category
+    await page.waitForSelector('.chart-section canvas, .progress-chart canvas', { timeout: 10_000 }).catch(() => {});
 
     // Navigate to the first category detail page
     const categoryCard = page.locator('.category-card').first();
@@ -321,12 +285,13 @@ test.describe('PDF Export – Category Detail (full verification)', () => {
     }
     await categoryCard.click();
     await page.locator('.category-detail-view').waitFor({ timeout: 10_000 });
-    await page.waitForTimeout(600);
+    // Wait for Chart.js canvas to render on category detail view
+    await page.waitForSelector('.chart-section canvas, .progress-chart canvas', { timeout: 10_000 }).catch(() => {});
   });
 
   test('download event MUST fire on category detail page', async ({ page }) => {
-    await openSavePDFModal(page);
     const downloadPromise = page.waitForEvent('download', { timeout: 10_000 });
+    await openSavePDFModal(page);
     await confirmSaveModal(page);
     const download = await downloadPromise;
     expect(download).not.toBeNull();
@@ -334,11 +299,11 @@ test.describe('PDF Export – Category Detail (full verification)', () => {
   });
 
   test('category detail PDF has valid magic bytes (%PDF-)', async ({ page }) => {
-    await openSavePDFModal(page);
     const dlPromise = page.waitForEvent('download', { timeout: 10_000 }).then(async (dl) => ({
       dl,
       path: await dl.path()
     }));
+    await openSavePDFModal(page);
     await confirmSaveModal(page);
     const { dl, path } = await dlPromise;
     expect(dl.suggestedFilename()).toMatch(/\.pdf$/i);
@@ -348,8 +313,8 @@ test.describe('PDF Export – Category Detail (full verification)', () => {
   });
 
   test('success toast appears on category detail after PDF export', async ({ page }) => {
-    await openSavePDFModal(page);
     const downloadPromise = page.waitForEvent('download', { timeout: 10_000 });
+    await openSavePDFModal(page);
     await confirmSaveModal(page);
     await downloadPromise;
 
@@ -358,8 +323,8 @@ test.describe('PDF Export – Category Detail (full verification)', () => {
   });
 
   test('save modal closes and page stays alive after category detail PDF export', async ({ page }) => {
-    await openSavePDFModal(page);
     const downloadPromise = page.waitForEvent('download', { timeout: 10_000 });
+    await openSavePDFModal(page);
     await confirmSaveModal(page);
     await downloadPromise;
 

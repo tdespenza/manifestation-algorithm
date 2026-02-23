@@ -2,176 +2,106 @@
 import { onMounted, computed, ref } from 'vue';
 import { useHistoryStore } from '../stores/history';
 import { useToast } from '../composables/useToast';
+import { useDateFilter } from '../composables/useDateFilter';
+import { useSessionSelection } from '../composables/useSessionSelection';
+import { loadAllSessionCategoryScores, type SessionCategoryScore } from '../services/db';
 import ProgressChart from '../components/charts/ProgressChart.vue';
+import ChartActions from '../components/charts/ChartActions.vue';
 import CategoryCard from '../components/dashboard/CategoryCard.vue';
+import DateRangeSelector from '../components/dashboard/DateRangeSelector.vue';
 import StatsPanel from '../components/dashboard/StatsPanel.vue';
 import NetworkRanking from '../components/dashboard/NetworkRanking.vue';
+import FocusAreas from '../components/dashboard/FocusAreas.vue';
+import SessionList from '../components/dashboard/SessionList.vue';
+import { useQuestionnaireStore } from '../stores/questionnaire';
 import ConfirmDialog from '../components/ui/ConfirmDialog.vue';
-import { exportToCSV } from '../services/export';
 
 const historyStore = useHistoryStore();
+const questionnaireStore = useQuestionnaireStore();
 const { addToast } = useToast();
 const isLoading = computed(() => historyStore.isLoading);
 const rawSessions = computed(() => historyStore.sessions);
 const rawTrends = computed(() => historyStore.trends);
+const hasMoreSessions = computed(() => historyStore.hasMore);
+const isLoadingMore = computed(() => historyStore.isLoadingMore);
 
-const selectedRange = ref('30d'); // Default to 30 days
-const ranges = [
-  { label: '7 Days', value: '7d' },
-  { label: '30 Days', value: '30d' },
-  { label: '90 Days', value: '90d' },
-  { label: '1 Year', value: '1y' },
-  { label: 'All Time', value: 'all' }
-];
+// ── Date filter ───────────────────────────────────────────────────────────────
+const { selectedRange, customStart, customEnd, todayStr, ranges, selectPreset, sessions, trends } =
+  useDateFilter(rawSessions, rawTrends);
 
-// ── Selection state ──────────────────────────────────────────────────────────
-const selectedIds = ref<Set<string>>(new Set());
-const selectionMode = ref(false);
-const isDeleting = ref(false);
-
-const selectedCount = computed(() => selectedIds.value.size);
-const allSelected = computed(
-  () => sessions.value.length > 0 && selectedIds.value.size === sessions.value.length
+// ── Selection / delete ────────────────────────────────────────────────────────
+const {
+  selectedIds,
+  selectionMode,
+  isDeleting,
+  selectedCount,
+  allSelected,
+  confirmVisible,
+  confirmTitle,
+  confirmMessage,
+  onConfirmed,
+  onCancelled,
+  enterSelectionMode,
+  exitSelectionMode,
+  toggleSelect,
+  toggleSelectAll,
+  handleDeleteSession,
+  handleDeleteSelected
+} = useSessionSelection(
+  sessions,
+  (id: string) => historyStore.deleteSession(id),
+  (ids: string[]) => historyStore.deleteSessions(ids),
+  addToast
 );
-
-// ── Confirmation dialog state ─────────────────────────────────────────────────
-const confirmVisible = ref(false);
-const confirmTitle = ref('');
-const confirmMessage = ref('');
-const confirmAction = ref<(() => Promise<void>) | null>(null);
-
-function showConfirm(title: string, message: string, action: () => Promise<void>) {
-  confirmTitle.value = title;
-  confirmMessage.value = message;
-  confirmAction.value = action;
-  confirmVisible.value = true;
-}
-
-async function onConfirmed() {
-  confirmVisible.value = false;
-  if (confirmAction.value) await confirmAction.value();
-}
-
-function onCancelled() {
-  confirmVisible.value = false;
-  confirmAction.value = null;
-}
-
-function enterSelectionMode() {
-  selectionMode.value = true;
-}
-
-function exitSelectionMode() {
-  selectionMode.value = false;
-  selectedIds.value = new Set();
-}
-
-function toggleSelect(id: string) {
-  const updated = new Set(selectedIds.value);
-  if (updated.has(id)) updated.delete(id);
-  else updated.add(id);
-  selectedIds.value = updated;
-}
-
-function toggleSelectAll() {
-  if (allSelected.value) {
-    selectedIds.value = new Set();
-  } else {
-    selectedIds.value = new Set(sessions.value.map(s => s.id));
-  }
-}
-
-async function doDeleteSession(id: string) {
-  isDeleting.value = true;
-  try {
-    await historyStore.deleteSession(id);
-    const updated = new Set(selectedIds.value);
-    updated.delete(id);
-    selectedIds.value = updated;
-    addToast('Session deleted', 'success');
-  } catch {
-    addToast('Failed to delete session', 'error');
-  } finally {
-    isDeleting.value = false;
-  }
-}
-
-function handleDeleteSession(id: string) {
-  showConfirm(
-    'Delete Session',
-    'Are you sure you want to permanently delete this session? This cannot be undone.',
-    () => doDeleteSession(id)
-  );
-}
-
-async function doDeleteSelected(ids: string[]) {
-  isDeleting.value = true;
-  try {
-    await historyStore.deleteSessions(ids);
-    exitSelectionMode();
-    addToast(`Deleted ${ids.length} session${ids.length === 1 ? '' : 's'}`, 'success');
-  } catch {
-    addToast('Failed to delete sessions', 'error');
-  } finally {
-    isDeleting.value = false;
-  }
-}
-
-function handleDeleteSelected() {
-  if (selectedIds.value.size === 0) return;
-  const ids = [...selectedIds.value];
-  const count = ids.length;
-  showConfirm(
-    `Delete ${count} Session${count === 1 ? '' : 's'}`,
-    `Are you sure you want to permanently delete ${count === 1 ? 'this session' : `these ${count} sessions`}? This cannot be undone.`,
-    () => doDeleteSelected(ids)
-  );
-}
-
-const getCutoffDate = () => {
-  const now = new Date();
-  if (selectedRange.value === '7d') now.setDate(now.getDate() - 7);
-  else if (selectedRange.value === '30d') now.setDate(now.getDate() - 30);
-  else if (selectedRange.value === '90d') now.setDate(now.getDate() - 90);
-  else if (selectedRange.value === '1y') now.setFullYear(now.getFullYear() - 1);
-  else return null; // All time
-  return now;
-};
-
-const sessions = computed(() => {
-  const cutoff = getCutoffDate();
-  if (!cutoff) return rawSessions.value;
-  return rawSessions.value.filter(s => new Date(s.completed_at) >= cutoff);
-});
-
-const trends = computed(() => {
-  const cutoff = getCutoffDate();
-  if (!cutoff) return rawTrends.value;
-
-  const filtered: Record<string, (typeof rawTrends.value)[string]> = {};
-  for (const [cat, points] of Object.entries(rawTrends.value)) {
-    const p = points.filter(p => new Date(p.date) >= cutoff);
-    if (p.length > 0) {
-      filtered[cat] = p;
-    }
-  }
-  return filtered;
-});
 
 const categories = computed(() => {
   return Object.keys(trends.value).sort();
 });
 
-const exportData = async () => {
-  try {
-    await exportToCSV();
-  } catch (e) {
-    alert('Export failed: ' + e);
-  }
-};
+// session_id → { category → avg_score }
+const categoryScoresBySession = ref<Record<string, Record<string, number>>>({});
 
-onMounted(() => {
+const exportData = computed(() => {
+  // Collect every category that appears in the filtered sessions
+  const filteredIds = new Set(sessions.value.map(s => s.id));
+  const catSet = new Set<string>();
+  for (const [sid, cats] of Object.entries(categoryScoresBySession.value)) {
+    if (filteredIds.has(sid)) {
+      Object.keys(cats).forEach(c => catSet.add(c));
+    }
+  }
+  const sortedCats = [...catSet].sort();
+
+  return [...sessions.value].reverse().map(s => {
+    const dt = new Date(s.completed_at);
+    const catScores = categoryScoresBySession.value[s.id] ?? {};
+    const row: Record<string, string | number> = {
+      Date: dt.toLocaleDateString(),
+      Time: dt.toLocaleTimeString(),
+      'Total Score': s.total_score,
+      'Duration (min)': Math.round(s.duration_seconds / 60),
+      Notes: s.notes ?? ''
+    };
+    for (const cat of sortedCats) {
+      row[cat] = catScores[cat] ?? '';
+    }
+    return row;
+  });
+});
+
+onMounted(async () => {
   historyStore.fetchHistory();
+  try {
+    const rows: SessionCategoryScore[] = await loadAllSessionCategoryScores();
+    const map: Record<string, Record<string, number>> = {};
+    for (const row of rows) {
+      if (!map[row.session_id]) map[row.session_id] = {};
+      map[row.session_id][row.category] = row.avg_score;
+    }
+    categoryScoresBySession.value = map;
+  } catch (e) {
+    console.error('Failed to load category scores for export', e);
+  }
 });
 </script>
 
@@ -186,19 +116,27 @@ onMounted(() => {
       @cancel="onCancelled"
     />
     <div class="dashboard-header">
-      <h1>Manifestation History</h1>
+      <h1>Manifestation Algorithm Tracking History</h1>
       <p class="subtitle">Track your progress over time</p>
 
-      <div v-if="sessions.length > 0" class="controls-bar">
-        <div class="range-selector">
-          <label for="range-select">Range:</label>
-          <select id="range-select" v-model="selectedRange">
-            <option v-for="range in ranges" :key="range.value" :value="range.value">
-              {{ range.label }}
-            </option>
-          </select>
-        </div>
-        <button class="export-btn" @click="exportData">📥 Export CSV</button>
+      <div v-if="rawSessions.length > 0" class="controls-bar">
+        <ChartActions
+          target-id="dashboard-history-area"
+          title="Manifestation Algorithm Tracking History"
+          :data="exportData"
+          :disabled="sessions.length === 0"
+          filename="manifestation_history"
+        />
+        <DateRangeSelector
+          :model-value="selectedRange"
+          :ranges="ranges"
+          :custom-start="customStart"
+          :custom-end="customEnd"
+          :today-str="todayStr"
+          @update:model-value="selectPreset"
+          @update:custom-start="customStart = $event"
+          @update:custom-end="customEnd = $event"
+        />
       </div>
     </div>
 
@@ -208,7 +146,7 @@ onMounted(() => {
         <p>Loading your history…</p>
       </div>
 
-      <div v-else-if="sessions.length > 0" class="history-content">
+      <div v-else-if="sessions.length > 0" id="dashboard-history-area" class="history-content">
         <div class="top-row">
           <div class="stats-overview">
             <StatsPanel :sessions="sessions" />
@@ -219,6 +157,58 @@ onMounted(() => {
             <h2>Progress Trend</h2>
             <ProgressChart :sessions="sessions" />
           </div>
+        </div>
+
+        <!-- Goal progress (only when a target is set and there are sessions) -->
+        <div
+          v-if="questionnaireStore.goalScore !== null && sessions.length > 0"
+          class="goal-progress-panel"
+          role="region"
+          aria-label="Progress to goal"
+        >
+          <div class="goal-progress-header">
+            <span class="goal-progress-label">Progress to Goal</span>
+            <span class="goal-progress-values">
+              {{ Math.round(sessions[0].total_score).toLocaleString() }}
+              <span class="goal-progress-sep">/</span>
+              {{ questionnaireStore.goalScore!.toLocaleString() }}
+            </span>
+          </div>
+          <div
+            class="goal-bar-track"
+            role="progressbar"
+            :aria-valuenow="
+              Math.min(
+                100,
+                Math.round((sessions[0].total_score / questionnaireStore.goalScore!) * 100)
+              )
+            "
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            <div
+              class="goal-bar-fill"
+              :class="{ achieved: sessions[0].total_score >= questionnaireStore.goalScore! }"
+              :style="{
+                width:
+                  Math.min(
+                    100,
+                    Math.round((sessions[0].total_score / questionnaireStore.goalScore!) * 100)
+                  ) + '%'
+              }"
+            />
+          </div>
+          <p class="goal-bar-pct">
+            {{
+              Math.min(
+                100,
+                Math.round((sessions[0].total_score / questionnaireStore.goalScore!) * 100)
+              )
+            }}% of goal
+            <span v-if="sessions[0].total_score >= questionnaireStore.goalScore!" class="goal-badge"
+              >🎯 Goal Reached!</span
+            >
+          </p>
         </div>
 
         <div class="category-grid-section">
@@ -235,95 +225,42 @@ onMounted(() => {
           </div>
         </div>
 
-        <div class="recent-sessions">
-          <div class="recent-sessions-header">
-            <h2>Recent Sessions</h2>
-            <div class="sessions-header-actions">
-              <template v-if="selectionMode">
-                <button class="select-all-pill" @click="toggleSelectAll">
-                  {{ allSelected ? 'Deselect All' : 'Select All' }}
-                </button>
-                <button
-                  v-if="selectedCount > 0"
-                  class="delete-selected-btn-sm"
-                  :disabled="isDeleting"
-                  @click="handleDeleteSelected"
-                >
-                  {{ isDeleting ? 'Deleting…' : `Delete ${selectedCount}` }}
-                </button>
-                <button class="cancel-select-btn" @click="exitSelectionMode">Cancel</button>
-              </template>
-              <button v-else class="select-mode-btn" @click="enterSelectionMode">Select</button>
-            </div>
-          </div>
-          <div class="session-list">
-            <div
-              v-for="session in sessions"
-              :key="session.id"
-              class="session-card"
-              :class="{
-                selected: selectedIds.has(session.id),
-                'selection-mode': selectionMode
-              }"
-              @click="selectionMode ? toggleSelect(session.id) : undefined"
-            >
-              <!-- Check badge (selection mode only) -->
-              <div
-                v-if="selectionMode"
-                class="session-check"
-                :class="{ checked: selectedIds.has(session.id) }"
-              >
-                <span v-if="selectedIds.has(session.id)" class="check-symbol">✓</span>
-              </div>
+        <FocusAreas :trends="trends" class="focus-areas-section" />
 
-              <!-- Individual delete (normal mode, hover only) -->
-              <button
-                v-else
-                class="delete-btn-inline"
-                title="Delete session"
-                :disabled="isDeleting"
-                @click.stop="handleDeleteSession(session.id)"
-              >
-                ✕
-              </button>
-
-              <div class="session-date">
-                {{ new Date(session.completed_at).toLocaleDateString() }}
-                <span class="session-time">{{
-                  new Date(session.completed_at).toLocaleTimeString()
-                }}</span>
-              </div>
-              <div class="session-score" :class="{ high: session.total_score > 5000 }">
-                {{ Math.round(session.total_score).toLocaleString() }}
-              </div>
-              <div
-                class="session-score-label"
-                :class="{
-                  'label-high': session.total_score > 7000,
-                  'label-mid': session.total_score >= 4000 && session.total_score <= 7000,
-                  'label-low': session.total_score < 4000
-                }"
-              >
-                {{
-                  session.total_score > 7000
-                    ? 'Excellent'
-                    : session.total_score >= 4000
-                      ? 'Good'
-                      : 'Needs Work'
-                }}
-              </div>
-            </div>
-          </div>
-        </div>
+        <SessionList
+          :sessions="sessions"
+          :is-deleting="isDeleting"
+          :selection-mode="selectionMode"
+          :selected-ids="selectedIds"
+          :all-selected="allSelected"
+          :selected-count="selectedCount"
+          :has-more="hasMoreSessions"
+          :is-loading-more="isLoadingMore"
+          :remaining="historyStore.totalCount - rawSessions.length"
+          @delete-session="handleDeleteSession"
+          @delete-selected="handleDeleteSelected"
+          @toggle-select="toggleSelect"
+          @toggle-select-all="toggleSelectAll"
+          @enter-selection="enterSelectionMode"
+          @exit-selection="exitSelectionMode"
+          @load-more="historyStore.loadMoreSessions()"
+        />
       </div>
 
       <div v-else class="empty-state">
-        <div class="empty-icon">✨</div>
-        <h3 class="empty-title">No sessions yet</h3>
-        <p class="empty-desc">
-          Complete your first assessment to see your progress and trends here.
-        </p>
-        <router-link to="/" class="cta-button">Start First Assessment</router-link>
+        <template v-if="rawSessions.length > 0">
+          <div class="empty-icon">🔍</div>
+          <h3 class="empty-title">No sessions in this range</h3>
+          <p class="empty-desc">Try a wider range or select a different period.</p>
+        </template>
+        <template v-else>
+          <div class="empty-icon">✨</div>
+          <h3 class="empty-title">No sessions yet</h3>
+          <p class="empty-desc">
+            Complete your first assessment to see your progress and trends here.
+          </p>
+          <router-link to="/" class="cta-button">Start First Assessment</router-link>
+        </template>
       </div>
     </div>
   </div>
@@ -342,6 +279,10 @@ onMounted(() => {
   padding: 0 24px;
 }
 
+.dashboard-header h1 {
+  color: var(--color-heading, #2c3e50);
+}
+
 .dashboard-content {
   width: 100%;
   padding: 0 24px;
@@ -356,130 +297,8 @@ onMounted(() => {
   margin-top: 1.5rem;
 }
 
-.range-selector {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: white;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.range-selector select {
-  border: none;
-  background: transparent;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.export-btn {
-  padding: 8px 16px;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9em;
-  color: #555;
-  transition: all 0.2s;
-}
-
-.export-btn:hover {
-  background: #f8f9fa;
-  border-color: #ccc;
-}
-
-/* ── Recent sessions header ── */
-.recent-sessions-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-
-.recent-sessions-header h2 {
-  margin: 0;
-}
-
-.sessions-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.select-mode-btn {
-  padding: 6px 16px;
-  background: transparent;
-  border: 1.5px solid #bbb;
-  border-radius: 20px;
-  color: #555;
-  font-size: 0.85em;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-  letter-spacing: 0.03em;
-}
-
-.select-mode-btn:hover {
-  border-color: var(--true-cobalt, #0a1f7d);
-  color: var(--true-cobalt, #0a1f7d);
-}
-
-.select-all-pill {
-  padding: 5px 12px;
-  background: rgba(0, 71, 171, 0.08);
-  border: none;
-  border-radius: 20px;
-  color: var(--true-cobalt, #0a1f7d);
-  font-size: 0.82em;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.select-all-pill:hover {
-  background: rgba(0, 71, 171, 0.16);
-}
-
-.delete-selected-btn-sm {
-  padding: 5px 14px;
-  background: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 20px;
-  font-size: 0.82em;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.delete-selected-btn-sm:hover:not(:disabled) {
-  background: #b02a37;
-}
-
-.delete-selected-btn-sm:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.cancel-select-btn {
-  padding: 5px 12px;
-  background: transparent;
-  border: none;
-  color: #888;
-  font-size: 0.82em;
-  font-weight: 600;
-  cursor: pointer;
-  border-radius: 20px;
-  transition:
-    background 0.15s,
-    color 0.15s;
-}
-
-.cancel-select-btn:hover {
-  background: #f0f0f0;
-  color: #333;
+.controls-bar :deep(.chart-actions) {
+  margin-bottom: 0;
 }
 
 /* ── Session card redesign ── */
@@ -493,7 +312,7 @@ h1 {
 h2 {
   margin-top: 0;
   margin-bottom: 16px;
-  color: #2c3e50;
+  color: var(--color-heading, #2c3e50);
   font-size: 1.3rem;
 }
 
@@ -542,10 +361,18 @@ h2 {
   }
 }
 
+.chart-section {
+  min-width: 0;
+}
+
 .category-grid-section h2 {
   margin-bottom: 16px;
   margin-top: 0;
-  color: #2c3e50;
+  color: var(--color-heading, #2c3e50);
+}
+
+.focus-areas-section {
+  margin-top: 32px;
 }
 
 .category-grid {
@@ -577,175 +404,6 @@ h2 {
   .chart-section {
     padding: 28px 32px;
   }
-}
-
-.recent-sessions {
-  background: white;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
-
-.session-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 12px;
-}
-
-@media (min-width: 1400px) {
-  .session-list {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  }
-}
-
-.session-card {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 16px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s,
-    border-color 0.2s;
-  border-left: 4px solid var(--true-cobalt, #0a1f7d);
-  position: relative;
-}
-
-.session-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.session-card.selection-mode {
-  cursor: pointer;
-}
-
-.session-card.selection-mode:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
-}
-
-.session-card.selected {
-  border-left-color: #43a047;
-  background: #f6fff7;
-}
-
-/* Circular check badge */
-.session-check {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: 2px solid #ccc;
-  background: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    border-color 0.15s,
-    background 0.15s;
-  flex-shrink: 0;
-}
-
-.session-check.checked {
-  border-color: #43a047;
-  background: #43a047;
-}
-
-.check-symbol {
-  color: white;
-  font-size: 0.75rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
-/* Inline delete (hover-reveal, normal mode) */
-.delete-btn-inline {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: none;
-  border: none;
-  color: #d0d0d0;
-  font-size: 0.8rem;
-  cursor: pointer;
-  padding: 4px 6px;
-  border-radius: 4px;
-  opacity: 0;
-  transition:
-    opacity 0.15s,
-    color 0.15s,
-    background 0.15s;
-  line-height: 1;
-}
-
-.session-card:hover .delete-btn-inline {
-  opacity: 1;
-}
-
-.delete-btn-inline:hover:not(:disabled) {
-  color: #dc3545;
-  background: #fff0f0;
-}
-
-.delete-btn-inline:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.session-date {
-  display: flex;
-  flex-direction: row;
-  align-items: baseline;
-  gap: 8px;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.session-time {
-  font-size: 0.8em;
-  color: #888;
-}
-
-.session-score {
-  font-weight: 800;
-  font-size: 1.5em;
-  color: #555;
-}
-
-.session-score.high {
-  color: #4caf50;
-}
-
-.session-score-label {
-  font-size: 0.72em;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-top: 2px;
-  padding: 2px 8px;
-  border-radius: 10px;
-  display: inline-block;
-}
-
-.label-high {
-  background: #e8f5e9;
-  color: #2e7d32;
-}
-
-.label-mid {
-  background: #fff3e0;
-  color: #e65100;
-}
-
-.label-low {
-  background: #ffebee;
-  color: #c62828;
 }
 
 .empty-state {
@@ -822,5 +480,69 @@ h2 {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* ── Goal progress panel ──────────────────────────────────────────────────── */
+
+.goal-progress-panel {
+  margin: 1.5rem 0;
+  padding: 1.25rem 1.5rem;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+}
+
+.goal-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.goal-progress-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--true-cobalt, #0a1f7d);
+}
+
+.goal-progress-values {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.goal-progress-sep {
+  color: #9ca3af;
+  margin: 0 0.2em;
+}
+
+.goal-bar-track {
+  height: 10px;
+  background: #e5e7eb;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.goal-bar-fill {
+  height: 100%;
+  background: var(--true-cobalt, #0a1f7d);
+  border-radius: 99px;
+  transition: width 0.5s ease;
+}
+
+.goal-bar-fill.achieved {
+  background: #16a34a;
+}
+
+.goal-bar-pct {
+  margin-top: 0.45rem;
+  font-size: 0.82rem;
+  color: #6b7280;
+}
+
+.goal-badge {
+  margin-left: 0.5em;
+  font-weight: 600;
+  color: #16a34a;
 }
 </style>

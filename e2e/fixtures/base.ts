@@ -49,10 +49,15 @@ export type E2EFixtures = {
 
 /**
  * Base fixture that injects the Tauri mock script on every page load.
+ * Also pre-seeds onboarding_complete so tests never hit the onboarding modal.
  */
 export const test = base.extend<E2EFixtures>({
   // Auto-install Tauri mock on every new page
   page: async ({ page }, use) => {
+    // Must be injected BEFORE TAURI_MOCK_SCRIPT so memDB.settings picks it up.
+    await page.addInitScript(
+      `window.__tauriPresetSettings = [{ key: 'onboarding_complete', value: 'true' }];`
+    );
     await page.addInitScript(TAURI_MOCK_SCRIPT);
     await use(page);
   },

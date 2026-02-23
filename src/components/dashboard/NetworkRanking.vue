@@ -2,7 +2,9 @@
   <div class="network-stats-panel">
     <h3>Network Rankings</h3>
 
-    <div v-if="count === 0 && manifestations === 0" class="loading">Searching for peers...</div>
+    <div v-if="sharingEnabled && count === 0 && manifestations === 0" class="loading">
+      Searching for peers...
+    </div>
 
     <div v-else class="stats-grid">
       <div class="stat-box primary">
@@ -64,8 +66,16 @@ import { computed, onMounted } from 'vue';
 import { useNetwork } from '../../composables/useNetwork';
 import SharingToggle from '../ui/SharingToggle.vue';
 
-const { count, manifestations, avgScore, percentile90, categoryStats, bandwidthStats, init } =
-  useNetwork();
+const {
+  count,
+  manifestations,
+  avgScore,
+  percentile90,
+  categoryStats,
+  bandwidthStats,
+  sharingEnabled,
+  init
+} = useNetwork();
 
 const hasCategories = computed(() => Object.keys(categoryStats.value).length > 0);
 
@@ -208,7 +218,7 @@ h4 {
 .cat-name {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #2c3e50;
+  color: var(--color-heading, #2c3e50);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

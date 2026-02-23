@@ -17,6 +17,21 @@
     "updater:allow-check",
     "updater:allow-download-and-install",
     "process:default",
-    "process:allow-restart"
+    "process:allow-restart",
+    "dialog:default",
+    "fs:default",
+    "fs:allow-write-text-file",
+    "fs:allow-write-file",
+    "fs:allow-app-write",
+    "fs:allow-read-file",
+    "fs:allow-read-text-file",
+    "fs:allow-exists",
+    "fs:allow-mkdir",
+    "fs:allow-remove",
+    "fs:allow-rename",
+    "fs:allow-copy-file",
+    "fs:allow-stat",
+    "fs:allow-lstat",
+    "fs:allow-read-dir"
   ]
 }

@@ -2,6 +2,7 @@ import { ref } from 'vue';
 import { invoke } from '@tauri-apps/api/core';
 import type { UnlistenFn } from '@tauri-apps/api/event';
 import { listen } from '@tauri-apps/api/event';
+import { loadHistoricalSessions, loadSessionResponses } from '../services/db';
 
 export interface CategoryStats {
   avg: number;
@@ -40,11 +41,32 @@ let unlisten: UnlistenFn | null = null;
 export async function loadSharingState(): Promise<void> {
   try {
     sharingEnabled.value = await invoke<boolean>('get_network_sharing');
-  } catch {
+  } catch (err) {
+    console.error(err);
     // Leave sharingEnabled at its current value — do not force it back to false.
     // Overwriting it here would silently revert a user-enabled setting if the
     // backend is momentarily unavailable or if init() is called more than once.
   }
+}
+
+/**
+ * Fetch the most recently completed session from the local DB and publish it
+ * to the P2P network via invoke('publish_result'). A no-op when no sessions exist.
+ * Exported so it can be unit-tested independently.
+ */
+export async function publishLastSession(): Promise<void> {
+  const sessions = await loadHistoricalSessions();
+  if (sessions.length === 0) return;
+  const latest = sessions[0];
+  const responses = await loadSessionResponses(latest.id);
+  const categoryScores: Record<string, number> = {};
+  for (const r of responses) {
+    // Guard against rows seeded with a different column name in test fixtures
+    if (r.question_id !== undefined && r.question_id !== null) {
+      categoryScores[r.question_id] = r.answer_value;
+    }
+  }
+  await invoke('publish_result', { score: latest.total_score, categoryScores });
 }
 
 export async function toggleSharing(enabled: boolean): Promise<void> {
@@ -52,6 +74,15 @@ export async function toggleSharing(enabled: boolean): Promise<void> {
   sharingEnabled.value = enabled; // optimistic update so the UI reflects the user's intent immediately
   try {
     await invoke('set_network_sharing', { enabled });
+    // On opt-in, immediately publish the most recent session so the user
+    // contributes to the network the moment they enable sharing.
+    if (enabled) {
+      try {
+        await publishLastSession();
+      } catch (e) {
+        console.error('Failed to publish last session on sharing enable:', e);
+      }
+    }
   } catch (e) {
     sharingEnabled.value = previous; // revert on backend error
     console.error('Failed to update sharing setting:', e);
@@ -71,7 +102,10 @@ export function useNetwork() {
     }, 3000);
 
     try {
-      const initialCount = await invoke<number>('get_peer_count').catch(() => 0);
+      const initialCount = await invoke<number>('get_peer_count').catch(err => {
+        console.error(err);
+        return 0;
+      });
       count.value = initialCount;
 
       // Load and track sharing opt-in state

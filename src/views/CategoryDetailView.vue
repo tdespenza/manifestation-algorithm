@@ -8,13 +8,12 @@
     <div class="detail-content">
       <div class="chart-section">
         <ChartActions
-          target-id="category-chart-print-area"
+          target-id="category-chart-area"
           :title="`${category} Trend`"
           :data="exportData"
           :filename="`${category.replace(/\\s+/g, '_')}_trend`"
         />
-        <div id="category-chart-print-area" class="main-chart-container">
-          <h2 class="print-only">{{ category }} Trend</h2>
+        <div id="category-chart-area" class="main-chart-container">
           <Line :data="chartData" :options="chartOptions" />
         </div>
       </div>
@@ -161,25 +160,6 @@ const exportData = computed(() => {
 </script>
 
 <style scoped>
-.print-only {
-  display: none;
-}
-
-@media print {
-  .print-only {
-    display: block;
-    text-align: center;
-    margin-bottom: 20px;
-    color: var(--deep-twilight);
-  }
-  .main-chart-container {
-    height: 80vh !important;
-    width: 100vw !important;
-    padding: 20px;
-    background: white;
-  }
-}
-
 .category-detail-view {
   padding: 2rem;
   max-width: 1200px;

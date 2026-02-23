@@ -50,7 +50,7 @@ export function generateCSV(sessions: ExportSession[], responses: ExportResponse
       s.total_score,
       note,
       r.question_id,
-      `"${r.category.replaceAll('"', '""')}"`, // Handle quotes in category
+      `"${(r.category || '').replaceAll('"', '""')}"`, // Handle quotes in category
       r.answer_value
     ].join(',');
 
@@ -86,13 +86,38 @@ export async function exportToCSV(): Promise<void> {
   const maxDate = new Date(Math.max(...dates)).toISOString().split('T')[0];
   const defaultFilename = `manifestation_export_${minDate}_to_${maxDate}.csv`;
 
-  // 4. Save via Tauri dialog
-  const filePath = await save({
-    filters: [{ name: 'CSV', extensions: ['csv'] }],
-    defaultPath: defaultFilename
-  });
+  // 4. Save file
+  // Check if running in Tauri environment
+  // @ts-expect-error - Tauri injects this
+  const isTauri = typeof window !== 'undefined' && !!window.__TAURI_INTERNALS__;
 
-  if (filePath) {
-    await writeTextFile(filePath, csvContent);
+  if (isTauri) {
+    try {
+      const filePath = await save({
+        filters: [{ name: 'CSV', extensions: ['csv'] }],
+        defaultPath: defaultFilename
+      });
+
+      if (filePath) {
+        await writeTextFile(filePath, csvContent);
+      }
+    } catch (error) {
+      console.error('Tauri export failed, falling back to browser download:', error);
+      downloadBrowser(csvContent, defaultFilename);
+    }
+  } else {
+    downloadBrowser(csvContent, defaultFilename);
   }
+}
+
+function downloadBrowser(content: string, filename: string) {
+  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }

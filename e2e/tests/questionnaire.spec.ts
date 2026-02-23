@@ -335,3 +335,50 @@ test.describe('Questionnaire – sticky header', () => {
   });
 });
 
+// ── Network sharing publish_result integration ────────────────────────────────
+
+test.describe('Questionnaire – publish_result called when sharing is enabled', () => {
+  test.beforeEach(async ({ page }) => {
+    // Seed _sharingEnabled = true BEFORE the page loads so that App.vue's
+    // onMounted → loadSharingState() → get_network_sharing returns true.
+    await page.addInitScript((data: unknown) => {
+      (window as unknown as { __tauriSeedDB?: (d: unknown) => void }).__tauriSeedDB?.(data);
+    }, { _sharingEnabled: true });
+  });
+
+  test('submitting a session invokes publish_result with score and categoryScores', async ({
+    questionnairePage,
+    page,
+    getDB,
+  }) => {
+    await questionnairePage.goto();
+    await questionnairePage.switchToScrollMode();
+    await questionnairePage.rateAllAndSubmit();
+    await page.waitForURL('/dashboard', { timeout: 15_000 });
+
+    const db = await getDB();
+    const publishCalls = db._publishCalls as Array<{ score: number; categoryScores: Record<string, number> }>;
+    expect(publishCalls).toHaveLength(1);
+    expect(typeof publishCalls[0].score).toBe('number');
+    expect(publishCalls[0].score).toBeGreaterThan(0);
+    expect(typeof publishCalls[0].categoryScores).toBe('object');
+  });
+});
+
+test.describe('Questionnaire – publish_result NOT called when sharing is disabled', () => {
+  test('submitting a session does not invoke publish_result when sharing is off', async ({
+    questionnairePage,
+    page,
+    getDB,
+  }) => {
+    // No seed — _sharingEnabled defaults to false in the mock
+    await questionnairePage.goto();
+    await questionnairePage.switchToScrollMode();
+    await questionnairePage.rateAllAndSubmit();
+    await page.waitForURL('/dashboard', { timeout: 15_000 });
+
+    const db = await getDB();
+    const publishCalls = db._publishCalls as unknown[];
+    expect(publishCalls).toHaveLength(0);
+  });
+});

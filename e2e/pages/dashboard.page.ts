@@ -75,7 +75,7 @@ export class DashboardPage {
     await this.page.waitForFunction(() => {
       const spinner = document.querySelector('.loading-spinner');
       return !spinner || (spinner as HTMLElement).style.display === 'none';
-    }, { timeout: 10_000 }).catch(() => {});
+    }, { timeout: 10_000 }).catch(console.error);
   }
 
   async selectRange(value: '7d' | '30d' | '90d' | '1y' | 'all') {

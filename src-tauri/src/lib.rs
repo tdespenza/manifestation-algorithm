@@ -45,7 +45,9 @@ fn load_or_generate_keypair(path: &Path) -> std::io::Result<libp2p::identity::Ke
         #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
-            let _ = std::fs::set_permissions(path, std::fs::Permissions::from_mode(0o600));
+            if let Err(e) = std::fs::set_permissions(path, std::fs::Permissions::from_mode(0o600)) {
+                eprintln!("Failed to set permissions: {}", e);
+            }
         }
         println!("Saved identity to {:?}", path);
         Ok(keypair)
@@ -53,16 +55,33 @@ fn load_or_generate_keypair(path: &Path) -> std::io::Result<libp2p::identity::Ke
 }
 
 /// Load sharing opt-in state from the app settings file.
-fn load_settings(path: &Path) -> bool {
-    let Ok(content) = std::fs::read_to_string(path) else { return false; };
-    let Ok(json) = serde_json::from_str::<serde_json::Value>(&content) else { return false; };
-    json.get("sharing_enabled").and_then(|v| v.as_bool()).unwrap_or(false)
+fn load_settings(path: &Path) -> (bool, Vec<libp2p::Multiaddr>) {
+    let Ok(content) = std::fs::read_to_string(path) else { return (false, vec![]); };
+    let Ok(json) = serde_json::from_str::<serde_json::Value>(&content) else { return (false, vec![]); };
+    let sharing = json.get("sharing_enabled").and_then(|v| v.as_bool()).unwrap_or(false);
+    let peers: Vec<libp2p::Multiaddr> = json
+        .get("bootstrap_peers")
+        .and_then(|v| v.as_array())
+        .map(|arr| {
+            arr.iter()
+                .filter_map(|s| s.as_str()?.parse().ok())
+                .collect()
+        })
+        .unwrap_or_default();
+    (sharing, peers)
 }
 
 /// Persist sharing opt-in state to the app settings file.
+/// Preserves any existing keys (e.g. bootstrap_peers) by doing a read-merge-write.
 fn save_settings(path: &Path, sharing_enabled: bool) -> Result<(), String> {
-    let json = serde_json::json!({ "sharing_enabled": sharing_enabled });
-    let content = serde_json::to_string(&json).map_err(|e| e.to_string())?;
+    let mut existing: serde_json::Value = if path.exists() {
+        let content = std::fs::read_to_string(path).unwrap_or_default();
+        serde_json::from_str(&content).unwrap_or(serde_json::json!({}))
+    } else {
+        serde_json::json!({})
+    };
+    existing["sharing_enabled"] = serde_json::Value::Bool(sharing_enabled);
+    let content = serde_json::to_string(&existing).map_err(|e| e.to_string())?;
     std::fs::write(path, content).map_err(|e| {
         eprintln!("[settings] Failed to write {:?}: {}", path, e);
         e.to_string()
@@ -166,7 +185,9 @@ fn set_network_sharing(enabled: bool, state: State<'_, NetworkState>, app: tauri
             None => {
                 eprintln!("[settings] settings_path not set, resolving from app_data_dir");
                 let dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
-                let _ = std::fs::create_dir_all(&dir);
+                if let Err(e) = std::fs::create_dir_all(&dir) {
+                    eprintln!("Failed to create dir: {}", e);
+                }
                 dir.join("app_settings.json")
             }
         }
@@ -182,6 +203,58 @@ fn set_network_sharing(enabled: bool, state: State<'_, NetworkState>, app: tauri
 fn get_network_sharing(state: State<'_, NetworkState>) -> Result<bool, String> {
     let guard = state.sharing_enabled.lock().map_err(|e| e.to_string())?;
     Ok(*guard)
+}
+
+/// Return the list of currently configured bootstrap peer addresses.
+/// Returns the hardcoded defaults if none have been persisted yet.
+#[tauri::command]
+fn get_bootstrap_peers(state: State<'_, NetworkState>) -> Result<Vec<String>, String> {
+    let path_guard = state.settings_path.lock().map_err(|e| e.to_string())?;
+    if let Some(ref path) = *path_guard {
+        let (_, peers) = load_settings(path);
+        if !peers.is_empty() {
+            return Ok(peers.iter().map(|p| p.to_string()).collect());
+        }
+    }
+    Ok(network::node::PeerNode::default_bootstrap_peers()
+        .iter()
+        .map(|p| p.to_string())
+        .collect())
+}
+
+/// Persist a list of bootstrap peer multiaddresses.
+/// Changes take effect on the next application restart.
+#[tauri::command]
+fn set_bootstrap_peers(
+    peers: Vec<String>,
+    state: State<'_, NetworkState>,
+) -> Result<(), String> {
+    let path_guard = state.settings_path.lock().map_err(|e| e.to_string())?;
+    let path = path_guard.clone().ok_or("Settings path not initialised")?;
+    drop(path_guard);
+
+    // Re-read current settings and merge in the new peers
+    let mut existing: serde_json::Value = if path.exists() {
+        let content = std::fs::read_to_string(&path).unwrap_or_default();
+        serde_json::from_str(&content).unwrap_or(serde_json::json!({}))
+    } else {
+        serde_json::json!({})
+    };
+
+    // Validate and normalise each peer address
+    let validated: Vec<String> = peers
+        .iter()
+        .filter_map(|s| s.parse::<libp2p::Multiaddr>().ok().map(|a| a.to_string()))
+        .collect();
+
+    existing["bootstrap_peers"] = serde_json::Value::Array(
+        validated.iter().map(|s| serde_json::Value::String(s.clone())).collect()
+    );
+
+    let content = serde_json::to_string(&existing).map_err(|e| e.to_string())?;
+    std::fs::write(&path, content).map_err(|e| e.to_string())?;
+    println!("[settings] Saved {} bootstrap peers to {:?}", validated.len(), path);
+    Ok(())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -205,20 +278,25 @@ pub fn run() {
             {
                 let settings_path = match app.path().app_data_dir() {
                     Ok(path) => {
-                        let _ = std::fs::create_dir_all(&path);
+                        if let Err(e) = std::fs::create_dir_all(&path) {
+                            eprintln!("Failed to create dir: {}", e);
+                        }
                         path.join("app_settings.json")
                     },
-                    Err(_) => std::path::PathBuf::from("app_settings.json"),
+                    Err(e) => {
+                        eprintln!("Failed to get app_data_dir: {}", e);
+                        std::path::PathBuf::from("app_settings.json")
+                    },
                 };
                 let saved_sharing = load_settings(&settings_path);
                 let state = app.state::<NetworkState>();
                 if let Ok(mut guard) = state.sharing_enabled.lock() {
-                    *guard = saved_sharing;
+                    *guard = saved_sharing.0;
                 }
                 if let Ok(mut guard) = state.settings_path.lock() {
                     *guard = Some(settings_path);
                 }
-                println!("[setup] Loaded sharing_enabled={} from settings", saved_sharing);
+                println!("[setup] Loaded sharing_enabled={} from settings", saved_sharing.0);
             }
 
             let app_handle = app.handle().clone();
@@ -237,7 +315,9 @@ pub fn run() {
                 let handle_clone = app_handle.clone();
                 tauri::async_runtime::spawn(async move {
                     while let Some(stats) = event_rx.recv().await {
-                        let _ = handle_clone.emit("network-stats", stats);
+                        if let Err(e) = handle_clone.emit("network-stats", stats) {
+                            eprintln!("Failed to emit network-stats: {}", e);
+                        }
                     }
                 });
 
@@ -246,11 +326,16 @@ pub fn run() {
                 let key_path = match app_handle.path().app_data_dir() {
                     Ok(path) => {
                         if !path.exists() {
-                            let _ = std::fs::create_dir_all(&path);
+                            if let Err(e) = std::fs::create_dir_all(&path) {
+                                eprintln!("Failed to create dir: {}", e);
+                            }
                         }
                         path.join("identity.key")
                     },
-                    Err(_) => std::path::PathBuf::from("identity.key"), // Fallback
+                    Err(e) => {
+                        eprintln!("Failed to get app_data_dir: {}", e);
+                        std::path::PathBuf::from("identity.key")
+                    }, // Fallback
                 };
 
                 // Update settings_path to the canonical app_data_dir location now that
@@ -261,7 +346,7 @@ pub fn run() {
                     if let Ok(mut guard) = state.settings_path.lock() {
                         // Only update if not already set (setup already set it)
                         if guard.is_none() {
-                            *guard = Some(settings_path);
+                            *guard = Some(settings_path.clone());
                         }
                     }
                 }
@@ -298,20 +383,29 @@ pub fn run() {
                 // Build cache path for network score persistence
                 let cache_path = match app_handle.path().app_data_dir() {
                     Ok(path) => Some(path.join("network_cache.json")),
-                    Err(_) => None,
+                    Err(e) => {
+                        eprintln!("Failed to get app_data_dir: {}", e);
+                        None
+                    },
                 };
 
-                match PeerNode::new(id_keys, cmd_rx, event_tx, cache_path).await {
+                match PeerNode::new(id_keys, cmd_rx, event_tx, cache_path, {
+                    // Load bootstrap peers from persisted settings; fall back to defaults if none set.
+                    let (_, peers) = load_settings(&settings_path);
+                    peers
+                }).await {
                     Ok(node) => {
                         println!("P2P Node created successfully.");
                         
                         let (ack_tx, ack_rx) = oneshot::channel();
                         let listen_addr = "/ip4/0.0.0.0/tcp/0".parse().unwrap();
                         
-                        let _ = cmd_tx.send(Command::StartListening { 
+                        if let Err(e) = cmd_tx.send(Command::StartListening { 
                             addr: listen_addr, 
                             sender: ack_tx 
-                        }).await;
+                        }).await {
+                            eprintln!("Failed to send StartListening command: {}", e);
+                        }
 
                         match ack_rx.await {
                             Ok(Ok(_)) => println!("P2P Node listening started"),
@@ -329,7 +423,7 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_peer_count, publish_result, set_network_sharing, get_network_sharing])
+        .invoke_handler(tauri::generate_handler![get_peer_count, publish_result, set_network_sharing, get_network_sharing, get_bootstrap_peers, set_bootstrap_peers])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")
         .run(|app_handle, event| {

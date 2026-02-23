@@ -159,6 +159,52 @@ test.describe('Settings – sharing toggle', () => {
     const checkbox = page.locator('[data-testid="sharing-checkbox"]');
     await expect(checkbox).toBeChecked();
   });
+
+  test('enabling the toggle immediately publishes the last session to the network', async ({
+    page,
+    getDB,
+  }) => {
+    // Seed a completed session. Sharing starts OFF (default).
+    await page.addInitScript(
+      (data: unknown) => {
+        (window as unknown as { __tauriSeedDB?: (d: unknown) => void }).__tauriSeedDB?.(data);
+      },
+      {
+        historical_sessions: [
+          { id: 'pub-e2e-001', total_score: 8250, completed_at: new Date().toISOString() }
+        ],
+        // Seed responses with question_id so publishLastSession picks them up
+        historical_responses: [
+          { session_id: 'pub-e2e-001', question_id: '1a', category: 'Master the Basics', answer_value: 9, recorded_at: new Date().toISOString() }
+        ]
+      }
+    );
+
+    await page.goto('/dashboard');
+    await page.locator('.sharing-toggle').waitFor({ timeout: 15_000 });
+
+    // Confirm no publish has happened yet
+    let db = await getDB();
+    expect((db._publishCalls as unknown[]).length).toBe(0);
+
+    // Enable the toggle — this should immediately invoke publish_result
+    await page.locator('label.toggle-label').click();
+    await expect(page.locator('[data-testid="sharing-checkbox"]')).toBeChecked();
+
+    // Wait for the async publish to complete by polling the mock DB state
+    await page.waitForFunction(
+      () => {
+        const db = (globalThis as unknown as { __tauriGetDB?: () => { _publishCalls: unknown[] } }).__tauriGetDB?.();
+        return (db?._publishCalls?.length ?? 0) >= 1;
+      },
+      { timeout: 5_000 }
+    );
+
+    db = await getDB();
+    const publishCalls = db._publishCalls as Array<{ score: number; categoryScores: Record<string, number> }>;
+    expect(publishCalls).toHaveLength(1);
+    expect(publishCalls[0].score).toBe(8250);
+  });
 });
 
 test.describe('Settings – save last session toggle', () => {
@@ -179,7 +225,6 @@ test.describe('Settings – save last session toggle', () => {
   test('clicking the Save Last Session toggle switches it Off', async ({ page }) => {
     const toggle = page.locator('button.btn-toggle');
     await toggle.click();
-    await page.waitForTimeout(100);
-    await expect(toggle).toHaveText('Off');
+    await expect(toggle).toHaveText('Off', { timeout: 3_000 });
   });
 });

@@ -17,9 +17,9 @@ We take the security of this software very seriously. If you have found a securi
 ### Reporting Process
 
 1. **Do not open an issue on GitHub.** This allows the vulnerability to be disclosed publicly before we have a chance to fix it.
-2. Please email `[INSERT EMAIL ADDRESS]` with a description of the vulnerability.
+2. Use the [**GitHub private security advisory form**](https://github.com/tdespenza/manifestation-algorithm/security/advisories/new) to report the vulnerability confidentially.
 3. Include the steps required to reproduce the issue.
-4. We will acknowledge your email within 48 hours.
+4. We will acknowledge your report within 48 hours.
 5. We will investigate and fix the issue.
 6. Once the issue is resolved, we will publish a security advisory and credit you for the discovery.
 

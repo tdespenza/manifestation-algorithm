@@ -12,7 +12,7 @@ test.describe('Dashboard – empty state', () => {
   });
 
   test('renders the dashboard heading', async ({ dashboardPage }) => {
-    await expect(dashboardPage.heading).toHaveText('Manifestation History');
+    await expect(dashboardPage.heading).toHaveText('Manifestation Algorithm Tracking History');
   });
 
   test('renders the subtitle', async ({ page }) => {
@@ -53,8 +53,8 @@ test.describe('Dashboard – with historical data', () => {
     // Reload to trigger fetchHistory with seeded data
     await page.reload();
     await page.locator('.dashboard-view').waitFor({ timeout: 10_000 });
-    // Wait a tick for async store
-    await page.waitForTimeout(500);
+    // Wait for async store to render content or empty state
+    await page.locator('#dashboard-history-area, .empty-state').waitFor({ timeout: 10_000 });
   });
 
   test('dashboard view is still visible with data', async ({ page }) => {
@@ -124,7 +124,7 @@ test.describe('Dashboard – session deletion', () => {
     );
     await page.goto('/dashboard');
     await page.locator('.dashboard-view').waitFor({ timeout: 10_000 });
-    await page.waitForTimeout(500);
+    await page.locator('#dashboard-history-area, .empty-state').waitFor({ timeout: 10_000 });
   });
 
   test('Select button appears in the sessions header', async ({ dashboardPage }) => {
@@ -167,7 +167,7 @@ test.describe('Dashboard – session deletion', () => {
     await expect(dashboardPage.confirmDialogTitle).toContainText('Delete');
     await dashboardPage.confirmDelete();
     // Wait for the list to update
-    await page.waitForTimeout(800);
+    await expect(dashboardPage.sessionCards).toHaveCount(countBefore - 1, { timeout: 5_000 });
     const countAfter = await dashboardPage.sessionCards.count();
     expect(countAfter).toBeLessThan(countBefore);
   });
@@ -179,7 +179,7 @@ test.describe('Dashboard – session deletion', () => {
     await dashboardPage.deleteSelected();
     await expect(dashboardPage.confirmDialog).toBeVisible({ timeout: 3_000 });
     await dashboardPage.cancelDelete();
-    await page.waitForTimeout(400);
+    await expect(dashboardPage.confirmDialog).toHaveCount(0, { timeout: 3_000 });
     expect(await dashboardPage.sessionCards.count()).toBe(countBefore);
     // Dialog closed, still in selection mode
     await expect(dashboardPage.cancelSelectBtn).toBeVisible();
@@ -194,7 +194,7 @@ test.describe('Dashboard – session deletion', () => {
     await expect(dashboardPage.confirmDialog).toBeVisible({ timeout: 3_000 });
     await expect(dashboardPage.confirmDialogMessage).toContainText('permanently delete');
     await dashboardPage.confirmDelete();
-    await page.waitForTimeout(800);
+    await expect(dashboardPage.sessionCards).toHaveCount(countBefore - 1, { timeout: 5_000 });
     const countAfter = await dashboardPage.sessionCards.count();
     expect(countAfter).toBeLessThan(countBefore);
   });
@@ -205,7 +205,7 @@ test.describe('Dashboard – session deletion', () => {
     await dashboardPage.clickInlineDelete(0);
     await expect(dashboardPage.confirmDialog).toBeVisible({ timeout: 3_000 });
     await dashboardPage.cancelDelete();
-    await page.waitForTimeout(400);
+    await expect(dashboardPage.confirmDialog).toHaveCount(0, { timeout: 3_000 });
     expect(await dashboardPage.sessionCards.count()).toBe(countBefore);
   });
 });

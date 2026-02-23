@@ -12,18 +12,38 @@ vi.mock('@tauri-apps/api/event', () => ({
   listen: (...args: unknown[]) => mockListen(...args)
 }));
 
+// ── DB service mocks ─────────────────────────────────────────────────────────
+const dbMocks = vi.hoisted(() => ({
+  loadHistoricalSessions: vi.fn().mockResolvedValue([]),
+  loadSessionResponses: vi.fn().mockResolvedValue([])
+}));
+
+vi.mock('@/services/db', () => ({
+  loadHistoricalSessions: (...args: unknown[]) => dbMocks.loadHistoricalSessions(...args),
+  loadSessionResponses: (...args: unknown[]) => dbMocks.loadSessionResponses(...args)
+}));
+
 // ── Import composable AFTER mocks are set up ─────────────────────────────────
-import { useNetwork, toggleSharing, _resetNetworkState } from '@/composables/useNetwork';
+import {
+  useNetwork,
+  toggleSharing,
+  publishLastSession,
+  _resetNetworkState
+} from '@/composables/useNetwork';
 
 describe('useNetwork composable', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     _resetNetworkState();
+    // Default: no historical sessions (so publishLastSession is a no-op)
+    dbMocks.loadHistoricalSessions.mockResolvedValue([]);
+    dbMocks.loadSessionResponses.mockResolvedValue([]);
     // Default: peer count returns 0, sharing disabled
     mockInvoke.mockImplementation((cmd: string) => {
       if (cmd === 'get_peer_count') return Promise.resolve(0);
       if (cmd === 'get_network_sharing') return Promise.resolve(false);
       if (cmd === 'set_network_sharing') return Promise.resolve();
+      if (cmd === 'publish_result') return Promise.resolve('bafy-mock-cid');
       return Promise.resolve();
     });
     // listen returns an unlisten stub that resolves immediately
@@ -204,6 +224,110 @@ describe('useNetwork composable', () => {
     await expect(toggleSharing(true)).resolves.toBeUndefined();
     expect(consoleSpy).toHaveBeenCalledWith('Failed to update sharing setting:', expect.any(Error));
     consoleSpy.mockRestore();
+  });
+
+  // ── publishLastSession on enable ────────────────────────────────────────────
+
+  it('toggleSharing(true) calls publish_result with last session data when sessions exist', async () => {
+    dbMocks.loadHistoricalSessions.mockResolvedValue([
+      {
+        id: 'sess-001',
+        total_score: 7500,
+        completed_at: '2026-02-22T10:00:00Z',
+        duration_seconds: 0
+      }
+    ]);
+    dbMocks.loadSessionResponses.mockResolvedValue([
+      { question_id: '1a', category: 'Master the Basics', answer_value: 9 },
+      { question_id: '2', category: 'Activate Words', answer_value: 7 }
+    ]);
+
+    await toggleSharing(true);
+
+    expect(mockInvoke).toHaveBeenCalledWith('publish_result', {
+      score: 7500,
+      categoryScores: { '1a': 9, '2': 7 }
+    });
+  });
+
+  it('toggleSharing(true) does NOT call publish_result when no sessions exist', async () => {
+    // dbMocks.loadHistoricalSessions already returns [] by default in beforeEach
+    await toggleSharing(true);
+
+    const publishCalls = mockInvoke.mock.calls.filter((c: unknown[]) => c[0] === 'publish_result');
+    expect(publishCalls).toHaveLength(0);
+  });
+
+  it('toggleSharing(false) does NOT call publish_result', async () => {
+    dbMocks.loadHistoricalSessions.mockResolvedValue([
+      {
+        id: 'sess-001',
+        total_score: 7500,
+        completed_at: '2026-02-22T10:00:00Z',
+        duration_seconds: 0
+      }
+    ]);
+
+    await toggleSharing(false);
+
+    const publishCalls = mockInvoke.mock.calls.filter((c: unknown[]) => c[0] === 'publish_result');
+    expect(publishCalls).toHaveLength(0);
+  });
+
+  it('toggleSharing(true) still succeeds and logs if publishLastSession throws', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    dbMocks.loadHistoricalSessions.mockResolvedValue([
+      {
+        id: 'sess-001',
+        total_score: 7500,
+        completed_at: '2026-02-22T10:00:00Z',
+        duration_seconds: 0
+      }
+    ]);
+    dbMocks.loadSessionResponses.mockResolvedValue([
+      { question_id: '1a', category: 'Master the Basics', answer_value: 9 }
+    ]);
+    mockInvoke.mockImplementation((cmd: string) => {
+      if (cmd === 'set_network_sharing') return Promise.resolve();
+      if (cmd === 'publish_result') return Promise.reject(new Error('gossipsub error'));
+      return Promise.resolve();
+    });
+
+    await expect(toggleSharing(true)).resolves.toBeUndefined();
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Failed to publish last session on sharing enable:',
+      expect.any(Error)
+    );
+    consoleSpy.mockRestore();
+  });
+
+  it('publishLastSession is a no-op when loadHistoricalSessions returns empty', async () => {
+    await publishLastSession(); // dbMocks default returns []
+    const publishCalls = mockInvoke.mock.calls.filter((c: unknown[]) => c[0] === 'publish_result');
+    expect(publishCalls).toHaveLength(0);
+  });
+
+  it('publishLastSession skips responses with undefined question_id', async () => {
+    dbMocks.loadHistoricalSessions.mockResolvedValue([
+      {
+        id: 'sess-001',
+        total_score: 5000,
+        completed_at: '2026-02-22T10:00:00Z',
+        duration_seconds: 0
+      }
+    ]);
+    // Simulate fixture data seeded with old column name (question_number instead of question_id)
+    dbMocks.loadSessionResponses.mockResolvedValue([
+      { question_id: undefined, category: 'General', answer_value: 5 },
+      { question_id: '2', category: 'Activate Words', answer_value: 8 }
+    ]);
+
+    await publishLastSession();
+
+    expect(mockInvoke).toHaveBeenCalledWith('publish_result', {
+      score: 5000,
+      categoryScores: { '2': 8 } // undefined key excluded
+    });
   });
 
   it('network-stats event sets isConnected to true via event handler', async () => {

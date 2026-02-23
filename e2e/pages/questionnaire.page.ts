@@ -114,8 +114,8 @@ export class QuestionnairePage {
       await slider.fill(String(value));
       await slider.dispatchEvent('input');
     }
-    // Allow the reactive store to process all answers before proceeding
-    await this.page.waitForTimeout(100);
+    // Flush any pending microtasks so Vue's reactive store processes all answers.
+    await this.page.evaluate(() => {});
   }
 
   /** Submit the assessment (assumes all questions are already rated) */

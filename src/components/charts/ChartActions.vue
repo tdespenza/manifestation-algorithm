@@ -1,84 +1,114 @@
 <template>
-  <div class="chart-actions no-print">
-    <!-- Export select — choosing an option opens the Save modal -->
+  <div class="chart-actions">
+    <button
+      class="action-btn"
+      :title="isFullscreen ? 'Exit full screen' : 'View full screen'"
+      :aria-label="isFullscreen ? 'Exit full screen' : 'View full screen'"
+      :disabled="props.disabled"
+      @click="toggleFullscreen"
+    >
+      <svg
+        v-if="!isFullscreen"
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <polyline points="15 3 21 3 21 9" />
+        <polyline points="9 21 3 21 3 15" />
+        <line x1="21" y1="3" x2="14" y2="10" />
+        <line x1="3" y1="21" x2="10" y2="14" />
+      </svg>
+      <svg
+        v-else
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <polyline points="4 14 10 14 10 20" />
+        <polyline points="20 10 14 10 14 4" />
+        <line x1="10" y1="14" x2="3" y2="21" />
+        <line x1="21" y1="3" x2="14" y2="10" />
+      </svg>
+    </button>
+
+    <button
+      class="action-btn"
+      title="Copy Chart"
+      aria-label="Copy Chart"
+      :disabled="busy || props.disabled"
+      @click="onCopyChart"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+      </svg>
+    </button>
+
     <select
       class="export-select"
-      :disabled="busy"
+      :disabled="busy || props.disabled"
       aria-label="Export chart"
       @change="onSelectChange"
     >
-      <option value="" disabled selected>⬇ Export / Print</option>
-      <option value="print">🖨️ Print</option>
+      <option value="" disabled selected>⬇ Export</option>
       <option value="excel">📊 Export Excel</option>
       <option value="csv">📄 Export CSV</option>
       <option value="pdf">📑 Export PDF</option>
       <option value="html">🌐 Export HTML</option>
-      <option value="copy">📋 Copy Chart</option>
     </select>
-  </div>
 
-  <!-- Save modal — shown after selecting an export format -->
-  <Teleport to="body">
-    <div v-if="saveModal.visible" class="save-modal-overlay" @click.self="closeSaveModal">
-      <div
-        class="save-modal"
-        role="dialog"
-        aria-modal="true"
-        :aria-label="`Save ${saveModal.label}`"
+    <Teleport v-if="isFullscreen" :to="'#' + targetId">
+      <button
+        class="exit-fullscreen-btn"
+        title="Exit full screen"
+        aria-label="Exit full screen"
+        @click="toggleFullscreen"
       >
-        <div class="save-modal-header">
-          <h3>{{ saveModal.label }}</h3>
-          <button class="close-btn" aria-label="Close" :disabled="busy" @click="closeSaveModal">
-            ✕
-          </button>
-        </div>
-
-        <!-- Progress bar while saving -->
-        <div v-if="busy" class="export-progress" aria-label="Exporting...">
-          <div class="progress-bar-track">
-            <div class="progress-bar-fill"></div>
-          </div>
-          <span class="progress-label">{{ busyLabel }}…</span>
-        </div>
-
-        <template v-else>
-          <!-- Filename row (hidden for print/copy) -->
-          <div v-if="saveModal.hasFile" class="save-modal-field">
-            <label class="save-modal-label" for="save-filename">Filename</label>
-            <input
-              id="save-filename"
-              v-model="saveModal.filename"
-              class="save-filename-input"
-              type="text"
-              spellcheck="false"
-            />
-          </div>
-
-          <!-- Directory row (hidden for print/copy) -->
-          <div v-if="saveModal.hasFile" class="save-modal-field">
-            <label class="save-modal-label">Save to</label>
-            <div class="save-dir-row">
-              <span class="save-directory-path">{{ saveModal.dirLabel }}</span>
-              <button class="save-browse-btn" type="button" @click="chooseDirectory">
-                Browse…
-              </button>
-            </div>
-          </div>
-
-          <div class="save-modal-actions">
-            <button class="save-cancel-btn" type="button" @click="closeSaveModal">Cancel</button>
-            <button class="save-confirm-btn" type="button" @click="confirmSave">
-              {{ saveModal.confirmLabel }}
-            </button>
-          </div>
-        </template>
-      </div>
-    </div>
-  </Teleport>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="4 14 10 14 10 20" />
+          <polyline points="20 10 14 10 14 4" />
+          <line x1="10" y1="14" x2="3" y2="21" />
+          <line x1="21" y1="3" x2="14" y2="10" />
+        </svg>
+      </button>
+    </Teleport>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useChartExport } from '../../composables/useChartExport';
 import { useToast } from '../../composables/useToast';
 
@@ -87,184 +117,114 @@ const props = defineProps<{
   title: string;
   data: Record<string, unknown>[];
   filename: string;
+  disabled?: boolean;
 }>();
 
-// ── Export composable ──────────────────────────────────────────────────────────
-const { printChart, exportToExcel, exportToCSV, exportToPDF, exportToHTML, copyChart } =
-  useChartExport();
+const { exportToExcel, exportToCSV, exportToPDF, exportToHTML, copyChart } = useChartExport();
 const { addToast } = useToast();
 
-// ── Busy state ─────────────────────────────────────────────────────────────────
 const busy = ref(false);
-const busyLabel = ref('Exporting');
+const isFullscreen = ref(false);
 
-// ── Save modal state ───────────────────────────────────────────────────────────
-type ExportFormat = 'print' | 'excel' | 'csv' | 'pdf' | 'html' | 'copy' | '';
-
-interface SaveModalState {
-  visible: boolean;
-  format: ExportFormat;
-  label: string;
-  confirmLabel: string;
-  /** Whether this format produces a downloadable file (false for print/copy). */
-  hasFile: boolean;
-  filename: string;
-  /** Human-readable directory label shown in the UI. */
-  dirLabel: string;
-  /** FileSystemDirectoryHandle when the user has picked a folder. */
-  dirHandle: FileSystemDirectoryHandle | null;
+// ── Full screen ────────────────────────────────────────────────────────────────
+function getChartContainer(): HTMLElement | null {
+  return document.getElementById(props.targetId);
 }
 
-const saveModal = reactive<SaveModalState>({
-  visible: false,
-  format: '',
-  label: '',
-  confirmLabel: 'Save',
-  hasFile: true,
-  filename: '',
-  dirLabel: 'Downloads (default)',
-  dirHandle: null
+function toggleFullscreen() {
+  const el = getChartContainer();
+  if (!el) return;
+
+  if (!isFullscreen.value) {
+    if (el.requestFullscreen) {
+      el.requestFullscreen().catch(err => {
+        console.error('Fullscreen API failed, using CSS fallback', err);
+        el.classList.add('fullscreen-fallback');
+        isFullscreen.value = true;
+      });
+    } else {
+      el.classList.add('fullscreen-fallback');
+      isFullscreen.value = true;
+    }
+  } else {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(console.error);
+    } else {
+      el.classList.remove('fullscreen-fallback');
+      isFullscreen.value = false;
+    }
+  }
+}
+
+function onFullscreenChange() {
+  isFullscreen.value = !!document.fullscreenElement;
+}
+
+function onKeyDown(e: KeyboardEvent) {
+  if (e.key === 'Escape' && isFullscreen.value) {
+    toggleFullscreen();
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('fullscreenchange', onFullscreenChange);
+  document.addEventListener('keydown', onKeyDown);
+});
+onUnmounted(() => {
+  document.removeEventListener('fullscreenchange', onFullscreenChange);
+  document.removeEventListener('keydown', onKeyDown);
 });
 
-// ── Format metadata ────────────────────────────────────────────────────────────
-const FORMAT_META: Record<
-  string,
-  { label: string; confirmLabel: string; hasFile: boolean; ext: string }
-> = {
-  print: { label: 'Print Chart', confirmLabel: 'Print', hasFile: false, ext: '' },
-  excel: { label: 'Export Excel', confirmLabel: 'Save', hasFile: true, ext: '.xlsx' },
-  csv: { label: 'Export CSV', confirmLabel: 'Save', hasFile: true, ext: '.csv' },
-  pdf: { label: 'Export PDF', confirmLabel: 'Save', hasFile: true, ext: '.pdf' },
-  html: { label: 'Export HTML', confirmLabel: 'Save', hasFile: true, ext: '.html' },
-  copy: { label: 'Copy to Clipboard', confirmLabel: 'Copy', hasFile: false, ext: '' }
-};
+// ── Copy Chart ─────────────────────────────────────────────────────────────────
+async function onCopyChart() {
+  busy.value = true;
+  try {
+    const success = await copyChart(props.targetId);
+    addToast(
+      success ? 'Chart copied to clipboard' : 'Copy failed — clipboard not available',
+      success ? 'success' : 'error'
+    );
+  } finally {
+    busy.value = false;
+  }
+}
 
-// ── Select change → open modal ─────────────────────────────────────────────────
-function onSelectChange(event: Event) {
+// ── Export select ──────────────────────────────────────────────────────────────
+type ExportFormat = 'excel' | 'csv' | 'pdf' | 'html';
+
+async function onSelectChange(event: Event) {
   const select = event.target as HTMLSelectElement;
   const format = select.value as ExportFormat;
-  // Reset the select back to the placeholder so it can be chosen again
   select.value = '';
 
   if (!format) return;
-  const meta = FORMAT_META[format];
 
-  const safeName = props.title.replace(/\s+/g, '_');
-  saveModal.visible = true;
-  saveModal.format = format;
-  saveModal.label = meta.label;
-  saveModal.confirmLabel = meta.confirmLabel;
-  saveModal.hasFile = meta.hasFile;
-  saveModal.filename = meta.hasFile
-    ? (format === 'excel' || format === 'csv' ? props.filename : safeName) + meta.ext
-    : '';
-  saveModal.dirLabel = saveModal.dirHandle ? saveModal.dirHandle.name : 'Downloads (default)';
-}
+  // File exports — saveWithPicker opens the OS save dialog directly
+  const safeName = props.title.replace(/\s+/g, ' ');
+  const baseName = props.filename || props.title.replace(/\s+/g, '_');
 
-// ── Directory chooser ──────────────────────────────────────────────────────────
-async function chooseDirectory() {
-  type ShowDirPicker = (opts?: { mode?: string }) => Promise<FileSystemDirectoryHandle>;
-  const picker = (window as Window & { showDirectoryPicker?: ShowDirPicker }).showDirectoryPicker;
-
-  if (!picker) {
-    addToast('Directory picker not supported in this environment', 'info');
-    return;
-  }
+  busy.value = true;
   try {
-    const handle = await picker({ mode: 'readwrite' });
-    saveModal.dirHandle = handle;
-    saveModal.dirLabel = handle.name;
+    let result: { success: boolean; message: string };
+
+    if (format === 'excel') {
+      result = await exportToExcel(props.data, baseName);
+    } else if (format === 'csv') {
+      result = await exportToCSV(props.data, baseName);
+    } else if (format === 'pdf') {
+      result = await exportToPDF(props.targetId, safeName);
+    } else {
+      result = await exportToHTML(props.targetId, safeName);
+    }
+
+    if (result.message !== 'Save cancelled') {
+      addToast(result.message, result.success ? 'success' : 'error');
+    }
   } catch (err) {
-    if ((err as Error).name !== 'AbortError') {
-      addToast('Could not open directory picker', 'error');
-    }
-  }
-}
-
-// ── Close modal ────────────────────────────────────────────────────────────────
-/** Close when idle (user-initiated cancel/✕). */
-function closeSaveModal() {
-  if (busy.value) return;
-  saveModal.visible = false;
-  saveModal.format = '';
-}
-
-/** Force-close regardless of busy state (called after export finishes). */
-function finishAndClose() {
-  saveModal.visible = false;
-  saveModal.format = '';
-}
-
-// ── Confirm → run export ───────────────────────────────────────────────────────
-async function confirmSave() {
-  const format = saveModal.format;
-
-  // Print and copy bypass the file-save path
-  if (format === 'print') {
-    const result = printChart(props.targetId, props.title);
-    closeSaveModal();
-    addToast(result.message, result.success ? 'info' : 'error');
-    return;
-  }
-
-  if (format === 'copy') {
-    busy.value = true;
-    busyLabel.value = 'Copying';
-    try {
-      const success = await copyChart(props.targetId);
-      finishAndClose();
-      addToast(
-        success ? 'Chart copied to clipboard' : 'Copy failed — clipboard not available',
-        success ? 'success' : 'error'
-      );
-    } finally {
-      busy.value = false;
-    }
-    return;
-  }
-
-  // File exports — strip the extension from saveModal.filename for the
-  // composable calls that append it themselves, but keep it for PDF/HTML
-  // which use the title-derived name.
-  const runExport = async (
-    label: string,
-    fn: () => Promise<{ success: boolean; message: string }>
-  ) => {
-    busy.value = true;
-    busyLabel.value = label;
-    try {
-      const result = await fn();
-      finishAndClose();
-      if (result.message !== 'Save cancelled') {
-        addToast(result.message, result.success ? 'success' : 'error');
-      }
-    } catch {
-      finishAndClose();
-      addToast('Export failed unexpectedly', 'error');
-    } finally {
-      busy.value = false;
-    }
-  };
-
-  // Derive a bare name (without extension) for composable calls
-  const meta = FORMAT_META[format];
-  const bareName = saveModal.filename.endsWith(meta.ext)
-    ? saveModal.filename.slice(0, -meta.ext.length)
-    : saveModal.filename;
-
-  if (format === 'excel') {
-    await runExport('Preparing Excel', () => exportToExcel(props.data, bareName));
-  } else if (format === 'csv') {
-    await runExport('Preparing CSV', () => exportToCSV(props.data, bareName));
-  } else if (format === 'pdf') {
-    await runExport('Preparing PDF', () =>
-      exportToPDF(props.targetId, bareName.replace(/_/g, ' '))
-    );
-  } else {
-    // html
-    await runExport('Preparing HTML', () =>
-      exportToHTML(props.targetId, bareName.replace(/_/g, ' '))
-    );
+    console.error(err);
+    addToast('Export failed unexpectedly', 'error');
+  } finally {
+    busy.value = false;
   }
 }
 </script>
@@ -272,9 +232,76 @@ async function confirmSave() {
 <style scoped>
 .chart-actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   justify-content: flex-end;
+  align-items: center;
   margin-bottom: 10px;
+}
+
+/* ── Action buttons ─────────────────────────────────────────────────────── */
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  background: var(--white, #fff);
+  border: 1px solid var(--dusty-grape, #8c6b9e);
+  border-radius: 6px;
+  color: var(--deep-twilight, #0f0758);
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  flex-shrink: 0;
+}
+
+.action-btn:hover:not(:disabled) {
+  border-color: var(--deep-twilight, #0f0758);
+  box-shadow: 0 0 0 2px rgba(15, 7, 88, 0.1);
+}
+
+.action-btn:focus {
+  outline: none;
+  border-color: var(--true-cobalt, #0a1f7d);
+  box-shadow: 0 0 0 3px rgba(10, 31, 125, 0.18);
+}
+
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Exit Fullscreen Button (Teleported) ────────────────────────────────── */
+.exit-fullscreen-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: var(--white, #fff);
+  border: 1px solid var(--dusty-grape, #8c6b9e);
+  border-radius: 50%;
+  color: var(--deep-twilight, #0f0758);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.exit-fullscreen-btn:hover {
+  background: var(--bg-gradient, #f5f7fa);
+  transform: scale(1.05);
+}
+
+.exit-fullscreen-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(10, 31, 125, 0.3);
 }
 
 /* ── Export select ─────────────────────────────────────────────────────────── */
@@ -312,227 +339,5 @@ async function confirmSave() {
 .export-select:disabled {
   opacity: 0.55;
   cursor: not-allowed;
-}
-
-/* ── Save modal ────────────────────────────────────────────────────────────── */
-.save-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: fadeIn 0.15s ease;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.save-modal {
-  background: #fff;
-  border-radius: 14px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-  padding: 28px 32px;
-  min-width: 340px;
-  max-width: 460px;
-  width: 90vw;
-  animation: slideUp 0.18s ease;
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.save-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 22px;
-}
-
-.save-modal-header h3 {
-  margin: 0;
-  font-size: 1.15rem;
-  color: var(--deep-twilight, #0f0758);
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 1.1rem;
-  cursor: pointer;
-  color: #888;
-  padding: 2px 6px;
-  border-radius: 4px;
-  line-height: 1;
-  transition: color 0.15s;
-}
-
-.close-btn:hover {
-  color: var(--deep-twilight, #0f0758);
-}
-
-/* ── Fields ───────────────────────────────────────────────────────────────── */
-.save-modal-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 16px;
-}
-
-.save-modal-label {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: #666;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.save-filename-input {
-  border: 1.5px solid #d0d5ea;
-  border-radius: 7px;
-  padding: 8px 12px;
-  font-size: 0.9rem;
-  font-family: monospace;
-  color: var(--deep-twilight, #0f0758);
-  transition: border-color 0.18s;
-  background: #fafbff;
-}
-
-.save-filename-input:focus {
-  outline: none;
-  border-color: var(--true-cobalt, #0a1f7d);
-  box-shadow: 0 0 0 3px rgba(10, 31, 125, 0.12);
-}
-
-.save-dir-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.save-directory-path {
-  flex: 1;
-  font-size: 0.88rem;
-  color: #555;
-  background: #f4f5fb;
-  border: 1.5px solid #e0e4f5;
-  border-radius: 7px;
-  padding: 7px 10px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.save-browse-btn {
-  background: #f4f5fb;
-  border: 1.5px solid #d0d5ea;
-  color: var(--deep-twilight, #0f0758);
-  padding: 7px 14px;
-  border-radius: 7px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
-  white-space: nowrap;
-  transition: all 0.18s;
-}
-
-.save-browse-btn:hover {
-  background: var(--dusty-grape, #8c6b9e);
-  border-color: var(--dusty-grape, #8c6b9e);
-  color: #fff;
-}
-
-/* ── Action row ───────────────────────────────────────────────────────────── */
-.save-modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 24px;
-}
-
-.save-cancel-btn {
-  background: #f4f5fb;
-  border: 1.5px solid #d0d5ea;
-  color: #555;
-  padding: 9px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 600;
-  transition: all 0.18s;
-}
-
-.save-cancel-btn:hover {
-  background: #e8eaf4;
-}
-
-.save-confirm-btn {
-  background: var(--true-cobalt, #0a1f7d);
-  border: none;
-  color: #fff;
-  padding: 9px 24px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 600;
-  transition: background 0.18s;
-}
-
-.save-confirm-btn:hover {
-  background: var(--deep-twilight, #0f0758);
-}
-
-/* ── Progress (reused) ────────────────────────────────────────────────────── */
-.export-progress {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 0 8px;
-}
-
-.progress-bar-track {
-  width: 100%;
-  height: 6px;
-  background: #e8eaf4;
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.progress-bar-fill {
-  height: 100%;
-  background: var(--true-cobalt, #0a1f7d);
-  border-radius: 3px;
-  animation: indeterminate 1.4s ease infinite;
-  width: 40%;
-}
-
-@keyframes indeterminate {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(350%);
-  }
-}
-
-.progress-label {
-  font-size: 0.88rem;
-  color: #666;
 }
 </style>

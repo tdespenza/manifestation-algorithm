@@ -17,6 +17,7 @@ const mockPercentile90 = ref<number | null>(null);
 const mockCategoryStats = ref<Record<string, { avg: number; p90: number; count: number }>>({});
 const mockBandwidthStats = ref({ inbound: 0, outbound: 0 });
 const mockIsConnected = ref(false);
+const mockSharingEnabled = ref(false);
 const mockInit = vi.fn();
 const mockCleanup = vi.fn();
 
@@ -29,7 +30,7 @@ vi.mock('@/composables/useNetwork', () => ({
     categoryStats: mockCategoryStats,
     bandwidthStats: mockBandwidthStats,
     isConnected: mockIsConnected,
-    sharingEnabled: ref(false),
+    sharingEnabled: mockSharingEnabled,
     init: mockInit,
     cleanup: mockCleanup,
     toggleSharing: vi.fn()
@@ -45,6 +46,7 @@ describe('NetworkRanking.vue', () => {
     mockCategoryStats.value = {};
     mockBandwidthStats.value = { inbound: 0, outbound: 0 };
     mockIsConnected.value = false;
+    mockSharingEnabled.value = false;
     vi.clearAllMocks();
   });
 
@@ -53,6 +55,7 @@ describe('NetworkRanking.vue', () => {
   it('shows "Searching for peers..." loading text when count and manifestations are both 0', () => {
     mockCount.value = 0;
     mockManifestations.value = 0;
+    mockSharingEnabled.value = true;
     const wrapper = mount(NetworkRanking);
     expect(wrapper.find('.loading').text()).toContain('Searching for peers...');
   });

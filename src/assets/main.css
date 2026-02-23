@@ -38,6 +38,11 @@
   --color-muted: #94a3b8;
   --color-success-text: var(--success);
   --color-warn: #f59e0b;
+  /* Surface colours */
+  --bg-surface: #ffffff;
+  --bg-page: #f8f9fa;
+
+  --color-heading: #2c3e50;
 }
 
 * {
@@ -60,6 +65,19 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(10, 31, 125, 0.32);
+}
+
+/* Fullscreen fallback for charts */
+.fullscreen-fallback {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  background: var(--white) !important;
+  padding: 20px !important;
+  overflow: auto !important;
 }
 
 /* Accessible focus ring */
@@ -113,45 +131,26 @@ h1 {
   opacity: 0;
 }
 
-/* Print Styles */
-@media print {
-  @page {
-    size: landscape;
-    margin: 0;
-  }
+/* ── Fullscreen chart container ──────────────────────────────────────────── */
+:fullscreen {
+  background: var(--bg-surface);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  box-sizing: border-box;
+  overflow: auto;
+}
 
-  body.printing-chart {
-    background: white !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-
-  body.printing-chart * {
-    visibility: hidden;
-  }
-
-  body.printing-chart .print-target,
-  body.printing-chart .print-target * {
-    visibility: visible;
-  }
-
-  body.printing-chart .print-target {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100vw !important;
-    height: 100vh !important;
-    padding: 40px;
-    box-sizing: border-box;
-    background: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* Hide non-essential elements during print */
-  .no-print {
-    display: none !important;
-  }
+/* Webkit prefix (Safari / older Chrome) */
+:-webkit-full-screen {
+  background: var(--bg-surface);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  box-sizing: border-box;
+  overflow: auto;
 }

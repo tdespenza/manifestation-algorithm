@@ -8,6 +8,19 @@ import { setActivePinia, createPinia } from 'pinia';
 import { useQuestionnaireStore } from '@/stores/questionnaire';
 import { questions } from '@/data/questions';
 
+// ── Mock Tauri API (required now that submitSession calls invoke) ─────────────
+const tauriMocks = vi.hoisted(() => ({
+  mockInvoke: vi.fn().mockResolvedValue(undefined)
+}));
+
+vi.mock('@tauri-apps/api/core', () => ({
+  invoke: (...args: unknown[]) => tauriMocks.mockInvoke(...args)
+}));
+
+vi.mock('@tauri-apps/api/event', () => ({
+  listen: vi.fn().mockResolvedValue(vi.fn())
+}));
+
 // ── Mock entire DB layer ────────────────────────────────────────────────────
 
 const dbMocks = vi.hoisted(() => ({
@@ -35,6 +48,9 @@ vi.mock('@/services/db', () => ({
   getSetting: dbMocks.getSetting,
   setSetting: dbMocks.setSetting
 }));
+
+// ── Network composable helpers (for sharing state control) ──────────────────
+import { _resetNetworkState, toggleSharing } from '@/composables/useNetwork';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -67,6 +83,10 @@ describe('E2E: Complete questionnaire flow', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
+    // Reset module-level network state so each test starts with sharing disabled
+    _resetNetworkState();
+    // Re-set default invoke behaviour after clearAllMocks() wiped the implementation
+    tauriMocks.mockInvoke.mockResolvedValue(undefined);
     dbMocks.loadAnswers.mockResolvedValue({});
     dbMocks.saveAnswer.mockResolvedValue(undefined);
   });
@@ -236,6 +256,57 @@ describe('E2E: Complete questionnaire flow', () => {
 
     await expect(store.submitSession()).rejects.toThrow('DB write failed');
     expect(consoleSpy).toHaveBeenCalledWith('Failed to submit session:', expect.any(Error));
+    consoleSpy.mockRestore();
+  });
+
+  // ── publish_result integration ─────────────────────────────────────────────
+
+  it('submitSession calls publish_result when sharing is enabled', async () => {
+    // Enable sharing — sets sharingEnabled.value = true optimistically
+    await toggleSharing(true);
+
+    const store = useQuestionnaireStore();
+    const histId = await store.submitSession();
+
+    expect(histId).toBe('hist-e2e-001');
+    expect(tauriMocks.mockInvoke).toHaveBeenCalledWith(
+      'publish_result',
+      expect.objectContaining({
+        score: expect.any(Number),
+        categoryScores: expect.any(Object)
+      })
+    );
+  });
+
+  it('submitSession does NOT call publish_result when sharing is disabled', async () => {
+    // sharingEnabled starts false after _resetNetworkState() in beforeEach
+    const store = useQuestionnaireStore();
+    await store.submitSession();
+
+    const publishCalls = tauriMocks.mockInvoke.mock.calls.filter(
+      (call: unknown[]) => call[0] === 'publish_result'
+    );
+    expect(publishCalls).toHaveLength(0);
+  });
+
+  it('submitSession still succeeds and logs error if publish_result rejects', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    await toggleSharing(true);
+    tauriMocks.mockInvoke.mockImplementation((cmd: string) => {
+      if (cmd === 'publish_result') return Promise.reject(new Error('network unreachable'));
+      return Promise.resolve(undefined);
+    });
+
+    const store = useQuestionnaireStore();
+    const histId = await store.submitSession();
+
+    // Session submission must succeed despite the network failure
+    expect(histId).toBe('hist-e2e-001');
+    expect(store.answers).toEqual({});
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Failed to publish result to network:',
+      expect.any(Error)
+    );
     consoleSpy.mockRestore();
   });
 });

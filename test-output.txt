@@ -1,0 +1,455 @@
+
+> manifestation-app@0.9.1 test
+> vitest run
+
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm[39m
+
+(node:85714) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:85713) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:85716) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:85719) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:85718) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:85725) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m tests/unit/composables/useToast.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 118[2mms[22m[39m
+[90mstderr[2m | tests/unit/composables/useChartExport.test.ts[2m > [22m[2museChartExport[2m > [22m[2mcopyChart[2m > [22m[2mreturns false when clipboard.write rejects
+[22m[39mClipboard write failed: Error: Clipboard denied
+    at [90m/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/composables/useChartExport.test.ts:293:9
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+    at Traces.$ [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4mvitest[24m/dist/chunks/traces.CCmnQaNT.js:142:27[90m)[39m
+    at trace [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4mvitest[24m/dist/chunks/test.B8ej_ZHS.js:239:21[90m)[39m
+    at runTest [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:12[90m)[39m
+
+[90mstderr[2m | tests/unit/composables/useUpdateService.test.ts[2m > [22m[2museUpdateService()[2m > [22m[2mtransitions to error state when downloadAndInstall throws
+[22m[39mError: disk full
+    at [90m/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/composables/useUpdateService.test.ts:275:49
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+    at Traces.$ [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4mvitest[24m/dist/chunks/traces.CCmnQaNT.js:142:27[90m)[39m
+    at trace [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4mvitest[24m/dist/chunks/test.B8ej_ZHS.js:239:21[90m)[39m
+    at runTest [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:12[90m)[39m
+
+[90mstderr[2m | tests/unit/composables/useUpdateService.test.ts[2m > [22m[2museUpdateService()[2m > [22m[2msilently swallows check() errors — state stays idle, no error banner
+[22m[39mError: network fail
+    at [90m/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/composables/useUpdateService.test.ts:286:33
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+    at Traces.$ [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4mvitest[24m/dist/chunks/traces.CCmnQaNT.js:142:27[90m)[39m
+    at trace [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4mvitest[24m/dist/chunks/test.B8ej_ZHS.js:239:21[90m)[39m
+    at runTest [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:12[90m)[39m
+
+[90mstderr[2m | tests/unit/composables/useChartExport.test.ts[2m > [22m[2museChartExport[2m > [22m[2msaveWithPicker (via exportToCSV)[2m > [22m[2mreturns failure when picker throws error
+[22m[39mTauri save failed: Error: Permission denied
+    at [90m/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/composables/useChartExport.test.ts:347:28
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+    at Traces.$ [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4mvitest[24m/dist/chunks/traces.CCmnQaNT.js:142:27[90m)[39m
+    at trace [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4mvitest[24m/dist/chunks/test.B8ej_ZHS.js:239:21[90m)[39m
+    at runTest [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:12[90m)[39m
+
+[90mstderr[2m | tests/unit/composables/useChartExport.test.ts[2m > [22m[2museChartExport[2m > [22m[2mexport error catch blocks[2m > [22m[2mexportToPDF returns failure when toDataURL throws
+[22m[39mError: Canvas render error
+    at HTMLCanvasElement.<anonymous> [90m(/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/composables/useChartExport.test.ts:361:15[90m)[39m
+    at HTMLCanvasElement.toDataURL [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/spy[24m/dist/index.js:285:34[90m)[39m
+    at exportToPDF [90m(/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39msrc/composables/useChartExport.ts:115:30[90m)[39m
+    at [90m/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/composables/useChartExport.test.ts:364:28
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+
+[90mstderr[2m | tests/unit/composables/useChartExport.test.ts[2m > [22m[2museChartExport[2m > [22m[2mexport error catch blocks[2m > [22m[2mexportToExcel returns failure when XLSX.write throws
+[22m[39mError: XLSX write failure
+    at Proxy.<anonymous> [90m(/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/composables/useChartExport.test.ts:371:15[90m)[39m
+    at Proxy.Mock [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/spy[24m/dist/index.js:285:34[90m)[39m
+    at exportToExcel [90m(/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39msrc/composables/useChartExport.ts:66:39[90m)[39m
+    at [90m/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/composables/useChartExport.test.ts:374:28
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+
+[90mstderr[2m | tests/unit/composables/useChartExport.test.ts[2m > [22m[2museChartExport[2m > [22m[2mexport error catch blocks[2m > [22m[2mexportToCSV returns failure when Blob constructor throws
+[22m[39m[vitest] The Blob mock did not use 'function' or 'class' in its implementation, see https://vitest.dev/api/vi#vi-spyon for examples.
+TypeError: () => {
+        throw new Error("Blob error");
+      } is not a constructor
+    at new Blob [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/spy[24m/dist/index.js:262:27[90m)[39m
+    at exportToCSV [90m(/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39msrc/composables/useChartExport.ts:96:20[90m)[39m
+    at [90m/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/composables/useChartExport.test.ts:384:28
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+    at Traces.$ [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4mvitest[24m/dist/chunks/traces.CCmnQaNT.js:142:27[90m)[39m
+
+[90mstderr[2m | tests/unit/composables/useChartExport.test.ts[2m > [22m[2museChartExport[2m > [22m[2mexport error catch blocks[2m > [22m[2mexportToHTML returns failure when toDataURL throws
+[22m[39mError: Canvas error
+    at HTMLCanvasElement.<anonymous> [90m(/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/composables/useChartExport.test.ts:391:15[90m)[39m
+    at HTMLCanvasElement.toDataURL [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/spy[24m/dist/index.js:285:34[90m)[39m
+    at exportToHTML [90m(/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39msrc/composables/useChartExport.ts:154:38[90m)[39m
+    at [90m/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/composables/useChartExport.test.ts:394:28
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+
+ [31m❯[39m tests/unit/composables/useChartExport.test.ts [2m([22m[2m29 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 18[2mms[22m[39m
+       [32m✓[39m creates a sheet from the data and writes an .xlsx blob[32m 4[2mms[22m[39m
+       [32m✓[39m uses a custom sheetName when provided[32m 1[2mms[22m[39m
+       [32m✓[39m includes filename in result message[32m 0[2mms[22m[39m
+       [32m✓[39m returns failure result when data is empty[32m 0[2mms[22m[39m
+       [32m✓[39m generates a CSV blob and triggers download[32m 0[2mms[22m[39m
+       [32m✓[39m wraps values containing commas in double quotes[32m 0[2mms[22m[39m
+       [32m✓[39m escapes double quotes within values[32m 0[2mms[22m[39m
+       [32m✓[39m wraps values containing newlines in double quotes[32m 0[2mms[22m[39m
+       [32m✓[39m converts null and undefined values to empty string[32m 0[2mms[22m[39m
+       [32m✓[39m returns failure result when element is not found[32m 0[2mms[22m[39m
+       [32m✓[39m returns failure when no canvas is present[32m 2[2mms[22m[39m
+       [32m✓[39m generates a PDF and triggers download when element has a canvas[32m 1[2mms[22m[39m
+       [32m✓[39m does not inject print DOM elements[32m 0[2mms[22m[39m
+       [32m✓[39m returns failure result when element is not found[32m 0[2mms[22m[39m
+       [32m✓[39m generates an HTML blob with canvas image and triggers download[32m 0[2mms[22m[39m
+       [32m✓[39m falls back when no canvas is present[32m 0[2mms[22m[39m
+       [32m✓[39m returns false when element is not found[32m 0[2mms[22m[39m
+       [32m✓[39m returns false when no canvas is found inside element[32m 0[2mms[22m[39m
+       [32m✓[39m writes canvas blob to clipboard and returns true[32m 0[2mms[22m[39m
+       [32m✓[39m returns false when clipboard.write rejects[32m 2[2mms[22m[39m
+[31m       [31m×[31m returns false when toBlob yields null[39m[32m 1[2mms[22m[39m
+       [32m✓[39m exposes isExporting reactive ref initialised to false[32m 0[2mms[22m[39m
+       [32m✓[39m uses Tauri save when available and returns success[32m 0[2mms[22m[39m
+       [32m✓[39m returns cancelled when picker returns null[32m 0[2mms[22m[39m
+       [32m✓[39m returns failure when picker throws error[32m 0[2mms[22m[39m
+       [32m✓[39m exportToPDF returns failure when toDataURL throws[32m 1[2mms[22m[39m
+       [32m✓[39m exportToExcel returns failure when XLSX.write throws[32m 0[2mms[22m[39m
+       [32m✓[39m exportToCSV returns failure when Blob constructor throws[32m 0[2mms[22m[39m
+       [32m✓[39m exportToHTML returns failure when toDataURL throws[32m 0[2mms[22m[39m
+[90mstderr[2m | tests/unit/composables/useUpdateService.test.ts[2m > [22m[2museUpdateService()[2m > [22m[2mrestart() stays in ready state when relaunch() throws
+[22m[39mError: no process plugin
+    at [90m/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/composables/useUpdateService.test.ts:383:36
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+    at Traces.$ [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4mvitest[24m/dist/chunks/traces.CCmnQaNT.js:142:27[90m)[39m
+    at trace [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4mvitest[24m/dist/chunks/test.B8ej_ZHS.js:239:21[90m)[39m
+    at runTest [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:12[90m)[39m
+
+ [32m✓[39m tests/unit/components/ui/ConfirmDialog.spec.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32m✓[39m tests/unit/composables/useUpdateService.test.ts [2m([22m[2m30 tests[22m[2m)[22m[32m 36[2mms[22m[39m
+ [32m✓[39m tests/unit/components/ui/AppToast.spec.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+[90mstderr[2m | tests/unit/components/ui/Settings.spec.ts[2m > [22m[2mSettings.vue[2m > [22m[2mfalls back to v0.2.2 when getVersion rejects
+[22m[39mError: not in tauri
+    at [90m/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/components/ui/Settings.spec.ts:99:49
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+    at Traces.$ [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4mvitest[24m/dist/chunks/traces.CCmnQaNT.js:142:27[90m)[39m
+    at trace [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4mvitest[24m/dist/chunks/test.B8ej_ZHS.js:239:21[90m)[39m
+    at runTest [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:12[90m)[39m
+
+ [32m✓[39m tests/unit/components/ui/Settings.spec.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 40[2mms[22m[39m
+[90mstderr[2m | tests/unit/components/App.spec.ts[2m > [22m[2mApp.vue[2m > [22m[2mhandles loadSharingState rejection without throwing
+[22m[39mError: network error
+    at [90m/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/components/App.spec.ts:95:7
+[90m    at processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:20
+
+[90mstderr[2m | tests/unit/components/charts/ChartActions.spec.ts[2m > [22m[2mChartActions.vue[2m > [22m[2mshows "Export failed unexpectedly" toast when export throws
+[22m[39mError: network crash
+    at [90m/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/components/charts/ChartActions.spec.ts:212:45
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+    at Traces.$ [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4mvitest[24m/dist/chunks/traces.CCmnQaNT.js:142:27[90m)[39m
+    at trace [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4mvitest[24m/dist/chunks/test.B8ej_ZHS.js:239:21[90m)[39m
+    at runTest [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:12[90m)[39m
+
+ [32m✓[39m tests/unit/components/ui/UpdateNotification.spec.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 88[2mms[22m[39m
+ [32m✓[39m tests/unit/components/charts/ProgressChart.spec.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 43[2mms[22m[39m
+ [32m✓[39m tests/unit/components/App.spec.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 70[2mms[22m[39m
+ [32m✓[39m tests/unit/components/charts/ChartActions.spec.ts [2m([22m[2m24 tests[22m[2m)[22m[32m 104[2mms[22m[39m
+[90mstderr[2m | tests/unit/components/ui/QuestionItem.spec.ts[2m > [22m[2mQuestionItem.vue[2m > [22m[2mupdates store on input
+[22m[39mFailed to save answer: TypeError: Cannot read properties of undefined (reading 'invoke')
+    at invoke [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@tauri-apps/api[24m/core.js:202:39[90m)[39m
+    at Database.load [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@tauri-apps/plugin-sql[24m/dist-js/index.js:32:29[90m)[39m
+    at getDb [90m(/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39msrc/services/db.ts:13:25[90m)[39m
+    at saveAnswer [90m(/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39msrc/services/db.ts:36:20[90m)[39m
+    at Proxy.setAnswer [90m(/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39msrc/stores/questionnaire.ts:171:13[90m)[39m
+    at Proxy.wrappedAction [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4mpinia[24m/dist/pinia.mjs:1400:26[90m)[39m
+    at Proxy.Mock [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/spy[24m/dist/index.js:285:34[90m)[39m
+    at ComputedRefImpl.set [as setter] [90m(/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39msrc/components/ui/QuestionItem.vue:70:13[90m)[39m
+    at ComputedRefImpl.set value [as value] [90m(/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vue/reactivity[24m/dist/reactivity.cjs.js:1719:12[90m)[39m
+    at handleInput [90m(/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39msrc/components/ui/QuestionItem.vue:93:17[90m)[39m
+
+ [32m✓[39m tests/unit/views/CategoryDetailView.spec.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 113[2mms[22m[39m
+ [32m✓[39m tests/unit/components/dashboard/NetworkRanking.spec.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 104[2mms[22m[39m
+ [32m✓[39m tests/unit/components/ui/QuestionItem.spec.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 56[2mms[22m[39m
+[90mstderr[2m | tests/unit/views/DashboardView.spec.ts[2m > [22m[2mDashboardView.vue[2m > [22m[2mselection mode[2m > [22m[2mdoDeleteSession shows error toast on store failure
+[22m[39mError: DB error
+    at [90m/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/views/DashboardView.spec.ts:372:47
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+    at Traces.$ [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4mvitest[24m/dist/chunks/traces.CCmnQaNT.js:142:27[90m)[39m
+    at trace [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4mvitest[24m/dist/chunks/test.B8ej_ZHS.js:239:21[90m)[39m
+    at runTest [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:12[90m)[39m
+
+[90mstderr[2m | tests/unit/views/DashboardView.spec.ts[2m > [22m[2mDashboardView.vue[2m > [22m[2mselection mode[2m > [22m[2mdoDeleteSelected shows error toast on store failure
+[22m[39mError: bulk fail
+    at [90m/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/views/DashboardView.spec.ts:425:48
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+    at Traces.$ [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4mvitest[24m/dist/chunks/traces.CCmnQaNT.js:142:27[90m)[39m
+    at trace [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4mvitest[24m/dist/chunks/test.B8ej_ZHS.js:239:21[90m)[39m
+    at runTest [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:12[90m)[39m
+
+[90mstderr[2m | tests/unit/components/ui/Questionnaire.spec.ts[2m > [22m[2mQuestionnaire.vue[2m > [22m[2mshows error message on submit failure
+[22m[39mError: DB error
+    at [90m/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/components/ui/Questionnaire.spec.ts:160:73
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+    at Traces.$ [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4mvitest[24m/dist/chunks/traces.CCmnQaNT.js:142:27[90m)[39m
+    at trace [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4mvitest[24m/dist/chunks/test.B8ej_ZHS.js:239:21[90m)[39m
+    at runTest [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:12[90m)[39m
+
+ [32m✓[39m tests/unit/views/DashboardView.spec.ts [2m([22m[2m41 tests[22m[2m)[22m[32m 197[2mms[22m[39m
+[90mstderr[2m | tests/unit/components/ui/Questionnaire.spec.ts[2m > [22m[2mQuestionnaire.vue[2m > [22m[2msubmit shows error message when submitSession rejects
+[22m[39mError: DB write failed
+    at [90m/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/components/ui/Questionnaire.spec.ts:489:7
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+    at Traces.$ [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4mvitest[24m/dist/chunks/traces.CCmnQaNT.js:142:27[90m)[39m
+    at trace [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4mvitest[24m/dist/chunks/test.B8ej_ZHS.js:239:21[90m)[39m
+    at runTest [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:12[90m)[39m
+
+ [32m✓[39m tests/unit/components/ui/Questionnaire.spec.ts [2m([22m[2m50 tests[22m[2m)[22m[33m 326[2mms[22m[39m
+[90mstderr[2m | tests/integration/chart-export-pdf.test.ts[2m > [22m[2museChartExport.exportToPDF integration[2m > [22m[2mreturns failure when jsPDF throws internally
+[22m[39mError: jsPDF internal error
+    at jsPDF.<anonymous> [90m(/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/integration/chart-export-pdf.test.ts:219:13[90m)[39m
+    at jsPDF.Mock [as output] [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/spy[24m/dist/index.js:285:34[90m)[39m
+    at exportToPDF [90m(/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39msrc/composables/useChartExport.ts:135:28[90m)[39m
+    at [90m/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/integration/chart-export-pdf.test.ts:222:26
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+
+[90mstderr[2m | tests/integration/chart-export-pdf.test.ts[2m > [22m[2museChartExport.exportToPDF integration[2m > [22m[2mproduces a blob with application/pdf MIME type
+[22m[39mTauri save failed: TypeError: blob.arrayBuffer is not a function
+    at saveWithPicker [90m(/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39msrc/composables/useChartExport.ts:34:38[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+    at exportToPDF [90m(/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39msrc/composables/useChartExport.ts:138:14[90m)[39m
+    at [90m/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/integration/chart-export-pdf.test.ts:230:5
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:20
+
+ [32m✓[39m tests/integration/chart-export-pdf.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32m✓[39m tests/unit/components/ui/NetworkStatus.spec.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+ [32m✓[39m tests/unit/components/dashboard/CategoryCard.spec.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+ [32m✓[39m tests/unit/views/SettingsView.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+(node:85742) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+[90mstderr[2m | tests/unit/services/db.test.ts[2m > [22m[2mDatabase Service[2m > [22m[2minitTables should run migrations on first connect
+[22m[39mApplying migration 1: initial_schema
+
+[90mstderr[2m | tests/unit/services/db.test.ts[2m > [22m[2mDatabase Service[2m > [22m[2minitTables should run migrations on first connect
+[22m[39mMigration 1 applied successfully.
+Applying migration 2: historical_schema
+
+[90mstderr[2m | tests/unit/services/db.test.ts[2m > [22m[2mDatabase Service[2m > [22m[2minitTables should run migrations on first connect
+[22m[39mMigration 2 applied successfully.
+Applying migration 3: optimized_indexes
+
+[90mstderr[2m | tests/unit/services/db.test.ts[2m > [22m[2mDatabase Service[2m > [22m[2minitTables should run migrations on first connect
+[22m[39mMigration 3 applied successfully.
+
+ [32m✓[39m tests/unit/components/ui/SharingToggle.spec.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 56[2mms[22m[39m
+ [32m✓[39m tests/unit/services/db.test.ts [2m([22m[2m21 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+[90mstderr[2m | tests/unit/composables/useNetwork.test.ts[2m > [22m[2museNetwork composable[2m > [22m[2mloadSharingState leaves sharingEnabled unchanged when invoke throws
+[22m[39mError: permission denied
+    at [90m/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/composables/useNetwork.test.ts:183:64
+    at Mock [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/spy[24m/dist/index.js:285:34[90m)[39m
+    at invoke [90m(/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/composables/useNetwork.test.ts:8:35[90m)[39m
+    at loadSharingState [90m(/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39msrc/composables/useNetwork.ts:42:34[90m)[39m
+    at init [90m(/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39msrc/composables/useNetwork.ts:79:13[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+    at [90m/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/composables/useNetwork.test.ts:189:5
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:20
+
+[90mstderr[2m | tests/unit/composables/useNetwork.test.ts[2m > [22m[2museNetwork composable[2m > [22m[2minvoke get_peer_count failure falls back to 0 via catch(() => 0)
+[22m[39mError: permission denied
+    at [90m/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/composables/useNetwork.test.ts:316:59
+    at Mock [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/spy[24m/dist/index.js:285:34[90m)[39m
+    at invoke [90m(/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/composables/useNetwork.test.ts:8:35[90m)[39m
+    at init [90m(/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39msrc/composables/useNetwork.ts:75:34[90m)[39m
+    at [90m/Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mtests/unit/composables/useNetwork.test.ts:321:11
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/simafuneyaholafvmpe/IdeaProjects/manifestation-algorithm/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+
+(node:85737) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m tests/unit/components/ui/ResumeDialog.spec.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+ [32m✓[39m tests/unit/composables/useNetwork.test.ts [2m([22m[2m22 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m tests/unit/components/dashboard/StatsPanel.spec.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 45[2mms[22m[39m
+ [32m✓[39m tests/integration/history-delete-flow.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+(node:85740) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:85738) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:85743) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m tests/unit/stores/questionnaire.test.ts [2m([22m[2m21 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m tests/integration/questionnaire-flow.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m tests/unit/views/HomeView.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m tests/unit/stores/history.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+[90mstderr[2m | tests/unit/services/migrations.test.ts[2m > [22m[2mDatabase Migrations[2m > [22m[2mshould create migrations table and run pending migrations
+[22m[39mApplying migration 1: initial_schema
+
+[90mstderr[2m | tests/unit/services/migrations.test.ts[2m > [22m[2mDatabase Migrations[2m > [22m[2mshould create migrations table and run pending migrations
+[22m[39mMigration 1 applied successfully.
+Applying migration 2: historical_schema
+
+[90mstderr[2m | tests/unit/services/migrations.test.ts[2m > [22m[2mDatabase Migrations[2m > [22m[2mshould create migrations table and run pending migrations
+[22m[39mMigration 2 applied successfully.
+Applying migration 3: optimized_indexes
+
+[90mstderr[2m | tests/unit/services/migrations.test.ts[2m > [22m[2mDatabase Migrations[2m > [22m[2mshould create migrations table and run pending migrations
+[22m[39mMigration 3 applied successfully.
+
+[90mstderr[2m | tests/unit/services/migrations.test.ts[2m > [22m[2mDatabase Migrations[2m > [22m[2mshould throw and stop when a migration fails
+[22m[39mApplying migration 1: initial_schema
+
+ [32m✓[39m tests/unit/services/migrations.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m tests/unit/services/export.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m tests/unit/services/sessionManager.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m tests/unit/utils/analysis.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 1[2mms[22m[39m
+[90mstderr[2m | tests/unit/services/db_trends.test.ts[2m > [22m[2mdb_trends service[2m > [22m[2mreturns empty object when no historical data exists
+[22m[39mApplying migration 1: initial_schema
+
+[90mstderr[2m | tests/unit/services/db_trends.test.ts[2m > [22m[2mdb_trends service[2m > [22m[2mreturns empty object when no historical data exists
+[22m[39mMigration 1 applied successfully.
+Applying migration 2: historical_schema
+
+[90mstderr[2m | tests/unit/services/db_trends.test.ts[2m > [22m[2mdb_trends service[2m > [22m[2mreturns empty object when no historical data exists
+[22m[39mMigration 2 applied successfully.
+Applying migration 3: optimized_indexes
+
+[90mstderr[2m | tests/unit/services/db_trends.test.ts[2m > [22m[2mdb_trends service[2m > [22m[2mreturns empty object when no historical data exists
+[22m[39mMigration 3 applied successfully.
+
+ [32m✓[39m tests/unit/services/db_trends.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m tests/unit/services/scoring.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 1[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/unit/composables/useChartExport.test.ts[2m > [22museChartExport[2m > [22mcopyChart[2m > [22mreturns false when toBlob yields null
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m tests/unit/composables/useChartExport.test.ts:[2m306:22[22m[39m
+    [90m304| [39m      [35mconst[39m { copyChart } [33m=[39m [34museChartExport[39m()[33m;[39m
+    [90m305| [39m      [35mconst[39m result [33m=[39m [35mawait[39m [34mcopyChart[39m([32m'test-chart-element'[39m)[33m;[39m
+    [90m306| [39m      [34mexpect[39m(result)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m   | [39m                     [31m^[39m
+    [90m307| [39m    })[33m;[39m
+    [90m308| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Unhandled Errors [49m[22m[31m⎯⎯⎯⎯⎯⎯[39m
+[31m[1m
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.[22m[39m
+
+[31m⎯⎯⎯⎯[39m[1m[41m Unhandled Rejection [49m[22m[31m⎯⎯⎯⎯⎯[39m
+[31m[1mError[22m: Canvas toBlob failed[39m
+[36m [2m❯[22m src/composables/useChartExport.ts:[2m197:23[22m[39m
+    [90m195| [39m        canvas[33m.[39m[34mtoBlob[39m(blob [33m=>[39m {
+    [90m196| [39m          [35mif[39m (blob) [34mresolve[39m(blob)[33m;[39m
+    [90m197| [39m          [35melse[39m [34mreject[39m([35mnew[39m [33mError[39m([32m'Canvas toBlob failed'[39m))[33m;[39m
+    [90m   | [39m                      [31m^[39m
+    [90m198| [39m        }[33m,[39m [32m'image/png'[39m)[33m;[39m
+    [90m199| [39m      })[33m;[39m
+[90m [2m❯[22m HTMLCanvasElement.<anonymous> tests/unit/composables/useChartExport.test.ts:[2m302:9[22m[39m
+[90m [2m❯[22m HTMLCanvasElement.toBlob node_modules/@vitest/spy/dist/index.js:[2m285:34[22m[39m
+[90m [2m❯[22m src/composables/useChartExport.ts:[2m195:16[22m[39m
+[90m [2m❯[22m copyChart src/composables/useChartExport.ts:[2m194:27[22m[39m
+[90m [2m❯[22m tests/unit/composables/useChartExport.test.ts:[2m305:28[22m[39m
+[90m [2m❯[22m node_modules/@vitest/runner/dist/index.js:[2m145:11[22m[39m
+[90m [2m❯[22m node_modules/@vitest/runner/dist/index.js:[2m915:26[22m[39m
+[90m [2m❯[22m node_modules/@vitest/runner/dist/index.js:[2m1243:20[22m[39m
+
+[31mThis error originated in "[1mtests/unit/composables/useChartExport.test.ts[22m" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.[39m
+[31m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m34 passed[39m[22m[90m (35)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m505 passed[39m[22m[90m (506)[39m
+[2m     Errors [22m [1m[31m1 error[39m[22m
+[2m   Start at [22m 15:38:03
+[2m   Duration [22m 2.16s[2m (transform 3.56s, setup 0ms, import 6.15s, tests 1.72s, environment 17.57s)[22m
+
