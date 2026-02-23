@@ -9,7 +9,6 @@ vi.mock('@/composables/useToast', () => ({
 }));
 
 // ── Mock useChartExport ──────────────────────────────────────────────────────
-const mockPrintChart = vi.fn().mockReturnValue({ success: true, message: 'Print dialog opened' });
 const mockExportToExcel = vi
   .fn()
   .mockResolvedValue({ success: true, message: 'Saved my_export.xlsx' });
@@ -22,41 +21,18 @@ const mockExportToPDF = vi
 const mockExportToHTML = vi.fn().mockResolvedValue({ success: true, message: 'Saved chart.html' });
 const mockCopyChart = vi.fn().mockResolvedValue(true);
 
-/** Trigger the change event on the export select to open the save modal. */
-async function openModal(wrapper: ReturnType<typeof mount>, format: string) {
+/** Selects a format from the export dropdown — triggers export immediately. */
+async function selectFormat(wrapper: ReturnType<typeof mount>, format: string) {
   const select = wrapper.find<HTMLSelectElement>('.export-select');
   select.element.value = format;
   await select.trigger('change');
-  await nextTick();
-}
-
-/** Click the confirm button in the save modal. */
-async function confirmModal() {
-  const btn = document.querySelector('.save-confirm-btn') as HTMLButtonElement;
-  btn.click();
   await flushPromises();
-  await nextTick();
-}
-
-/** Click the cancel button in the save modal. */
-async function cancelModal() {
-  const btn = document.querySelector('.save-cancel-btn') as HTMLButtonElement;
-  btn.click();
-  await nextTick();
-}
-
-/** Click the browse button in the save modal. */
-async function clickBrowse() {
-  const btn = document.querySelector('.save-browse-btn') as HTMLButtonElement;
-  btn.click();
   await nextTick();
 }
 
 vi.mock('@/composables/useChartExport', () => ({
   useChartExport: () => ({
-    isPrinting: { value: false },
     isExporting: { value: false },
-    printChart: mockPrintChart,
     exportToExcel: mockExportToExcel,
     exportToCSV: mockExportToCSV,
     exportToPDF: mockExportToPDF,
@@ -78,6 +54,13 @@ describe('ChartActions.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.unstubAllGlobals();
+    Object.defineProperty(document, 'fullscreenElement', {
+      value: null,
+      writable: true,
+      configurable: true
+    });
+    HTMLElement.prototype.requestFullscreen = vi.fn().mockResolvedValue(undefined);
+    document.exitFullscreen = vi.fn().mockResolvedValue(undefined);
   });
 
   // ── Rendering ─────────────────────────────────────────────────────────────────
@@ -88,71 +71,41 @@ describe('ChartActions.vue', () => {
     wrapper.unmount();
   });
 
-  it('has no-print class on the container', () => {
+  it('renders the fullscreen button', () => {
     const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    expect(wrapper.find('.chart-actions').classes()).toContain('no-print');
+    expect(wrapper.find('.action-btn[title="View full screen"]').exists()).toBe(true);
     wrapper.unmount();
   });
 
-  it('export select has 7 options (placeholder + 6 formats)', () => {
+  it('export select has 5 options (placeholder + 4 formats)', () => {
     const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
     const options = wrapper.findAll('.export-select option');
-    expect(options).toHaveLength(7);
+    expect(options).toHaveLength(5);
     wrapper.unmount();
   });
 
-  it('save modal is hidden initially', () => {
+  it('no modal is rendered initially', () => {
     const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
     expect(document.querySelector('.save-modal')).toBeNull();
     wrapper.unmount();
   });
 
-  // ── Opening / closing the modal ───────────────────────────────────────────────
-
-  it('selecting a format opens the save modal', async () => {
-    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'pdf');
-    expect(document.querySelector('.save-modal')).not.toBeNull();
-    wrapper.unmount();
+  it('no modal is rendered after any format selection', async () => {
+    for (const format of ['excel', 'csv', 'pdf', 'html']) {
+      const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
+      await selectFormat(wrapper, format);
+      expect(document.querySelector('.save-modal')).toBeNull();
+      wrapper.unmount();
+    }
   });
 
-  it('cancel button hides the save modal', async () => {
+  it('select resets to placeholder after change', async () => {
     const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'pdf');
-    await cancelModal();
-    expect(document.querySelector('.save-modal')).toBeNull();
-    wrapper.unmount();
-  });
-
-  it('✕ close button hides the save modal', async () => {
-    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'pdf');
-    const closeBtn = document.querySelector('.close-btn') as HTMLButtonElement;
-    closeBtn.click();
+    const select = wrapper.find<HTMLSelectElement>('.export-select');
+    select.element.value = 'csv';
+    await select.trigger('change');
     await nextTick();
-    expect(document.querySelector('.save-modal')).toBeNull();
-    wrapper.unmount();
-  });
-
-  it('overlay click closes the modal', async () => {
-    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'pdf');
-    const overlay = document.querySelector('.save-modal-overlay') as HTMLElement;
-    overlay.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    await nextTick();
-    expect(document.querySelector('.save-modal')).toBeNull();
-    wrapper.unmount();
-  });
-
-  it('filename input v-model: editing filename updates saveModal.filename', async () => {
-    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'pdf');
-    const input = document.querySelector('.save-filename-input') as HTMLInputElement;
-    // Simulate the user typing a new filename — triggers the v-model onUpdate:modelValue handler
-    input.value = 'My_Custom_Name.pdf';
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    await nextTick();
-    expect(input.value).toBe('My_Custom_Name.pdf');
+    expect(select.element.value).toBe('');
     wrapper.unmount();
   });
 
@@ -162,302 +115,285 @@ describe('ChartActions.vue', () => {
     select.element.value = '';
     await select.trigger('change');
     await nextTick();
-    expect(document.querySelector('.save-modal')).toBeNull();
+    expect(mockCopyChart).not.toHaveBeenCalled();
     wrapper.unmount();
   });
 
-  it('directory label shows handle.name when modal reopened after a browse pick', async () => {
-    const mockHandle = { name: 'MyDocs' } as FileSystemDirectoryHandle;
-    vi.stubGlobal('showDirectoryPicker', vi.fn().mockResolvedValue(mockHandle));
+  // ── Direct export calls ───────────────────────────────────────────────────────
+
+  it('Copy button calls copyChart directly without modal', async () => {
     const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    // First open: pick a directory
-    await openModal(wrapper, 'pdf');
-    await clickBrowse();
-    await flushPromises();
-    await nextTick();
-    // Close the modal
-    await cancelModal();
-    // Reopen: dirHandle is now set — covers the `saveModal.dirHandle ? dirHandle.name : ...` truthy branch
-    await openModal(wrapper, 'pdf');
-    const dirPath = document.querySelector('.save-directory-path') as HTMLElement;
-    expect(dirPath.textContent).toContain('MyDocs');
-    wrapper.unmount();
-  });
-
-  it('bareName falls back to full filename when it lacks the expected extension', async () => {
-    // Covers the `: saveModal.filename` else branch in the bareName ternary
-    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'csv');
-    // Change the filename to one without the extension
-    const input = document.querySelector('.save-filename-input') as HTMLInputElement;
-    input.value = 'custom_no_ext';
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    await nextTick();
-    await confirmModal();
-    // exportToCSV should be called with 'custom_no_ext' (no slice, since it doesn't end with .csv)
-    expect(mockExportToCSV).toHaveBeenCalledWith(defaultProps.data, 'custom_no_ext');
-    wrapper.unmount();
-  });
-
-  it('opens modal again after re-selecting same format', async () => {
-    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'csv');
-    await cancelModal();
-    expect(document.querySelector('.save-modal')).toBeNull();
-    await openModal(wrapper, 'csv');
-    expect(document.querySelector('.save-modal')).not.toBeNull();
-    wrapper.unmount();
-  });
-
-  // ── File fields visibility ────────────────────────────────────────────────────
-
-  it('file export (pdf) shows filename input and directory field', async () => {
-    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'pdf');
-    expect(document.querySelector('.save-filename-input')).not.toBeNull();
-    expect(document.querySelector('.save-directory-path')).not.toBeNull();
-    wrapper.unmount();
-  });
-
-  it('print format hides filename and directory fields', async () => {
-    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'print');
-    expect(document.querySelector('.save-filename-input')).toBeNull();
-    expect(document.querySelector('.save-directory-path')).toBeNull();
-    wrapper.unmount();
-  });
-
-  it('copy format hides filename and directory fields', async () => {
-    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'copy');
-    expect(document.querySelector('.save-filename-input')).toBeNull();
-    expect(document.querySelector('.save-directory-path')).toBeNull();
-    wrapper.unmount();
-  });
-
-  it('filename input is pre-populated with title-based name for PDF', async () => {
-    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'pdf');
-    const input = document.querySelector('.save-filename-input') as HTMLInputElement;
-    expect(input.value).toBe('My_Chart_Title.pdf');
-    wrapper.unmount();
-  });
-
-  it('filename input is pre-populated with props.filename for Excel', async () => {
-    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'excel');
-    const input = document.querySelector('.save-filename-input') as HTMLInputElement;
-    expect(input.value).toBe('my_export.xlsx');
-    wrapper.unmount();
-  });
-
-  // ── Export actions ────────────────────────────────────────────────────────────
-
-  it('Print option calls printChart and closes modal', async () => {
-    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'print');
-    await confirmModal();
-    expect(mockPrintChart).toHaveBeenCalledWith('my-chart', 'My Chart Title');
-    expect(document.querySelector('.save-modal')).toBeNull();
-    wrapper.unmount();
-  });
-
-  it('print calls addToast with info type on success', async () => {
-    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'print');
-    await confirmModal();
-    expect(mockAddToast).toHaveBeenCalledWith('Print dialog opened', 'info');
-    wrapper.unmount();
-  });
-
-  it('handlePrint shows error toast when printChart returns success: false', async () => {
-    mockPrintChart.mockReturnValueOnce({ success: false, message: 'Print failed' });
-    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'print');
-    await confirmModal();
-    expect(mockAddToast).toHaveBeenCalledWith('Print failed', 'error');
-    wrapper.unmount();
-  });
-
-  it('Export Excel calls exportToExcel and closes modal', async () => {
-    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'excel');
-    await confirmModal();
-    expect(mockExportToExcel).toHaveBeenCalledWith(defaultProps.data, 'my_export');
-    expect(document.querySelector('.save-modal')).toBeNull();
-    wrapper.unmount();
-  });
-
-  it('Export CSV calls exportToCSV and closes modal', async () => {
-    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'csv');
-    await confirmModal();
-    expect(mockExportToCSV).toHaveBeenCalledWith(defaultProps.data, 'my_export');
-    expect(document.querySelector('.save-modal')).toBeNull();
-    wrapper.unmount();
-  });
-
-  it('Export PDF calls exportToPDF and closes modal', async () => {
-    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'pdf');
-    await confirmModal();
-    expect(mockExportToPDF).toHaveBeenCalledWith('my-chart', 'My Chart Title');
-    expect(document.querySelector('.save-modal')).toBeNull();
-    wrapper.unmount();
-  });
-
-  it('Export HTML calls exportToHTML and closes modal', async () => {
-    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'html');
-    await confirmModal();
-    expect(mockExportToHTML).toHaveBeenCalledWith('my-chart', 'My Chart Title');
-    expect(document.querySelector('.save-modal')).toBeNull();
-    wrapper.unmount();
-  });
-
-  it('Copy Chart calls copyChart and shows success toast', async () => {
-    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'copy');
-    await confirmModal();
+    await wrapper.find('.action-btn[title="Copy Chart"]').trigger('click');
     expect(mockCopyChart).toHaveBeenCalledWith('my-chart');
     expect(mockAddToast).toHaveBeenCalledWith('Chart copied to clipboard', 'success');
     wrapper.unmount();
   });
 
-  it('Copy Chart shows error toast when copy fails', async () => {
+  it('Copy button shows error toast when copy fails', async () => {
     mockCopyChart.mockResolvedValueOnce(false);
     const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'copy');
-    await confirmModal();
-    expect(mockAddToast).toHaveBeenCalledWith('Copy failed — clipboard not available', 'error');
+    await wrapper.find('.action-btn[title="Copy Chart"]').trigger('click');
+    expect(mockAddToast).toHaveBeenCalledWith(
+      'Copy failed \u2014 clipboard not available',
+      'error'
+    );
+    wrapper.unmount();
+  });
+
+  it('Excel selection calls exportToExcel with base filename', async () => {
+    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
+    await selectFormat(wrapper, 'excel');
+    expect(mockExportToExcel).toHaveBeenCalledWith(defaultProps.data, 'my_export');
+    wrapper.unmount();
+  });
+
+  it('Excel selection shows success toast', async () => {
+    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
+    await selectFormat(wrapper, 'excel');
+    expect(mockAddToast).toHaveBeenCalledWith('Saved my_export.xlsx', 'success');
+    wrapper.unmount();
+  });
+
+  it('CSV selection calls exportToCSV with base filename', async () => {
+    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
+    await selectFormat(wrapper, 'csv');
+    expect(mockExportToCSV).toHaveBeenCalledWith(defaultProps.data, 'my_export');
+    wrapper.unmount();
+  });
+
+  it('PDF selection calls exportToPDF with chart title', async () => {
+    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
+    await selectFormat(wrapper, 'pdf');
+    expect(mockExportToPDF).toHaveBeenCalledWith('my-chart', 'My Chart Title');
+    wrapper.unmount();
+  });
+
+  it('HTML selection calls exportToHTML with chart title', async () => {
+    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
+    await selectFormat(wrapper, 'html');
+    expect(mockExportToHTML).toHaveBeenCalledWith('my-chart', 'My Chart Title');
+    wrapper.unmount();
+  });
+
+  it('uses title as basename when filename prop is empty', async () => {
+    const wrapper = mount(ChartActions, {
+      props: { ...defaultProps, filename: '' },
+      attachTo: document.body
+    });
+    await selectFormat(wrapper, 'excel');
+    expect(mockExportToExcel).toHaveBeenCalledWith(defaultProps.data, 'My_Chart_Title');
     wrapper.unmount();
   });
 
   // ── Busy state ────────────────────────────────────────────────────────────────
 
-  it('close button is disabled while export is in progress', async () => {
-    mockExportToExcel.mockReturnValueOnce(new Promise(() => {}));
+  it('select is disabled while export is in progress', async () => {
+    let resolveExport!: (val: { success: boolean; message: string }) => void;
+    mockExportToExcel.mockReturnValueOnce(
+      new Promise(res => {
+        resolveExport = res;
+      })
+    );
     const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'excel');
-    const confirmBtn = document.querySelector('.save-confirm-btn') as HTMLButtonElement;
-    confirmBtn.click();
+    const select = wrapper.find<HTMLSelectElement>('.export-select');
+    select.element.value = 'excel';
+    await select.trigger('change');
     await nextTick();
-    const closeBtn = document.querySelector('.close-btn') as HTMLButtonElement;
-    expect(closeBtn.disabled).toBe(true);
+    expect(select.element.disabled).toBe(true);
+    resolveExport({ success: true, message: 'done' });
+    await flushPromises();
     wrapper.unmount();
   });
 
-  it('progress bar is shown while export is in progress', async () => {
-    mockExportToPDF.mockReturnValueOnce(new Promise(() => {}));
+  it('select is re-enabled after export completes', async () => {
     const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'pdf');
-    const confirmBtn = document.querySelector('.save-confirm-btn') as HTMLButtonElement;
-    confirmBtn.click();
-    await nextTick();
-    expect(document.querySelector('.export-progress')).not.toBeNull();
-    wrapper.unmount();
-  });
-
-  it('closeSaveModal while busy does not close the modal', async () => {
-    mockExportToExcel.mockReturnValueOnce(new Promise(() => {}));
-    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'excel');
-    const confirmBtn = document.querySelector('.save-confirm-btn') as HTMLButtonElement;
-    confirmBtn.click();
-    await nextTick();
-    const overlay = document.querySelector('.save-modal-overlay') as HTMLElement;
-    overlay?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    await nextTick();
-    expect(document.querySelector('.save-modal')).not.toBeNull();
+    await selectFormat(wrapper, 'excel');
+    const select = wrapper.find<HTMLSelectElement>('.export-select');
+    expect(select.element.disabled).toBe(false);
     wrapper.unmount();
   });
 
   // ── Error handling ────────────────────────────────────────────────────────────
 
-  it('runExport catch block: shows "Export failed unexpectedly" toast when export throws', async () => {
+  it('shows "Export failed unexpectedly" toast when export throws', async () => {
     mockExportToExcel.mockRejectedValueOnce(new Error('network crash'));
     const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'excel');
-    await confirmModal();
+    await selectFormat(wrapper, 'excel');
     expect(mockAddToast).toHaveBeenCalledWith('Export failed unexpectedly', 'error');
     wrapper.unmount();
   });
 
-  it('runExport shows error toast when export resolves with success: false', async () => {
+  it('shows error toast when export resolves with success: false', async () => {
     mockExportToCSV.mockResolvedValueOnce({ success: false, message: 'Permission denied' });
     const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'csv');
-    await confirmModal();
+    await selectFormat(wrapper, 'csv');
     expect(mockAddToast).toHaveBeenCalledWith('Permission denied', 'error');
     wrapper.unmount();
   });
 
-  it('runExport suppresses toast when message is "Save cancelled"', async () => {
+  it('suppresses toast when message is "Save cancelled"', async () => {
     mockExportToCSV.mockResolvedValueOnce({ success: false, message: 'Save cancelled' });
     const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'csv');
-    await confirmModal();
+    await selectFormat(wrapper, 'csv');
     expect(mockAddToast).not.toHaveBeenCalled();
     wrapper.unmount();
   });
 
-  it('handlePDFExport shows error toast when exportToPDF returns success: false', async () => {
+  it('shows error toast when exportToPDF returns success: false', async () => {
     mockExportToPDF.mockResolvedValueOnce({ success: false, message: 'PDF failed' });
     const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'pdf');
-    await confirmModal();
+    await selectFormat(wrapper, 'pdf');
     expect(mockAddToast).toHaveBeenCalledWith('PDF failed', 'error');
     wrapper.unmount();
   });
 
-  // ── chooseDirectory (Browse button) ──────────────────────────────────────────
+  // ── Fullscreen button ─────────────────────────────────────────────────────────
 
-  it('Browse: shows info toast when showDirectoryPicker is not supported', async () => {
-    vi.stubGlobal('showDirectoryPicker', undefined);
+  it('fullscreen button calls requestFullscreen on the target element', async () => {
+    const el = document.createElement('div');
+    el.id = 'my-chart';
+    document.body.appendChild(el);
     const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'pdf');
-    await clickBrowse();
-    expect(mockAddToast).toHaveBeenCalledWith(
-      'Directory picker not supported in this environment',
-      'info'
+    await wrapper.find('.action-btn[title="View full screen"]').trigger('click');
+    expect(el.requestFullscreen).toHaveBeenCalled();
+    document.body.removeChild(el);
+    wrapper.unmount();
+  });
+
+  it('fullscreen button calls exitFullscreen when already fullscreen', async () => {
+    const el = document.createElement('div');
+    el.id = 'my-chart';
+    document.body.appendChild(el);
+    Object.defineProperty(document, 'fullscreenElement', {
+      value: el,
+      writable: true,
+      configurable: true
+    });
+    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
+
+    // Trigger the event so the component updates its isFullscreen ref
+    document.dispatchEvent(new Event('fullscreenchange'));
+    await nextTick();
+
+    await wrapper.find('.action-btn[title="Exit full screen"]').trigger('click');
+    expect(document.exitFullscreen).toHaveBeenCalled();
+    document.body.removeChild(el);
+    wrapper.unmount();
+  });
+
+  it('fullscreen button shows "View full screen" title when not fullscreen', () => {
+    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
+    expect(wrapper.find('.action-btn[title="View full screen"]').attributes('title')).toBe(
+      'View full screen'
     );
     wrapper.unmount();
   });
 
-  it('Browse: updates directory label on successful pick', async () => {
-    const mockHandle = { name: 'Documents' } as FileSystemDirectoryHandle;
-    vi.stubGlobal('showDirectoryPicker', vi.fn().mockResolvedValue(mockHandle));
+  it('exits CSS fallback fullscreen when isFullscreen is true but fullscreenElement is null', async () => {
+    const el = document.createElement('div');
+    el.id = 'my-chart';
+    document.body.appendChild(el);
+
+    // Simulate CSS-fallback entry: no native requestFullscreen
+    const origRequestFullscreen = HTMLElement.prototype.requestFullscreen;
+    (HTMLElement.prototype as any).requestFullscreen = undefined;
+
     const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'pdf');
-    await clickBrowse();
-    await flushPromises();
+
+    // Enter fullscreen via CSS fallback (requestFullscreen is falsy)
+    await wrapper.find('.action-btn[title="View full screen"]').trigger('click');
     await nextTick();
-    const dirPath = document.querySelector('.save-directory-path') as HTMLElement;
-    expect(dirPath.textContent).toContain('Documents');
+    expect((wrapper.vm as any).isFullscreen).toBe(true);
+
+    // Ensure document.fullscreenElement is null (no native fullscreen)
+    Object.defineProperty(document, 'fullscreenElement', {
+      value: null,
+      writable: true,
+      configurable: true
+    });
+
+    // Exit fullscreen - should use CSS fallback exit path (lines 105-107)
+    await wrapper.find('.action-btn[title="Exit full screen"]').trigger('click');
+    await nextTick();
+    expect((wrapper.vm as any).isFullscreen).toBe(false);
+    expect(el.classList.contains('fullscreen-fallback')).toBe(false);
+
+    HTMLElement.prototype.requestFullscreen = origRequestFullscreen;
+    document.body.removeChild(el);
     wrapper.unmount();
   });
 
-  it('Browse: AbortError is ignored silently', async () => {
-    const abortErr = Object.assign(new Error('cancelled'), { name: 'AbortError' });
-    vi.stubGlobal('showDirectoryPicker', vi.fn().mockRejectedValue(abortErr));
+  it('Escape key triggers toggleFullscreen when fullscreen is active', async () => {
+    const el = document.createElement('div');
+    el.id = 'my-chart';
+    document.body.appendChild(el);
+
+    Object.defineProperty(document, 'fullscreenElement', {
+      value: el,
+      writable: true,
+      configurable: true
+    });
+
     const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'pdf');
-    await clickBrowse();
-    await flushPromises();
+
+    // Simulate entering fullscreen via fullscreenchange event
+    document.dispatchEvent(new Event('fullscreenchange'));
     await nextTick();
-    expect(mockAddToast).not.toHaveBeenCalled();
+    expect((wrapper.vm as any).isFullscreen).toBe(true);
+
+    // Press Escape key - should call toggleFullscreen (lines 117-118)
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await nextTick();
+    expect(document.exitFullscreen).toHaveBeenCalled();
+
+    document.body.removeChild(el);
     wrapper.unmount();
   });
 
-  it('Browse: other error shows error toast', async () => {
-    const otherErr = new Error('permission denied');
-    vi.stubGlobal('showDirectoryPicker', vi.fn().mockRejectedValue(otherErr));
+  it('Escape key is ignored when not in fullscreen', async () => {
     const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
-    await openModal(wrapper, 'pdf');
-    await clickBrowse();
+    expect((wrapper.vm as any).isFullscreen).toBe(false);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await nextTick();
+    // exitFullscreen should not be called since not in fullscreen
+    expect(document.exitFullscreen).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
+  it('uses CSS fallback when requestFullscreen rejects (covers catch callback)', async () => {
+    const el = document.createElement('div');
+    el.id = 'my-chart';
+    document.body.appendChild(el);
+
+    // Make requestFullscreen reject to trigger the .catch() callback (lines 94-96)
+    HTMLElement.prototype.requestFullscreen = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('fullscreen denied'));
+
+    const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
+    await wrapper.find('.action-btn[title="View full screen"]').trigger('click');
     await flushPromises();
     await nextTick();
-    expect(mockAddToast).toHaveBeenCalledWith('Could not open directory picker', 'error');
+
+    // Catch block: el.classList gets 'fullscreen-fallback' and isFullscreen becomes true
+    expect((wrapper.vm as any).isFullscreen).toBe(true);
+    expect(el.classList.contains('fullscreen-fallback')).toBe(true);
+
+    document.body.removeChild(el);
+    wrapper.unmount();
+  });
+
+  it('toggleFullscreen is a no-op when target element does not exist in DOM', async () => {
+    // Use a targetId that doesn't exist in the DOM (covers the if (!el) return branch)
+    const wrapper = mount(ChartActions, {
+      props: { ...defaultProps, targetId: 'nonexistent-element-id' },
+      attachTo: document.body
+    });
+    await wrapper.find('.action-btn[title="View full screen"]').trigger('click');
+    await flushPromises();
+    // No fullscreen should have been activated since el is null
+    expect((wrapper.vm as any).isFullscreen).toBe(false);
+    expect(document.exitFullscreen).not.toHaveBeenCalled();
     wrapper.unmount();
   });
 });

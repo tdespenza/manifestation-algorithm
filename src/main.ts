@@ -13,4 +13,14 @@ app.config.errorHandler = (err, _instance, info) => {
   console.error('[Vue error]', info, err);
 };
 
+// Global window error handler
+window.addEventListener('error', event => {
+  console.error('[Window error]', event.error || event.message);
+});
+
+// Global unhandled promise rejection handler
+window.addEventListener('unhandledrejection', event => {
+  console.error('[Unhandled promise rejection]', event.reason);
+});
+
 app.mount('#app');

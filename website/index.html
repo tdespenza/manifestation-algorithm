@@ -656,7 +656,9 @@
           if (/Apple M\d|Apple GPU/i.test(renderer)) isArm = true;
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error(e);
+    }
     if (isArm) {
       highlightBtn('btn-mac-arm');
       notice.textContent = '\u25c6 We detected you are on macOS (Apple Silicon) — the Apple Silicon download is highlighted below.';
@@ -701,7 +703,7 @@
         }
       });
     })
-    .catch(function () {});
+    .catch(function (err) { console.error(err); });
 })();
 </script>
 </body>

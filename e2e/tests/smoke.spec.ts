@@ -31,7 +31,8 @@ test.describe('Full user journey (smoke test)', () => {
     // Set first slider to 8
     await firstSlider.fill('8');
     await firstSlider.dispatchEvent('input');
-    await page.waitForTimeout(150);
+    // Wait for Vue reactivity to reflect the new slider value in the score display
+    await expect(page.locator('.score-display, [class*="score"]').first()).not.toHaveText('--', { timeout: 3_000 });
 
     // Step 3: Verify score updates
     const score = await questionnairePage.getScore();
@@ -42,7 +43,7 @@ test.describe('Full user journey (smoke test)', () => {
 
     // Step 5: Verify redirect to dashboard
     await page.waitForURL('/dashboard', { timeout: 15_000 });
-    await expect(dashboardPage.heading).toHaveText('Manifestation History');
+    await expect(dashboardPage.heading).toHaveText('Manifestation Algorithm Tracking History');
 
     // Step 6: Go to settings
     await appPage.goSettings();
@@ -93,7 +94,8 @@ test.describe('Full user journey (smoke test)', () => {
     const slider = page.locator('.slider').first();
     await slider.fill('9');
     await slider.dispatchEvent('input');
-    await page.waitForTimeout(200);
+    // Wait for Vue reactivity to confirm the slider value landed
+    await expect(page.locator('.slider').first()).toHaveValue('9', { timeout: 3_000 });
 
     // Switch to step mode
     await questionnairePage.switchToStepMode();

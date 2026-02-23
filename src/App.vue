@@ -1,20 +1,34 @@
 <script setup lang="ts">
 import { RouterLink, RouterView, useRoute } from 'vue-router';
-import { computed, onErrorCaptured, onMounted } from 'vue';
+import { computed, onErrorCaptured, onMounted, ref } from 'vue';
 import NetworkStatus from './components/NetworkStatus.vue';
 import AppToast from './components/ui/AppToast.vue';
 import UpdateNotification from './components/ui/UpdateNotification.vue';
+import OnboardingModal from './components/ui/OnboardingModal.vue';
 import logoUrl from './assets/logo.svg';
 import { useToast } from './composables/useToast';
 import { useNetwork, loadSharingState } from './composables/useNetwork';
+import { getSetting, setSetting } from './services/db';
 
 const route = useRoute();
 const mainClass = computed(() => (route.name === 'dashboard' ? 'full-width-main' : 'container'));
 const { addToast } = useToast();
 const { sharingEnabled } = useNetwork();
 
+const showOnboarding = ref(false);
+
+async function completeOnboarding() {
+  showOnboarding.value = false;
+  await setSetting('onboarding_complete', 'true');
+}
+
 onMounted(() => {
-  loadSharingState().catch(() => {});
+  loadSharingState().catch(console.error);
+  getSetting('onboarding_complete')
+    .then(val => {
+      if (!val) showOnboarding.value = true;
+    })
+    .catch(console.error);
 });
 
 onErrorCaptured(err => {
@@ -79,12 +93,13 @@ onErrorCaptured(err => {
     </main>
   </div>
   <AppToast />
+  <OnboardingModal v-if="showOnboarding" @complete="completeOnboarding" />
 </template>
 
 <style scoped>
 .app-layout {
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background-color: var(--bg-page, #f8f9fa);
 }
 
 .main-nav {

@@ -28,18 +28,37 @@ vi.mock('xlsx', () => ({
   write: xlsxMocks.write
 }));
 
+// ── Mock Tauri APIs ───────────────────────────────────────────────────────────
+const tauriMocks = vi.hoisted(() => ({
+  save: vi.fn().mockResolvedValue('/fake/path/file.ext'),
+  writeFile: vi.fn().mockResolvedValue(undefined),
+  isTauri: vi.fn().mockReturnValue(false)
+}));
+
+vi.mock('@tauri-apps/plugin-dialog', () => ({
+  save: tauriMocks.save
+}));
+
+vi.mock('@tauri-apps/plugin-fs', () => ({
+  writeFile: tauriMocks.writeFile
+}));
+
+vi.mock('@tauri-apps/api/core', () => ({
+  isTauri: tauriMocks.isTauri
+}));
+
 import { useChartExport } from '@/composables/useChartExport';
 
 describe('useChartExport', () => {
   let originalTitle: string;
-  let printSpy: ReturnType<typeof vi.fn>;
   let mockEl: HTMLDivElement;
   let mockCanvas: HTMLCanvasElement;
 
   beforeEach(() => {
     originalTitle = document.title;
-    printSpy = vi.fn();
-    vi.stubGlobal('print', printSpy);
+
+    // Stub window.print so calling it doesn't throw in jsdom
+    vi.stubGlobal('print', vi.fn());
 
     // Mock URL API
     vi.stubGlobal('URL', {
@@ -47,7 +66,7 @@ describe('useChartExport', () => {
       revokeObjectURL: vi.fn()
     });
 
-    // Mock anchor click
+    // Intercept createElement only to mock anchor clicks for file downloads.
     const originalCreateElement = document.createElement.bind(document);
     vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
       const el = originalCreateElement(tag);
@@ -72,14 +91,22 @@ describe('useChartExport', () => {
     vi.stubGlobal(
       'ClipboardItem',
       class MockClipboardItem {
-        data: unknown;
-        constructor(d: unknown) {
+        data: Record<string, any>;
+        constructor(d: Record<string, any>) {
           this.data = d;
         }
       }
     );
     Object.defineProperty(navigator, 'clipboard', {
-      value: { write: vi.fn().mockResolvedValue(undefined) },
+      value: {
+        write: vi.fn().mockImplementation(async (items: any[]) => {
+          for (const item of items) {
+            for (const key in item.data) {
+              await item.data[key];
+            }
+          }
+        })
+      },
       configurable: true,
       writable: true
     });
@@ -90,53 +117,8 @@ describe('useChartExport', () => {
   afterEach(() => {
     document.title = originalTitle;
     if (mockEl.parentNode) mockEl.parentNode.removeChild(mockEl);
-    document.body.classList.remove('printing-chart');
-    mockEl.classList.remove('print-target');
     vi.restoreAllMocks();
-  });
-
-  // ── printChart ───────────────────────────────────────────────────────────────
-  describe('printChart', () => {
-    it('returns failure result when element is not found', () => {
-      const { printChart } = useChartExport();
-      const result = printChart('non-existent-id', 'My Chart');
-      expect(result.success).toBe(false);
-      expect(printSpy).not.toHaveBeenCalled();
-    });
-
-    it('adds classes, sets title, calls window.print, then restores everything', () => {
-      document.title = 'Original Title';
-      const { printChart } = useChartExport();
-      const result = printChart('test-chart-element', 'Progress Trend');
-      expect(result.success).toBe(true);
-      expect(printSpy).toHaveBeenCalledOnce();
-      expect(document.title).toBe('Original Title');
-      expect(document.body.classList.contains('printing-chart')).toBe(false);
-      expect(mockEl.classList.contains('print-target')).toBe(false);
-    });
-
-    it('sets document.title to the chart title before printing', () => {
-      const { printChart } = useChartExport();
-      let titleDuringPrint = '';
-      printSpy.mockImplementation(() => {
-        titleDuringPrint = document.title;
-      });
-      printChart('test-chart-element', 'Category Trend');
-      expect(titleDuringPrint).toBe('Category Trend');
-    });
-
-    it('adds printing-chart class to body and print-target class to element during print', () => {
-      const { printChart } = useChartExport();
-      let bodyHasClass = false;
-      let elHasClass = false;
-      printSpy.mockImplementation(() => {
-        bodyHasClass = document.body.classList.contains('printing-chart');
-        elHasClass = mockEl.classList.contains('print-target');
-      });
-      printChart('test-chart-element', 'Test');
-      expect(bodyHasClass).toBe(true);
-      expect(elHasClass).toBe(true);
-    });
+    vi.useRealTimers();
   });
 
   // ── exportToExcel ────────────────────────────────────────────────────────────
@@ -256,10 +238,11 @@ describe('useChartExport', () => {
       expect(URL.createObjectURL).toHaveBeenCalledWith(expect.any(Blob));
     });
 
-    it('does not call window.print', async () => {
+    it('does not inject print DOM elements', async () => {
       const { exportToPDF } = useChartExport();
       await exportToPDF('test-chart-element', 'My PDF');
-      expect(printSpy).not.toHaveBeenCalled();
+      expect(document.getElementById('__chart-print-style__')).toBeNull();
+      expect(document.getElementById('__chart-print-root__')).toBeNull();
     });
   });
 
@@ -314,7 +297,7 @@ describe('useChartExport', () => {
     });
 
     it('returns false when clipboard.write rejects', async () => {
-      (navigator.clipboard.write as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+      (navigator.clipboard.write as ReturnType<typeof vi.fn>).mockRejectedValue(
         new Error('Clipboard denied')
       );
       const { copyChart } = useChartExport();
@@ -330,15 +313,25 @@ describe('useChartExport', () => {
       const result = await copyChart('test-chart-element');
       expect(result).toBe(false);
     });
+
+    it('uses direct Blob fallback when Promise<Blob> clipboard write fails', async () => {
+      // Simulate a browser that throws when ClipboardItem gets a Promise value
+      // (older Chrome path — the inner try throws, the catch uses blob directly)
+      let callCount = 0;
+      (navigator.clipboard.write as ReturnType<typeof vi.fn>).mockImplementation(async () => {
+        callCount++;
+        if (callCount === 1) throw new Error('Promise not supported in ClipboardItem');
+        // second call succeeds
+      });
+      const { copyChart } = useChartExport();
+      const result = await copyChart('test-chart-element');
+      expect(result).toBe(true);
+      expect(callCount).toBe(2);
+    });
   });
 
-  // ── isPrinting / isExporting refs ────────────────────────────────────────────
+  // ── isExporting ref ────────────────────────────────────────────
   describe('state refs', () => {
-    it('exposes isPrinting reactive ref initialised to false', () => {
-      const { isPrinting } = useChartExport();
-      expect(isPrinting.value).toBe(false);
-    });
-
     it('exposes isExporting reactive ref initialised to false', () => {
       const { isExporting } = useChartExport();
       expect(isExporting.value).toBe(false);
@@ -351,25 +344,20 @@ describe('useChartExport', () => {
       vi.unstubAllGlobals();
     });
 
-    it('uses showSaveFilePicker when available and returns success', async () => {
-      const mockWritable = {
-        write: vi.fn().mockResolvedValue(undefined),
-        close: vi.fn().mockResolvedValue(undefined)
-      };
-      const mockHandle = { createWritable: vi.fn().mockResolvedValue(mockWritable) };
-      vi.stubGlobal('showSaveFilePicker', vi.fn().mockResolvedValue(mockHandle));
+    it('uses Tauri save when available and returns success', async () => {
+      tauriMocks.isTauri.mockReturnValueOnce(true);
+      tauriMocks.save.mockResolvedValueOnce('/fake/path/picker_test.csv');
 
       const { exportToCSV } = useChartExport();
       const result = await exportToCSV([{ A: 1 }], 'picker_test');
       expect(result.success).toBe(true);
       expect(result.message).toContain('Saved as');
-      expect(mockWritable.write).toHaveBeenCalled();
-      expect(mockWritable.close).toHaveBeenCalled();
+      expect(tauriMocks.writeFile).toHaveBeenCalled();
     });
 
-    it('returns cancelled when picker throws AbortError', async () => {
-      const abortError = Object.assign(new Error('User cancelled'), { name: 'AbortError' });
-      vi.stubGlobal('showSaveFilePicker', vi.fn().mockRejectedValue(abortError));
+    it('returns cancelled when picker returns null', async () => {
+      tauriMocks.isTauri.mockReturnValueOnce(true);
+      tauriMocks.save.mockResolvedValueOnce(null);
 
       const { exportToCSV } = useChartExport();
       const result = await exportToCSV([{ A: 1 }], 'abort_test');
@@ -377,15 +365,25 @@ describe('useChartExport', () => {
       expect(result.message).toBe('Save cancelled');
     });
 
-    it('falls back to anchor download when picker throws non-abort error', async () => {
+    it('returns failure when picker throws error', async () => {
+      tauriMocks.isTauri.mockReturnValueOnce(true);
       const networkError = new Error('Permission denied');
-      vi.stubGlobal('showSaveFilePicker', vi.fn().mockRejectedValue(networkError));
+      tauriMocks.save.mockRejectedValueOnce(networkError);
 
       const { exportToCSV } = useChartExport();
       const result = await exportToCSV([{ A: 1 }], 'fallback_test');
-      // Falls back to legacy anchor download, which succeeds
-      expect(result.success).toBe(true);
-      expect(URL.createObjectURL).toHaveBeenCalled();
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Save failed: Permission denied');
+    });
+
+    it('returns failure when picker throws a non-Error value (String(err) branch)', async () => {
+      tauriMocks.isTauri.mockReturnValueOnce(true);
+      tauriMocks.save.mockRejectedValueOnce('disk-full'); // non-Error string
+
+      const { exportToCSV } = useChartExport();
+      const result = await exportToCSV([{ A: 1 }], 'fallback_test');
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('disk-full');
     });
   });
 

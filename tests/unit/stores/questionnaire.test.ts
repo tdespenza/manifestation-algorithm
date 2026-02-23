@@ -283,9 +283,8 @@ describe('Questionnaire Store', () => {
 
   it('reset() clears all in-memory state to defaults', () => {
     const store = useQuestionnaireStore();
-    store.answers['1a'] = 7;
+    store.answers['1a'] = 7; // hasSavedSession is computed — becomes true automatically
     store.currentIndex = 5;
-    store.hasSavedSession = true;
     store.isSaving = true;
 
     store.reset();
@@ -294,5 +293,54 @@ describe('Questionnaire Store', () => {
     expect(store.currentIndex).toBe(0);
     expect(store.hasSavedSession).toBe(false);
     expect(store.isSaving).toBe(false);
+  });
+
+  describe('ensureSessionId', () => {
+    it('restores persisted session ID from settings when available', async () => {
+      // init calls getSetting three times: save_last_session, goal_score, session_id
+      // Return null for the first two, then a persisted ID for session_id
+      dbMocks.getSetting
+        .mockResolvedValueOnce(null) // save_last_session
+        .mockResolvedValueOnce(null) // goal_score
+        .mockResolvedValueOnce('persisted-uuid'); // session_id
+
+      const store = useQuestionnaireStore();
+      await store.init();
+
+      expect(store.sessionId).toBe('persisted-uuid');
+      // setSetting should NOT be called for session_id when it already exists
+      expect(dbMocks.setSetting).not.toHaveBeenCalledWith('session_id', expect.any(String));
+    });
+  });
+
+  describe('goalScore init from settings', () => {
+    it('init parses stored goal_score when persisted value is non-empty', async () => {
+      dbMocks.getSetting
+        .mockResolvedValueOnce(null) // save_last_session
+        .mockResolvedValueOnce('7500'); // goal_score — truthy branch at line 140
+
+      const store = useQuestionnaireStore();
+      await store.init();
+
+      expect(store.goalScore).toBe(7500);
+    });
+  });
+
+  describe('setGoalScore', () => {
+    it('setGoalScore(null) clears the goal and persists empty string', async () => {
+      const store = useQuestionnaireStore();
+      await store.setGoalScore(null);
+
+      expect(store.goalScore).toBeNull();
+      expect(dbMocks.setSetting).toHaveBeenCalledWith('goal_score', '');
+    });
+
+    it('setGoalScore(value) sets the goal and persists the stringified value', async () => {
+      const store = useQuestionnaireStore();
+      await store.setGoalScore(7500);
+
+      expect(store.goalScore).toBe(7500);
+      expect(dbMocks.setSetting).toHaveBeenCalledWith('goal_score', '7500');
+    });
   });
 });

@@ -1,11 +1,7 @@
 import { getDb } from './db';
+import type { TrendPoint, CategoryTrends } from '../types';
 
-export interface TrendPoint {
-  date: string;
-  value: number;
-}
-
-export type CategoryTrends = Record<string, TrendPoint[]>;
+export type { TrendPoint, CategoryTrends };
 
 export async function loadConsolidatedCategoryTrends(): Promise<CategoryTrends> {
   const db = await getDb();

@@ -49,6 +49,25 @@ vi.mock('@/composables/useToast', () => ({
   useToast: () => ({ addToast: mockAddToast, toasts: { value: [] }, dismissToast: vi.fn() })
 }));
 
+// ── Mock Tauri APIs ───────────────────────────────────────────────────────────
+const tauriMocks = vi.hoisted(() => ({
+  save: vi.fn().mockResolvedValue('/fake/path/file.ext'),
+  writeFile: vi.fn().mockResolvedValue(undefined),
+  isTauri: vi.fn().mockReturnValue(true)
+}));
+
+vi.mock('@tauri-apps/plugin-dialog', () => ({
+  save: tauriMocks.save
+}));
+
+vi.mock('@tauri-apps/plugin-fs', () => ({
+  writeFile: tauriMocks.writeFile
+}));
+
+vi.mock('@tauri-apps/api/core', () => ({
+  isTauri: tauriMocks.isTauri
+}));
+
 import { useChartExport } from '@/composables/useChartExport';
 import ChartActions from '@/components/charts/ChartActions.vue';
 
@@ -162,7 +181,8 @@ describe('useChartExport.exportToPDF integration', () => {
     expect(mockJsPDFInstance.output).toHaveBeenCalledWith('arraybuffer');
   });
 
-  it('falls back to anchor download and returns success when no showSaveFilePicker', async () => {
+  it('falls back to anchor download and returns success when not in Tauri', async () => {
+    tauriMocks.isTauri.mockReturnValueOnce(false);
     const { exportToPDF } = useChartExport();
     const result = await exportToPDF('pdf-test-chart', 'My PDF');
     expect(result.success).toBe(true);
@@ -170,26 +190,23 @@ describe('useChartExport.exportToPDF integration', () => {
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:pdf-url');
   });
 
-  it('uses showSaveFilePicker when available and returns success', async () => {
-    const mockWritable = {
-      write: vi.fn().mockResolvedValue(undefined),
-      close: vi.fn().mockResolvedValue(undefined)
-    };
-    const mockHandle = { createWritable: vi.fn().mockResolvedValue(mockWritable) };
-    vi.stubGlobal('showSaveFilePicker', vi.fn().mockResolvedValue(mockHandle));
+  it('uses Tauri save when available and returns success', async () => {
+    tauriMocks.isTauri.mockReturnValueOnce(true);
+    tauriMocks.save.mockResolvedValueOnce('/fake/path/Picker_PDF.pdf');
 
     const { exportToPDF } = useChartExport();
     const result = await exportToPDF('pdf-test-chart', 'Picker PDF');
     expect(result.success).toBe(true);
     expect(result.message).toContain('Saved as');
-    const pickerArg = (window as unknown as Record<string, ReturnType<typeof vi.fn>>)
-      .showSaveFilePicker.mock.calls[0][0] as { suggestedName: string; types: unknown[] };
-    expect(pickerArg.suggestedName).toMatch(/\.pdf$/);
+
+    const saveArg = tauriMocks.save.mock.calls[0][0] as { defaultPath: string; filters: unknown[] };
+    expect(saveArg.defaultPath).toMatch(/\.pdf$/);
+    expect(tauriMocks.writeFile).toHaveBeenCalled();
   });
 
   it('returns cancelled when the save picker is aborted by user', async () => {
-    const abortErr = Object.assign(new Error('cancelled'), { name: 'AbortError' });
-    vi.stubGlobal('showSaveFilePicker', vi.fn().mockRejectedValue(abortErr));
+    tauriMocks.isTauri.mockReturnValueOnce(true);
+    tauriMocks.save.mockResolvedValueOnce(null);
 
     const { exportToPDF } = useChartExport();
     const result = await exportToPDF('pdf-test-chart', 'Aborted PDF');
@@ -218,41 +235,20 @@ describe('useChartExport.exportToPDF integration', () => {
   });
 
   it('sanitises the title for the filename (spaces → underscores)', async () => {
-    const mockWritable = {
-      write: vi.fn().mockResolvedValue(undefined),
-      close: vi.fn().mockResolvedValue(undefined)
-    };
-    const mockHandle = { createWritable: vi.fn().mockResolvedValue(mockWritable) };
-    const pickerFn = vi.fn().mockResolvedValue(mockHandle);
-    vi.stubGlobal('showSaveFilePicker', pickerFn);
+    tauriMocks.isTauri.mockReturnValueOnce(true);
+    tauriMocks.save.mockResolvedValueOnce('/fake/path/Health_Trend_2024.pdf');
 
     const { exportToPDF } = useChartExport();
     await exportToPDF('pdf-test-chart', 'Health Trend 2024');
-    const opts = pickerFn.mock.calls[0][0] as { suggestedName: string };
-    expect(opts.suggestedName).toBe('Health_Trend_2024.pdf');
+    const opts = tauriMocks.save.mock.calls[0][0] as { defaultPath: string };
+    expect(opts.defaultPath).toBe('Health_Trend_2024.pdf');
   });
 });
 
 // ── ChartActions component integration ───────────────────────────────────────
 
 describe('ChartActions – Export PDF button (component integration)', () => {
-  /** Open the save modal for PDF via the select element. */
-  async function openPDFModal(wrapper: ReturnType<typeof mount>) {
-    const select = wrapper.find<HTMLSelectElement>('.export-select');
-    select.element.value = 'pdf';
-    await select.trigger('change');
-    await nextTick();
-  }
-
-  /** Click the confirm button in the save modal. */
-  async function confirmModal() {
-    const btn = document.querySelector('.save-confirm-btn') as HTMLButtonElement;
-    btn.click();
-    await flushPromises();
-    await nextTick();
-  }
-
-  it('clicking Export PDF shows progress bar while exporting', async () => {
+  it('selecting PDF disables the select (busy) while exporting', async () => {
     // Use a never-resolving promise to freeze the busy state so we can assert
     const neverResolves = new Promise<{ success: boolean; message: string }>(() => {});
     const mod = await import('@/composables/useChartExport');
@@ -263,34 +259,38 @@ describe('ChartActions – Export PDF button (component integration)', () => {
     }));
 
     const wrapper = mount(ChartActions, { props: DEFAULT_PROPS, attachTo: document.body });
-    await openPDFModal(wrapper);
-    const confirmBtn = document.querySelector('.save-confirm-btn') as HTMLButtonElement;
-    confirmBtn.click();
+    const select = wrapper.find<HTMLSelectElement>('.export-select');
+    select.element.value = 'pdf';
+    await select.trigger('change');
     await nextTick();
 
-    expect(document.querySelector('.export-progress')).not.toBeNull();
+    expect(select.element.disabled).toBe(true);
     wrapper.unmount();
   });
 
-  it('successful PDF export closes dialog and shows success toast', async () => {
+  it('successful PDF export shows success toast', async () => {
     const wrapper = mount(ChartActions, { props: DEFAULT_PROPS, attachTo: document.body });
-    await openPDFModal(wrapper);
-    await confirmModal();
+    const select = wrapper.find<HTMLSelectElement>('.export-select');
+    select.element.value = 'pdf';
+    await select.trigger('change');
+    await flushPromises();
+    await nextTick();
 
-    expect(document.querySelector('.save-modal')).toBeNull();
     expect(mockAddToast).toHaveBeenCalledWith(expect.stringMatching(/saved|pdf/i), 'success');
     wrapper.unmount();
   });
 
-  it('cancelling save picker (AbortError) closes dialog without showing a toast', async () => {
-    const abortErr = Object.assign(new Error('cancelled'), { name: 'AbortError' });
-    vi.stubGlobal('showSaveFilePicker', vi.fn().mockRejectedValue(abortErr));
+  it('cancelling save picker does not show a toast', async () => {
+    tauriMocks.isTauri.mockReturnValueOnce(true);
+    tauriMocks.save.mockResolvedValueOnce(null);
 
     const wrapper = mount(ChartActions, { props: DEFAULT_PROPS, attachTo: document.body });
-    await openPDFModal(wrapper);
-    await confirmModal();
+    const select = wrapper.find<HTMLSelectElement>('.export-select');
+    select.element.value = 'pdf';
+    await select.trigger('change');
+    await flushPromises();
+    await nextTick();
 
-    expect(document.querySelector('.save-modal')).toBeNull();
     expect(mockAddToast).not.toHaveBeenCalled();
     wrapper.unmount();
   });

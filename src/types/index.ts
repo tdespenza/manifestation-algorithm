@@ -19,6 +19,13 @@ export interface HistoricalSession {
   notes?: string;
 }
 
+export interface TrendPoint {
+  date: string;
+  value: number;
+}
+
+export type CategoryTrends = Record<string, TrendPoint[]>;
+
 export interface HistoricalResponse {
   id: number;
   session_id: string; // UUID from HistoricalSession

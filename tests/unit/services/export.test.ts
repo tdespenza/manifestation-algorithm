@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { ExportSession, ExportResponse } from '@/services/export';
 import { generateCSV, exportToCSV } from '@/services/export';
 
@@ -27,6 +27,12 @@ describe('Export Service', () => {
     vi.clearAllMocks();
     mocks.execute.mockResolvedValue([]);
     mocks.select.mockResolvedValue([]);
+    // Simulate Tauri environment so exportToCSV uses save/writeTextFile path
+    (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__ = {};
+  });
+
+  afterEach(() => {
+    delete (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__;
   });
 
   // ── generateCSV ──────────────────────────────────────────────────────────
@@ -87,6 +93,18 @@ describe('Export Service', () => {
     expect(lines[1]).toContain('s1,2023-01-01,200,,q2,"Focus",9');
   });
 
+  it('generateCSV handles empty/falsy category (covers || empty-string fallback)', () => {
+    const sessions: ExportSession[] = [{ id: 's1', completed_at: '2023-01-01', total_score: 100 }];
+    const responses: ExportResponse[] = [
+      { session_id: 's1', question_id: 'q1', category: '' as any, answer_value: 3 }
+    ];
+
+    const csv = generateCSV(sessions, responses);
+    const lines = csv.split('\n');
+    // category is empty string, so the || '' fallback is used → generates `""`
+    expect(lines[1]).toContain('"",3');
+  });
+
   // ── exportToCSV ──────────────────────────────────────────────────────────
 
   it('exportToCSV throws when no sessions exist', async () => {
@@ -143,5 +161,92 @@ describe('Export Service', () => {
 
     expect(save).toHaveBeenCalled();
     expect(writeTextFile).toHaveBeenCalledWith('mock-path.csv', expect.any(String));
+  });
+
+  it('exportToCSV falls back to browser download when Tauri save() throws', async () => {
+    const { save } = await import('@tauri-apps/plugin-dialog');
+    vi.mocked(save).mockRejectedValueOnce(new Error('dialog crashed'));
+
+    // Mock URL API for blob download fallback
+    const mockCreateObjectURL = vi.fn().mockReturnValue('blob:fake-url');
+    const mockRevokeObjectURL = vi.fn();
+    vi.stubGlobal('URL', {
+      createObjectURL: mockCreateObjectURL,
+      revokeObjectURL: mockRevokeObjectURL
+    });
+
+    const origCreateElement = document.createElement.bind(document);
+    vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
+      const el = origCreateElement(tag);
+      if (tag === 'a') vi.spyOn(el as HTMLAnchorElement, 'click').mockImplementation(() => {});
+      return el;
+    });
+
+    const sessions: ExportSession[] = [
+      { id: 's1', completed_at: '2023-06-15T12:00:00.000Z', total_score: 5000 }
+    ];
+    const responses: ExportResponse[] = [
+      { session_id: 's1', question_id: 'q1', category: 'Health', answer_value: 8 }
+    ];
+
+    mocks.select.mockImplementation((query: string) => {
+      if (query.includes('_migrations')) return Promise.resolve([{ id: 1 }, { id: 2 }, { id: 3 }]);
+      if (query.includes('historical_sessions')) return Promise.resolve(sessions);
+      if (query.includes('historical_responses')) return Promise.resolve(responses);
+      return Promise.resolve([]);
+    });
+
+    await exportToCSV();
+
+    expect(mockCreateObjectURL).toHaveBeenCalled();
+    expect(mockRevokeObjectURL).toHaveBeenCalled();
+
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it('exportToCSV uses browser download (downloadBrowser) when not in Tauri', async () => {
+    // Remove Tauri flag so the non-Tauri path is taken
+    delete (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__;
+
+    // Mock URL API for blob download
+    const mockCreateObjectURL = vi.fn().mockReturnValue('blob:fake-url');
+    const mockRevokeObjectURL = vi.fn();
+    vi.stubGlobal('URL', {
+      createObjectURL: mockCreateObjectURL,
+      revokeObjectURL: mockRevokeObjectURL
+    });
+
+    // Intercept link.click to avoid jsdom navigation errors
+    const origCreateElement = document.createElement.bind(document);
+    vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
+      const el = origCreateElement(tag);
+      if (tag === 'a') vi.spyOn(el as HTMLAnchorElement, 'click').mockImplementation(() => {});
+      return el;
+    });
+
+    const sessions: ExportSession[] = [
+      { id: 's1', completed_at: '2023-06-15T12:00:00.000Z', total_score: 5000 }
+    ];
+    const responses: ExportResponse[] = [
+      { session_id: 's1', question_id: 'q1', category: 'Health', answer_value: 8 }
+    ];
+
+    mocks.select.mockImplementation((query: string) => {
+      if (query.includes('_migrations')) return Promise.resolve([{ id: 1 }, { id: 2 }, { id: 3 }]);
+      if (query.includes('historical_sessions')) return Promise.resolve(sessions);
+      if (query.includes('historical_responses')) return Promise.resolve(responses);
+      return Promise.resolve([]);
+    });
+
+    await exportToCSV();
+
+    expect(mockCreateObjectURL).toHaveBeenCalled();
+    expect(mockRevokeObjectURL).toHaveBeenCalled();
+
+    // Restore Tauri state for subsequent tests
+    (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__ = {};
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 });

@@ -28,6 +28,14 @@ vi.mock('@/composables/useNetwork', () => ({
   loadSharingState: vi.fn().mockResolvedValue(undefined)
 }));
 
+// DB mock - control onboarding_complete setting
+const mockGetSetting = vi.fn().mockResolvedValue('true');
+const mockSetSetting = vi.fn().mockResolvedValue(undefined);
+vi.mock('@/services/db', () => ({
+  getSetting: (...args: unknown[]) => mockGetSetting(...args),
+  setSetting: (...args: unknown[]) => mockSetSetting(...args)
+}));
+
 import App from '@/App.vue';
 
 const router = createRouter({
@@ -138,5 +146,30 @@ describe('App.vue', () => {
     expect(consoleSpy).toHaveBeenCalledWith('Caught in App boundary:', testError);
     expect(result).toBe(false);
     consoleSpy.mockRestore();
+  });
+
+  it('shows the onboarding modal when onboarding_complete is not set', async () => {
+    mockGetSetting.mockResolvedValueOnce(null);
+    const wrapper = mount(App, { global: { plugins: [router] } });
+    await router.isReady();
+    await flushPromises();
+    expect((wrapper.vm as any).showOnboarding).toBe(true);
+    mockGetSetting.mockResolvedValue('true');
+  });
+
+  it('completeOnboarding sets showOnboarding to false and calls setSetting', async () => {
+    mockGetSetting.mockResolvedValueOnce(null);
+    const wrapper = mount(App, { global: { plugins: [router] } });
+    await router.isReady();
+    await flushPromises();
+    expect((wrapper.vm as any).showOnboarding).toBe(true);
+
+    // Call completeOnboarding directly
+    await (wrapper.vm as any).completeOnboarding();
+    await flushPromises();
+
+    expect((wrapper.vm as any).showOnboarding).toBe(false);
+    expect(mockSetSetting).toHaveBeenCalledWith('onboarding_complete', 'true');
+    mockGetSetting.mockResolvedValue('true');
   });
 });

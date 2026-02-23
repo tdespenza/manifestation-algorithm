@@ -23,7 +23,9 @@ const storeMocks = vi.hoisted(() => ({
   reset: vi.fn(),
   init: vi.fn().mockResolvedValue(undefined),
   setSaveLastSession: vi.fn().mockResolvedValue(undefined),
-  saveLastSession: true as boolean
+  saveLastSession: true as boolean,
+  goalScore: null as number | null,
+  setGoalScore: vi.fn().mockResolvedValue(undefined)
 }));
 
 vi.mock('@/stores/questionnaire', () => ({
@@ -32,9 +34,13 @@ vi.mock('@/stores/questionnaire', () => ({
     get saveLastSession() {
       return storeMocks.saveLastSession;
     },
+    get goalScore() {
+      return storeMocks.goalScore;
+    },
     reset: storeMocks.reset,
     init: storeMocks.init,
-    setSaveLastSession: storeMocks.setSaveLastSession
+    setSaveLastSession: storeMocks.setSaveLastSession,
+    setGoalScore: storeMocks.setGoalScore
   })
 }));
 
@@ -127,5 +133,89 @@ describe('Settings.vue', () => {
     expect(toggle.text()).toBe('Off');
     expect(toggle.classes()).not.toContain('active');
     storeMocks.saveLastSession = true; // restore for subsequent tests
+  });
+
+  // ── Goal score ─────────────────────────────────────────────────────────────
+
+  it('shows Clear button and current target when goalScore is set', async () => {
+    storeMocks.goalScore = 7500;
+    const wrapper = mount(Settings);
+    await flushPromises();
+    expect(wrapper.find('.btn-secondary').exists()).toBe(true);
+    expect(wrapper.find('.goal-current').exists()).toBe(true);
+    expect(wrapper.find('.goal-current').text()).toContain('7,500');
+    storeMocks.goalScore = null;
+  });
+
+  it('saveGoal calls store.setGoalScore with parsed value for valid input', async () => {
+    const wrapper = mount(Settings);
+    await flushPromises();
+    (wrapper.vm as any).goalInput = '7500';
+    await wrapper.find('.btn-primary.btn-sm').trigger('click');
+    await flushPromises();
+    expect(storeMocks.setGoalScore).toHaveBeenCalledWith(7500);
+  });
+
+  it('saveGoal calls store.setGoalScore(null) when input is empty', async () => {
+    const wrapper = mount(Settings);
+    await flushPromises();
+    const input = wrapper.find<HTMLInputElement>('.goal-input');
+    await input.setValue('');
+    await wrapper.find('.btn-primary.btn-sm').trigger('click');
+    await flushPromises();
+    expect(storeMocks.setGoalScore).toHaveBeenCalledWith(null);
+  });
+
+  it('saveGoal shows error for out-of-range value (below 1000)', async () => {
+    const wrapper = mount(Settings);
+    await flushPromises();
+    (wrapper.vm as any).goalInput = '500';
+    await wrapper.find('.btn-primary.btn-sm').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('.goal-error').exists()).toBe(true);
+    expect(storeMocks.setGoalScore).not.toHaveBeenCalled();
+  });
+
+  it('saveGoal shows error for out-of-range value (above 10000)', async () => {
+    const wrapper = mount(Settings);
+    await flushPromises();
+    (wrapper.vm as any).goalInput = '15000';
+    await wrapper.find('.btn-primary.btn-sm').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('.goal-error').exists()).toBe(true);
+    expect(storeMocks.setGoalScore).not.toHaveBeenCalled();
+  });
+
+  it('saveGoal shows error for non-numeric input (isNaN path)', async () => {
+    const wrapper = mount(Settings);
+    await flushPromises();
+    // Manually set goalInput to a non-numeric string to trigger isNaN path
+    (wrapper.vm as any).goalInput = 'abc';
+    await wrapper.find('.btn-primary.btn-sm').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('.goal-error').exists()).toBe(true);
+    expect(storeMocks.setGoalScore).not.toHaveBeenCalled();
+  });
+
+  it('saveGoal triggers on Enter key press', async () => {
+    const wrapper = mount(Settings);
+    await flushPromises();
+    (wrapper.vm as any).goalInput = '6000';
+    const input = wrapper.find<HTMLInputElement>('.goal-input');
+    await input.trigger('keyup.enter');
+    await flushPromises();
+    expect(storeMocks.setGoalScore).toHaveBeenCalledWith(6000);
+  });
+
+  it('clearGoal calls store.setGoalScore(null) and clears input', async () => {
+    storeMocks.goalScore = 5000;
+    const wrapper = mount(Settings);
+    await flushPromises();
+    // Click the Clear button (btn-secondary)
+    await wrapper.find('.btn-secondary').trigger('click');
+    await flushPromises();
+    expect(storeMocks.setGoalScore).toHaveBeenCalledWith(null);
+    expect((wrapper.vm as any).goalInput).toBe('');
+    storeMocks.goalScore = null;
   });
 });

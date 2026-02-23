@@ -24,8 +24,11 @@ test.describe('UpdateNotification', () => {
   test('no update banner is shown when check returns null', async ({ page }) => {
     await page.goto('/');
 
-    // Wait long enough for the 3-second startup delay to elapse.
-    await page.waitForTimeout(AFTER_CHECK_WAIT);
+    // Wait for the 3-second startup delay to elapse and the check to complete.
+    await page.waitForFunction(
+      () => !!(window as unknown as Record<string, unknown>).__updateCheckDone,
+      { timeout: BANNER_WAIT }
+    );
 
     // The banner element should not be rendered at all.
     await expect(page.locator('.update-banner')).toHaveCount(0);
@@ -130,8 +133,7 @@ test.describe('UpdateNotification', () => {
     await page.waitForURL('/dashboard');
     await page.getByRole('link', { name: 'Questionnaire' }).click();
 
-    // After a short wait well under 3 s the banner must not be visible.
-    await page.waitForTimeout(500);
+    // The 3-second re-check guard means the banner cannot reappear immediately.
     await expect(page.locator('.update-banner')).toHaveCount(0);
   });
 
@@ -207,8 +209,11 @@ test.describe('UpdateNotification – comprehensive', () => {
   test('no update banner is shown when check returns null', async ({ page }) => {
     await page.goto('/');
 
-    // Wait long enough for the 3-second startup delay to elapse.
-    await page.waitForTimeout(AFTER_CHECK_WAIT);
+    // Wait for the 3-second startup delay to elapse and the check to complete.
+    await page.waitForFunction(
+      () => !!(window as unknown as Record<string, unknown>).__updateCheckDone,
+      { timeout: BANNER_WAIT }
+    );
 
     // The banner element should not be rendered at all.
     await expect(page.locator('.update-banner')).toHaveCount(0);
@@ -307,8 +312,7 @@ test.describe('UpdateNotification – comprehensive', () => {
     await page.waitForURL('/dashboard');
     await page.getByRole('link', { name: 'Questionnaire' }).click();
 
-    // After a short wait well under 3 s the banner must not be visible.
-    await page.waitForTimeout(500);
+    // The 3-second re-check guard means the banner cannot reappear immediately.
     await expect(page.locator('.update-banner')).toHaveCount(0);
   });
 

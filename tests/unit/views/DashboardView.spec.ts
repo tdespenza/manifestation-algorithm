@@ -7,6 +7,12 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 vi.mock('@/components/charts/ProgressChart.vue', () => ({
   default: { template: '<div class="progress-chart-stub" />' }
 }));
+vi.mock('@/components/charts/ChartActions.vue', () => ({
+  default: {
+    template: '<div class="chart-actions-stub" />',
+    props: ['targetId', 'title', 'data', 'filename']
+  }
+}));
 vi.mock('@/components/dashboard/CategoryCard.vue', () => ({
   default: {
     template: '<div class="category-card-stub" />',
@@ -26,14 +32,6 @@ vi.mock('@/composables/useToast', () => ({
   useToast: () => ({ addToast: mockAddToast, toasts: { value: [] }, dismissToast: vi.fn() })
 }));
 
-// ── Mock export service ───────────────────────────────────────────────────────
-const exportMocks = vi.hoisted(() => ({
-  exportToCSV: vi.fn().mockResolvedValue(undefined)
-}));
-vi.mock('@/services/export', () => ({
-  exportToCSV: (...args: unknown[]) => exportMocks.exportToCSV(...args)
-}));
-
 // ── Mock history store with plain state via vi.hoisted ────────────────────────
 const dashState = vi.hoisted(() => ({
   isLoading: false,
@@ -43,6 +41,7 @@ const dashState = vi.hoisted(() => ({
 const fetchHistoryMock = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 const deleteSessionMock = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 const deleteSessionsMock = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
+const loadMoreSessionsMock = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 
 vi.mock('@/stores/history', () => ({
   useHistoryStore: () => ({
@@ -55,10 +54,40 @@ vi.mock('@/stores/history', () => ({
     get trends() {
       return dashState.trends;
     },
+    get hasMore() {
+      return false;
+    },
+    get isLoadingMore() {
+      return false;
+    },
+    get totalCount() {
+      return dashState.sessions.length;
+    },
     fetchHistory: fetchHistoryMock,
+    loadMoreSessions: loadMoreSessionsMock,
     deleteSession: deleteSessionMock,
     deleteSessions: deleteSessionsMock
   })
+}));
+
+// ── Questionnaire state (dynamic goalScore) ────────────────────────────────────
+const questState = vi.hoisted(() => ({
+  goalScore: null as number | null
+}));
+
+vi.mock('@/stores/questionnaire', () => ({
+  useQuestionnaireStore: () => ({
+    get goalScore() {
+      return questState.goalScore;
+    },
+    setGoalScore: vi.fn()
+  })
+}));
+
+// ── Mock db service for loadAllSessionCategoryScores ─────────────────────────
+const loadAllSessionCategoryScoresMock = vi.hoisted(() => vi.fn().mockResolvedValue([]));
+vi.mock('@/services/db', () => ({
+  loadAllSessionCategoryScores: loadAllSessionCategoryScoresMock
 }));
 
 import DashboardView from '@/views/DashboardView.vue';
@@ -88,10 +117,12 @@ describe('DashboardView.vue', () => {
     dashState.isLoading = false;
     dashState.sessions = [];
     dashState.trends = {};
+    questState.goalScore = null;
     fetchHistoryMock.mockResolvedValue(undefined);
     deleteSessionMock.mockResolvedValue(undefined);
     deleteSessionsMock.mockResolvedValue(undefined);
-    exportMocks.exportToCSV.mockResolvedValue(undefined);
+    loadAllSessionCategoryScoresMock.mockResolvedValue([]);
+    loadMoreSessionsMock.mockResolvedValue(undefined);
     vi.stubGlobal('alert', vi.fn());
   });
 
@@ -144,12 +175,12 @@ describe('DashboardView.vue', () => {
     expect(fetchHistoryMock).toHaveBeenCalled();
   });
 
-  it('shows range selector and export button when sessions exist', async () => {
+  it('shows range selector when sessions exist', async () => {
     dashState.sessions = [makeSession('s1', 5)];
     const wrapper = mount(DashboardView, { global: { plugins: [router] } });
     await wrapper.vm.$nextTick();
     expect(wrapper.find('.range-selector').exists()).toBe(true);
-    expect(wrapper.find('.export-btn').exists()).toBe(true);
+    expect(wrapper.find('.chart-actions-stub').exists()).toBe(true);
   });
 
   it('hides range selector and export button when no sessions', () => {
@@ -162,8 +193,7 @@ describe('DashboardView.vue', () => {
     const wrapper = mount(DashboardView, { global: { plugins: [router] } });
     await wrapper.vm.$nextTick();
 
-    const select = wrapper.find<HTMLSelectElement>('#range-select');
-    await select.setValue('7d');
+    (wrapper.vm as any).selectedRange = '7d';
     await wrapper.vm.$nextTick();
 
     // The vm should have only 1 session within 7d
@@ -224,8 +254,7 @@ describe('DashboardView.vue', () => {
     };
     const wrapper = mount(DashboardView, { global: { plugins: [router] } });
     await wrapper.vm.$nextTick();
-    const select = wrapper.find<HTMLSelectElement>('#range-select');
-    await select.setValue('30d');
+    (wrapper.vm as any).selectedRange = '30d';
     await wrapper.vm.$nextTick();
 
     const vm = wrapper.vm as unknown as { trends: Record<string, any[]> };
@@ -243,8 +272,7 @@ describe('DashboardView.vue', () => {
     };
     const wrapper = mount(DashboardView, { global: { plugins: [router] } });
     await wrapper.vm.$nextTick();
-    const select = wrapper.find<HTMLSelectElement>('#range-select');
-    await select.setValue('30d');
+    (wrapper.vm as any).selectedRange = '30d';
     await wrapper.vm.$nextTick();
 
     const vm = wrapper.vm as unknown as { trends: Record<string, any[]> };
@@ -263,29 +291,6 @@ describe('DashboardView.vue', () => {
     await wrapper.vm.$nextTick();
     const vm = wrapper.vm as unknown as { categories: string[] };
     expect(vm.categories).toEqual(['Focus', 'Health', 'Wealth']);
-  });
-
-  it('export button triggers exportToCSV', async () => {
-    dashState.sessions = [makeSession('s1', 3)];
-    const wrapper = mount(DashboardView, { global: { plugins: [router] } });
-    await wrapper.vm.$nextTick();
-    await wrapper.find('.export-btn').trigger('click');
-    await new Promise(r => setTimeout(r, 0));
-    expect(exportMocks.exportToCSV).toHaveBeenCalled();
-  });
-
-  it('shows alert on export failure', async () => {
-    const alertMock = vi.fn();
-    vi.stubGlobal('alert', alertMock);
-    exportMocks.exportToCSV.mockRejectedValueOnce(new Error('write failed'));
-    dashState.sessions = [makeSession('s1', 3)];
-
-    const wrapper = mount(DashboardView, { global: { plugins: [router] } });
-    await wrapper.vm.$nextTick();
-    await wrapper.find('.export-btn').trigger('click');
-    await new Promise(r => setTimeout(r, 10));
-
-    expect(alertMock).toHaveBeenCalledWith(expect.stringContaining('Export failed'));
   });
 
   // ── Selection / delete ───────────────────────────────────────────────────────
@@ -387,7 +392,10 @@ describe('DashboardView.vue', () => {
     it('doDeleteSession calls store.deleteSession and shows success toast', async () => {
       const wrapper = mount(DashboardView, { global: { plugins: [router] } });
       await wrapper.vm.$nextTick();
-      await (wrapper.vm as any).doDeleteSession('s1');
+      const vm = wrapper.vm as any;
+      vm.handleDeleteSession('s1');
+      await wrapper.vm.$nextTick();
+      await vm.onConfirmed();
       await flushPromises();
       expect(deleteSessionMock).toHaveBeenCalledWith('s1');
       expect(mockAddToast).toHaveBeenCalledWith('Session deleted', 'success');
@@ -398,7 +406,10 @@ describe('DashboardView.vue', () => {
       deleteSessionMock.mockRejectedValueOnce(new Error('DB error'));
       const wrapper = mount(DashboardView, { global: { plugins: [router] } });
       await wrapper.vm.$nextTick();
-      await (wrapper.vm as any).doDeleteSession('s1');
+      const vm = wrapper.vm as any;
+      vm.handleDeleteSession('s1');
+      await wrapper.vm.$nextTick();
+      await vm.onConfirmed();
       await flushPromises();
       expect(mockAddToast).toHaveBeenCalledWith('Failed to delete session', 'error');
       wrapper.unmount();
@@ -420,7 +431,11 @@ describe('DashboardView.vue', () => {
     it('doDeleteSelected calls store.deleteSessions with selected ids', async () => {
       const wrapper = mount(DashboardView, { global: { plugins: [router] } });
       await wrapper.vm.$nextTick();
-      await (wrapper.vm as any).doDeleteSelected(['s1', 's2']);
+      const vm = wrapper.vm as any;
+      vm.selectedIds = new Set(['s1', 's2']);
+      vm.handleDeleteSelected();
+      await wrapper.vm.$nextTick();
+      await vm.onConfirmed();
       await flushPromises();
       expect(deleteSessionsMock).toHaveBeenCalledWith(['s1', 's2']);
       expect(mockAddToast).toHaveBeenCalledWith('Deleted 2 sessions', 'success');
@@ -430,7 +445,11 @@ describe('DashboardView.vue', () => {
     it('doDeleteSelected shows singular message when deleting 1 session', async () => {
       const wrapper = mount(DashboardView, { global: { plugins: [router] } });
       await wrapper.vm.$nextTick();
-      await (wrapper.vm as any).doDeleteSelected(['s1']);
+      const vm = wrapper.vm as any;
+      vm.selectedIds = new Set(['s1']);
+      vm.handleDeleteSelected();
+      await wrapper.vm.$nextTick();
+      await vm.onConfirmed();
       await flushPromises();
       expect(mockAddToast).toHaveBeenCalledWith('Deleted 1 session', 'success');
       wrapper.unmount();
@@ -451,7 +470,11 @@ describe('DashboardView.vue', () => {
       deleteSessionsMock.mockRejectedValueOnce(new Error('bulk fail'));
       const wrapper = mount(DashboardView, { global: { plugins: [router] } });
       await wrapper.vm.$nextTick();
-      await (wrapper.vm as any).doDeleteSelected(['s1', 's2']);
+      const vm = wrapper.vm as any;
+      vm.selectedIds = new Set(['s1', 's2']);
+      vm.handleDeleteSelected();
+      await wrapper.vm.$nextTick();
+      await vm.onConfirmed();
       await flushPromises();
       expect(mockAddToast).toHaveBeenCalledWith('Failed to delete sessions', 'error');
       wrapper.unmount();
@@ -461,9 +484,11 @@ describe('DashboardView.vue', () => {
       const wrapper = mount(DashboardView, { global: { plugins: [router] } });
       await wrapper.vm.$nextTick();
       const vm = wrapper.vm as any;
-      vm.selectionMode = true;
       vm.selectedIds = new Set(['s1']);
-      await vm.doDeleteSelected(['s1']);
+      vm.selectionMode = true;
+      vm.handleDeleteSelected();
+      await wrapper.vm.$nextTick();
+      await vm.onConfirmed();
       await flushPromises();
       expect(vm.selectionMode).toBe(false);
       expect(vm.selectedIds.size).toBe(0);
@@ -474,12 +499,13 @@ describe('DashboardView.vue', () => {
       const wrapper = mount(DashboardView, { global: { plugins: [router] } });
       await wrapper.vm.$nextTick();
       const vm = wrapper.vm as any;
-      const action = vi.fn().mockResolvedValue(undefined);
-      vm.confirmAction = action;
-      vm.confirmVisible = true;
+      // Populate the confirm dialog via the public API
+      vm.handleDeleteSession('s1');
+      await wrapper.vm.$nextTick();
+      expect(vm.confirmVisible).toBe(true);
       await vm.onConfirmed();
       await flushPromises();
-      expect(action).toHaveBeenCalled();
+      expect(deleteSessionMock).toHaveBeenCalledWith('s1');
       expect(vm.confirmVisible).toBe(false);
       wrapper.unmount();
     });
@@ -488,12 +514,13 @@ describe('DashboardView.vue', () => {
       const wrapper = mount(DashboardView, { global: { plugins: [router] } });
       await wrapper.vm.$nextTick();
       const vm = wrapper.vm as any;
-      vm.confirmVisible = true;
-      vm.confirmAction = vi.fn();
+      // Populate the confirm dialog via the public API
+      vm.handleDeleteSession('s1');
+      await wrapper.vm.$nextTick();
+      expect(vm.confirmVisible).toBe(true);
       vm.onCancelled();
       await wrapper.vm.$nextTick();
       expect(vm.confirmVisible).toBe(false);
-      expect(vm.confirmAction).toBeNull();
       expect(deleteSessionMock).not.toHaveBeenCalled();
       wrapper.unmount();
     });
@@ -612,5 +639,210 @@ describe('DashboardView.vue', () => {
       expect(deleteSessionMock).not.toHaveBeenCalled();
       wrapper.unmount();
     });
+  });
+
+  // ── loadAllSessionCategoryScores (onMounted) ──────────────────────────────
+
+  it('populates categoryScoresBySession from loadAllSessionCategoryScores on mount', async () => {
+    loadAllSessionCategoryScoresMock.mockResolvedValueOnce([
+      { session_id: 's1', category: 'Health', avg_score: 7.5 }
+    ]);
+    dashState.sessions = [makeSession('s1', 1, 5000)];
+    dashState.trends = { Health: [{ date: new Date().toISOString(), value: 7 }] };
+
+    const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+    await flushPromises();
+
+    const vm = wrapper.vm as any;
+    expect(vm.categoryScoresBySession).toEqual({ s1: { Health: 7.5 } });
+    wrapper.unmount();
+  });
+
+  it('logs error when loadAllSessionCategoryScores throws on mount', async () => {
+    loadAllSessionCategoryScoresMock.mockRejectedValueOnce(new Error('db failure'));
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+    await flushPromises();
+
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Failed to load category scores for export',
+      expect.any(Error)
+    );
+    consoleSpy.mockRestore();
+    wrapper.unmount();
+  });
+
+  // ── @load-more handler ────────────────────────────────────────────────────
+
+  it('load-more event from SessionList calls historyStore.loadMoreSessions', async () => {
+    dashState.sessions = [makeSession('s1', 1, 5000)];
+    dashState.trends = { Health: [{ date: new Date().toISOString(), value: 7 }] };
+
+    const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+    await flushPromises();
+
+    const sessionList = wrapper.findComponent({ name: 'SessionList' });
+    expect(sessionList.exists()).toBe(true);
+    await sessionList.vm.$emit('load-more');
+    await flushPromises();
+
+    expect(loadMoreSessionsMock).toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
+  // ── Custom date range input events ────────────────────────────────────────
+
+  it('handles update:customStart event from DateRangeSelector', async () => {
+    dashState.sessions = [makeSession('s1', 1, 5000)];
+    const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+    await flushPromises();
+
+    const vm = wrapper.vm as any;
+    // Switch to 'custom' range so the DateRangeSelector emits the event
+    vm.selectedRange = 'custom';
+    await wrapper.vm.$nextTick();
+
+    // Find the DateRangeSelector and emit the event
+    const dateSelector = wrapper.findComponent({ name: 'DateRangeSelector' });
+    await dateSelector.vm.$emit('update:customStart', '2024-01-01');
+    await wrapper.vm.$nextTick();
+
+    expect(vm.customStart).toBe('2024-01-01');
+    wrapper.unmount();
+  });
+
+  it('handles update:customEnd event from DateRangeSelector', async () => {
+    dashState.sessions = [makeSession('s1', 1, 5000)];
+    const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+    await flushPromises();
+
+    const vm = wrapper.vm as any;
+    vm.selectedRange = 'custom';
+    await wrapper.vm.$nextTick();
+
+    const dateSelector = wrapper.findComponent({ name: 'DateRangeSelector' });
+    await dateSelector.vm.$emit('update:customEnd', '2024-01-31');
+    await wrapper.vm.$nextTick();
+
+    expect(vm.customEnd).toBe('2024-01-31');
+    wrapper.unmount();
+  });
+
+  // ── "No sessions in this range" empty state ───────────────────────────────
+
+  it('shows "No sessions in this range" when rawSessions exist but filter returns none', async () => {
+    // Sessions from 60 days ago — outside the default 30d window
+    dashState.sessions = [makeSession('old', 60, 5000)];
+    const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+    await wrapper.vm.$nextTick();
+
+    // Verify rawSessions has data but filtered sessions is empty (default 30d range)
+    expect(wrapper.find('.empty-state').exists()).toBe(true);
+    expect(wrapper.find('.empty-title').text()).toBe('No sessions in this range');
+    wrapper.unmount();
+  });
+
+  // ── exportData computed branches ──────────────────────────────────────────
+
+  it('exportData covers all branches: filteredIds false, catScores null, notes, sortedCats', async () => {
+    // s1: in filter, has category scores + notes
+    // s2: in filter, NO category scores, no notes
+    // s_old: NOT in filter (60 days ago), HAS category scores (covers filteredIds.has false branch)
+    dashState.sessions = [
+      makeSession('s1', 1, 5000),
+      makeSession('s2', 1, 6000),
+      makeSession('s_old', 60, 4000)
+    ];
+    dashState.trends = { Health: [{ date: new Date().toISOString(), value: 7 }] };
+
+    // Provide category scores for s1 (truthy catScores) and s_old (outside filter)
+    // s2 has no category scores in the map (tests the ?? {} fallback on line 85)
+    loadAllSessionCategoryScoresMock.mockResolvedValueOnce([
+      { session_id: 's1', category: 'Health', avg_score: 7.5 },
+      { session_id: 's_old', category: 'Health', avg_score: 5.0 }
+    ]);
+
+    // Add notes to s1 to cover the s.notes ?? '' truthy branch
+    dashState.sessions[0] = { ...makeSession('s1', 1, 5000), notes: 'Test note' } as any;
+
+    const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+    await flushPromises();
+
+    const vm = wrapper.vm as any;
+    const exportRows = vm.exportData;
+
+    // exportData should have rows for s1 and s2 (filtered sessions), s_old is excluded
+    expect(exportRows).toHaveLength(2);
+    // s1: has Health score from categoryScoresBySession
+    const s1Row = exportRows.find((r: any) => r.Notes === 'Test note');
+    expect(s1Row).toBeDefined();
+    expect(s1Row['Health']).toBe(7.5);
+    // s2: no category scores, Health falls back to ''
+    const s2Row = exportRows.find((r: any) => r.Notes === '');
+    expect(s2Row).toBeDefined();
+    expect(s2Row['Health']).toBe('');
+
+    wrapper.unmount();
+  });
+
+  it('exportData handles multiple rows with same session_id in category scores', async () => {
+    dashState.sessions = [makeSession('s1', 1, 5000)];
+    dashState.trends = {
+      Health: [{ date: new Date().toISOString(), value: 7 }],
+      Focus: [{ date: new Date().toISOString(), value: 8 }]
+    };
+
+    // Two rows for same session_id: tests `if (!map[row.session_id])` false branch
+    loadAllSessionCategoryScoresMock.mockResolvedValueOnce([
+      { session_id: 's1', category: 'Health', avg_score: 7.5 },
+      { session_id: 's1', category: 'Focus', avg_score: 8.0 }
+    ]);
+
+    const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+    await flushPromises();
+
+    const vm = wrapper.vm as any;
+    expect(vm.categoryScoresBySession).toEqual({
+      s1: { Health: 7.5, Focus: 8.0 }
+    });
+
+    wrapper.unmount();
+  });
+
+  // ── Goal progress panel branches ──────────────────────────────────────────
+
+  it('renders goal progress panel with progress bar when goalScore is set and sessions exist', async () => {
+    questState.goalScore = 7500;
+    dashState.sessions = [makeSession('s1', 1, 5000)];
+    dashState.trends = { Health: [{ date: new Date().toISOString(), value: 7 }] };
+
+    const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+    await flushPromises();
+
+    expect(wrapper.find('.goal-progress-panel').exists()).toBe(true);
+    // Score 5000 is below goal 7500, so no achieved class and no badge
+    expect(wrapper.find('.goal-bar-fill').classes()).not.toContain('achieved');
+    expect(wrapper.find('.goal-badge').exists()).toBe(false);
+
+    wrapper.unmount();
+    questState.goalScore = null;
+  });
+
+  it('shows goal-badge and achieved class when session score meets or exceeds goal', async () => {
+    questState.goalScore = 5000;
+    dashState.sessions = [makeSession('s1', 1, 5000)]; // score == goal
+    dashState.trends = { Health: [{ date: new Date().toISOString(), value: 7 }] };
+
+    const wrapper = mount(DashboardView, { global: { plugins: [router] } });
+    await flushPromises();
+
+    expect(wrapper.find('.goal-progress-panel').exists()).toBe(true);
+    expect(wrapper.find('.goal-bar-fill').classes()).toContain('achieved');
+    expect(wrapper.find('.goal-badge').exists()).toBe(true);
+    expect(wrapper.find('.goal-badge').text()).toContain('Goal Reached!');
+
+    wrapper.unmount();
+    questState.goalScore = null;
   });
 });

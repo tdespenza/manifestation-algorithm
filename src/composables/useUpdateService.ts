@@ -48,10 +48,15 @@ export function useUpdateService() {
     let update;
     try {
       update = await check();
-    } catch {
+    } catch (err) {
+      console.error(err);
       // Silently swallow check() failures — update check errors must never
       // disrupt the app (e.g. offline, server unreachable).
       return;
+    } finally {
+      // Signal to E2E tests that the update check has run (regardless of result).
+      // This flag lets tests replace time-based waits with condition-based waits.
+      (window as unknown as Record<string, unknown>).__updateCheckDone = true;
     }
     if (!update) return;
 
@@ -77,6 +82,7 @@ export function useUpdateService() {
 
       state.value = 'ready';
     } catch (dlErr) {
+      console.error(dlErr);
       errorMessage.value = String(dlErr);
       state.value = 'error';
     }
@@ -87,7 +93,8 @@ export function useUpdateService() {
     if (!isTauri()) return;
     try {
       await relaunch();
-    } catch {
+    } catch (err) {
+      console.error(err);
       // Fallback: keep the ready banner in case relaunch fails.
       state.value = 'ready';
     }

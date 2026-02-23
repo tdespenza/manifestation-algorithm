@@ -269,4 +269,49 @@ describe('Database Service', () => {
     await dbService.deleteSessions([]);
     expect(mocks.execute.mock.calls.length).toBe(callsBefore);
   });
+
+  it('loadHistoricalSessionsPage executes paginated query with limit and offset', async () => {
+    const rows = [
+      { id: 's1', completed_at: '2024-01-01', total_score: 5000, duration_seconds: 60 }
+    ];
+    mocks.select.mockResolvedValueOnce(rows);
+
+    const result = await dbService.loadHistoricalSessionsPage(20, 40);
+
+    expect(mocks.select).toHaveBeenCalledWith(
+      expect.stringContaining('LIMIT $1 OFFSET $2'),
+      [20, 40]
+    );
+    expect(result).toEqual(rows);
+  });
+
+  it('countHistoricalSessions returns total count from query', async () => {
+    mocks.select.mockResolvedValueOnce([{ total: 42 }]);
+
+    const result = await dbService.countHistoricalSessions();
+
+    expect(mocks.select).toHaveBeenCalledWith(expect.stringContaining('COUNT(*)'));
+    expect(result).toBe(42);
+  });
+
+  it('countHistoricalSessions returns 0 when query returns empty rows', async () => {
+    mocks.select.mockResolvedValueOnce([]);
+
+    const result = await dbService.countHistoricalSessions();
+
+    expect(result).toBe(0);
+  });
+
+  it('loadAllSessionCategoryScores returns aggregated category scores', async () => {
+    const rows = [
+      { session_id: 's1', category: 'Health', avg_score: 7.5 },
+      { session_id: 's1', category: 'Focus', avg_score: 8.0 }
+    ];
+    mocks.select.mockResolvedValueOnce(rows);
+
+    const result = await dbService.loadAllSessionCategoryScores();
+
+    expect(mocks.select).toHaveBeenCalledWith(expect.stringContaining('AVG(answer_value)'));
+    expect(result).toEqual(rows);
+  });
 });

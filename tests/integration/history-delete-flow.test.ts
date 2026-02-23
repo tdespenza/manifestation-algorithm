@@ -11,6 +11,8 @@ import { useHistoryStore } from '@/stores/history';
 
 const dbMocks = vi.hoisted(() => ({
   loadHistoricalSessions: vi.fn(),
+  loadHistoricalSessionsPage: vi.fn(),
+  countHistoricalSessions: vi.fn(),
   deleteSession: vi.fn(),
   deleteSessions: vi.fn()
 }));
@@ -21,6 +23,8 @@ const trendsMocks = vi.hoisted(() => ({
 
 vi.mock('@/services/db', () => ({
   loadHistoricalSessions: dbMocks.loadHistoricalSessions,
+  loadHistoricalSessionsPage: dbMocks.loadHistoricalSessionsPage,
+  countHistoricalSessions: dbMocks.countHistoricalSessions,
   deleteSession: dbMocks.deleteSession,
   deleteSessions: dbMocks.deleteSessions
 }));
@@ -52,7 +56,9 @@ const SESSION_C = makeSession('session-c', 3);
 beforeEach(() => {
   setActivePinia(createPinia());
   vi.clearAllMocks();
-  // Default: return 3 sessions from DB
+  // Default: return 3 sessions from DB (paginated), total count = 3
+  dbMocks.loadHistoricalSessionsPage.mockResolvedValue([SESSION_A, SESSION_B, SESSION_C]);
+  dbMocks.countHistoricalSessions.mockResolvedValue(3);
   dbMocks.loadHistoricalSessions.mockResolvedValue([SESSION_A, SESSION_B, SESSION_C]);
   trendsMocks.loadConsolidatedCategoryTrends.mockResolvedValue({});
   dbMocks.deleteSession.mockResolvedValue(undefined);
@@ -68,12 +74,13 @@ describe('deleteSession (single)', () => {
     expect(store.sessions).toHaveLength(3);
 
     // After deletion, DB returns only 2 sessions
-    dbMocks.loadHistoricalSessions.mockResolvedValueOnce([SESSION_B, SESSION_C]);
+    dbMocks.loadHistoricalSessionsPage.mockResolvedValueOnce([SESSION_B, SESSION_C]);
+    dbMocks.countHistoricalSessions.mockResolvedValueOnce(2);
 
     await store.deleteSession('session-a');
 
     expect(dbMocks.deleteSession).toHaveBeenCalledWith('session-a');
-    expect(dbMocks.loadHistoricalSessions).toHaveBeenCalledTimes(2); // initial + refetch
+    expect(dbMocks.loadHistoricalSessionsPage).toHaveBeenCalledTimes(2); // initial + refetch
     expect(store.sessions).toHaveLength(2);
     expect(store.sessions.find(s => s.id === 'session-a')).toBeUndefined();
   });
@@ -82,7 +89,8 @@ describe('deleteSession (single)', () => {
     const store = useHistoryStore();
     await store.fetchHistory();
 
-    dbMocks.loadHistoricalSessions.mockResolvedValueOnce([SESSION_A, SESSION_C]);
+    dbMocks.loadHistoricalSessionsPage.mockResolvedValueOnce([SESSION_A, SESSION_C]);
+    dbMocks.countHistoricalSessions.mockResolvedValueOnce(2);
     await store.deleteSession('session-b');
 
     expect(store.sessions.map(s => s.id)).toEqual(['session-a', 'session-c']);
@@ -94,13 +102,13 @@ describe('deleteSession (single)', () => {
 
     const store = useHistoryStore();
     await store.fetchHistory();
-    const callCountBefore = dbMocks.loadHistoricalSessions.mock.calls.length;
+    const callCountBefore = dbMocks.loadHistoricalSessionsPage.mock.calls.length;
 
     await store.deleteSession('session-a');
 
     expect(store.error).toContain('foreign key constraint');
     // fetchHistory should NOT have been called again after failure
-    expect(dbMocks.loadHistoricalSessions.mock.calls.length).toBe(callCountBefore);
+    expect(dbMocks.loadHistoricalSessionsPage.mock.calls.length).toBe(callCountBefore);
     consoleSpy.mockRestore();
   });
 
@@ -124,7 +132,8 @@ describe('deleteSessions (bulk)', () => {
     await store.fetchHistory();
     expect(store.sessions).toHaveLength(3);
 
-    dbMocks.loadHistoricalSessions.mockResolvedValueOnce([SESSION_C]);
+    dbMocks.loadHistoricalSessionsPage.mockResolvedValueOnce([SESSION_C]);
+    dbMocks.countHistoricalSessions.mockResolvedValueOnce(1);
     await store.deleteSessions(['session-a', 'session-b']);
 
     expect(dbMocks.deleteSessions).toHaveBeenCalledWith(['session-a', 'session-b']);
@@ -135,19 +144,20 @@ describe('deleteSessions (bulk)', () => {
   it('is a no-op (no DB call, no refetch) when given an empty array', async () => {
     const store = useHistoryStore();
     await store.fetchHistory();
-    const callsBefore = dbMocks.loadHistoricalSessions.mock.calls.length;
+    const callsBefore = dbMocks.loadHistoricalSessionsPage.mock.calls.length;
 
     await store.deleteSessions([]);
 
     expect(dbMocks.deleteSessions).not.toHaveBeenCalled();
-    expect(dbMocks.loadHistoricalSessions.mock.calls.length).toBe(callsBefore);
+    expect(dbMocks.loadHistoricalSessionsPage.mock.calls.length).toBe(callsBefore);
   });
 
   it('deletes all sessions when passed all ids', async () => {
     const store = useHistoryStore();
     await store.fetchHistory();
 
-    dbMocks.loadHistoricalSessions.mockResolvedValueOnce([]);
+    dbMocks.loadHistoricalSessionsPage.mockResolvedValueOnce([]);
+    dbMocks.countHistoricalSessions.mockResolvedValueOnce(0);
     await store.deleteSessions(['session-a', 'session-b', 'session-c']);
 
     expect(store.sessions).toHaveLength(0);
@@ -159,12 +169,12 @@ describe('deleteSessions (bulk)', () => {
 
     const store = useHistoryStore();
     await store.fetchHistory();
-    const callCountBefore = dbMocks.loadHistoricalSessions.mock.calls.length;
+    const callCountBefore = dbMocks.loadHistoricalSessionsPage.mock.calls.length;
 
     await store.deleteSessions(['session-a', 'session-b']);
 
     expect(store.error).toContain('bulk delete failed');
-    expect(dbMocks.loadHistoricalSessions.mock.calls.length).toBe(callCountBefore);
+    expect(dbMocks.loadHistoricalSessionsPage.mock.calls.length).toBe(callCountBefore);
     consoleSpy.mockRestore();
   });
 
@@ -188,12 +198,14 @@ describe('sequential delete operations', () => {
     await store.fetchHistory();
 
     // Delete A → 2 remain
-    dbMocks.loadHistoricalSessions.mockResolvedValueOnce([SESSION_B, SESSION_C]);
+    dbMocks.loadHistoricalSessionsPage.mockResolvedValueOnce([SESSION_B, SESSION_C]);
+    dbMocks.countHistoricalSessions.mockResolvedValueOnce(2);
     await store.deleteSession('session-a');
     expect(store.sessions).toHaveLength(2);
 
     // Delete B → 1 remains
-    dbMocks.loadHistoricalSessions.mockResolvedValueOnce([SESSION_C]);
+    dbMocks.loadHistoricalSessionsPage.mockResolvedValueOnce([SESSION_C]);
+    dbMocks.countHistoricalSessions.mockResolvedValueOnce(1);
     await store.deleteSession('session-b');
     expect(store.sessions).toHaveLength(1);
     expect(store.sessions[0].id).toBe('session-c');
@@ -204,11 +216,13 @@ describe('sequential delete operations', () => {
     await store.fetchHistory();
 
     // Single delete first
-    dbMocks.loadHistoricalSessions.mockResolvedValueOnce([SESSION_B, SESSION_C]);
+    dbMocks.loadHistoricalSessionsPage.mockResolvedValueOnce([SESSION_B, SESSION_C]);
+    dbMocks.countHistoricalSessions.mockResolvedValueOnce(2);
     await store.deleteSession('session-a');
 
     // Then bulk delete remaining
-    dbMocks.loadHistoricalSessions.mockResolvedValueOnce([]);
+    dbMocks.loadHistoricalSessionsPage.mockResolvedValueOnce([]);
+    dbMocks.countHistoricalSessions.mockResolvedValueOnce(0);
     await store.deleteSessions(['session-b', 'session-c']);
 
     expect(store.sessions).toHaveLength(0);

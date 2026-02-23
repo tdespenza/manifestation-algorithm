@@ -55,7 +55,9 @@ impl UserIdentity {
             #[cfg(unix)]
             {
                 use std::os::unix::fs::PermissionsExt;
-                let _ = std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o600));
+                if let Err(e) = std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o600)) {
+                    eprintln!("Failed to set permissions: {}", e);
+                }
             }
             Ok(identity)
         }
@@ -119,5 +121,98 @@ mod tests {
         let json = serde_json::to_string(&id).unwrap();
         let id2: UserIdentity = serde_json::from_str(&json).unwrap();
         assert_eq!(pk, id2.public_key_b64());
+    }
+
+    // ── Security edge-cases ───────────────────────────────────────────────────
+
+    #[test]
+    fn test_verify_rejects_malformed_base64_signature() {
+        let id = UserIdentity::generate();
+        let msg = b"test message";
+        let pk_b64 = id.public_key_b64();
+        // Garbage / non-base64 data
+        assert!(!UserIdentity::verify(msg, "!!!not-base64!!!", &pk_b64));
+        assert!(!UserIdentity::verify(msg, "", &pk_b64));
+    }
+
+    #[test]
+    fn test_verify_rejects_malformed_base64_public_key() {
+        let id = UserIdentity::generate();
+        let msg = b"test message";
+        let sig = id.sign(msg);
+        let sig_b64 = BASE64.encode(sig.to_bytes());
+        assert!(!UserIdentity::verify(msg, &sig_b64, "!!!invalid-pubkey!!!"));
+        assert!(!UserIdentity::verify(msg, &sig_b64, ""));
+    }
+
+    #[test]
+    fn test_verify_rejects_wrong_length_public_key() {
+        let id = UserIdentity::generate();
+        let msg = b"test";
+        let sig = id.sign(msg);
+        let sig_b64 = BASE64.encode(sig.to_bytes());
+        // 31 bytes instead of 32 — should fail
+        let short_key = BASE64.encode(&[0u8; 31]);
+        assert!(!UserIdentity::verify(msg, &sig_b64, &short_key));
+        // 33 bytes
+        let long_key = BASE64.encode(&[0u8; 33]);
+        assert!(!UserIdentity::verify(msg, &sig_b64, &long_key));
+    }
+
+    #[test]
+    fn test_verify_rejects_signature_from_different_key() {
+        let id_a = UserIdentity::generate();
+        let id_b = UserIdentity::generate();
+        let msg = b"cross-signing test";
+        let sig_a = id_a.sign(msg);
+        let sig_a_b64 = BASE64.encode(sig_a.to_bytes());
+        // Use key B's public key to verify key A's signature — must fail
+        assert!(!UserIdentity::verify(msg, &sig_a_b64, &id_b.public_key_b64()));
+    }
+
+    #[test]
+    fn test_generate_produces_unique_keys() {
+        let ids: Vec<String> = (0..10).map(|_| UserIdentity::generate().public_key_b64()).collect();
+        let unique: std::collections::HashSet<&String> = ids.iter().collect();
+        assert_eq!(unique.len(), 10, "10 generated identities should all have unique public keys");
+    }
+
+    #[test]
+    fn test_public_key_is_44_chars_base64() {
+        // Ed25519 public key = 32 bytes → base64 = ceil(32/3)*4 = 44 chars (no padding variance)
+        let id = UserIdentity::generate();
+        assert_eq!(id.public_key_b64().len(), 44);
+    }
+
+    #[test]
+    fn test_public_key_contains_no_pii_patterns() {
+        for _ in 0..20 {
+            let pk = UserIdentity::generate().public_key_b64();
+            assert!(!pk.contains('@'),   "public key must not contain '@'");
+            assert!(!pk.contains("http"), "public key must not contain 'http'");
+            assert!(!pk.contains(' '),   "public key must not contain spaces");
+        }
+    }
+
+    #[test]
+    fn test_load_or_create_persists_identity() {
+        let unique = format!("test_identity_{}.json", std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_nanos())
+            .unwrap_or(0));
+        let path = std::env::temp_dir().join(unique);
+
+        // First call: creates new identity
+        let id1 = UserIdentity::load_or_create(&path).expect("load_or_create failed");
+        let pk1 = id1.public_key_b64();
+
+        // Second call: loads the same identity
+        let id2 = UserIdentity::load_or_create(&path).expect("load_or_create reload failed");
+        let pk2 = id2.public_key_b64();
+
+        // Clean up
+        let _ = std::fs::remove_file(&path);
+
+        assert_eq!(pk1, pk2, "Identity must be stable across calls on the same file");
     }
 }

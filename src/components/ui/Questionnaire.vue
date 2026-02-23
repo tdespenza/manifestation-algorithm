@@ -247,6 +247,7 @@ const submit = async () => {
     await store.submitSession();
     router.push('/dashboard');
   } catch (e) {
+    console.error(e);
     submitError.value = 'Failed to save session: ' + e;
   } finally {
     isSubmitting.value = false;

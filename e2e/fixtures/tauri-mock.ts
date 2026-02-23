@@ -17,10 +17,13 @@ export const TAURI_MOCK_SCRIPT = String.raw`
   // ── In-memory database ─────────────────────────────────────────────
   const memDB = {
     questionnaire_responses: [],   // { session_id, question_number, answer_value }
-    settings: [],                  // { key, value }
+    // Allow tests to pre-seed settings via window.__tauriPresetSettings (must
+    // be injected as an init script BEFORE this script runs).
+    settings: [...(window.__tauriPresetSettings || [])],  // { key, value }
     historical_sessions: [],       // { id, score, completed_at, answers_snapshot }
     historical_responses: [],      // { session_id, question_number, answer_value, recorded_at }
     _sharingEnabled: false,        // persisted sharing opt-in state
+    _publishCalls: [],             // records each publish_result invocation for test assertions
     // Optional fake update metadata returned by plugin:updater|check.
     // Tests can pre-set window.__tauriPresetUpdate (init script) or call
     // window.__setMockUpdate(data) at runtime.
@@ -177,6 +180,17 @@ export const TAURI_MOCK_SCRIPT = String.raw`
         return 0;
       }
 
+      case 'publish_result': {
+        // Record the call so E2E tests can assert it was called with the right args.
+        // Sharing must be enabled for this command to be invoked (enforced by Rust),
+        // but in the mock we just record unconditionally.
+        memDB._publishCalls.push({
+          score: payload.score,
+          categoryScores: payload.categoryScores
+        });
+        return 'bafy-mock-cid';
+      }
+
       case 'plugin:updater|check': {
         // Returns null by default (no update). Tests can call
         // window.__setMockUpdate({ version, body, ... }) to simulate an update.
@@ -247,6 +261,7 @@ export const TAURI_MOCK_SCRIPT = String.raw`
     memDB.historical_sessions = [];
     memDB.historical_responses = [];
     memDB._sharingEnabled = false;
+    memDB._publishCalls = [];
     memDB._mockUpdate = null;
   };
 

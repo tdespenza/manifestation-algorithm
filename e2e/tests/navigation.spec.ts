@@ -33,7 +33,7 @@ test.describe('App navigation', () => {
   test('navigates to Dashboard (History) via nav link', async ({ appPage, dashboardPage }) => {
     await appPage.goDashboard();
     await expect(dashboardPage.heading).toBeVisible();
-    await expect(dashboardPage.heading).toHaveText('Manifestation History');
+    await expect(dashboardPage.heading).toHaveText('Manifestation Algorithm Tracking History');
   });
 
   test('navigates back to Home from Dashboard', async ({ appPage, homePage }) => {
