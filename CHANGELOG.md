@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2026-02-28
+### Features
+- Add mutation tests to CI workflow and update contributing guidelines
+### Other Changes
+- Add unit tests for DashboardView, HomeView, and SettingsView components
+
+- Created comprehensive unit tests for DashboardView.vue, covering loading states, session filtering, and selection mode functionality.
+- Added tests for HomeView.vue to ensure proper rendering and component integration.
+- Implemented tests for SettingsView.vue, including navigation and child component interactions.
+
 ## [0.10.0] - 2026-02-23
 ### Features
 - Update notification flow to direct users to release page instead of auto-download
@@ -133,7 +143,7 @@ fix(index.html): update footer credits and licensing information
 - Added tests for ResumeDialog component to ensure correct event emissions.
 - Implemented tests for Settings component to verify settings functionality and interactions.
 - Developed tests for SharingToggle component to check sharing state and interactions.
-- Added tests for dbTrends service to validate data retrieval and processing.
+- Added tests for db_trends service to validate data retrieval and processing.
 - Created tests for history store to ensure correct state management and data fetching.
 - Implemented tests for analysis utility functions to validate trend detection logic.
 - Added tests for CategoryDetailView to ensure correct rendering and data handling.
