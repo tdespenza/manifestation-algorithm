@@ -1,5 +1,5 @@
 use ed25519_dalek::{SigningKey, VerifyingKey, Signer, Signature, Verifier};
-use rand::rngs::OsRng;
+use rand_core::OsRng;
 use std::path::Path;
 use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 use serde::{Deserialize, Serialize};

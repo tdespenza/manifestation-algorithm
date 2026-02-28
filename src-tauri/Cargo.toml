@@ -47,6 +47,7 @@ cid = "0.11"
 multihash = "0.19"
 ed25519-dalek = { version = "2", features = ["rand_core"] }
 rand = "0.9"
+rand_core = "0.6"
 base64 = "0.22"
 tauri-plugin-dialog = "2.6.0"
 tauri-plugin-fs = "2.4.5"
