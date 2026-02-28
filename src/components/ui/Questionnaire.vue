@@ -1,5 +1,5 @@
 <template>
-  <div ref="containerRef" class="questionnaire" tabindex="-1" @keydown="handleGlobalKey">
+  <div ref="containerRef" class="questionnaire">
     <!-- Sticky Header -->
     <div class="header">
       <div class="status-container">
@@ -74,14 +74,16 @@
           ← Previous
         </button>
         <div class="dot-nav">
-          <span
+          <button
             v-for="(_, idx) in store.totalQuestions"
             :key="idx"
             class="dot"
             :class="{ active: idx === store.currentIndex, answered: isAnswered(idx) }"
+            type="button"
             :title="`Question ${idx + 1}`"
+            :aria-label="`Go to question ${idx + 1}`"
             @click="store.goToIndex(idx)"
-          ></span>
+          ></button>
         </div>
         <button
           class="nav-btn next-btn"
@@ -136,7 +138,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, nextTick } from 'vue';
+import { computed, onMounted, onUnmounted, reactive, ref, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuestionnaireStore } from '../../stores/questionnaire';
 import { questions as allTopLevelQuestions } from '../../data/questions';
@@ -178,12 +180,12 @@ const formattedScore = computed(() =>
 );
 
 const scoreQuality = computed(() => {
-  if (answeredCount.value === 0) return { label: 'Not Started', color: '#94a3b8' };
+  if (answeredCount.value === 0) return { label: 'Not Started', color: '#475569' };
   const pct = score.value / maxScore;
   if (pct >= 0.75) return { label: 'Manifesting ✦', color: '#1a8a3a' };
   if (pct >= 0.5) return { label: 'Aligned', color: '#0d7a5f' };
-  if (pct >= 0.25) return { label: 'Building', color: '#6b5ca5' };
-  return { label: 'Starting Out', color: '#94a3b8' };
+  if (pct >= 0.25) return { label: 'Building', color: '#4c3f8c' };
+  return { label: 'Starting Out', color: '#475569' };
 });
 
 const submitButtonState = computed(() => {
@@ -259,6 +261,11 @@ const questions = allTopLevelQuestions;
 onMounted(async () => {
   await store.init();
   nextTick(() => containerRef.value?.focus());
+  window.addEventListener('keydown', handleGlobalKey);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleGlobalKey);
 });
 </script>
 
@@ -286,7 +293,7 @@ onMounted(async () => {
 
 .save-indicator {
   font-size: 0.85em;
-  color: #888;
+  color: #4b5563;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -322,7 +329,7 @@ onMounted(async () => {
 
 .reset-zone-label {
   font-size: 0.82em;
-  color: var(--color-muted, #94a3b8);
+  color: #475569;
   font-weight: 400;
 }
 
@@ -330,7 +337,7 @@ onMounted(async () => {
   background: transparent;
   border: 1px solid transparent;
   border-radius: 6px;
-  color: var(--color-muted, #94a3b8);
+  color: #475569;
   font-size: 0.82em;
   font-weight: 500;
   cursor: pointer;
@@ -419,7 +426,7 @@ onMounted(async () => {
 }
 .max-info {
   font-size: 0.7em;
-  color: #aaa;
+  color: #4b5563;
 }
 
 /* Mode Toggle — segmented pill */
@@ -440,7 +447,7 @@ onMounted(async () => {
   cursor: pointer;
   font-size: 0.85em;
   font-weight: 600;
-  color: #888;
+  color: #475569;
   transition: all 0.18s ease;
 }
 
@@ -507,6 +514,9 @@ onMounted(async () => {
 }
 
 .dot {
+  border: none;
+  padding: 0;
+  appearance: none;
   width: 10px;
   height: 10px;
   border-radius: 50%;
@@ -554,7 +564,7 @@ kbd {
 }
 
 .completion-hint {
-  color: #999;
+  color: #475569;
   font-size: 0.85em;
 }
 
@@ -589,8 +599,7 @@ kbd {
 }
 
 .submit-button.incomplete {
-  background: var(--dusty-grape, #6061a4);
-  opacity: 0.75;
+  background: #4f518b;
   box-shadow: 0 4px 14px rgba(96, 97, 164, 0.28);
 }
 

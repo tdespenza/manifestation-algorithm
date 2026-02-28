@@ -184,10 +184,10 @@ describe('Questionnaire.vue', () => {
   // ── Keyboard navigation ───────────────────────────────────────────────────
 
   it('handleGlobalKey: ignores input in scroll mode', async () => {
-    const wrapper = makeWrapper();
+    makeWrapper();
     const store = useQuestionnaireStore();
-    // In scroll mode (default), trigger on .questionnaire — handleGlobalKey runs but exits immediately
-    await wrapper.find('.questionnaire').trigger('keydown', { key: 'ArrowRight' });
+    // In scroll mode (default), listener still receives keydown from window but exits immediately
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
     expect(store.goToNext).not.toHaveBeenCalled();
   });
 
@@ -197,7 +197,7 @@ describe('Questionnaire.vue', () => {
     const buttons = wrapper.findAll('.mode-toggle button');
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
-    await wrapper.find('.questionnaire').trigger('keydown', { key: 'ArrowRight' });
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
     expect(store.goToNext).toHaveBeenCalled();
   });
 
@@ -207,7 +207,7 @@ describe('Questionnaire.vue', () => {
     const buttons = wrapper.findAll('.mode-toggle button');
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
-    await wrapper.find('.questionnaire').trigger('keydown', { key: 'ArrowDown' });
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
     expect(store.goToNext).toHaveBeenCalled();
   });
 
@@ -217,7 +217,7 @@ describe('Questionnaire.vue', () => {
     const buttons = wrapper.findAll('.mode-toggle button');
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
-    await wrapper.find('.questionnaire').trigger('keydown', { key: 'ArrowLeft' });
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
     expect(store.goToPrev).toHaveBeenCalled();
   });
 
@@ -227,7 +227,7 @@ describe('Questionnaire.vue', () => {
     const buttons = wrapper.findAll('.mode-toggle button');
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
-    await wrapper.find('.questionnaire').trigger('keydown', { key: 'ArrowUp' });
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
     expect(store.goToPrev).toHaveBeenCalled();
   });
 
@@ -243,7 +243,7 @@ describe('Questionnaire.vue', () => {
     const buttons = wrapper.findAll('.mode-toggle button');
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
-    await wrapper.find('.questionnaire').trigger('keydown', { key: '5' });
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: '5' }));
     expect(store.setAnswer).toHaveBeenCalledWith('q1', 5);
   });
 
@@ -259,8 +259,37 @@ describe('Questionnaire.vue', () => {
     const buttons = wrapper.findAll('.mode-toggle button');
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
-    await wrapper.find('.questionnaire').trigger('keydown', { key: '0' });
+    (store.setAnswer as ReturnType<typeof vi.fn>).mockClear();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: '0' }));
+    expect(store.setAnswer).toHaveBeenCalledTimes(1);
     expect(store.setAnswer).toHaveBeenCalledWith('q1', 10);
+  });
+
+  it('handleGlobalKey: number keys do nothing when currentQuestion is null', async () => {
+    const wrapper = makeWrapper();
+    const store = useQuestionnaireStore();
+    vi.spyOn(store, 'currentQuestion', 'get').mockReturnValue(
+      null as unknown as typeof store.currentQuestion
+    );
+    const buttons = wrapper.findAll('.mode-toggle button');
+    await buttons[1].trigger('click');
+    await wrapper.vm.$nextTick();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: '7' }));
+    expect(store.setAnswer).not.toHaveBeenCalled();
+  });
+
+  it('handleGlobalKey: key 0 does nothing when currentQuestion is null', async () => {
+    const wrapper = makeWrapper();
+    const store = useQuestionnaireStore();
+    vi.spyOn(store, 'currentQuestion', 'get').mockReturnValue(
+      null as unknown as typeof store.currentQuestion
+    );
+    const buttons = wrapper.findAll('.mode-toggle button');
+    await buttons[1].trigger('click');
+    await wrapper.vm.$nextTick();
+    (store.setAnswer as ReturnType<typeof vi.fn>).mockClear();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: '0' }));
+    expect(store.setAnswer).not.toHaveBeenCalled();
   });
 
   it('handleGlobalKey: ignores key events from INPUT elements in step mode', async () => {
@@ -273,8 +302,25 @@ describe('Questionnaire.vue', () => {
     const inputEl = document.createElement('input');
     const event = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true });
     Object.defineProperty(event, 'target', { value: inputEl });
-    wrapper.find('.questionnaire').element.dispatchEvent(event);
+    window.dispatchEvent(event);
     expect(store.goToNext).not.toHaveBeenCalled();
+  });
+
+  it('registers and cleans up the global keydown listener on mount/unmount', async () => {
+    const addSpy = vi.spyOn(window, 'addEventListener');
+    const removeSpy = vi.spyOn(window, 'removeEventListener');
+
+    const wrapper = makeWrapper();
+    await wrapper.vm.$nextTick();
+
+    expect(addSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+
+    wrapper.unmount();
+
+    expect(removeSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+
+    addSpy.mockRestore();
+    removeSpy.mockRestore();
   });
 
   // ── Progress display ──────────────────────────────────────────────────────
@@ -431,7 +477,7 @@ describe('Questionnaire.vue', () => {
     await wrapper.vm.$nextTick();
     // Override currentQuestion to undefined
     vi.spyOn(store, 'currentQuestion', 'get').mockReturnValue(undefined as any);
-    await wrapper.find('.questionnaire').trigger('keydown', { key: '5' });
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: '5' }));
     // Should NOT have called setAnswer
     expect(store.setAnswer).not.toHaveBeenCalled();
   });
@@ -443,7 +489,7 @@ describe('Questionnaire.vue', () => {
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
     vi.spyOn(store, 'currentQuestion', 'get').mockReturnValue(undefined as any);
-    await wrapper.find('.questionnaire').trigger('keydown', { key: '0' });
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: '0' }));
     expect(store.setAnswer).not.toHaveBeenCalled();
   });
 
@@ -463,7 +509,7 @@ describe('Questionnaire.vue', () => {
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
     // Press a key that doesn't match any branch: not Arrow, not 1-9, not 0
-    await wrapper.find('.questionnaire').trigger('keydown', { key: 'a' });
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'a' }));
     expect(store.goToNext).not.toHaveBeenCalled();
     expect(store.goToPrev).not.toHaveBeenCalled();
     expect(store.setAnswer).not.toHaveBeenCalled();

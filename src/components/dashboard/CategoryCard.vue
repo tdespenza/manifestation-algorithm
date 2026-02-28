@@ -1,5 +1,11 @@
 <template>
-  <div class="category-card" :class="`trend-${trend}`" @click="goToDetail">
+  <button
+    type="button"
+    class="category-card"
+    :class="`trend-${trend}`"
+    :aria-label="`Open details for ${category}`"
+    @click="goToDetail"
+  >
     <div class="card-header">
       <h3>{{ category }}</h3>
       <div v-if="currentScore !== undefined" class="current-score" :class="scoreClass">
@@ -14,7 +20,7 @@
     <div v-else class="no-trend">
       <small>Not enough data</small>
     </div>
-  </div>
+  </button>
 </template>
 
 <script setup lang="ts">
@@ -117,6 +123,7 @@ const chartOptions: ChartOptions<'line'> = {
 
 <style scoped>
 .category-card {
+  border: none;
   background: white;
   border-radius: 10px;
   padding: 16px;

@@ -31,7 +31,7 @@ jobs:
       tag: ${{ steps.version.outputs.tag }}
     steps:
       - name: Checkout Main
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: main
 
@@ -88,12 +88,12 @@ jobs:
 
     steps:
       - name: Checkout Main
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: main
 
       - name: Set Up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'npm'
@@ -144,7 +144,7 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
       - name: Upload Installers to Actions Artifact Storage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: installers-${{ matrix.name }}
           path: ${{ matrix.artifact-paths }}
@@ -172,7 +172,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout Main
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: main
           fetch-depth: 0
@@ -188,7 +188,7 @@ jobs:
           GITHUB_REPO: ${{ github.repository }}
 
       - name: Download All Installer Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: installers-*
           path: dist

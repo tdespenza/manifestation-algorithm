@@ -38,6 +38,7 @@
     </div>
   </div>
   <div v-else class="loading">
+    <h1>{{ category || 'Category Detail' }}</h1>
     <span v-if="historyStore.isLoading">Loading...</span>
     <span v-else>No data found for "{{ category }}".</span>
     <button @click="$router.push('/dashboard')">Go to Dashboard</button>
@@ -272,7 +273,7 @@ const exportData = computed(() => {
   align-items: center;
   gap: 1rem;
   padding: 4rem;
-  color: #666;
+  color: #334155;
 }
 
 @media (max-width: 768px) {

@@ -1,6 +1,7 @@
 // @ts-check
 import js from '@eslint/js';
 import pluginVue from 'eslint-plugin-vue';
+import vueA11y from 'eslint-plugin-vuejs-accessibility';
 import tseslint from 'typescript-eslint';
 import prettierConfig from 'eslint-config-prettier';
 
@@ -34,6 +35,9 @@ export default tseslint.config(
 
   // --- Vue 3 rules ---
   ...pluginVue.configs['flat/recommended'],
+
+  // --- Vue accessibility rules ---
+  ...vueA11y.configs['flat/recommended'],
 
   // --- Prettier disables conflicting rules (must be last) ---
   prettierConfig,

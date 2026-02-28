@@ -220,11 +220,11 @@ function handleInput(e: Event) {
 }
 
 .low-label {
-  color: #ef9a9a;
+  color: #9f1d1d;
 }
 
 .high-label {
-  color: #81c784;
+  color: #1f6f35;
 }
 
 .slider-value {
@@ -254,7 +254,7 @@ function handleInput(e: Event) {
 
 .score-calc {
   font-size: 0.82em;
-  color: #9499b8;
+  color: #4b5563;
   font-weight: 500;
 }
 </style>
