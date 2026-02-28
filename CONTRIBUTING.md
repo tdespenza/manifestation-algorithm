@@ -30,6 +30,19 @@ This project and everyone participating in it is governed by the [Code of Conduc
 5. Make sure your code lints (`cargo clippy` and `npm run lint`).
 6. Issue that pull request!
 
+### Required CI Status Checks (Branch Protection)
+
+When configuring GitHub branch protection for `main`, require these checks:
+
+- `Lint, Format & Architecture`
+- `Type Check`
+- `Unit & Integration Tests`
+- `Mutation Tests`
+- `End-to-End Tests`
+- `Rust Tests`
+
+These names must match the CI workflow job names exactly.
+
 ## Development Setup
 
 ### Prerequisites

@@ -181,14 +181,19 @@ describe('Questionnaire Store', () => {
     });
 
     it('init persists generated session_id when none exists', async () => {
-      const randomSpy = vi.spyOn(crypto, 'randomUUID').mockReturnValue('generated-uuid');
+      const randomSpy = vi
+        .spyOn(crypto, 'randomUUID')
+        .mockReturnValue('00000000-0000-4000-8000-000000000000');
       const store = useQuestionnaireStore();
 
       await store.init();
 
       expect(dbMocks.getSetting).toHaveBeenCalledWith('session_id');
-      expect(store.sessionId).toBe('generated-uuid');
-      expect(dbMocks.setSetting).toHaveBeenCalledWith('session_id', 'generated-uuid');
+      expect(store.sessionId).toBe('00000000-0000-4000-8000-000000000000');
+      expect(dbMocks.setSetting).toHaveBeenCalledWith(
+        'session_id',
+        '00000000-0000-4000-8000-000000000000'
+      );
       randomSpy.mockRestore();
     });
 

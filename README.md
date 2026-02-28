@@ -105,6 +105,7 @@ npm run tauri build
 ```
 
 Cross-platform builds are handled by GitHub Actions CI (see `.github/workflows/ci.yml`).
+For required branch-protection checks, see [Required CI Status Checks (Branch Protection)](CONTRIBUTING.md#required-ci-status-checks-branch-protection).
 
 ---
 

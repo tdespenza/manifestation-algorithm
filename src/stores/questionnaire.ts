@@ -20,7 +20,7 @@ import {
 } from '../services/db';
 
 const allQuestions: Question[] = questions.flatMap(question =>
-  question.hasSubPoints ? (question.subPoints ?? []) : [question]
+  question.hasSubPoints ? question.subPoints! : [question]
 );
 
 const TOTAL_QUESTIONS_COUNT = allQuestions.length;
