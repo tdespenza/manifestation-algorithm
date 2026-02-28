@@ -24,7 +24,12 @@ async function saveWithPicker(
     try {
       const filePath = await save({
         defaultPath: suggestedName,
-        filters: [{ name: description, extensions: extensions.map(ext => ext.replace(/^\./, '')) }]
+        filters: [
+          {
+            name: description,
+            extensions: extensions.map(ext => (ext.startsWith('.') ? ext.slice(1) : ext))
+          }
+        ]
       });
 
       if (!filePath) {
@@ -70,7 +75,7 @@ export function useChartExport() {
       const blob = new Blob([wbout], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       });
-      return await saveWithPicker(blob, `${filename}.xlsx`, 'Excel Spreadsheet', ['.xlsx']);
+      return await saveWithPicker(blob, `${filename}.xlsx`, 'Excel Spreadsheet', ['xlsx']);
     } catch (err) {
       console.error(err);
       return { success: false, message: 'Excel export failed' };
@@ -97,7 +102,7 @@ export function useChartExport() {
       );
       const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      return await saveWithPicker(blob, `${filename}.csv`, 'CSV File', ['.csv']);
+      return await saveWithPicker(blob, `${filename}.csv`, 'CSV File', ['csv']);
     } catch (err) {
       console.error(err);
       return { success: false, message: 'CSV export failed' };
@@ -138,7 +143,7 @@ export function useChartExport() {
       const arrayBuf = doc.output('arraybuffer');
       const blob = new Blob([arrayBuf], { type: 'application/pdf' });
       const safeName = title.replace(/\s+/g, '_');
-      return await saveWithPicker(blob, `${safeName}.pdf`, 'PDF Document', ['.pdf']);
+      return await saveWithPicker(blob, `${safeName}.pdf`, 'PDF Document', ['pdf']);
     } catch (err) {
       console.error(err);
       return { success: false, message: 'PDF export failed' };
@@ -175,7 +180,7 @@ export function useChartExport() {
 
       const blob = new Blob([html], { type: 'text/html;charset=utf-8;' });
       const safeName = title.replace(/\s+/g, '_');
-      return await saveWithPicker(blob, `${safeName}.html`, 'HTML File', ['.html', '.htm']);
+      return await saveWithPicker(blob, `${safeName}.html`, 'HTML File', ['.html', 'htm']);
     } catch (err) {
       console.error(err);
       return { success: false, message: 'HTML export failed' };

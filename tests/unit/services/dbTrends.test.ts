@@ -11,9 +11,9 @@ vi.mock('@tauri-apps/plugin-sql', () => ({
   default: { load: mocks.load }
 }));
 
-import { loadConsolidatedCategoryTrends } from '@/services/db_trends';
+import { loadConsolidatedCategoryTrends } from '@/services/dbTrends';
 
-describe('db_trends service', () => {
+describe('dbTrends service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.execute.mockResolvedValue([]);
@@ -58,5 +58,20 @@ describe('db_trends service', () => {
 
     const result = await loadConsolidatedCategoryTrends();
     expect(result['Focus'][0].value).toBe(7.56);
+  });
+
+  it('uses the consolidated trends SQL query', async () => {
+    mocks.select.mockResolvedValueOnce([]);
+
+    await loadConsolidatedCategoryTrends();
+
+    expect(mocks.select).toHaveBeenCalled();
+    const calls = mocks.select.mock.calls;
+    const latestQuery = String(calls[calls.length - 1][0]);
+    expect(latestQuery).toContain('SELECT');
+    expect(latestQuery).toContain('FROM historical_responses r');
+    expect(latestQuery).toContain('JOIN historical_sessions s ON s.id = r.session_id');
+    expect(latestQuery).toContain('GROUP BY s.id, r.category');
+    expect(latestQuery).toContain('ORDER BY s.completed_at ASC');
   });
 });

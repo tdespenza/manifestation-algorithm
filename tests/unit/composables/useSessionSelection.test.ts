@@ -38,6 +38,18 @@ describe('useSessionSelection', () => {
       const { sel } = setup();
       expect(sel.allSelected.value).toBe(false);
     });
+
+    it('confirm title/message start empty', () => {
+      const { sel } = setup();
+      expect(sel.confirmTitle.value).toBe('');
+      expect(sel.confirmMessage.value).toBe('');
+    });
+
+    it('allSelected is false when sessions list is empty', () => {
+      const { sel } = setup([]);
+      expect(sel.selectedCount.value).toBe(0);
+      expect(sel.allSelected.value).toBe(false);
+    });
   });
 
   describe('selection mode', () => {
@@ -104,7 +116,37 @@ describe('useSessionSelection', () => {
       sel.handleDeleteSession('s1');
       expect(sel.confirmVisible.value).toBe(true);
       expect(sel.confirmTitle.value).toBe('Delete Session');
+      expect(sel.confirmMessage.value).toBe(
+        'Are you sure you want to permanently delete this session? This cannot be undone.'
+      );
       expect(deleteOne).not.toHaveBeenCalled();
+    });
+
+    it('sets isDeleting while single delete is in flight and resets after success', async () => {
+      let resolveDelete: (() => void) | undefined;
+      const { sel, deleteOne } = setup();
+      deleteOne.mockImplementationOnce(
+        () =>
+          new Promise<void>(resolve => {
+            resolveDelete = resolve;
+          })
+      );
+
+      sel.handleDeleteSession('s1');
+      const pending = sel.onConfirmed();
+      expect(sel.isDeleting.value).toBe(true);
+
+      resolveDelete?.();
+      await pending;
+      expect(sel.isDeleting.value).toBe(false);
+    });
+
+    it('resets isDeleting after single delete failure', async () => {
+      const { sel, deleteOne } = setup();
+      deleteOne.mockRejectedValueOnce(new Error('DB error'));
+      sel.handleDeleteSession('s1');
+      await sel.onConfirmed();
+      expect(sel.isDeleting.value).toBe(false);
     });
 
     it('calls deleteOne after onConfirmed', async () => {
@@ -144,7 +186,10 @@ describe('useSessionSelection', () => {
       sel.toggleSelect('s2');
       sel.handleDeleteSelected();
       expect(sel.confirmVisible.value).toBe(true);
-      expect(sel.confirmTitle.value).toContain('Delete');
+      expect(sel.confirmTitle.value).toBe('Delete 2 Sessions');
+      expect(sel.confirmMessage.value).toBe(
+        'Are you sure you want to permanently delete these 2 sessions? This cannot be undone.'
+      );
     });
 
     it('calls deleteMany with selected ids after onConfirmed', async () => {
@@ -171,6 +216,45 @@ describe('useSessionSelection', () => {
       sel.handleDeleteSelected();
       await sel.onConfirmed();
       expect(addToast).toHaveBeenCalledWith('Deleted 1 session', 'success');
+    });
+
+    it('builds exact singular confirm title/message for 1 selection', () => {
+      const { sel } = setup();
+      sel.toggleSelect('s1');
+      sel.handleDeleteSelected();
+      expect(sel.confirmTitle.value).toBe('Delete 1 Session');
+      expect(sel.confirmMessage.value).toBe(
+        'Are you sure you want to permanently delete this session? This cannot be undone.'
+      );
+    });
+
+    it('sets isDeleting while bulk delete is in flight and resets after success', async () => {
+      let resolveDelete: (() => void) | undefined;
+      const { sel, deleteMany } = setup();
+      deleteMany.mockImplementationOnce(
+        () =>
+          new Promise<void>(resolve => {
+            resolveDelete = resolve;
+          })
+      );
+
+      sel.toggleSelect('s1');
+      sel.handleDeleteSelected();
+      const pending = sel.onConfirmed();
+      expect(sel.isDeleting.value).toBe(true);
+
+      resolveDelete?.();
+      await pending;
+      expect(sel.isDeleting.value).toBe(false);
+    });
+
+    it('resets isDeleting after bulk delete failure', async () => {
+      const { sel, deleteMany } = setup();
+      deleteMany.mockRejectedValueOnce(new Error('bulk fail'));
+      sel.toggleSelect('s1');
+      sel.handleDeleteSelected();
+      await sel.onConfirmed();
+      expect(sel.isDeleting.value).toBe(false);
     });
 
     it('exits selection mode after successful bulk delete', async () => {

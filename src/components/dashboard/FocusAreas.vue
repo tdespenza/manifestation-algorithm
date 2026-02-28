@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { CategoryTrends } from '../../services/db_trends';
+import type { CategoryTrends } from '../../services/dbTrends';
 import { computeFocusAreas } from '../../data/recommendations';
 
 const props = defineProps<{

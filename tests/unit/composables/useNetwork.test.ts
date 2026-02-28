@@ -31,6 +31,18 @@ import {
   _resetNetworkState
 } from '@/composables/useNetwork';
 
+describe('useNetwork module initial state', () => {
+  it('starts with strict module-level defaults before any reset/init', () => {
+    const network = useNetwork();
+    expect(network.bandwidthStats.value).toEqual({ inbound: 0, outbound: 0 });
+    expect(network.isConnected.value).toBe(false);
+    expect(network.sharingEnabled.value).toBe(false);
+
+    // Bring state back to defaults for subsequent describe blocks.
+    _resetNetworkState();
+  });
+});
+
 describe('useNetwork composable', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -52,15 +64,14 @@ describe('useNetwork composable', () => {
 
   it('exposes correct default state before init', () => {
     const network = useNetwork();
-    expect(network.isConnected.value).toBeDefined();
-    expect(typeof network.count.value).toBe('number');
-    expect(typeof network.manifestations.value).toBe('number');
-    expect(network.avgScore.value === null || typeof network.avgScore.value === 'number').toBe(
-      true
-    );
-    expect(
-      network.percentile90.value === null || typeof network.percentile90.value === 'number'
-    ).toBe(true);
+    expect(network.count.value).toBe(0);
+    expect(network.manifestations.value).toBe(0);
+    expect(network.avgScore.value).toBeNull();
+    expect(network.percentile90.value).toBeNull();
+    expect(network.categoryStats.value).toEqual({});
+    expect(network.bandwidthStats.value).toEqual({ inbound: 0, outbound: 0 });
+    expect(network.isConnected.value).toBe(false);
+    expect(network.sharingEnabled.value).toBe(false);
   });
 
   it('init() invokes get_peer_count and get_network_sharing', async () => {
@@ -198,6 +209,7 @@ describe('useNetwork composable', () => {
   });
 
   it('loadSharingState leaves sharingEnabled unchanged when invoke throws', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     // Make get_network_sharing throw so the catch block is exercised
     mockInvoke.mockImplementation((cmd: string) => {
       if (cmd === 'get_network_sharing') return Promise.reject(new Error('permission denied'));
@@ -212,6 +224,8 @@ describe('useNetwork composable', () => {
     // preventing an already-enabled setting from being silently reverted.
     // After _resetNetworkState() the value starts as false, so false is expected here.
     expect(sharingEnabled.value).toBe(false);
+    expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));
+    consoleSpy.mockRestore();
   });
 
   it('toggleSharing logs error and does not throw when invoke rejects', async () => {
@@ -330,6 +344,28 @@ describe('useNetwork composable', () => {
     });
   });
 
+  it('publishLastSession skips responses with null question_id', async () => {
+    dbMocks.loadHistoricalSessions.mockResolvedValue([
+      {
+        id: 'sess-001',
+        total_score: 5000,
+        completed_at: '2026-02-22T10:00:00Z',
+        duration_seconds: 0
+      }
+    ]);
+    dbMocks.loadSessionResponses.mockResolvedValue([
+      { question_id: null, category: 'General', answer_value: 5 },
+      { question_id: '2', category: 'Activate Words', answer_value: 8 }
+    ]);
+
+    await publishLastSession();
+
+    expect(mockInvoke).toHaveBeenCalledWith('publish_result', {
+      score: 5000,
+      categoryScores: { '2': 8 }
+    });
+  });
+
   it('network-stats event sets isConnected to true via event handler', async () => {
     let capturedHandler: ((e: { payload: unknown }) => void) | null = null;
     mockListen.mockImplementation((_event: string, handler: (e: { payload: unknown }) => void) => {
@@ -388,11 +424,25 @@ describe('useNetwork composable', () => {
     expect(() => cleanup()).not.toThrow();
   });
 
+  it('cleanup() does not call clearTimeout when no timer exists', () => {
+    _resetNetworkState();
+    const clearSpy = vi.spyOn(globalThis, 'clearTimeout');
+
+    const { cleanup } = useNetwork();
+    cleanup();
+
+    expect(clearSpy).not.toHaveBeenCalled();
+    clearSpy.mockRestore();
+  });
+
   it('cleanup() clears timeout when connectTimeoutId is set', async () => {
     _resetNetworkState();
+    const clearSpy = vi.spyOn(globalThis, 'clearTimeout');
     const { init, cleanup } = useNetwork();
     await init(); // sets connectTimeoutId
     expect(() => cleanup()).not.toThrow();
+    expect(clearSpy).toHaveBeenCalled();
+    clearSpy.mockRestore();
   });
 
   it('network-stats event with partial payload (missing optional fields)', async () => {
@@ -402,7 +452,8 @@ describe('useNetwork composable', () => {
       return Promise.resolve(vi.fn());
     });
     _resetNetworkState();
-    const { init, avgScore, percentile90, categoryStats, bandwidthStats } = useNetwork();
+    const { init, manifestations, avgScore, percentile90, categoryStats, bandwidthStats } =
+      useNetwork();
     await init();
 
     // Send payload WITHOUT optional fields — tests FALSE branches of if-checks
@@ -416,6 +467,7 @@ describe('useNetwork composable', () => {
     // Optional fields should remain at defaults since payload didn't include them
     expect(avgScore.value).toBeNull();
     expect(percentile90.value).toBeNull();
+    expect(manifestations.value).toBe(0);
     expect(Object.keys(categoryStats.value)).toHaveLength(0);
     expect(bandwidthStats.value.inbound).toBe(0);
     expect(bandwidthStats.value.outbound).toBe(0);
@@ -469,5 +521,46 @@ describe('useNetwork composable', () => {
     );
     consoleSpy.mockRestore();
     vi.useRealTimers();
+  });
+
+  it('cleanup() after init allows re-init to invoke get_peer_count again', async () => {
+    _resetNetworkState();
+    const { init, cleanup } = useNetwork();
+
+    await init();
+    cleanup();
+    vi.clearAllMocks();
+    await init();
+
+    expect(mockInvoke).toHaveBeenCalledWith('get_peer_count');
+  });
+
+  it('_resetNetworkState resets connected/sharing/bandwidth refs to defaults', async () => {
+    const clearSpy = vi.spyOn(globalThis, 'clearTimeout');
+    const { init, isConnected, sharingEnabled, bandwidthStats } = useNetwork();
+    await init();
+
+    isConnected.value = true;
+    sharingEnabled.value = true;
+    bandwidthStats.value.inbound = 99;
+    bandwidthStats.value.outbound = 88;
+
+    _resetNetworkState();
+
+    expect(isConnected.value).toBe(false);
+    expect(sharingEnabled.value).toBe(false);
+    expect(bandwidthStats.value).toEqual({ inbound: 0, outbound: 0 });
+    expect(clearSpy).toHaveBeenCalled();
+    clearSpy.mockRestore();
+  });
+
+  it('_resetNetworkState does not call clearTimeout when timer is null', () => {
+    _resetNetworkState();
+    const clearSpy = vi.spyOn(globalThis, 'clearTimeout');
+
+    _resetNetworkState();
+
+    expect(clearSpy).not.toHaveBeenCalled();
+    clearSpy.mockRestore();
   });
 });

@@ -12,22 +12,16 @@ export function calculateScore(answers: AnswerSheet): number {
   let totalScore = 0;
 
   const processQuestion = (q: Question) => {
-    // If a question has sub-points, we score the sub-points instead
-    // The parent container itself does not have a user rating
-    if (q.hasSubPoints && q.subPoints && q.subPoints.length > 0) {
-      q.subPoints.forEach(processQuestion);
-    } else {
-      // Direct question or sub-question leaf
-      const rating = answers[q.id];
-
-      // If unanswered, default to 1 as specified
-      if (typeof rating === 'number' && rating >= 1 && rating <= 10) {
-        totalScore += q.points * (rating / 10);
-      } else {
-        // Default: 1 point (min rating)
-        totalScore += q.points * (1 / 10);
-      }
+    const subPoints = Array.isArray(q.subPoints) ? q.subPoints : [];
+    if (subPoints.length > 0) {
+      subPoints.forEach(processQuestion);
+      return;
     }
+
+    const rawRating = answers[q.id];
+    const numericRating = typeof rawRating === 'number' ? rawRating : 1;
+    const rating = Math.min(10, Math.max(1, numericRating));
+    totalScore += q.points * (rating / 10);
   };
 
   questions.forEach(processQuestion);
@@ -48,11 +42,13 @@ export function getMaxPossibleScore(): number {
   const maxAnswers: AnswerSheet = {};
 
   const collectIds = (q: Question) => {
-    if (q.hasSubPoints && q.subPoints) {
-      q.subPoints.forEach(collectIds);
-    } else {
-      maxAnswers[q.id] = 10;
+    const subPoints = Array.isArray(q.subPoints) ? q.subPoints : [];
+    if (subPoints.length > 0) {
+      subPoints.forEach(collectIds);
+      return;
     }
+
+    maxAnswers[q.id] = 10;
   };
 
   questions.forEach(collectIds);

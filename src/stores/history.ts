@@ -8,7 +8,7 @@ import {
   deleteSessions as dbDeleteSessions,
   type SessionSummary
 } from '../services/db';
-import { loadConsolidatedCategoryTrends, type CategoryTrends } from '../services/db_trends';
+import { loadConsolidatedCategoryTrends, type CategoryTrends } from '../services/dbTrends';
 
 /** Number of sessions to load per page. */
 const PAGE_SIZE = 20;

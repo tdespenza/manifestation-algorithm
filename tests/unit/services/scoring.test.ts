@@ -74,4 +74,37 @@ describe('Score Calculation Engine', () => {
     // Going from 1→10 for 4 questions of 25pts each: delta = 4 * 25 * (9/10) = 90
     expect(calculateScore(answers) - baseline).toBeCloseTo(90);
   });
+
+  it('clamps ratings below 1 and above 10 to valid bounds', () => {
+    const answers: Record<string, number> = {};
+    const fill = (q: any) => {
+      if (q.subPoints) q.subPoints.forEach(fill);
+      else answers[q.id] = 1;
+    };
+    questions.forEach(fill);
+
+    const baseline = calculateScore({ ...answers });
+
+    // Q2 has 100 points
+    answers['2'] = 0;
+    expect(calculateScore(answers) - baseline).toBeCloseTo(0);
+
+    answers['2'] = 999;
+    // 1 -> 10 on a 100-point question gives +90
+    expect(calculateScore(answers) - baseline).toBeCloseTo(90);
+  });
+
+  it('supports decimal ratings within range', () => {
+    const answers: Record<string, number> = {};
+    const fill = (q: any) => {
+      if (q.subPoints) q.subPoints.forEach(fill);
+      else answers[q.id] = 1;
+    };
+    questions.forEach(fill);
+
+    const baseline = calculateScore({ ...answers });
+    answers['2'] = 7.5;
+    // Q2=100: 1 -> 7.5 gives +65
+    expect(calculateScore(answers) - baseline).toBeCloseTo(65);
+  });
 });

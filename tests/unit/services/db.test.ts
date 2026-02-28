@@ -30,6 +30,7 @@ describe('Database Service', () => {
 
   it('initTables should run migrations on first connect', async () => {
     await dbService.getDb();
+    expect(mocks.load).toHaveBeenCalledWith('sqlite:manifestation.db');
     // WAL mode and busy_timeout are set before migrations to prevent SQLITE_BUSY
     expect(mocks.execute).toHaveBeenCalledWith('PRAGMA journal_mode=WAL', []);
     expect(mocks.execute).toHaveBeenCalledWith('PRAGMA busy_timeout=5000', []);
@@ -93,12 +94,18 @@ describe('Database Service', () => {
     mocks.select.mockResolvedValueOnce([]);
     const result = await dbService.getLastActive('sess-3');
     expect(result).toBeNull();
+    expect(mocks.select).toHaveBeenCalledWith('SELECT value FROM settings WHERE key = $1', [
+      'last_active_sess-3'
+    ]);
   });
 
   it('getLastActive returns the value when row exists', async () => {
     mocks.select.mockResolvedValueOnce([{ value: '1700000000000' }]);
     const result = await dbService.getLastActive('sess-4');
     expect(result).toBe('1700000000000');
+    expect(mocks.select).toHaveBeenCalledWith('SELECT value FROM settings WHERE key = $1', [
+      'last_active_sess-4'
+    ]);
   });
 
   it('getSetting returns null when no row found', async () => {
@@ -145,6 +152,22 @@ describe('Database Service', () => {
       expect.arrayContaining(['1b', 6])
     );
 
+    const responseInsertCall = mocks.execute.mock.calls.find(call =>
+      String(call[0]).includes('INSERT INTO historical_responses')
+    );
+    expect(responseInsertCall).toBeDefined();
+    expect(responseInsertCall?.[0]).toContain('VALUES ($1, $2, $3, $4), ($5, $6, $7, $8)');
+    expect(responseInsertCall?.[1]).toEqual([
+      expect.any(String),
+      '1a',
+      'Master the Basics',
+      8,
+      expect.any(String),
+      '1b',
+      'Master the Basics',
+      6
+    ]);
+
     expect(typeof id).toBe('string');
     expect(id.length).toBeGreaterThan(0);
   });
@@ -178,6 +201,34 @@ describe('Database Service', () => {
       expect.stringContaining('INSERT INTO historical_responses'),
       expect.arrayContaining(['2', 7])
     );
+
+    const responseInsertCall = mocks.execute.mock.calls.find(call =>
+      String(call[0]).includes('INSERT INTO historical_responses')
+    );
+    expect(responseInsertCall?.[1]).toEqual([
+      expect.any(String),
+      '2',
+      'Activate & Illuminate Words',
+      7
+    ]);
+  });
+
+  it('saveHistoricalSession uses parent category for nested sub-point ids', async () => {
+    await dbService.saveHistoricalSession(650, { '19a': 6 });
+
+    const responseInsertCall = mocks.execute.mock.calls.find(call =>
+      String(call[0]).includes('INSERT INTO historical_responses')
+    );
+    expect(responseInsertCall?.[1]).toEqual([expect.any(String), '19a', 'Plug into System', 6]);
+  });
+
+  it('saveHistoricalSession falls back to General category for unknown ids', async () => {
+    await dbService.saveHistoricalSession(500, { 'unknown-id': 4 });
+
+    const responseInsertCall = mocks.execute.mock.calls.find(call =>
+      String(call[0]).includes('INSERT INTO historical_responses')
+    );
+    expect(responseInsertCall?.[1]).toEqual([expect.any(String), 'unknown-id', 'General', 4]);
   });
 
   it('loadHistoricalSessions executes select and returns rows', async () => {
@@ -255,11 +306,11 @@ describe('Database Service', () => {
   it('deleteSessions deletes responses and sessions for all ids', async () => {
     await dbService.deleteSessions(['s1', 's2']);
     expect(mocks.execute).toHaveBeenCalledWith(
-      expect.stringContaining('DELETE FROM historical_responses'),
+      expect.stringContaining('DELETE FROM historical_responses WHERE session_id IN ($1, $2)'),
       ['s1', 's2']
     );
     expect(mocks.execute).toHaveBeenCalledWith(
-      expect.stringContaining('DELETE FROM historical_sessions'),
+      expect.stringContaining('DELETE FROM historical_sessions WHERE id IN ($1, $2)'),
       ['s1', 's2']
     );
   });

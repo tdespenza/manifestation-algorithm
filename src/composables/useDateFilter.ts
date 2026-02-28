@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue';
 import type { ComputedRef, Ref } from 'vue';
 import type { SessionSummary } from '../services/db';
-import type { CategoryTrends } from '../services/db_trends';
+import type { CategoryTrends } from '../services/dbTrends';
 
 export interface DateRange {
   label: string;

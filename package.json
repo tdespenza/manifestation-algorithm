@@ -21,7 +21,8 @@
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:report": "playwright show-report playwright-report",
     "test:all": "npm run test && npm run test:e2e",
-    "ci": "npm run lint:check && npm run format:check && npm run deps:validate && vue-tsc --noEmit && npm run test && npx playwright test --project=chromium",
+    "naming:check": "node scripts/check-naming.cjs",
+    "ci": "npm run lint:check && npm run naming:check && npm run format:check && npm run deps:validate && vue-tsc --noEmit && npm run test && npx playwright test --project=chromium",
     "prepare": "husky",
     "lint": "eslint src tests --fix",
     "lint:check": "eslint src tests",
@@ -29,7 +30,8 @@
     "format:check": "prettier --check \"src/**/*.{ts,vue}\" \"tests/**/*.ts\"",
     "deps:validate": "depcruise src --config .dependency-cruiser.js",
     "deps:graph": "depcruise src --config .dependency-cruiser.js --output-type dot | node -e \"process.stdin.resume()\" > /dev/null || depcruise src --config .dependency-cruiser.js --output-type err-long",
-    "quality:check": "npm run lint:check && npm run format:check && npm run deps:validate && npm run test:coverage"
+    "quality:check": "npm run lint:check && npm run format:check && npm run deps:validate && npm run test:coverage",
+    "test:mutation": "stryker run"
   },
   "lint-staged": {
     "src/**/*.{ts,vue}": [
@@ -53,17 +55,20 @@
     "jspdf": "^4.2.0",
     "pinia": "^3.0.4",
     "uuid": "^13.0.0",
-    "vue": "^3.5.13",
+    "vue": "^3.5.29",
     "vue-chartjs": "^5.3.3",
-    "vue-router": "^5.0.2",
+    "vue-router": "^5.0.3",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@pinia/testing": "^1.0.3",
     "@playwright/test": "^1.58.2",
+    "@stryker-mutator/core": "^9.6.0",
+    "@stryker-mutator/typescript-checker": "^9.6.0",
+    "@stryker-mutator/vitest-runner": "^9.6.0",
     "@tauri-apps/cli": "^2",
-    "@types/node": "^25.3.0",
+    "@types/node": "^25.3.2",
     "@types/uuid": "^11.0.0",
     "@vitejs/plugin-vue": "^6.0.4",
     "@vitest/coverage-istanbul": "^4.0.18",
@@ -71,7 +76,7 @@
     "@vue/eslint-config-typescript": "^14.7.0",
     "@vue/test-utils": "^2.4.6",
     "dependency-cruiser": "^17.3.8",
-    "eslint": "^10.0.0",
+    "eslint": "^10.0.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-vue": "^10.8.0",
     "husky": "^9.1.7",
@@ -79,9 +84,9 @@
     "lint-staged": "^16.2.7",
     "prettier": "^3.8.1",
     "typescript": "~5.9.3",
-    "typescript-eslint": "^8.56.0",
+    "typescript-eslint": "^8.56.1",
     "vite": "^7.3.1",
     "vitest": "^4.0.18",
-    "vue-tsc": "^3.2.4"
+    "vue-tsc": "^3.2.5"
   }
 }

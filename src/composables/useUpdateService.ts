@@ -15,7 +15,13 @@ export const RELEASE_PAGE_URL = 'https://tdespenza.github.io/manifestation-algor
 
 /** True when the page is running inside the Tauri shell. */
 export function isTauri(): boolean {
-  return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+  const win = (globalThis as { window?: unknown }).window;
+  if (win === undefined) {
+    throw new TypeError('window is undefined');
+  }
+  if (win === null) return false;
+  if (typeof win !== 'object') return false;
+  return '__TAURI_INTERNALS__' in win;
 }
 
 /**

@@ -19,19 +19,10 @@ import {
   setSetting
 } from '../services/db';
 
-function getLeafQuestions(qs: Question[]): Question[] {
-  let leaves: Question[] = [];
-  for (const q of qs) {
-    if (q.hasSubPoints && q.subPoints?.length) {
-      leaves = leaves.concat(getLeafQuestions(q.subPoints));
-    } else {
-      leaves.push(q);
-    }
-  }
-  return leaves;
-}
+const allQuestions: Question[] = questions.flatMap(question =>
+  question.hasSubPoints ? question.subPoints! : [question]
+);
 
-const allQuestions = getLeafQuestions(questions);
 const TOTAL_QUESTIONS_COUNT = allQuestions.length;
 
 export const useQuestionnaireStore = defineStore('questionnaire', () => {
@@ -105,10 +96,10 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
    * Attempt to pre-fill answers from the most recent historical session.
    * Returns true when a pre-fill was applied, false otherwise.
    */
-  async function tryHistoricalPreFill(): Promise<boolean> {
-    if (!saveLastSession.value) return false;
+  async function tryHistoricalPreFill(): Promise<void> {
+    if (!saveLastSession.value) return;
     const history = await loadHistoricalSessions();
-    if (history.length === 0) return false;
+    if (history.length === 0) return;
 
     const lastSessionId = history[0].id; // Most recent due to DESC order
     const lastResponses = await loadSessionResponses(lastSessionId);
@@ -121,11 +112,10 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
       }
     });
 
-    if (Object.keys(historyAnswers).length === 0) return false;
+    if (Object.keys(historyAnswers).length === 0) return;
 
     answers.value = historyAnswers;
     isHistoricalPreFill.value = true;
-    return true;
   }
 
   async function init() {

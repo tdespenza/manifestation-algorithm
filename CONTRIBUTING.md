@@ -30,6 +30,19 @@ This project and everyone participating in it is governed by the [Code of Conduc
 5. Make sure your code lints (`cargo clippy` and `npm run lint`).
 6. Issue that pull request!
 
+### Required CI Status Checks (Branch Protection)
+
+When configuring GitHub branch protection for `main`, require these checks:
+
+- `Lint, Format & Architecture`
+- `Type Check`
+- `Unit & Integration Tests`
+- `Mutation Tests`
+- `End-to-End Tests`
+- `Rust Tests`
+
+These names must match the CI workflow job names exactly.
+
 ## Development Setup
 
 ### Prerequisites
@@ -69,6 +82,24 @@ cd src-tauri && cargo test
 - `src-tauri/` - Rust Backend
 - `website/` - GitHub Pages site
 - `docs/` - Architecture & Protocol documentation
+
+## Naming Conventions
+
+Use domain-specific naming consistently:
+
+- TypeScript identifiers: `camelCase`
+- TypeScript type-like symbols (interfaces/types/classes/enums): `PascalCase`
+- Constants and env vars: `UPPER_CASE`
+- Vue component and view files: `PascalCase.vue`
+- Composable files: `camelCase.ts` (for example, `useDateFilter.ts`)
+- E2E test files: `kebab-case.test.ts`
+- Unit/integration tests: use `*.test.ts` (not `*.spec.ts`)
+
+Run naming checks locally before opening a PR:
+
+```bash
+npm run naming:check
+```
 
 ## Commit Messages
 
@@ -111,7 +142,7 @@ BUMP_TYPE=minor git commit -m "chore: restructure internals"
 
 ### How It Works
 
-1. **`pre-commit`** — runs ESLint, Prettier, and lint-staged
+1. **`pre-commit`** — runs lint-staged, naming checks, ESLint, and Prettier
 2. **`commit-msg`** — reads the commit message, determines the bump level (major / minor / patch), updates `package.json`, then calls `scripts/sync-version.js` to propagate the new version to `src-tauri/Cargo.toml` and `src-tauri/tauri.conf.json`; all three files are staged and included in the commit automatically
 
 ## Architecture
