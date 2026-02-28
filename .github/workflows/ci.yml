@@ -144,7 +144,7 @@ jobs:
           CI: true
 
       - name: Upload A11y Playwright Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-a11y-report
@@ -152,7 +152,7 @@ jobs:
           retention-days: 7
 
       - name: Upload A11y Playwright Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-a11y-results
