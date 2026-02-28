@@ -219,7 +219,7 @@ async function doClear() {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #999;
+  color: #4b5563;
   margin-bottom: 0.75rem;
 }
 
@@ -248,11 +248,11 @@ async function doClear() {
 
 .setting-desc {
   font-size: 0.82rem;
-  color: #888;
+  color: #4b5563;
 }
 
 .btn-danger {
-  background-color: #ef4444;
+  background-color: #b91c1c;
   color: white;
   padding: 0.5rem 1.1rem;
   border: none;
@@ -265,7 +265,7 @@ async function doClear() {
 }
 
 .btn-danger:hover {
-  background-color: #dc2626;
+  background-color: #991b1b;
 }
 
 .btn-toggle {
@@ -311,7 +311,7 @@ async function doClear() {
 .toggle-text-val {
   font-size: 0.82rem;
   font-weight: 600;
-  color: #aaa;
+  color: #4b5563;
   min-width: 22px;
   transition: color 0.2s;
 }
@@ -326,7 +326,7 @@ async function doClear() {
 }
 
 .setting-about p {
-  color: #bbb;
+  color: #4b5563;
   font-size: 0.8rem;
 }
 

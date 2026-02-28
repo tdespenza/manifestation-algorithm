@@ -250,12 +250,12 @@ onMounted(async () => {
       <div v-else class="empty-state">
         <template v-if="rawSessions.length > 0">
           <div class="empty-icon">🔍</div>
-          <h3 class="empty-title">No sessions in this range</h3>
+          <h2 class="empty-title">No sessions in this range</h2>
           <p class="empty-desc">Try a wider range or select a different period.</p>
         </template>
         <template v-else>
           <div class="empty-icon">✨</div>
-          <h3 class="empty-title">No sessions yet</h3>
+          <h2 class="empty-title">No sessions yet</h2>
           <p class="empty-desc">
             Complete your first assessment to see your progress and trends here.
           </p>
@@ -428,7 +428,7 @@ h2 {
 }
 
 .empty-desc {
-  color: #888;
+  color: #4b5563;
   font-size: 1rem;
   margin-bottom: 1.5rem;
   max-width: 380px;

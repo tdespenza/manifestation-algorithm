@@ -38,6 +38,7 @@ When configuring GitHub branch protection for `main`, require these checks:
 - `Type Check`
 - `Unit & Integration Tests`
 - `Mutation Tests`
+- `Accessibility Tests`
 - `End-to-End Tests`
 - `Rust Tests`
 
