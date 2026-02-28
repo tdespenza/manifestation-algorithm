@@ -57,7 +57,7 @@ test.describe('Accessibility – resume dialog', () => {
     // We check the template — the overlay has role="dialog"
     const overlay = page.locator('.overlay[role="dialog"]');
     // If not visible, we just confirm the attribute pattern is correct in code
-    // (existence tested here; visibility tested in questionnaire.spec.ts)
+    // (existence tested here; visibility tested in questionnaire.test.ts)
     const count = await overlay.count();
     // count can be 0 if no saved session, that's fine
     expect(count).toBeGreaterThanOrEqual(0);

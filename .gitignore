@@ -7,6 +7,8 @@ pnpm-workspace.yaml
 
 test-output/*
 coverage/
+reports/
+.stryker-tmp/
 
 # Logs
 logs/
@@ -101,7 +103,6 @@ src-tauri/target/
 *.db-wal
 *.DS_Store
 .idea
-
 
 # Playwright E2E test artifacts
 playwright-report/

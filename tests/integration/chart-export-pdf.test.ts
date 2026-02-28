@@ -23,8 +23,13 @@ const mockJsPDFInstance = {
   output: vi.fn().mockReturnValue(new ArrayBuffer(16))
 };
 
+let lastJsPdfCtorArg: unknown;
+
 vi.mock('jspdf', () => {
   class jsPDF {
+    constructor(arg?: unknown) {
+      lastJsPdfCtorArg = arg;
+    }
     setFontSize = mockJsPDFInstance.setFontSize;
     text = mockJsPDFInstance.text;
     addImage = mockJsPDFInstance.addImage;
@@ -108,6 +113,7 @@ const DEFAULT_PROPS = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  lastJsPdfCtorArg = undefined;
   buildDOM();
 
   vi.stubGlobal('URL', {
@@ -165,14 +171,58 @@ describe('useChartExport.exportToPDF integration', () => {
     );
   });
 
+  it('computes expected A4 draw rectangle for 800x400 canvas', async () => {
+    const { exportToPDF } = useChartExport();
+    await exportToPDF('pdf-test-chart', 'Geometry Report');
+
+    expect(mockJsPDFInstance.addImage).toHaveBeenCalledWith(
+      'data:image/png;base64,abc123',
+      'PNG',
+      40,
+      60,
+      515,
+      257.5
+    );
+  });
+
+  it('uses height-limited scaling for very tall canvases', async () => {
+    mockCanvas.width = 400;
+    mockCanvas.height = 2000;
+
+    const { exportToPDF } = useChartExport();
+    await exportToPDF('pdf-test-chart', 'Tall Chart');
+
+    expect(mockJsPDFInstance.addImage).toHaveBeenCalledWith(
+      'data:image/png;base64,abc123',
+      'PNG',
+      40,
+      60,
+      146.4,
+      732
+    );
+  });
+
+  it('clamps scale to 1 for small canvases (no upscaling)', async () => {
+    mockCanvas.width = 100;
+    mockCanvas.height = 100;
+
+    const { exportToPDF } = useChartExport();
+    await exportToPDF('pdf-test-chart', 'Small Chart');
+
+    expect(mockJsPDFInstance.addImage).toHaveBeenCalledWith(
+      'data:image/png;base64,abc123',
+      'PNG',
+      40,
+      60,
+      100,
+      100
+    );
+  });
+
   it('sets the title text via jsPDF.text', async () => {
     const { exportToPDF } = useChartExport();
     await exportToPDF('pdf-test-chart', 'My Report');
-    expect(mockJsPDFInstance.text).toHaveBeenCalledWith(
-      'My Report',
-      expect.any(Number),
-      expect.any(Number)
-    );
+    expect(mockJsPDFInstance.text).toHaveBeenCalledWith('My Report', 40, 40);
   });
 
   it('calls jsPDF.output("arraybuffer") to get the binary data', async () => {
@@ -181,12 +231,20 @@ describe('useChartExport.exportToPDF integration', () => {
     expect(mockJsPDFInstance.output).toHaveBeenCalledWith('arraybuffer');
   });
 
+  it('creates jsPDF with pt units and a4 format', async () => {
+    const { exportToPDF } = useChartExport();
+    await exportToPDF('pdf-test-chart', 'Ctor Check');
+    expect(lastJsPdfCtorArg).toEqual({ unit: 'pt', format: 'a4' });
+  });
+
   it('falls back to anchor download and returns success when not in Tauri', async () => {
     tauriMocks.isTauri.mockReturnValueOnce(false);
     const { exportToPDF } = useChartExport();
     const result = await exportToPDF('pdf-test-chart', 'My PDF');
     expect(result.success).toBe(true);
-    expect(URL.createObjectURL).toHaveBeenCalledWith(expect.any(Blob));
+    const blobArg = (URL.createObjectURL as ReturnType<typeof vi.fn>).mock.calls[0][0] as Blob;
+    expect(blobArg.size).toBeGreaterThan(0);
+    expect(blobArg.type).toBe('application/pdf');
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:pdf-url');
   });
 
@@ -201,6 +259,7 @@ describe('useChartExport.exportToPDF integration', () => {
 
     const saveArg = tauriMocks.save.mock.calls[0][0] as { defaultPath: string; filters: unknown[] };
     expect(saveArg.defaultPath).toMatch(/\.pdf$/);
+    expect(saveArg.filters).toEqual([{ name: 'PDF Document', extensions: ['pdf'] }]);
     expect(tauriMocks.writeFile).toHaveBeenCalled();
   });
 
@@ -242,6 +301,16 @@ describe('useChartExport.exportToPDF integration', () => {
     await exportToPDF('pdf-test-chart', 'Health Trend 2024');
     const opts = tauriMocks.save.mock.calls[0][0] as { defaultPath: string };
     expect(opts.defaultPath).toBe('Health_Trend_2024.pdf');
+  });
+
+  it('collapses repeated and mixed whitespace in pdf filename', async () => {
+    tauriMocks.isTauri.mockReturnValueOnce(true);
+    tauriMocks.save.mockResolvedValueOnce('/fake/path/Annual_Summary_2026.pdf');
+
+    const { exportToPDF } = useChartExport();
+    await exportToPDF('pdf-test-chart', 'Annual   Summary\t2026');
+    const opts = tauriMocks.save.mock.calls[0][0] as { defaultPath: string };
+    expect(opts.defaultPath).toBe('Annual_Summary_2026.pdf');
   });
 });
 

@@ -29,7 +29,7 @@ vi.mock('@/services/db', () => ({
   deleteSessions: dbMocks.deleteSessions
 }));
 
-vi.mock('@/services/db_trends', () => ({
+vi.mock('@/services/dbTrends', () => ({
   loadConsolidatedCategoryTrends: trendsMocks.loadConsolidatedCategoryTrends
 }));
 

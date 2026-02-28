@@ -70,6 +70,24 @@ cd src-tauri && cargo test
 - `website/` - GitHub Pages site
 - `docs/` - Architecture & Protocol documentation
 
+## Naming Conventions
+
+Use domain-specific naming consistently:
+
+- TypeScript identifiers: `camelCase`
+- TypeScript type-like symbols (interfaces/types/classes/enums): `PascalCase`
+- Constants and env vars: `UPPER_CASE`
+- Vue component and view files: `PascalCase.vue`
+- Composable files: `camelCase.ts` (for example, `useDateFilter.ts`)
+- E2E test files: `kebab-case.test.ts`
+- Unit/integration tests: use `*.test.ts` (not `*.spec.ts`)
+
+Run naming checks locally before opening a PR:
+
+```bash
+npm run naming:check
+```
+
 ## Commit Messages
 
 We follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
@@ -111,7 +129,7 @@ BUMP_TYPE=minor git commit -m "chore: restructure internals"
 
 ### How It Works
 
-1. **`pre-commit`** — runs ESLint, Prettier, and lint-staged
+1. **`pre-commit`** — runs lint-staged, naming checks, ESLint, and Prettier
 2. **`commit-msg`** — reads the commit message, determines the bump level (major / minor / patch), updates `package.json`, then calls `scripts/sync-version.js` to propagate the new version to `src-tauri/Cargo.toml` and `src-tauri/tauri.conf.json`; all three files are staged and included in the commit automatically
 
 ## Architecture

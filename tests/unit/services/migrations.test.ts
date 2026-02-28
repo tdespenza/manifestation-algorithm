@@ -12,6 +12,8 @@ const mockDb = {
 describe('Database Migrations', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    (mockDb.execute as any).mockResolvedValue([]);
+    (mockDb.select as any).mockResolvedValue([]);
   });
 
   it('should create migrations table and run pending migrations', async () => {
@@ -36,12 +38,63 @@ describe('Database Migrations', () => {
     expect(mockDb.execute).toHaveBeenCalledWith(
       expect.stringContaining('CREATE TABLE IF NOT EXISTS questionnaire_responses')
     );
+    expect(mockDb.execute).toHaveBeenCalledWith(
+      expect.stringContaining('CREATE TABLE IF NOT EXISTS settings')
+    );
 
     // 4. Should record migration 1
     expect(mockDb.execute).toHaveBeenCalledWith(
       'INSERT INTO _migrations (id, name) VALUES ($1, $2)',
       [1, 'initial_schema']
     );
+
+    // 5. Should run migration 2 schema/index SQL
+    expect(mockDb.execute).toHaveBeenCalledWith(
+      expect.stringContaining('CREATE TABLE IF NOT EXISTS historical_sessions')
+    );
+    expect(mockDb.execute).toHaveBeenCalledWith(
+      expect.stringContaining('CREATE TABLE IF NOT EXISTS historical_responses')
+    );
+    expect(mockDb.execute).toHaveBeenCalledWith(
+      'CREATE INDEX IF NOT EXISTS idx_sessions_completed ON historical_sessions(completed_at);'
+    );
+    expect(mockDb.execute).toHaveBeenCalledWith(
+      'CREATE INDEX IF NOT EXISTS idx_responses_qid ON historical_responses(question_id);'
+    );
+
+    // 6. Should run migration 3 index SQL
+    expect(mockDb.execute).toHaveBeenCalledWith(
+      'CREATE INDEX IF NOT EXISTS idx_responses_session_id ON historical_responses(session_id);'
+    );
+    expect(mockDb.execute).toHaveBeenCalledWith(
+      'CREATE INDEX IF NOT EXISTS idx_responses_category ON historical_responses(category);'
+    );
+
+    // 7. Should record all migration IDs/names
+    expect(mockDb.execute).toHaveBeenCalledWith(
+      'INSERT INTO _migrations (id, name) VALUES ($1, $2)',
+      [2, 'historical_schema']
+    );
+    expect(mockDb.execute).toHaveBeenCalledWith(
+      'INSERT INTO _migrations (id, name) VALUES ($1, $2)',
+      [3, 'optimized_indexes']
+    );
+  });
+
+  it('logs applying and success messages for each pending migration', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    (mockDb.select as any).mockResolvedValue([]);
+
+    await runMigrations(mockDb);
+
+    expect(warnSpy).toHaveBeenCalledWith('Applying migration 1: initial_schema');
+    expect(warnSpy).toHaveBeenCalledWith('Applying migration 2: historical_schema');
+    expect(warnSpy).toHaveBeenCalledWith('Applying migration 3: optimized_indexes');
+
+    expect(warnSpy).toHaveBeenCalledWith('Migration 1 applied successfully.');
+    expect(warnSpy).toHaveBeenCalledWith('Migration 2 applied successfully.');
+    expect(warnSpy).toHaveBeenCalledWith('Migration 3 applied successfully.');
+    warnSpy.mockRestore();
   });
 
   it('should skip already applied migrations', async () => {

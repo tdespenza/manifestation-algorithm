@@ -34,7 +34,7 @@ This document describes the overall design of the Manifestation Algorithm deskto
 │  │       │                                             │   │
 │  │  ┌────▼─────────────────────────────────────────┐  │   │
 │  │  │           Services Layer (TypeScript)         │  │   │
-│  │  │  db.ts · scoring.ts · export.ts · db_trends  │  │   │
+│  │  │  db.ts · scoring.ts · export.ts · dbTrends   │  │   │
 │  │  └────┬─────────────────────────────────────────┘  │   │
 │  └───────┼─────────────────────────────────────────────┘  │
 │          │  @tauri-apps/api (invoke / listen)              │
@@ -103,7 +103,7 @@ src/components/
 | File | Purpose |
 |------|---------|
 | `db.ts` | SQLite CRUD: `saveAnswer`, `loadAnswers`, `getLastActive`, `updateLastActive`, `clearSession`, `saveHistoricalSession`, `loadHistoricalSessions`, `loadSessionResponses`, `loadCategoryTrend` |
-| `db_trends.ts` | Aggregates per-category averages from `historical_responses` |
+| `dbTrends.ts` | Aggregates per-category averages from `historical_responses` |
 | `migrations.ts` | Versioned schema runner — applies pending migrations on startup |
 | `scoring.ts` | `calculateScore(answers)` · `getMaxPossibleScore()` |
 | `export.ts` | Serialises `historical_sessions` to CSV and triggers download |

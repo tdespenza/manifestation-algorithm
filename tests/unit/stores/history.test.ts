@@ -19,12 +19,12 @@ vi.mock('@/services/db', () => ({
   deleteSessions: dbMocks.deleteSessions
 }));
 
-// Mock db_trends service
+// Mock dbTrends service
 const trendsMocks = vi.hoisted(() => ({
   loadConsolidatedCategoryTrends: vi.fn().mockResolvedValue({})
 }));
 
-vi.mock('@/services/db_trends', () => ({
+vi.mock('@/services/dbTrends', () => ({
   loadConsolidatedCategoryTrends: trendsMocks.loadConsolidatedCategoryTrends
 }));
 
@@ -42,6 +42,7 @@ describe('History Store', () => {
 
   it('has correct initial state', () => {
     const store = useHistoryStore();
+    expect(store.$id).toBe('history');
     expect(store.sessions).toEqual([]);
     expect(store.trends).toEqual({});
     expect(store.isLoading).toBe(false);
@@ -96,6 +97,7 @@ describe('History Store', () => {
 
     expect(store.error).toContain('DB read error');
     expect(store.isLoading).toBe(false);
+    expect(consoleSpy).toHaveBeenCalledWith('Failed to load history:', expect.any(Error));
     consoleSpy.mockRestore();
   });
 
@@ -149,6 +151,29 @@ describe('History Store', () => {
     expect(store.sessions[1].id).toBe('b');
   });
 
+  it('loadMoreSessions sets and clears isLoadingMore around async fetch', async () => {
+    const page1 = [
+      { id: 'a', completed_at: '2024-01-01', total_score: 5000, duration_seconds: 60 }
+    ];
+
+    let resolveNext!: (value: unknown) => void;
+    dbMocks.loadHistoricalSessionsPage.mockResolvedValueOnce(page1).mockReturnValueOnce(
+      new Promise(r => {
+        resolveNext = r;
+      })
+    );
+    dbMocks.countHistoricalSessions.mockResolvedValue(2);
+
+    const store = useHistoryStore();
+    await store.fetchHistory();
+
+    const loadMorePromise = store.loadMoreSessions();
+    expect(store.isLoadingMore).toBe(true);
+    resolveNext([]);
+    await loadMorePromise;
+    expect(store.isLoadingMore).toBe(false);
+  });
+
   it('loadMoreSessions is a no-op when hasMore is false', async () => {
     const page1 = [
       { id: 'a', completed_at: '2024-01-01', total_score: 5000, duration_seconds: 60 }
@@ -189,6 +214,7 @@ describe('History Store', () => {
     await store.deleteSession('bad-id');
 
     expect(store.error).toContain('DB delete error');
+    expect(consoleSpy).toHaveBeenCalledWith('Failed to delete session:', expect.any(Error));
     consoleSpy.mockRestore();
   });
 
@@ -216,6 +242,7 @@ describe('History Store', () => {
     const store = useHistoryStore();
     await store.deleteSessions(['s1', 's2']);
     expect(store.error).toContain('bulk delete error');
+    expect(consoleSpy).toHaveBeenCalledWith('Failed to delete sessions:', expect.any(Error));
     consoleSpy.mockRestore();
   });
 
@@ -247,6 +274,8 @@ describe('History Store', () => {
 
     await store.loadMoreSessions();
     expect(store.error).toContain('load more failed');
+    expect(store.isLoadingMore).toBe(false);
+    expect(consoleSpy).toHaveBeenCalledWith('Failed to load more sessions:', expect.any(Error));
     consoleSpy.mockRestore();
   });
 });

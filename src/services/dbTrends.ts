@@ -20,8 +20,6 @@ export async function loadConsolidatedCategoryTrends(): Promise<CategoryTrends> 
 
   const trends: CategoryTrends = {};
 
-  if (!results.length) return trends;
-
   for (const row of results) {
     if (!trends[row.category]) {
       trends[row.category] = [];

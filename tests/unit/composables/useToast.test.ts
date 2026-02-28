@@ -101,5 +101,7 @@ describe('useToast', () => {
 
     const ids = toasts.value.map(t => t.id);
     expect(new Set(ids).size).toBe(ids.length);
+    expect(ids[0]).toBeLessThan(ids[1]);
+    expect(ids[1]).toBeLessThan(ids[2]);
   });
 });

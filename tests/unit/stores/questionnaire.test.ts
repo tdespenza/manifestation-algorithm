@@ -2,6 +2,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { useQuestionnaireStore } from '@/stores/questionnaire';
 
+vi.mock('@tauri-apps/api/core', () => ({
+  invoke: vi.fn()
+}));
+
+vi.mock('@/composables/useNetwork', () => ({
+  useNetwork: () => ({
+    sharingEnabled: { value: false }
+  })
+}));
+
 // Mock DB service
 const dbMocks = vi.hoisted(() => ({
   saveAnswer: vi.fn(),
@@ -83,9 +93,12 @@ describe('Questionnaire Store', () => {
 
       // historyAnswers is empty → answers stays empty
       expect(store.answers).toEqual({});
+      expect(store.isHistoricalPreFill).toBe(false);
+      expect(store.hasSavedSession).toBe(false);
     });
 
     it('init skips prefill when no historical sessions exist', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       dbMocks.loadAnswers.mockResolvedValue({});
       dbMocks.loadHistoricalSessions.mockResolvedValue([]); // empty history
 
@@ -93,6 +106,10 @@ describe('Questionnaire Store', () => {
       await store.init();
 
       expect(store.answers).toEqual({});
+      expect(store.isHistoricalPreFill).toBe(false);
+      expect(dbMocks.loadSessionResponses).not.toHaveBeenCalled();
+      expect(consoleSpy).not.toHaveBeenCalledWith('Failed to init store:', expect.anything());
+      consoleSpy.mockRestore();
     });
 
     it('init should clear answers if session expired', async () => {
@@ -124,6 +141,22 @@ describe('Questionnaire Store', () => {
       expect(store.answers['1a']).toBe(5);
     });
 
+    it('init does not expire when exactly at timeout boundary', async () => {
+      const store = useQuestionnaireStore();
+      const now = 1_800_000_000_000;
+      const nowSpy = vi.spyOn(Date, 'now').mockReturnValue(now);
+      const atBoundary = now - 30 * 24 * 60 * 60 * 1000;
+
+      dbMocks.loadAnswers.mockResolvedValue({ '1a': 5 });
+      dbMocks.getLastActive.mockResolvedValue(atBoundary.toString());
+
+      await store.init();
+
+      expect(store.answers['1a']).toBe(5);
+      expect(dbMocks.clearSession).not.toHaveBeenCalled();
+      nowSpy.mockRestore();
+    });
+
     it('init should handle errors gracefully', async () => {
       // Create a spy. Note: console is global, so verify it's not reused.
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -134,6 +167,54 @@ describe('Questionnaire Store', () => {
 
       expect(consoleSpy).toHaveBeenCalledWith('Failed to init store:', expect.any(Error));
       consoleSpy.mockRestore();
+    });
+
+    it('does not parse lastActive when DB returns null', async () => {
+      const parseSpy = vi.spyOn(Number, 'parseInt');
+      dbMocks.getLastActive.mockResolvedValueOnce(null);
+      const store = useQuestionnaireStore();
+
+      await store.init();
+
+      expect(parseSpy).not.toHaveBeenCalledWith(null as unknown as string, 10);
+      parseSpy.mockRestore();
+    });
+
+    it('init persists generated session_id when none exists', async () => {
+      const randomSpy = vi.spyOn(crypto, 'randomUUID').mockReturnValue('generated-uuid');
+      const store = useQuestionnaireStore();
+
+      await store.init();
+
+      expect(dbMocks.getSetting).toHaveBeenCalledWith('session_id');
+      expect(store.sessionId).toBe('generated-uuid');
+      expect(dbMocks.setSetting).toHaveBeenCalledWith('session_id', 'generated-uuid');
+      randomSpy.mockRestore();
+    });
+
+    it('init keeps default goalScore null when goal_score setting is empty string', async () => {
+      dbMocks.getSetting
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce('')
+        .mockResolvedValueOnce('persisted-uuid');
+
+      const store = useQuestionnaireStore();
+      await store.init();
+
+      expect(store.goalScore).toBeNull();
+      expect(dbMocks.getSetting).toHaveBeenCalledWith('goal_score');
+    });
+
+    it('init sets saveLastSession true when persisted setting is "true"', async () => {
+      dbMocks.getSetting
+        .mockResolvedValueOnce('true')
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce('persisted-uuid');
+
+      const store = useQuestionnaireStore();
+      await store.init();
+
+      expect(store.saveLastSession).toBe(true);
     });
   });
 
@@ -177,6 +258,18 @@ describe('Questionnaire Store', () => {
       expect(dbMocks.saveAnswer).not.toHaveBeenCalled();
     });
 
+    it('setAnswer accepts boundary values 1 and 10', async () => {
+      const store = useQuestionnaireStore();
+
+      await store.setAnswer('1b', 1);
+      await store.setAnswer('1c', 10);
+
+      expect(store.answers['1b']).toBe(1);
+      expect(store.answers['1c']).toBe(10);
+      expect(dbMocks.saveAnswer).toHaveBeenNthCalledWith(1, expect.anything(), '1b', 1);
+      expect(dbMocks.saveAnswer).toHaveBeenNthCalledWith(2, expect.anything(), '1c', 10);
+    });
+
     it('setAnswer should handle db save failure (optimistic update remains)', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       dbMocks.saveAnswer.mockRejectedValue(new Error('Save Fail'));
@@ -204,6 +297,23 @@ describe('Questionnaire Store', () => {
         'totally-invalid-question-id'
       );
       consoleSpy.mockRestore();
+    });
+  });
+
+  describe('Default state', () => {
+    it('starts with default session id and not saving', () => {
+      const store = useQuestionnaireStore();
+      expect(store.sessionId).toBe('default-session');
+      expect(store.isSaving).toBe(false);
+    });
+
+    it('hasSavedSession is true when answers exist before resumeSession', async () => {
+      const store = useQuestionnaireStore();
+      store.answers['1a'] = 3;
+      expect(store.hasSavedSession).toBe(true);
+
+      await store.resumeSession();
+      expect(store.hasSavedSession).toBe(false);
     });
   });
 
@@ -313,6 +423,40 @@ describe('Questionnaire Store', () => {
     });
   });
 
+  describe('leaf-question flattening', () => {
+    it('derives totalQuestions from flattened leaf question set', () => {
+      const store = useQuestionnaireStore();
+      expect(store.totalQuestions).toBe(54);
+    });
+
+    it('navigates through flattened leaf question order', () => {
+      const store = useQuestionnaireStore();
+
+      expect(store.currentQuestion?.id).toBe('1a');
+      store.goToNext();
+      expect(store.currentQuestion?.id).toBe('1b');
+
+      store.goToIndex(21);
+      expect(store.currentQuestion?.id).toBe('19a');
+    });
+
+    it('goToIndex only updates for valid index bounds', () => {
+      const store = useQuestionnaireStore();
+
+      store.goToIndex(0);
+      expect(store.currentIndex).toBe(0);
+
+      store.goToIndex(store.totalQuestions - 1);
+      expect(store.currentIndex).toBe(store.totalQuestions - 1);
+
+      store.goToIndex(-1);
+      expect(store.currentIndex).toBe(store.totalQuestions - 1);
+
+      store.goToIndex(store.totalQuestions);
+      expect(store.currentIndex).toBe(store.totalQuestions - 1);
+    });
+  });
+
   describe('goalScore init from settings', () => {
     it('init parses stored goal_score when persisted value is non-empty', async () => {
       dbMocks.getSetting
@@ -341,6 +485,92 @@ describe('Questionnaire Store', () => {
 
       expect(store.goalScore).toBe(7500);
       expect(dbMocks.setSetting).toHaveBeenCalledWith('goal_score', '7500');
+    });
+  });
+
+  describe('submitSession', () => {
+    it('resets isSaving to false after successful submit', async () => {
+      const store = useQuestionnaireStore();
+      store.answers['1a'] = 8;
+
+      const historyId = await store.submitSession();
+
+      expect(historyId).toBe('uuid-1');
+      expect(store.isSaving).toBe(false);
+      expect(dbMocks.clearSession).toHaveBeenCalledWith(expect.any(String));
+    });
+
+    it('resets isSaving to false when submit throws', async () => {
+      dbMocks.saveHistoricalSession.mockRejectedValueOnce(new Error('save failed'));
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const store = useQuestionnaireStore();
+      store.answers['1a'] = 9;
+
+      await expect(store.submitSession()).rejects.toThrow('save failed');
+      expect(store.isSaving).toBe(false);
+
+      consoleSpy.mockRestore();
+    });
+
+    it('sets isSaving true while submitSession is in flight', async () => {
+      let resolveHistory: ((value: string) => void) | undefined;
+      dbMocks.saveHistoricalSession.mockImplementationOnce(
+        () =>
+          new Promise<string>(resolve => {
+            resolveHistory = resolve;
+          })
+      );
+
+      const store = useQuestionnaireStore();
+      store.answers['1a'] = 8;
+
+      const pending = store.submitSession();
+      expect(store.isSaving).toBe(true);
+
+      resolveHistory?.('uuid-inflight');
+      await pending;
+      expect(store.isSaving).toBe(false);
+    });
+
+    it('startFresh clears session state and historical prefill flags', async () => {
+      dbMocks.loadAnswers.mockResolvedValue({});
+      dbMocks.loadHistoricalSessions.mockResolvedValue([{ id: 'hist-1' }]);
+      dbMocks.loadSessionResponses.mockResolvedValue([
+        { question_id: '1a', category: 'General', answer_value: 9 }
+      ]);
+
+      const store = useQuestionnaireStore();
+      await store.init();
+      expect(store.hasSavedSession).toBe(true);
+      expect(store.isHistoricalPreFill).toBe(true);
+
+      await store.startFresh();
+
+      expect(store.answers).toEqual({});
+      expect(store.currentIndex).toBe(0);
+      expect(store.isHistoricalPreFill).toBe(false);
+      expect(store.hasSavedSession).toBe(false);
+      expect(dbMocks.clearSession).toHaveBeenCalledWith(expect.any(String));
+      expect(dbMocks.updateLastActive).toHaveBeenCalledWith(expect.any(String));
+    });
+
+    it('startFresh keeps resume dialog available for new answers', async () => {
+      const store = useQuestionnaireStore();
+      await store.resumeSession();
+      expect(store.hasSavedSession).toBe(false);
+
+      await store.startFresh();
+      store.answers['1a'] = 8;
+      expect(store.hasSavedSession).toBe(true);
+    });
+
+    it('reset keeps resume dialog available for new answers', () => {
+      const store = useQuestionnaireStore();
+      store.answers['1a'] = 7;
+      store.reset();
+
+      store.answers['1a'] = 5;
+      expect(store.hasSavedSession).toBe(true);
     });
   });
 });

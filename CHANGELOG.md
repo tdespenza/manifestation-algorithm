@@ -133,7 +133,7 @@ fix(index.html): update footer credits and licensing information
 - Added tests for ResumeDialog component to ensure correct event emissions.
 - Implemented tests for Settings component to verify settings functionality and interactions.
 - Developed tests for SharingToggle component to check sharing state and interactions.
-- Added tests for db_trends service to validate data retrieval and processing.
+- Added tests for dbTrends service to validate data retrieval and processing.
 - Created tests for history store to ensure correct state management and data fetching.
 - Implemented tests for analysis utility functions to validate trend detection logic.
 - Added tests for CategoryDetailView to ensure correct rendering and data handling.

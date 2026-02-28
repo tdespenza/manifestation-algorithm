@@ -30,8 +30,6 @@ export function detectTrend(data: number[]): TrendDirection {
 
   // Threshold for stability (e.g., slope very close to 0)
   const threshold = 0.05;
-
-  if (slope > threshold) return 'improving';
-  if (slope < -threshold) return 'declining';
-  return 'stable';
+  if (Math.abs(slope) <= threshold) return 'stable';
+  return Math.sign(slope) === 1 ? 'improving' : 'declining';
 }

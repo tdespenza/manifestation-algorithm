@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { detectTrend } from '@/utils/analysis';
 
 describe('detectTrend', () => {
@@ -41,5 +41,41 @@ describe('detectTrend', () => {
 
   it('returns "declining" for exactly 3 items with downward trend', () => {
     expect(detectTrend([10, 5, 1])).toBe('declining');
+  });
+
+  it('returns "improving" for a subtle upward slope just above threshold', () => {
+    const subtleUp = [0, 0.06, 0.12, 0.18, 0.24, 0.3, 0.36];
+    expect(detectTrend(subtleUp)).toBe('improving');
+  });
+
+  it('returns "declining" for a subtle downward slope just below negative threshold', () => {
+    const subtleDown = [0, -0.06, -0.12, -0.18, -0.24, -0.3, -0.36];
+    expect(detectTrend(subtleDown)).toBe('declining');
+  });
+
+  it('returns "stable" when slope is exactly +0.05 threshold', () => {
+    const atPositiveThreshold = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3];
+    expect(detectTrend(atPositiveThreshold)).toBe('stable');
+  });
+
+  it('returns "stable" when slope is exactly -0.05 threshold', () => {
+    const atNegativeThreshold = [0, -0.05, -0.1, -0.15, -0.2, -0.25, -0.3];
+    expect(detectTrend(atNegativeThreshold)).toBe('stable');
+  });
+
+  it('returns "stable" for 3-point slope exactly +0.05', () => {
+    const exactPositive = [0, 0.05, 0.1];
+    expect(detectTrend(exactPositive)).toBe('stable');
+  });
+
+  it('returns "stable" for 3-point slope exactly -0.05', () => {
+    const exactNegative = [0, -0.05, -0.1];
+    expect(detectTrend(exactNegative)).toBe('stable');
+  });
+
+  it('treats an exact absolute-threshold slope as stable', () => {
+    const absSpy = vi.spyOn(Math, 'abs').mockReturnValue(0.05);
+    expect(detectTrend([1, 2, 3, 4, 5, 6, 7])).toBe('stable');
+    absSpy.mockRestore();
   });
 });

@@ -37,6 +37,9 @@ jobs:
       - name: Run ESLint
         run: npm run lint:check
 
+      - name: Validate Naming Conventions
+        run: npm run naming:check
+
       - name: Check Formatting
         run: npm run format:check
 

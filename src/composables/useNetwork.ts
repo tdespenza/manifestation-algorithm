@@ -28,7 +28,6 @@ const categoryStats = ref<Record<string, CategoryStats>>({});
 const bandwidthStats = ref({ inbound: 0, outbound: 0 });
 const lastUpdate = ref(Date.now());
 const isConnected = ref(false);
-const isListening = ref(false);
 const sharingEnabled = ref(false);
 
 // Fallback: mark as connected after 3 s even if the first invoke hasn't resolved.
@@ -91,7 +90,7 @@ export async function toggleSharing(enabled: boolean): Promise<void> {
 
 export function useNetwork() {
   const init = async () => {
-    if (isListening.value) return;
+    if (unlisten) return;
 
     // Mark as connected immediately — the P2P node is always running in the backend.
     // This prevents the UI from being stuck on "Connecting..." forever.
@@ -126,8 +125,6 @@ export function useNetwork() {
         lastUpdate.value = Date.now();
         isConnected.value = true;
       });
-
-      isListening.value = true;
     } catch (e) {
       console.error('Failed to connect to network service:', e);
     }
@@ -137,7 +134,6 @@ export function useNetwork() {
     if (unlisten) {
       unlisten();
       unlisten = null;
-      isListening.value = false;
     }
     if (connectTimeoutId !== null) {
       clearTimeout(connectTimeoutId);
@@ -171,7 +167,6 @@ export function _resetNetworkState(): void {
   bandwidthStats.value = { inbound: 0, outbound: 0 };
   lastUpdate.value = Date.now();
   isConnected.value = false;
-  isListening.value = false;
   sharingEnabled.value = false;
   unlisten = null;
   if (connectTimeoutId !== null) {

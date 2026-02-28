@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
 import FocusAreas from '@/components/dashboard/FocusAreas.vue';
 import { computeFocusAreas } from '@/data/recommendations';
-import type { CategoryTrends } from '@/services/db_trends';
+import type { CategoryTrends } from '@/services/dbTrends';
 
 // ── computeFocusAreas unit tests ─────────────────────────────────────────────
 describe('computeFocusAreas()', () => {

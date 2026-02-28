@@ -77,6 +77,60 @@ describe('isTauri()', () => {
     withoutTauri();
     expect(isTauri()).toBe(false);
   });
+
+  it('returns false when window is not an object host for Tauri internals', () => {
+    const originalWindow = (globalThis as unknown as Record<string, unknown>).window;
+    try {
+      Object.defineProperty(globalThis, 'window', {
+        value: 'not-an-object',
+        configurable: true,
+        writable: true
+      });
+      expect(isTauri()).toBe(false);
+    } finally {
+      Object.defineProperty(globalThis, 'window', {
+        value: originalWindow,
+        configurable: true,
+        writable: true
+      });
+    }
+  });
+
+  it('returns false when window is undefined', () => {
+    const originalWindow = (globalThis as unknown as Record<string, unknown>).window;
+    try {
+      Object.defineProperty(globalThis, 'window', {
+        value: undefined,
+        configurable: true,
+        writable: true
+      });
+      expect(() => isTauri()).toThrow('window is undefined');
+    } finally {
+      Object.defineProperty(globalThis, 'window', {
+        value: originalWindow,
+        configurable: true,
+        writable: true
+      });
+    }
+  });
+
+  it('returns false when window is null', () => {
+    const originalWindow = (globalThis as unknown as Record<string, unknown>).window;
+    try {
+      Object.defineProperty(globalThis, 'window', {
+        value: null,
+        configurable: true,
+        writable: true
+      });
+      expect(isTauri()).toBe(false);
+    } finally {
+      Object.defineProperty(globalThis, 'window', {
+        value: originalWindow,
+        configurable: true,
+        writable: true
+      });
+    }
+  });
 });
 
 describe('exported constants', () => {
@@ -100,6 +154,7 @@ describe('useUpdateService()', () => {
     mockCheck.mockResolvedValue(null);
     mockOpen.mockResolvedValue(undefined);
     withTauri();
+    delete (window as unknown as Record<string, unknown>).__updateCheckDone;
   });
 
   afterEach(() => {
@@ -127,10 +182,13 @@ describe('useUpdateService()', () => {
   });
 
   it('does not schedule polling when not inside Tauri', async () => {
+    const timeoutSpy = vi.spyOn(globalThis, 'setTimeout');
     withoutTauri();
     mountService();
     await tick(CHECK_INTERVAL_MS + 100);
     expect(mockCheck).not.toHaveBeenCalled();
+    expect(timeoutSpy).not.toHaveBeenCalled();
+    timeoutSpy.mockRestore();
   });
 
   // ── idle timer flow ───────────────────────────────────────────────────
@@ -152,6 +210,7 @@ describe('useUpdateService()', () => {
     const { service } = mountService();
     await tick();
     expect(service.state.value).toBe('idle');
+    expect((window as unknown as Record<string, unknown>).__updateCheckDone).toBe(true);
   });
 
   // ── update found flow ─────────────────────────────────────────────────
@@ -179,6 +238,7 @@ describe('useUpdateService()', () => {
   });
 
   it('silently swallows check() errors — state stays idle, no error banner', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockCheck.mockRejectedValue(new Error('network fail'));
 
     const { service } = mountService();
@@ -186,6 +246,9 @@ describe('useUpdateService()', () => {
 
     // check() errors are silently swallowed so they never disrupt the app
     expect(service.state.value).toBe('idle');
+    expect((window as unknown as Record<string, unknown>).__updateCheckDone).toBe(true);
+    expect(errorSpy).toHaveBeenCalledTimes(1);
+    errorSpy.mockRestore();
   });
 
   // ── idempotency guards ─────────────────────────────────────────────────
@@ -254,10 +317,13 @@ describe('useUpdateService()', () => {
   });
 
   it('openReleasePage() handles open() throwing without crashing', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockOpen.mockRejectedValue(new Error('opener unavailable'));
     const { service } = mountService();
     await expect(service.openReleasePage()).resolves.toBeUndefined();
     expect(service.state.value).toBe('idle');
+    expect(errorSpy).toHaveBeenCalledTimes(1);
+    errorSpy.mockRestore();
   });
 
   // ── cleanup ───────────────────────────────────────────────────────────
@@ -291,13 +357,19 @@ describe('useUpdateService()', () => {
   it('onUnmounted is a no-op when timers were never set (non-Tauri env)', async () => {
     // In a non-Tauri env, onMounted returns early without setting initialTimer.
     // Unmounting should not throw even when timers are null.
+    const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
+    const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval');
     withoutTauri();
     const { wrapper } = mountService();
     expect(() => wrapper.unmount()).not.toThrow();
+    expect(clearTimeoutSpy).not.toHaveBeenCalled();
+    expect(clearIntervalSpy).not.toHaveBeenCalled();
     // Advance — no timers to fire
     vi.advanceTimersByTime(INITIAL_DELAY_MS + CHECK_INTERVAL_MS);
     await flushPromises();
     expect(mockCheck).not.toHaveBeenCalled();
+    clearTimeoutSpy.mockRestore();
+    clearIntervalSpy.mockRestore();
   });
 
   // ── checkForUpdates exposed ────────────────────────────────────────────
