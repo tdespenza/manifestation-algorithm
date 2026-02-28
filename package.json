@@ -20,6 +20,7 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:report": "playwright show-report playwright-report",
+    "test:e2e:a11y": "playwright test e2e/tests/a11y.test.ts e2e/tests/a11y-axe.test.ts e2e/tests/a11y-keyboard.test.ts --project=chromium",
     "test:all": "npm run test && npm run test:e2e",
     "naming:check": "node scripts/check-naming.cjs",
     "ci": "npm run lint:check && npm run naming:check && npm run format:check && npm run deps:validate && vue-tsc --noEmit && npm run test && npx playwright test --project=chromium",
@@ -30,7 +31,7 @@
     "format:check": "prettier --check \"src/**/*.{ts,vue}\" \"tests/**/*.ts\"",
     "deps:validate": "depcruise src --config .dependency-cruiser.js",
     "deps:graph": "depcruise src --config .dependency-cruiser.js --output-type dot | node -e \"process.stdin.resume()\" > /dev/null || depcruise src --config .dependency-cruiser.js --output-type err-long",
-    "quality:check": "npm run lint:check && npm run format:check && npm run deps:validate && npm run test:coverage",
+    "quality:check": "npm run lint:check && npm run format:check && npm run deps:validate && npm run test:coverage && npm run test:mutation && npm run test:e2e:a11y",
     "test:mutation": "stryker run"
   },
   "lint-staged": {
@@ -61,6 +62,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.1",
     "@eslint/js": "^10.0.1",
     "@pinia/testing": "^1.0.3",
     "@playwright/test": "^1.58.2",
@@ -79,6 +81,7 @@
     "eslint": "^10.0.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-vue": "^10.8.0",
+    "eslint-plugin-vuejs-accessibility": "^2.4.1",
     "husky": "^9.1.7",
     "jsdom": "^28.1.0",
     "lint-staged": "^16.2.7",

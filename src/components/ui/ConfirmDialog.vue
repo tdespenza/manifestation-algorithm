@@ -6,7 +6,9 @@
         <h2 :id="titleId" class="confirm-title">{{ title }}</h2>
         <p :id="messageId" class="confirm-message">{{ message }}</p>
         <div class="confirm-actions">
-          <button class="btn-cancel" autofocus @click="$emit('cancel')">{{ cancelLabel }}</button>
+          <button ref="cancelButtonRef" class="btn-cancel" @click="$emit('cancel')">
+            {{ cancelLabel }}
+          </button>
           <button class="btn-confirm" @click="$emit('confirm')">{{ confirmLabel }}</button>
         </div>
       </dialog>
@@ -15,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, nextTick, onMounted, ref } from 'vue';
 
 const props = withDefaults(
   defineProps<{
@@ -38,6 +40,12 @@ defineEmits<{ (e: 'confirm'): void; (e: 'cancel'): void }>();
 
 const titleId = computed(() => `${props.uid}-title`);
 const messageId = computed(() => `${props.uid}-message`);
+const cancelButtonRef = ref<HTMLButtonElement | null>(null);
+
+onMounted(async () => {
+  await nextTick();
+  cancelButtonRef.value?.focus();
+});
 </script>
 
 <style scoped>

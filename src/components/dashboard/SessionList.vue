@@ -56,14 +56,17 @@ const emit = defineEmits<{
     </div>
 
     <div class="session-list">
-      <div
+      <component
+        :is="selectionMode ? 'button' : 'div'"
         v-for="session in sessions"
         :key="session.id"
+        :type="selectionMode ? 'button' : undefined"
         class="session-card"
         :class="{
           selected: selectedIds.has(session.id),
           'selection-mode': selectionMode
         }"
+        :aria-pressed="selectionMode ? selectedIds.has(session.id) : undefined"
         @click="selectionMode ? emit('toggle-select', session.id) : undefined"
       >
         <!-- Check badge (selection mode only) -->
@@ -111,7 +114,7 @@ const emit = defineEmits<{
                 : 'Needs Work'
           }}
         </div>
-      </div>
+      </component>
     </div>
 
     <!-- Load More sessions (paginated, 20 per page) -->

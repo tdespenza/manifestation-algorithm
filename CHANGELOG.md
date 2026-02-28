@@ -8,8 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.11.0] - 2026-02-28
 ### Features
 - Add mutation tests to CI workflow and update contributing guidelines
+- Enforce strict accessibility checks with Axe across routes and key UI states
 ### Other Changes
 - Add unit tests for DashboardView, HomeView, and SettingsView components
+- Add keyboard-only accessibility journey tests for questionnaire, dashboard CTA, and settings toggle
+- Expand quality:check to include mutation testing and full accessibility test suite
+- Improve accessibility semantics and contrast in dashboard, questionnaire, settings, and category detail views
 
 - Created comprehensive unit tests for DashboardView.vue, covering loading states, session filtering, and selection mode functionality.
 - Added tests for HomeView.vue to ensure proper rendering and component integration.

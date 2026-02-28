@@ -10,8 +10,9 @@
       address, or device ID is ever shared.
     </p>
 
-    <label class="toggle-label">
+    <label class="toggle-label" for="sharing-toggle-input">
       <input
+        id="sharing-toggle-input"
         type="checkbox"
         :checked="sharingEnabled"
         class="toggle-input"
