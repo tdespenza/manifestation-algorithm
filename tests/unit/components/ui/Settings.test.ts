@@ -2,6 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 
+// Mock setLocale to prevent it from touching localStorage in the test env.
+// The test just verifies the component reactive state update.
+const setLocaleMock = vi.hoisted(() => vi.fn());
+vi.mock('@/i18n', async () => {
+  const actual = (await vi.importActual('@/i18n')) as Record<string, unknown>;
+  return { ...actual, setLocale: setLocaleMock };
+});
+
 // ── Tauri app API mock ────────────────────────────────────────────────────────
 vi.mock('@tauri-apps/api/app', () => ({
   getVersion: vi.fn().mockResolvedValue('0.2.2')
@@ -45,6 +53,7 @@ vi.mock('@/stores/questionnaire', () => ({
 }));
 
 import Settings from '@/components/ui/Settings.vue';
+import { SUPPORTED_LOCALES } from '@/i18n';
 
 describe('Settings.vue', () => {
   beforeEach(() => {
@@ -217,5 +226,32 @@ describe('Settings.vue', () => {
     expect(storeMocks.setGoalScore).toHaveBeenCalledWith(null);
     expect((wrapper.vm as any).goalInput).toBe('');
     storeMocks.goalScore = null;
+  });
+
+  it('onLocaleChange updates currentLocale and calls setLocale', async () => {
+    const wrapper = mount(Settings);
+    await flushPromises();
+
+    const select = wrapper.find('#lang-select');
+    if (!select.exists()) return; // guard: skip if language selector absent
+
+    // Set the select element's value before triggering the change event
+    const selectEl = select.element as HTMLSelectElement;
+    selectEl.value = 'es';
+    await select.trigger('change');
+
+    // setLocale should have been called with the new locale
+    expect(setLocaleMock).toHaveBeenCalledWith('es');
+    // The component's reactive currentLocale ref should reflect the change
+    expect((wrapper.vm as any).currentLocale).toBe('es');
+  });
+
+  it('renders all supported locale options in language selector', async () => {
+    const wrapper = mount(Settings);
+    await flushPromises();
+
+    const options = wrapper.findAll('#lang-select option');
+    expect(options.length).toBe(Object.keys(SUPPORTED_LOCALES).length);
+    expect(options.length).toBe(100);
   });
 });

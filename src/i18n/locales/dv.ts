@@ -1,0 +1,321 @@
+/**
+ * Auto-converted locale module for dv.
+ */
+import type { Messages } from './en';
+
+const dv: Messages = {
+  nav: {
+    questionnaire: 'ސުވާލު ފޮތް',
+    history: 'ތާރީޚް',
+    settings: 'ސެޓިންގސް'
+  },
+  app: {
+    name: 'މެނިފެސްޓޭޝަން އެލްގޮރިޒަމް',
+    unexpectedError: 'ހީވެސް ނުކުރާ ގޯހެއް ދިމާވިއެވެ.'
+  },
+  home: {
+    subtitle:
+      'ތިބާގެ ދިރިއުޅުމުގެ ކޮންމެ ދާއިރާއެއް ރޭޓް ކުރާށެވެ — ތިބާގެ އެލައިންމަންޓް ސްކޯ ހޯދާށެވެ'
+  },
+  dashboard: {
+    title: 'މެނިފެސްޓޭޝަން އެލްގޮރިޒަމް ޓްރެކިންގ ހީސްޓްރީ',
+    subtitle: 'ވަގުތު ފާއިތުވަމުންދާ ވަރަކަށް ކުރިއެރުން ޓްރެކް ކުރާށެވެ',
+    loading: 'ތިޔަ ތާރީޚު ލޯޑް ކުރަމުން...',
+    noData: 'މި މުއްދަތުގެ ޑޭޓާއެއް ނެތެވެ',
+    progressTrend: 'ޕްރޮގްރެސް ޓްރެންޑް',
+    progressToGoal: 'ޕްރޮގްރެސް ޓު ގޯލް',
+    ofGoal: '{pct}% ލަނޑުގެ',
+    goalReached: '🎯 އަމާޒަށް ވާސިލްވެއްޖެ!',
+    categoryBreakdown: 'ކެޓަގަރީ ބްރޭކްޑައުން',
+    noSessionsRange: 'މި ރޭންޖުގައި ސެޝަންތަކެއް ނެތެވެ',
+    tryWiderRange: 'ފުޅާ ދާއިރާއެއްގައި މަސައްކަތް ކުރާށެވެ ނުވަތަ ތަފާތު މުއްދަތެއް ހޮވާށެވެ.',
+    noSessionsYet: 'އަދި ސެޝަނެއް ނުހިނގާ',
+    completeFirst:
+      'މިތަނުގައި ތިމާގެ ކުރިއެރުމާއި ޓްރެންޑްތައް ބަލާލުމަށް ފުރަތަމަ އެސެސްމަންޓް ފުރިހަމަ ކުރާށެވެ.',
+    startFirst: 'ފުރަތަމަ އެސެސްމަންޓް ފެށުން',
+    export: {
+      date: 'ތާރީޚް',
+      time: 'ވަގުތު',
+      totalScore: 'ޖުމްލަ ސްކޯރ',
+      duration: 'މުއްދަތު (މިނިޓް)',
+      notes: 'ނޯޓްސް'
+    }
+  },
+  stats: {
+    averageScore: 'އެވްރެޖް ސްކޯރ',
+    medianScore: 'މީޑިއަން ސްކޯރ',
+    highestScore: 'އެންމެ މަތީ ސްކޯރ',
+    totalSessions: 'ޖުމްލަ ސެޝަންތައް'
+  },
+  network: {
+    rankings: 'ނެޓްވޯކް ރޭންކިންގސް',
+    searchingPeers: 'އެކުވެރިން ހޯދަން...',
+    searching: 'ހޯދަމުންދަނީ...',
+    online: 'އޮންލައިން',
+    peers: '{count} އެކުވެރިން',
+    results: '{count} ގެ ނަތީޖާ',
+    avgShort: 'އެވްރެޖްކޮށް',
+    p90Short: 'ޕީ90',
+    averageScoreTitle: 'އެވްރެޖް ސްކޯރ',
+    percentile90Title: '90 ވަނަ ޕަސެންޓައިލް އެވެ',
+    globalAverage: 'ގްލޯބަލް އެވްރެޖް',
+    percentile90: '90 ވަނަ ޕަސެންޓައިލް އެވެ',
+    manifestations: 'ފާޅުވުންތައް',
+    activePeers: 'އެކްޓިވް ޕީއާރސް',
+    categoryRankings: 'ކެޓަގަރީ ރޭންކިންގސް'
+  },
+  focusAreas: {
+    title: 'ފޯކަސް އޭރިއާސް',
+    subtitle:
+      'ތިބާގެ އެންމެ ދަށް 3 ކެޓަގަރީ — މިކަންކަން ރަނގަޅުކުރުމުން އެންމެ ބޮޑު ފައިދާތަކެއް ލިބެއެވެ.',
+    empty:
+      'ޕާސަނަލައިޒްޑް ފޯކަސް އޭރިއާ ރެކޮމެންޑޭޝަންތައް ބަލާލުމަށް އިތުރު ސެޝަންތައް ފުރިހަމަކުރުން.'
+  },
+  sessions: {
+    recent: 'ފަހުގެ ސެޝަންތަކެވެ',
+    deselectAll: 'ހުރިހާ އެއްޗެއް ޑިސެލެކްޓް ކުރުން',
+    selectAll: 'ހުރިހާ އެއްޗެއް ހޮވާށެވެ',
+    deleteCount: '{count} ޑިލީޓް ކުރާށެވެ.',
+    cancel: 'ކެންސަލް',
+    select: 'ޚިޔާރުކުރުން',
+    deleting: 'ޑިލީޓް ކުރަމުން...'
+  },
+  settings: {
+    title: 'އެޕް ސެޓިންގސް',
+    close: 'ސެޓިންގސް ބަންދުކުރުން',
+    dataManagement: 'ޑޭޓާ މެނޭޖްމަންޓް',
+    saveLastSession: 'އެންމެ ފަހު ސެޝަން ސޭވްކުރުން',
+    saveLastSessionDesc: 'އެންމެ ފަހުން ފުރިހަމަކުރި ސެޝަނުން ޖަވާބުތައް ޕްރީ ފިލްކުރުން.',
+    resetProgress: 'ޕްރޮގްރެސް ރީސެޓްކުރުން',
+    resetProgressDesc: 'ސޭވްކޮށްފައިވާ ހުރިހާ ޖަވާބުތަކެއް ޑިލީޓްކޮށް ތާޒާކޮށް ފަށާށެވެ.',
+    goals: 'ލަނޑުދަނޑިތައް',
+    targetScore: 'ޓާގެޓް ސްކޯރ',
+    targetScoreDesc:
+      'ޑޭޝްބޯޑުގައި ތިމާގެ ކުރިއެރުން ޓްރެކް ކުރުމަށް ގޯލް ސްކޯރެއް (1،000–10،000) ކަނޑައަޅާށެވެ.',
+    set: 'ސެޓް',
+    clearGoal: 'ސާފުކޮށް',
+    currentTarget: 'މިހާރުގެ އަމާޒު:',
+    on: 'މަތީގައި',
+    off: 'އޮފް',
+    version: 'މެނިފެސްޓޭޝަން އެލްގޮރިޒަމް {version}',
+    clearAllAnswers: 'ހުރިހާ ޖަވާބެއް ސާފުކުރުން',
+    clearConfirmTitle: 'ހުރިހާ ޖަވާބެއް ސާފުކުރުން',
+    clearConfirmMessage:
+      'މިއީ މިހާރު ދެއްވާ ހުރިހާ ޖަވާބެއް ދާއިމީ ގޮތެއްގައި ޑިލީޓް ވެގެންދާނެ ކަމަކަށް ވާތީ، އެކަން އަނބުރާ ނުކުރެވޭނެއެވެ.',
+    clearConfirmLabel: 'ސާފުކޮށް',
+    keepAnswers: 'ޖަވާބުތައް ބެހެއްޓުން',
+    language: 'ބަސް',
+    languageDesc: 'އެޕްލިކޭޝަނަށް ޑިސްޕްލޭ ލޭންގުއޭޖް ހޮވާށެވެ.',
+    languageCount: '{count} ބަސްބަހުން ލިބެން ހުންނާނެއެވެ',
+    goalErrorRange: '1،000 އާއި 10،000 އާއި ދެމެދުގެ ސްކޯއެއް ލިޔުއްވުން އެދެމެވެ.'
+  },
+  questionnaire: {
+    saving: 'ސޭވިންގ...',
+    saved: 'ރައްކާކުރެވިއްޖެއެވެ',
+    progressText: '{pct}% ފުރިހަމަ ({answered}/{total})',
+    progressAria: 'އެސެސްމަންޓް ނިންމުމުގެ ކުރިއެރުން',
+    maxScore: 'މެކްސް: {score}',
+    answerToScore: 'ލަނޑު ޖަހާނެ ޖަވާބެއް',
+    currentScore: 'މިހާރުގެ ސްކޯރ',
+    scrollAll: 'ހުރިހާ ކަމެއް ސްކްރޯލް ކުރާށެވެ',
+    stepByStep: 'ފިޔަވަޅަކުން ފިޔަވަޅަކަށް',
+    questionOf: 'ސުވާލު {current} ގެ {total}',
+    previous: '← ކުރީގެ',
+    next: 'ދެން →',
+    completeAssessment: 'ފުރިހަމަ އެސެސްމަންޓް ހެދުން',
+    startFresh: 'ތާޒާކޮށް ފަށަން ބޭނުންތަ؟',
+    resetAllAnswers: 'ހުރިހާ ޖަވާބެއް ރީސެޓް ކުރާށެވެ',
+    resetTitle: 'ހުރިހާ ޖަވާބެއް ރީސެޓް ކުރުން؟',
+    resetMessage:
+      'މިކަމުގެ ސަބަބުން ކޮންމެ ޖަވާބެއް ސާފުކޮށް ސުމެއްގައި ފެށޭނެއެވެ. މިކަން އަނބުރާ ނުގެންދެވޭނެ.',
+    resetLabel: 'ރީސެޓް ކުރުން',
+    scoreQuality: {
+      notStarted: 'ނުފެށޭ',
+      manifesting: 'ފާޅުވުން ❆',
+      aligned: 'އެލައިން ކޮށްފައި',
+      building: 'ބިނާ',
+      startingOut: 'ސްޓާޓިންގ އައުޓް'
+    },
+    submitHint: {
+      zero: '{total} ސުވާލުތަކުގެ ތެރެއިން 0 ސުވާލު ޖަވާބު ލިބިއްޖެ — ޖަވާބު ނުލިބޭ ސުވާލުތައް ޑިފޯލްޓް ކޮށް އެންމެ ކުޑަމިނުން',
+      partial:
+        '{remaining} ސުވާލު ބާކީ އޮތީ — ޖަވާބު ނުލިބޭ ސުވާލުތައް ޑިފޯލްޓް ކުރާނީ އެންމެ ކުޑަމިނުން | {remaining} ސުވާލުތައް ބާކީ ހުރި — ޖަވާބު ނުލިބޭ ސުވާލުތައް ޑިފޯލްޓް ކޮށް އެންމެ ކުޑަމިނުން',
+      complete: 'ހުރިހާ ސުވާލަކަށް ޖަވާބު ލިބިއްޖެ — ހުށަހަޅަން ތައްޔާރަށް!'
+    },
+    submitTitle: {
+      zero: 'ތިމާގެ އެސެސްމަންޓް ފުރިހަމަ ކުރުމަށްޓަކައި ބައެއް ސުވާލުތަކަށް ޖަވާބު ދޭށެވެ',
+      partial: '{remaining} ސުވާލު ބާކީ އޮތީ | {remaining} ސުވާލުތައް ބާކީ އެބަހުއްޓެވެ',
+      complete: 'ފުރިހަމަކޮށްފައިވާ އެސެސްމަންޓް ހުށަހެޅުން'
+    },
+    submitError: 'ސެޝަން ސޭވް ނުކުރެވިއްޖެ: {error}',
+    dotTitle: 'ސުވާލު {index}',
+    dotAria: 'ސުވާލު {index} އަށް ވަޑައިގަންނަވާށެވެ.',
+    keyboardHint: 'އިރުޝާދު: ނޭވިގޭޓް ކުރުމަށް ← → ބޭނުން ކުރާށެވެ · ރޭޓް ކުރުމަށް 1–9 / 0'
+  },
+  onboarding: {
+    step0Title: 'މެނިފެސްޓޭޝަން އެލްގޮރިޒަމް އަށް މަރުހަބާ',
+    step0Body1:
+      'މި ޓޫލްގެ އެހީގައި ތިބާގެ ވިސްނުމާއި، އާދަތަކާއި، ދުވަހުން ދުވަހަށް ކުރާ ކަންތައްތައް ތިބާގެ ލަނޑުދަނޑިތައް ހާސިލްކުރުމާ އެއްގޮތްވާ މިންވަރު ވަޒަންކުރެވޭނެއެވެ. މިހާރު ލިބިފައިވާ ސްކޯ ހޯދުމަށްޓަކައި ކޮންމެ ސުވާލަކަށް ތެދުވެރިކަމާއެކު ޖަވާބު ދޭށެވެ.',
+    step0Body2:
+      'ވަގުތު ފާއިތުވަމުންދާ ވަރަކަށް ތިމާގެ ކުރިއެރުން ޓްރެކްކޮށް، އެންމެ ސަމާލުކަން ދޭންޖެހޭ ދާއިރާތަކަކީ ކޮބައިތޯ ބެލުމަށްޓަކައި ގަވާއިދުން ސުވާލު ފޮތް ފުރިހަމަކުރުން.',
+    step1Title: 'ސްކޯރިންގ މަސައްކަތް ކުރާ ގޮތް',
+    step1Body:
+      'ކޮންމެ ސުވާލަކީ ކަނޑައެޅިފައިވާ އަދަދެއްގެ ޕޮއިންޓްތަކުގެ އަގުހުރި ސުވާލެކެވެ. ކޮންމެ ސުވާލަކަށް 1-10 ގެ ސްކޭލެއްގައި އަމިއްލައަށް ރޭޓް ކުރާށެވެ. 10 ގެ ރޭޓިންގ ގެ މާނައަކީ ތިބާ އެ އުސޫލު ފުރިހަމައަށް އެކުލެވިގެންވާ ކަމެވެ؛ 1 ގެ މާނައަކީ ތިބާ ނުފެށޭ ކަމެވެ.',
+    step1TargetHint: '🎯 ޓާގެޓް: {target} | އެންމެ ގިނަވެގެން: {maximum}',
+    excellent: 'ވަރަށް މޮޅު',
+    excellentRange: '7،001 – 10،000ރ',
+    excellentNote: 'ވަރުގަދަ އެލައިންމަންޓެއް — ކުރިއަށް ގެންދަވާށެވެ',
+    good: 'ރަނގަޅު',
+    goodRange: '4،001 – 7،000 އެވެ',
+    goodNote: 'ސޮލިޑް ފައުންޑޭޝަން — ބޮޑުވާން ޖާގަ',
+    needsWork: 'ނީޑްސް ވޯކް',
+    needsWorkRange: '0 – 4،000 އެވެ',
+    needsWorkNote: 'ފުރަތަމަ ފޯކަސް ކުރާނީ އަސާސީ ކަންކަމަށެވެ',
+    step2Title: 'ތިޔަ ޑޭޓާ ސްޓޭސް ޕްރައިވެޓް',
+    step2Body1:
+      'ތިބާގެ ހުރިހާ ޖަވާބާއި ސްކޯރ ހީސްޓްރީ ތިބާގެ ޑިވައިސްގައި ލޯކަލްކޮށް ރައްކާކުރެވެނީ އެންކްރިޕްޓް ކުރެވިފައިވާ އެސްކިއުލައިޓް ޑޭޓާބޭސްއެއް ބޭނުންކޮށްގެންނެވެ. ތިބާގެ ސާފު ހުއްދަ ނެތި އެއްވެސް ސަރވަރަކަށް އެއްވެސް އެއްޗެއް ނުފޮނުވައެވެ.',
+    step2Body2:
+      'އިޚްތިޔާރީ ޕީއާރް ޓު ޕީއާރް ޝެއަރިން ފީޗާގެ ސަބަބުން އެހެން ޔޫޒަރުންގެ އެނޮނިމައިޒްޑް އެގްރިގޭޓް ސްކޯތައް ފެންނާނެ އެވެ. އެއީ ހަމައެކަނި ކްރިޕްޓޯގްރަފިކަލީ ސޮއިކޮށްފައިވާ ޚުލާސާއެއް ހިއްސާކުރާ އެއްޗެއް — ދުވަހަކުވެސް ތިބާގެ ވަކިވަކި ޖަވާބުތަކެއް ނޫނެވެ.',
+    readyText: 'ތައްޔާރު؟ ތިބާގެ ބޭސްލައިން ސްކޯ ހޯދަމާ ހިނގާށެވެ.',
+    skipIntro: 'އިންޓްރޯ ދޫކޮށްލާށެވެ',
+    next: 'ދެން',
+    getStarted: 'ފަށާށެވެ'
+  },
+  sharing: {
+    title: 'އެނޮނިމަސް ނެޓްވޯކް ޝެއަރިންގ',
+    privacyFirst: '🔒 ޕްރައިވެސީ-ފުރަތަމަ',
+    description:
+      'އިޚްތިޔާރީ ގޮތެއްގައި ތިމާގެ ނަތީޖާ ނަން ނުޖެހި ގްލޯބަލް ނެޓްވޯކަށް ކޮންޓްރިބިއުޓް ކުރާށެވެ. އެއްވެސް ނަމެއް، އީމެއިލްއެއް، އައިޕީ އެޑްރެހެއް، އަދި ޑިވައިސް އައިޑީއެއް ދުވަހަކުވެސް ހިއްސާއެއް ނުކުރެވެއެވެ.',
+    enabled: 'ޝެއަރިންގ އެނެބަލްޑް — ނެޓްވޯކަށް ކޮންޓްރިބިއުޓްކުރުން',
+    disabled: 'ހިއްސާކުރުން ނުކުޅެދުންތެރިވެފައި (ޑިފޯލްޓް)',
+    activeBadge:
+      '✓ ތިބާގެ ނަން ނުޖެހޭ ސްކޯތައް އެކުވެރިންނާ ހިއްސާ ކުރަމުންދާކަން ފާހަގަކޮށްލެވެއެވެ',
+    enableNote:
+      'ގްލޯބަލް ނެޓްވޯކާއި އަޅާބަލާއިރު ތިމާގެ ޕަސެންޓައިލް ރޭންކް ފެންނަން އެނެބަލް ކުރުން.'
+  },
+  category: {
+    back: '< ފަހަތް',
+    history: 'ތާރީޚް',
+    date: 'ތާރީޚް',
+    score: 'ނަތީޖާ',
+    loading: 'ލޯޑިންގ...',
+    notEnoughData: 'އެކަށީގެންވާ ޑޭޓާއެއް ނުލިބެއެވެ',
+    noData: '“{category}” އަށް އެއްވެސް ޑޭޓާއެއް ނުފެނެއެވެ.',
+    goToDashboard: 'ޑޭޝްބޯޑަށް ދާށެވެ'
+  },
+  chartActions: {
+    viewFullscreen: 'ފުލް ސްކްރީން ބަލާށެވެ',
+    exitFullscreen: 'ފުލް ސްކްރީނުން ނުކުމެވޭނެއެވެ',
+    copyChart: 'ކޮޕީ ޗާޓް',
+    exportChart: 'އެކްސްޕޯޓް ޗާޓެވެ',
+    exportDefault: '⬇ އެކްސްޕޯޓްކުރުން',
+    exportExcel: '📊 އެކްސްޕޯޓް އެކްސެލް',
+    exportCsv: '📄 އެކްސްޕޯޓް ސީއެސްވީ',
+    exportPdf: '📑 ޕީޑީއެފް އެކްސްޕޯޓްކުރުން',
+    exportHtml: '🌐 އެޗްޓީއެމްއެލް އެކްސްޕޯޓްކުރުން',
+    copied: 'ޗާޓް ކްލިޕްބޯޑަށް ކޮޕީކޮށްފައިވެއެވެ',
+    copyFailed: 'ކޮޕީ ފެއިލްވެއްޖެ — ކްލިޕްބޯޑް ނުލިބޭ',
+    saveCancelled: 'ސޭވް ކެންސަލް ކޮށްފި އެވެ'
+  },
+  resume: {
+    continueLastSession: 'އެންމެ ފަހު ސެޝަނުން ފެށިގެން ކުރިއަށް ދާންވީތަ؟',
+    welcomeBack: 'މަރުހަބާ އަނބުރާ!',
+    historicalBody:
+      'އެންމެ ފަހުން ފުރިހަމަކުރި ސެޝަންގެ ޖަވާބުތައް ޕްރީ ލޯޑްކޮށްފައިވެއެވެ. އެ އަގުތައް ފެށުމެއްގެ ގޮތުގައި ބެހެއްޓުމަށް ބޭނުންތޯ، ނުވަތަ މުޅިން ހުސް ސުވާލު ފޮތަކުން ފަށަން ބޭނުންތޯ؟',
+    activeBody:
+      'ތިޔަބޭފުޅުންގެ ސެޝަނެއް ކުރިއަށް އެބައޮތް. ހުއްޓާލި ތަނުން އަލުން ފަށަން ބޭނުންތޯ، ނުވަތަ އާ އެސެސްމަންޓެއް ފަށަން ބޭނުންތޯ؟',
+    clearWarning: '⚠️ މިކަމުގެ ސަބަބުން މިހާރުގެ ހުރިހާ ޖަވާބެއް ސާފުވެގެންދާނެއެވެ. ޔަގީންތަ؟',
+    yesStartFresh: 'އާދެ، ސްޓާޓް ފްރެޝް',
+    cancel: 'ކެންސަލް',
+    keepLastValues: 'އެންމެ ފަހުގެ އަގުތައް ބެހެއްޓުން',
+    resumeSession: 'ސެޝަން އަލުން ފަށާށެވެ',
+    startFresh: 'ސްޓާޓް ފްރެޝް'
+  },
+  questionItem: {
+    pointsSuffix: 'ޕޮއިންޓް',
+    low: 'ދަށް',
+    high: 'އުސް',
+    rateAria: 'ރޭޓް {question}'
+  },
+  dateRange: {
+    rangeLabel: 'މިންގަނޑު:',
+    startDate: 'ފެށޭ ތާރީޚެވެ',
+    endDate: 'ނިމޭ ތާރީޚެވެ',
+    presets: {
+      '7d': '7 ދުވަސް',
+      '30d': '30 ދުވަސް',
+      '90d': '90 ދުވަސް',
+      '1y': '1 އަހަރު',
+      all: 'އޮލް ޓައިމް',
+      custom: 'ސަޤާފަތް'
+    }
+  },
+  update: {
+    availableTitle: 'v{version} ލިބެން ހުންނާނެ!',
+    releaseNotesFallback:
+      'އެންމެ ފަހުގެ ވަރޝަން ޑައުންލޯޑް ކުރުމަށް ރިލީޒް ޕޭޖަށް ޒިޔާރަތް ކުރާށެވެ.',
+    getUpdate: 'އަޕްޑޭޓް ހޯއްދަވާށެވެ',
+    dismiss: 'ދުރުކޮށްލުން'
+  },
+  questions: {
+    '1': 'Master the Basics',
+    '2': 'Activate & Illuminate Words',
+    '3': 'Find Pain & Contract Energy',
+    '4': 'Define what you want',
+    '5': 'Write down what you want',
+    '6': "Don't share your dream with others",
+    '7': 'Get a burning desire for your goal',
+    '8': 'Goal must be in Sweet Spot',
+    '9': 'Make a Decision',
+    '10': 'See/Feel good in possession of your goal',
+    '11': 'Release attachment to the outcome',
+    '12': 'Allow the HOW to present itself',
+    '13': 'Know the difference between Dream & Chief Aim',
+    '14': 'Be Focused / Singleness of purpose',
+    '15': 'Daily TO DO list of Priorities',
+    '16': 'Chart Progress / Know the Score',
+    '17': 'Use Momentum Cycle of Success',
+    '18': 'Dream Build - Dream Book & Vision Board',
+    '19': 'Plug into System',
+    '20': 'Science of Personal Mastery Course',
+    '21': 'Watch the words you speak - what you say is what you get',
+    '22': 'Physiology / Dress for success',
+    '23': 'Clear Counter Intentions',
+    '24': 'Awaken your Inner Power: Superpower Processes',
+    '25': 'Broadcast on Alpha-theta brainwave',
+    '26': 'Stop Telling Your Story of woe',
+    '27': 'Show Appreciation / Gratitude',
+    '28': 'Replace Failure Habits w/ Success Habits (Accelerator Processes)',
+    '29': 'Create a Mastermind',
+    '30': 'Watch Successful People/Apprentice',
+    '31': 'Listen to/Read Success Stories',
+    '32': 'Give away what you want first',
+    '33': 'Do It Now Mentality',
+    '34': 'Take Care of Your Body',
+    '35': 'Find the Gold in Adversity',
+    '36': 'Clear Samskaras from Field',
+    '37': 'Take 100% Responsibility',
+    '38': 'Attractor Field Generators',
+    '39': 'Join a Club that connects you to a Power Source',
+    '40': 'Live life with deliberate intent - be in present time',
+    '1a': 'Who do you listen to?',
+    '1b': 'Teachability Index',
+    '1c': 'Training Balance Scale',
+    '1d': 'Unconscious competence',
+    '19a': 'Read books',
+    '19b': 'Listen to Audios',
+    '19c': 'Attend Events (monthly)',
+    '19d': 'Give and receive Recognition / expanded Golden Rule',
+    '19e': 'Develop relationships with like minded people',
+    '23a': 'Money Processes',
+    '23b': 'Relationship Processes',
+    '23c': 'Leadership Processes',
+    '23d': 'Communication Processes',
+    '23e': 'Health Processes',
+    '23f': 'Spiritual Awareness Processes',
+    '23g': 'Dream Processes',
+    '23h': 'Organization & Focus Processes'
+  }
+};
+
+export default dv;

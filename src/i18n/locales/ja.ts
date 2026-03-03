@@ -1,0 +1,314 @@
+/**
+ * Auto-converted locale module for ja.
+ */
+import type { Messages } from './en';
+
+const ja: Messages = {
+  nav: {
+    questionnaire: 'アンケート',
+    history: '歴史',
+    settings: '設定'
+  },
+  app: {
+    name: '顕現アルゴリズム',
+    unexpectedError: '予期しないエラーが発生しました。'
+  },
+  home: {
+    subtitle: 'あなたの生活の各分野を評価してください – 自分の調和スコアを発見してください'
+  },
+  dashboard: {
+    title: '顕現アルゴリズム追跡履歴',
+    subtitle: '時間の経過とともに進捗状況を追跡する',
+    loading: '履歴を読み込んでいます…',
+    noData: 'この期間のデータはありません',
+    progressTrend: '進捗傾向',
+    progressToGoal: '目標への進捗',
+    ofGoal: '{pct}目標の%',
+    goalReached: '🎯 目標を達成しました!',
+    categoryBreakdown: 'カテゴリの内訳',
+    noSessionsRange: 'この範囲にはセッションがありません',
+    tryWiderRange: 'より広い範囲を試すか、別の期間を選択してください。',
+    noSessionsYet: 'まだセッションはありません',
+    completeFirst: '最初の評価を完了して、ここで進捗状況と傾向を確認してください。',
+    startFirst: '最初の評価を開始する',
+    export: {
+      date: '日付',
+      time: '時間',
+      totalScore: '合計スコア',
+      duration: '継続時間 (分)',
+      notes: '注意事項'
+    }
+  },
+  stats: {
+    averageScore: '平均点',
+    medianScore: '中央値スコア',
+    highestScore: '最高スコア',
+    totalSessions: '合計セッション数'
+  },
+  network: {
+    rankings: 'ネットワークランキング',
+    searchingPeers: '仲間を探しています...',
+    searching: '検索中...',
+    online: 'オンライン',
+    peers: '{count} ピア',
+    results: '{count} の結果',
+    avgShort: '平均',
+    p90Short: 'P90',
+    averageScoreTitle: '平均点',
+    percentile90Title: '90 パーセンタイル',
+    globalAverage: '世界平均',
+    percentile90: '90 パーセンタイル',
+    manifestations: '症状の発現',
+    activePeers: 'アクティブなピア',
+    categoryRankings: 'カテゴリランキング'
+  },
+  focusAreas: {
+    title: '注力分野',
+    subtitle: 'スコアの最も低い 3 つのカテゴリ — これらを改善することで最大の利益が得られます。',
+    empty: 'さらにセッションを完了すると、パーソナライズされた重点領域の推奨事項が表示されます。'
+  },
+  sessions: {
+    recent: '最近のセッション',
+    deselectAll: 'すべての選択を解除',
+    selectAll: 'すべて選択',
+    deleteCount: '{count}を削除',
+    cancel: 'キャンセル',
+    select: '選択',
+    deleting: '削除中…'
+  },
+  settings: {
+    title: 'アプリの設定',
+    close: '設定を閉じる',
+    dataManagement: 'データ管理',
+    saveLastSession: '最後のセッションを保存する',
+    saveLastSessionDesc: '最近完了したセッションからの回答を事前入力します。',
+    resetProgress: '進行状況をリセットする',
+    resetProgressDesc: '保存されている回答をすべて削除し、最初からやり直してください。',
+    goals: '目標',
+    targetScore: '目標スコア',
+    targetScoreDesc:
+      '目標スコア (1,000 ～ 10,000) を設定して、ダッシュボードで進捗状況を追跡します。',
+    set: 'セット',
+    clearGoal: 'クリア',
+    currentTarget: '現在の目標:',
+    on: 'オン',
+    off: 'オフ',
+    version: '顕現アルゴリズム {version}',
+    clearAllAnswers: 'すべての回答をクリア',
+    clearConfirmTitle: 'すべての回答をクリア',
+    clearConfirmMessage: 'これにより、現在の回答がすべて完全に削除され、元に戻すことはできません。',
+    clearConfirmLabel: 'クリア',
+    keepAnswers: '答えを保持する',
+    language: '言語',
+    languageDesc: 'アプリケーションの表示言語を選択します。',
+    languageCount: '{count} の言語が利用可能',
+    goalErrorRange: '1,000 ～ 10,000 のスコアを入力してください。'
+  },
+  questionnaire: {
+    saving: '保存中...',
+    saved: '保存されました',
+    progressText: '{pct}% 完了 ({answered}/{total})',
+    progressAria: '評価完了の進捗状況',
+    maxScore: '最大: {score}',
+    answerToScore: '答えて得点する',
+    currentScore: '現在のスコア',
+    scrollAll: 'すべてスクロール',
+    stepByStep: 'ステップバイステップ',
+    questionOf: '{total} さんの {current} への質問',
+    previous: '← 前へ',
+    next: '次へ →',
+    completeAssessment: '完全な評価',
+    startFresh: '新たに始めてみませんか?',
+    resetAllAnswers: 'すべての回答をリセットする',
+    resetTitle: 'すべての答えをリセットしますか?',
+    resetMessage:
+      'これにより、すべての答えがクリアされ、最初から開始されます。これを元に戻すことはできません。',
+    resetLabel: 'リセット',
+    scoreQuality: {
+      notStarted: '未開始',
+      manifesting: '顕現❆',
+      aligned: '整列した',
+      building: '建物',
+      startingOut: '始める'
+    },
+    submitHint: {
+      zero: '{total} の質問のうち 0 件が回答されました - 未回答の質問はデフォルトで最小値になっています',
+      partial:
+        '{remaining} 質問が残っています — 未回答の質問はデフォルトで最小値になります | {remaining} 質問が残っています - 未回答の質問はデフォルトで最小限に抑えられています',
+      complete: 'すべての質問に答えました - 送信する準備ができました!'
+    },
+    submitTitle: {
+      zero: 'いくつかの質問に答えて評価を完了します',
+      partial: '{remaining} 質問が残っています | {remaining} 質問が残っています',
+      complete: '完了した評価を送信する'
+    },
+    submitError: 'セッションを保存できませんでした: {error}',
+    dotTitle: '質問 {index}',
+    dotAria: '{index} の質問に移動',
+    keyboardHint: 'ヒント: ← → を使用して移動します · 1 ～ 9 / 0 を使用して評価します'
+  },
+  onboarding: {
+    step0Title: 'マニフェステーション アルゴリズムへようこそ',
+    step0Body1:
+      'このツールは、自分の考え方、習慣、日々の行動が目標の達成にどれだけ適合しているかを測定するのに役立ちます。各質問に正直に答えて、現在のスコアを取得してください。',
+    step0Body2:
+      '定期的にアンケートに回答して、時間の経過に伴う成長を追跡し、どの分野に最も注意が必要かを確認します。',
+    step1Title: 'スコアリングの仕組み',
+    step1Body:
+      '各質問には一定のポイント数が与えられます。すべての質問について、1～10 のスケールで自分自身を評価してください。 10 の評価は、その原則を完全に体現していることを意味します。 1 はまだ開始していないことを意味します。',
+    step1TargetHint: '🎯 ターゲット: {target} |最大値: {maximum}',
+    excellent: '素晴らしい',
+    excellentRange: '7,001 – 10,000',
+    excellentNote: '強力な連携 – 継続します',
+    good: '良い',
+    goodRange: '4,001 – 7,000',
+    goodNote: '強固な基盤 — 成長の余地',
+    needsWork: '仕事が必要です',
+    needsWorkRange: '0～4,000',
+    needsWorkNote: 'まずは基礎に集中する',
+    step2Title: 'データのプライバシーは保たれます',
+    step2Body1:
+      'すべての解答とスコア履歴は、暗号化された SQLite データベースを使用してデバイスにローカルに保存されます。ユーザーの明示的な許可がない限り、サーバーに何も送信されることはありません。',
+    step2Body2:
+      'オプションのピアツーピア共有機能を使用すると、他のユーザーからの匿名化された集計スコアを確認できます。暗号化された署名付きの概要のみが共有され、個人的な回答は共有されません。',
+    readyText: '準備ができて？ベースラインスコアを取得しましょう。',
+    skipIntro: 'イントロをスキップ',
+    next: '次へ',
+    getStarted: '始めましょう'
+  },
+  sharing: {
+    title: '匿名ネットワーク共有',
+    privacyFirst: '🔒 プライバシー第一',
+    description:
+      'オプションで、結果を匿名でグローバル ネットワークに投稿できます。名前、電子メール、IP アドレス、デバイス ID が共有されることはありません。',
+    enabled: '共有が有効 — ネットワークに貢献',
+    disabled: '共有が無効になっています (デフォルト)',
+    activeBadge: '✓ 匿名化されたスコアは同僚と共有されます',
+    enableNote:
+      '有効にすると、グローバル ネットワークと比較したパーセンタイル ランクが表示されます。'
+  },
+  category: {
+    back: '« 戻る',
+    history: '歴史',
+    date: '日付',
+    score: 'スコア',
+    loading: '読み込み中...',
+    notEnoughData: 'データが不十分です',
+    noData: '「{category}」のデータが見つかりませんでした。',
+    goToDashboard: 'ダッシュボードに移動'
+  },
+  chartActions: {
+    viewFullscreen: '全画面表示',
+    exitFullscreen: '全画面表示を終了する',
+    copyChart: 'チャートをコピー',
+    exportChart: 'チャートのエクスポート',
+    exportDefault: '⬇ エクスポート',
+    exportExcel: '📊 Excelのエクスポート',
+    exportCsv: '📄 CSVのエクスポート',
+    exportPdf: '📑 PDFをエクスポート',
+    exportHtml: '🌐 HTMLをエクスポート',
+    copied: 'グラフをクリップボードにコピーしました',
+    copyFailed: 'コピーに失敗しました — クリップボードが使用できません',
+    saveCancelled: '保存がキャンセルされました'
+  },
+  resume: {
+    continueLastSession: '前回のセッションから続けますか?',
+    welcomeBack: 'おかえり！',
+    historicalBody:
+      '最後に完了したセッションの回答が事前にロードされています。これらの値を出発点として保持しますか、それとも完全に白紙のアンケートから始めますか?',
+    activeBody:
+      '進行中のセッションがあります。中断したところから再開しますか? それとも新たに評価を開始しますか?',
+    clearWarning: '⚠️ これにより、現在の回答がすべてクリアされます。本気ですか？',
+    yesStartFresh: 'はい、新たに始めましょう',
+    cancel: 'キャンセル',
+    keepLastValues: '最後の値を保持する',
+    resumeSession: 'セッションを再開する',
+    startFresh: '新たに始める'
+  },
+  questionItem: {
+    pointsSuffix: 'ポイント',
+    low: '低い',
+    high: '高',
+    rateAria: '{question} を評価してください'
+  },
+  dateRange: {
+    rangeLabel: '範囲:',
+    startDate: '開始日',
+    endDate: '終了日',
+    presets: {
+      '7d': '7日間',
+      '30d': '30日',
+      '90d': '90日',
+      '1y': '1年',
+      all: 'オールタイム',
+      custom: 'カスタム'
+    }
+  },
+  update: {
+    availableTitle: 'v{version} が利用可能です!',
+    releaseNotesFallback: 'リリース ページにアクセスして最新バージョンをダウンロードしてください。',
+    getUpdate: 'アップデートを入手',
+    dismiss: '解雇する'
+  },
+  questions: {
+    '1': 'Master the Basics',
+    '2': 'Activate & Illuminate Words',
+    '3': 'Find Pain & Contract Energy',
+    '4': 'Define what you want',
+    '5': 'Write down what you want',
+    '6': "Don't share your dream with others",
+    '7': 'Get a burning desire for your goal',
+    '8': 'Goal must be in Sweet Spot',
+    '9': 'Make a Decision',
+    '10': 'See/Feel good in possession of your goal',
+    '11': 'Release attachment to the outcome',
+    '12': 'Allow the HOW to present itself',
+    '13': 'Know the difference between Dream & Chief Aim',
+    '14': 'Be Focused / Singleness of purpose',
+    '15': 'Daily TO DO list of Priorities',
+    '16': 'Chart Progress / Know the Score',
+    '17': 'Use Momentum Cycle of Success',
+    '18': 'Dream Build - Dream Book & Vision Board',
+    '19': 'Plug into System',
+    '20': 'Science of Personal Mastery Course',
+    '21': 'Watch the words you speak - what you say is what you get',
+    '22': 'Physiology / Dress for success',
+    '23': 'Clear Counter Intentions',
+    '24': 'Awaken your Inner Power: Superpower Processes',
+    '25': 'Broadcast on Alpha-theta brainwave',
+    '26': 'Stop Telling Your Story of woe',
+    '27': 'Show Appreciation / Gratitude',
+    '28': 'Replace Failure Habits w/ Success Habits (Accelerator Processes)',
+    '29': 'Create a Mastermind',
+    '30': 'Watch Successful People/Apprentice',
+    '31': 'Listen to/Read Success Stories',
+    '32': 'Give away what you want first',
+    '33': 'Do It Now Mentality',
+    '34': 'Take Care of Your Body',
+    '35': 'Find the Gold in Adversity',
+    '36': 'Clear Samskaras from Field',
+    '37': 'Take 100% Responsibility',
+    '38': 'Attractor Field Generators',
+    '39': 'Join a Club that connects you to a Power Source',
+    '40': 'Live life with deliberate intent - be in present time',
+    '1a': 'Who do you listen to?',
+    '1b': 'Teachability Index',
+    '1c': 'Training Balance Scale',
+    '1d': 'Unconscious competence',
+    '19a': 'Read books',
+    '19b': 'Listen to Audios',
+    '19c': 'Attend Events (monthly)',
+    '19d': 'Give and receive Recognition / expanded Golden Rule',
+    '19e': 'Develop relationships with like minded people',
+    '23a': 'Money Processes',
+    '23b': 'Relationship Processes',
+    '23c': 'Leadership Processes',
+    '23d': 'Communication Processes',
+    '23e': 'Health Processes',
+    '23f': 'Spiritual Awareness Processes',
+    '23g': 'Dream Processes',
+    '23h': 'Organization & Focus Processes'
+  }
+};
+
+export default ja;

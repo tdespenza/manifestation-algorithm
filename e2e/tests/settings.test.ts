@@ -5,6 +5,7 @@
  */
 import { test, expect } from '../fixtures/base';
 import type { DBSeed } from '../fixtures/base';
+import en from '../../src/i18n/locales/en';
 
 // Minimal seed so the dashboard renders sessions (required for NetworkRanking/SharingToggle)
 const DASHBOARD_SEED: DBSeed = {
@@ -35,7 +36,7 @@ test.describe('Settings page', () => {
   });
 
   test('shows "Settings" heading', async ({ settingsPage }) => {
-    await expect(settingsPage.heading).toHaveText('Settings');
+    await expect(settingsPage.heading).toHaveText(en.nav.settings);
   });
 
   test('mounts the Settings component', async ({ page }) => {
@@ -97,7 +98,7 @@ test.describe('Settings – sharing toggle', () => {
     const checkbox = page.locator('[data-testid="sharing-checkbox"]');
     await expect(checkbox).not.toBeChecked();
     const label = page.locator('.toggle-text');
-    await expect(label).toContainText('Sharing disabled');
+    await expect(label).toContainText(en.sharing.disabled);
   });
 
   test('enabling the toggle updates the UI immediately', async ({ page }) => {
@@ -107,7 +108,7 @@ test.describe('Settings – sharing toggle', () => {
     // Click the visible label to toggle (checkbox is display:none)
     await page.locator('label.toggle-label').click();
     await expect(checkbox).toBeChecked();
-    await expect(page.locator('.toggle-text')).toContainText('Sharing enabled');
+    await expect(page.locator('.toggle-text')).toContainText(en.sharing.enabled);
     await expect(page.locator('.sharing-active-badge')).toBeVisible();
   });
 
@@ -120,7 +121,7 @@ test.describe('Settings – sharing toggle', () => {
     await expect(checkbox).toBeChecked();
     await page.locator('label.toggle-label').click();
     await expect(checkbox).not.toBeChecked();
-    await expect(page.locator('.toggle-text')).toContainText('Sharing disabled');
+    await expect(page.locator('.toggle-text')).toContainText(en.sharing.disabled);
     await expect(page.locator('.sharing-off-note')).toBeVisible();
   });
 
@@ -143,7 +144,7 @@ test.describe('Settings – sharing toggle', () => {
     // SharingToggle loads state via get_network_sharing on mount
     const checkbox = page.locator('[data-testid="sharing-checkbox"]');
     await expect(checkbox).toBeChecked();
-    await expect(page.locator('.toggle-text')).toContainText('Sharing enabled');
+    await expect(page.locator('.toggle-text')).toContainText(en.sharing.enabled);
   });
 
   test('mock get_network_sharing returns true when previously enabled', async ({ page }) => {
@@ -218,13 +219,13 @@ test.describe('Settings – save last session toggle', () => {
 
   test('Save Last Session toggle shows "On" by default', async ({ page }) => {
     const toggle = page.locator('button.btn-toggle');
-    await expect(toggle).toHaveText('On');
+    await expect(toggle).toHaveText(en.settings.on);
     await expect(toggle).toHaveClass(/active/);
   });
 
   test('clicking the Save Last Session toggle switches it Off', async ({ page }) => {
     const toggle = page.locator('button.btn-toggle');
     await toggle.click();
-    await expect(toggle).toHaveText('Off', { timeout: 3_000 });
+    await expect(toggle).toHaveText(en.settings.off, { timeout: 3_000 });
   });
 });

@@ -5,6 +5,7 @@
  * progress tracking, resume dialog, and submission flow.
  */
 import { test, expect } from '../fixtures/base';
+import en from '../../src/i18n/locales/en';
 
 test.describe('Questionnaire – scroll mode', () => {
   test.beforeEach(async ({ questionnairePage }) => {
@@ -175,7 +176,7 @@ test.describe('Questionnaire – submission', () => {
 
   test('submit button is visible and labeled "Complete Assessment"', async ({ questionnairePage }) => {
     await expect(questionnairePage.submitBtn).toBeVisible();
-    await expect(questionnairePage.submitBtn).toHaveText('Complete Assessment');
+    await expect(questionnairePage.submitBtn).toHaveText(en.questionnaire.completeAssessment);
   });
 
   test('submit navigates to dashboard on success', async ({ questionnairePage, page }) => {
@@ -195,7 +196,7 @@ test.describe('Questionnaire – reset button', () => {
 
   test('reset button is visible in the questionnaire', async ({ page }) => {
     await expect(page.locator('.reset-btn')).toBeVisible();
-    await expect(page.locator('.reset-btn')).toHaveText('Reset all answers');
+    await expect(page.locator('.reset-btn')).toHaveText(en.questionnaire.resetAllAnswers);
   });
 
   test('clicking reset clears all answers', async ({ questionnairePage, page }) => {

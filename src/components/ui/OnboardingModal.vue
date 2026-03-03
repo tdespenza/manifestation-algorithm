@@ -40,70 +40,52 @@ function skip() {
       <!-- Step 0: What is this? -->
       <div v-if="step === 0" class="step-content">
         <div class="step-icon">✦</div>
-        <h2 id="onboarding-title" class="step-title">Welcome to the Manifestation Algorithm</h2>
-        <p class="step-body">
-          This tool helps you measure how aligned your mindset, habits, and daily actions are with
-          achieving your goals. Answer each question honestly to get your current score.
-        </p>
-        <p class="step-body">
-          Complete the questionnaire at regular intervals to track your growth over time and see
-          which areas need the most attention.
-        </p>
+        <h2 id="onboarding-title" class="step-title">{{ $t('onboarding.step0Title') }}</h2>
+        <p class="step-body">{{ $t('onboarding.step0Body1') }}</p>
+        <p class="step-body">{{ $t('onboarding.step0Body2') }}</p>
       </div>
 
       <!-- Step 1: Scoring explained -->
       <div v-else-if="step === 1" class="step-content">
         <div class="step-icon">📊</div>
-        <h2 id="onboarding-title" class="step-title">How Scoring Works</h2>
-        <p class="step-body">
-          Each question is worth a set number of points. Rate yourself on a scale of
-          <strong>1&ndash;10</strong> for every question. A rating of 10 means you fully embody that
-          principle; 1 means you haven't started.
-        </p>
+        <h2 id="onboarding-title" class="step-title">{{ $t('onboarding.step1Title') }}</h2>
+        <p class="step-body">{{ $t('onboarding.step1Body') }}</p>
         <div class="score-tiers">
           <div class="tier tier--excellent">
-            <span class="tier-range">7,001 – 10,000</span>
-            <span class="tier-label">Excellent</span>
-            <span class="tier-note">Strong alignment — keep going</span>
+            <span class="tier-range">{{ $t('onboarding.excellentRange') }}</span>
+            <span class="tier-label">{{ $t('onboarding.excellent') }}</span>
+            <span class="tier-note">{{ $t('onboarding.excellentNote') }}</span>
           </div>
           <div class="tier tier--good">
-            <span class="tier-range">4,001 – 7,000</span>
-            <span class="tier-label">Good</span>
-            <span class="tier-note">Solid foundation — room to grow</span>
+            <span class="tier-range">{{ $t('onboarding.goodRange') }}</span>
+            <span class="tier-label">{{ $t('onboarding.good') }}</span>
+            <span class="tier-note">{{ $t('onboarding.goodNote') }}</span>
           </div>
           <div class="tier tier--needs-work">
-            <span class="tier-range">0 – 4,000</span>
-            <span class="tier-label">Needs Work</span>
-            <span class="tier-note">Focus on fundamentals first</span>
+            <span class="tier-range">{{ $t('onboarding.needsWorkRange') }}</span>
+            <span class="tier-label">{{ $t('onboarding.needsWork') }}</span>
+            <span class="tier-note">{{ $t('onboarding.needsWorkNote') }}</span>
           </div>
         </div>
         <p class="step-hint">
-          🎯 Target: <strong>6,000+</strong> &nbsp;|&nbsp; Maximum: <strong>10,000</strong>
+          {{ $t('onboarding.step1TargetHint', { target: '6,000+', maximum: '10,000' }) }}
         </p>
       </div>
 
       <!-- Step 2: Privacy -->
       <div v-else-if="step === 2" class="step-content">
         <div class="step-icon">🔒</div>
-        <h2 id="onboarding-title" class="step-title">Your Data Stays Private</h2>
-        <p class="step-body">
-          All your answers and score history are stored <strong>locally on your device</strong>
-          using an encrypted SQLite database. Nothing is sent to any server without your explicit
-          permission.
-        </p>
-        <p class="step-body">
-          The optional peer-to-peer sharing feature lets you see anonymised aggregate scores from
-          other users. It only shares a cryptographically signed summary — never your individual
-          answers.
-        </p>
-        <p class="step-body ready-text">Ready? Let's get your baseline score.</p>
+        <h2 id="onboarding-title" class="step-title">{{ $t('onboarding.step2Title') }}</h2>
+        <p class="step-body">{{ $t('onboarding.step2Body1') }}</p>
+        <p class="step-body">{{ $t('onboarding.step2Body2') }}</p>
+        <p class="step-body ready-text">{{ $t('onboarding.readyText') }}</p>
       </div>
 
       <!-- Navigation -->
       <div class="step-actions">
-        <button class="btn-skip" @click="skip">Skip intro</button>
+        <button class="btn-skip" @click="skip">{{ $t('onboarding.skipIntro') }}</button>
         <button class="btn-next" @click="next">
-          {{ step < totalSteps - 1 ? 'Next' : 'Get Started' }}
+          {{ step < totalSteps - 1 ? $t('onboarding.next') : $t('onboarding.getStarted') }}
         </button>
       </div>
     </div>

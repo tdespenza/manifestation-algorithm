@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import type { DateRange } from '../../composables/useDateFilter';
 
 const props = defineProps<{
@@ -14,6 +15,7 @@ const emit = defineEmits<{
   (e: 'update:customStart', value: string): void;
   (e: 'update:customEnd', value: string): void;
 }>();
+const { t } = useI18n();
 
 const today = props.todayStr ?? new Date().toISOString().slice(0, 10);
 
@@ -24,7 +26,7 @@ function select(value: string) {
 
 <template>
   <div class="range-selector">
-    <span class="range-label">Range:</span>
+    <span class="range-label">{{ t('dateRange.rangeLabel') }}</span>
     <div class="range-pills">
       <button
         v-for="r in ranges"
@@ -33,7 +35,7 @@ function select(value: string) {
         :class="{ active: modelValue === r.value }"
         @click="select(r.value)"
       >
-        {{ r.label }}
+        {{ t(r.label) }}
       </button>
     </div>
     <template v-if="modelValue === 'custom'">
@@ -44,7 +46,7 @@ function select(value: string) {
           class="date-input"
           :value="customStart"
           :max="customEnd || today"
-          aria-label="Start date"
+          :aria-label="t('dateRange.startDate')"
           @input="emit('update:customStart', ($event.target as HTMLInputElement).value)"
         />
         <span class="date-sep">→</span>
@@ -55,7 +57,7 @@ function select(value: string) {
           :value="customEnd"
           :min="customStart"
           :max="today"
-          aria-label="End date"
+          :aria-label="t('dateRange.endDate')"
           @input="emit('update:customEnd', ($event.target as HTMLInputElement).value)"
         />
       </div>

@@ -219,7 +219,7 @@ describe('ChartActions.vue', () => {
     mockExportToExcel.mockRejectedValueOnce(new Error('network crash'));
     const wrapper = mount(ChartActions, { props: defaultProps, attachTo: document.body });
     await selectFormat(wrapper, 'excel');
-    expect(mockAddToast).toHaveBeenCalledWith('Export failed unexpectedly', 'error');
+    expect(mockAddToast).toHaveBeenCalledWith('An unexpected error occurred.', 'error');
     wrapper.unmount();
   });
 

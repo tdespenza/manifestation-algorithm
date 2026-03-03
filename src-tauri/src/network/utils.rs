@@ -55,4 +55,16 @@ mod tests {
         assert_eq!(p50_ord, p50_rev);
         assert_eq!(p50_ord, p50_shu);
     }
+
+    #[test]
+    fn test_percentile_100_uses_last_element() {
+        // Kills `idx < sorted.len()` → `idx <= sorted.len()`:
+        // percentile=1.0 produces idx==len, which must fall through to the else
+        // branch (last element). The mutation would try sorted[len] and panic.
+        let scores = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+        assert_eq!(calculate_percentile(&scores, 1.0), Some(5.0));
+
+        let single = vec![42.0];
+        assert_eq!(calculate_percentile(&single, 1.0), Some(42.0));
+    }
 }

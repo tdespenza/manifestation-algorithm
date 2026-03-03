@@ -1,0 +1,57 @@
+# cargo-mutants configuration for manifestation-app
+# https://mutants.rs/configuration.html
+
+# ── Timeouts ────────────────────────────────────────────────────────────────
+# Maximum wall-clock seconds for a mutated test suite to run.
+# Raise if the test suite is slow; lower to skip hanging mutants faster.
+minimum_test_timeout = 60
+
+# ── Exclusions ──────────────────────────────────────────────────────────────
+# Skip generated code, build artefacts and integration-surface that is hard
+# to unit-test in isolation (Tauri command boilerplate, network I/O setup).
+exclude_globs = [
+    "src/main.rs",        # binary entry-point — not unit-testable
+    "src/lib.rs",         # Tauri plugin/command wiring — integration surface
+    "build.rs",           # build script — not part of runtime logic
+]
+
+# Only mutate pure-logic modules; the network swarm and I/O setup are excluded
+# via glob above and via the regex below.
+exclude_re = [
+    # Tauri command handlers (side-effectful, rely on external state)
+    "#\\[tauri::command\\]",
+    # tokio async runtime setup / libp2p swarm loops
+    "tokio::select!",
+    "Swarm::new",
+    # log/env_logger calls — not business logic
+    "env_logger",
+    "eprintln!",
+    "println!",
+    # Network node methods that require a running libp2p Swarm to execute;
+    # they cannot be unit-tested without spinning up the full networking stack.
+    "PeerNode::run",
+    "PeerNode::handle_swarm_event",
+    "PeerNode::handle_gossip_message",
+    "PeerNode::handle_command",
+    "PeerNode::get_stats",
+    "PeerNode::save_cache",
+]
+
+# ── Output ──────────────────────────────────────────────────────────────────
+# Keep mutation output inside the src-tauri directory.
+output = "mutants.out"
+
+# ── Packages ────────────────────────────────────────────────────────────────
+# Scope mutations to the application library crate only (excludes any
+# workspace members that may be added in the future).
+# Uncomment and extend if additional workspace members are added.
+# packages = ["manifestation-app"]
+
+# ── Jobs ────────────────────────────────────────────────────────────────────
+# Number of parallel mutation test runs. Default = number of CPU threads.
+# Lower this if the machine runs out of memory during large test suites.
+# jobs = 4
+
+# ── Error values ────────────────────────────────────────────────────────────
+# Extra values cargo-mutants injects when replacing Result-returning functions.
+error_values = ["Err(\"mutant\".into())"]

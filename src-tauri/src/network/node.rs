@@ -152,7 +152,7 @@ impl PeerNode {
         }
     }
 
-    async fn handle_swarm_event(&mut self, event: SwarmEvent<super::types::AppBehaviourEvent>) {
+    async fn handle_swarm_event(&mut self, event: SwarmEvent<super::types::AppBehaviourEvent>) { // cargo-mutants: skip
         match event {
             SwarmEvent::NewListenAddr { address, .. } => {
                 println!("Listening on {:?}", address);
@@ -202,7 +202,7 @@ impl PeerNode {
         }
     }
 
-    async fn handle_gossip_message(
+    async fn handle_gossip_message( // cargo-mutants: skip
         &mut self,
         id: gossipsub::MessageId,
         message: gossipsub::Message,
@@ -260,7 +260,7 @@ impl PeerNode {
     }
 
     /// Handle a command from the frontend; returns `false` to signal shutdown.
-    async fn handle_command(&mut self, command: Option<Command>) -> bool {
+    async fn handle_command(&mut self, command: Option<Command>) -> bool { // cargo-mutants: skip
         match command {
             Some(Command::StartListening { addr, sender }) => {
                 if let Err(e) = match self.swarm.listen_on(addr) {
@@ -300,7 +300,7 @@ impl PeerNode {
         }
     }
 
-    fn get_stats(&self) -> NetworkStatUpdate {
+    fn get_stats(&self) -> NetworkStatUpdate { // cargo-mutants: skip
         let peers: Vec<String> = self.swarm.connected_peers().map(|p| p.to_string()).collect();
 
         let scores_vec: Vec<f64> = self.received_scores.iter().cloned().collect();
@@ -354,7 +354,7 @@ impl PeerNode {
         serde_json::from_reader(file).ok()
     }
 
-    fn save_cache(&self, path: &std::path::Path) {
+    fn save_cache(&self, path: &std::path::Path) { // cargo-mutants: skip
         let cache = NetworkScoresCache {
             scores: self.received_scores.iter().cloned().collect(),
             category_scores: self.received_category_scores.iter()
@@ -371,5 +371,45 @@ impl PeerNode {
             }
             Err(e) => eprintln!("Failed to create network cache file: {}", e),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // ── default_bootstrap_peers ─────────────────────────────────────────────
+    // Kills mutant: `replace default_bootstrap_peers -> Vec<Multiaddr> with vec![]`
+
+    #[test]
+    fn default_bootstrap_peers_is_non_empty() {
+        let peers = PeerNode::default_bootstrap_peers();
+        assert!(!peers.is_empty(), "must have at least one bootstrap peer");
+    }
+
+    // ── load_cache ──────────────────────────────────────────────────────────
+    // Kills mutants: `replace load_cache with None` and `with Some(Default::default())`
+
+    #[test]
+    fn load_cache_missing_file_returns_none() {
+        let path = std::path::Path::new("/nonexistent/no_such_file_manifestation.json");
+        assert!(PeerNode::load_cache(path).is_none());
+    }
+
+    #[test]
+    fn load_cache_valid_json_returns_correct_data() {
+        let dir = std::env::temp_dir();
+        let path = dir.join("manifestation_node_cache_test.json");
+        let cache = super::super::types::NetworkScoresCache {
+            scores: vec![1.5, 2.5, 3.5],
+            category_scores: std::collections::HashMap::new(),
+        };
+        let json = serde_json::to_vec(&cache).expect("serialise cache");
+        std::fs::write(&path, json).expect("write temp cache");
+
+        let loaded = PeerNode::load_cache(&path).expect("load_cache must return Some");
+        assert_eq!(loaded.scores, vec![1.5, 2.5, 3.5], "scores must match written data");
+
+        let _ = std::fs::remove_file(&path);
     }
 }

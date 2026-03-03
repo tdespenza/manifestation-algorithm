@@ -1,0 +1,313 @@
+/**
+ * Auto-converted locale module for et.
+ */
+import type { Messages } from './en';
+
+const et: Messages = {
+  nav: {
+    questionnaire: 'Küsimustik',
+    history: 'Ajalugu',
+    settings: 'Seaded'
+  },
+  app: {
+    name: 'Manifestatsiooni algoritm',
+    unexpectedError: 'Ilmnes ootamatu viga.'
+  },
+  home: {
+    subtitle: 'Hinnake oma elu iga valdkonda – avastage oma joondusskoor'
+  },
+  dashboard: {
+    title: 'Manifestatsiooni algoritmi jälgimise ajalugu',
+    subtitle: 'Jälgige oma edusamme aja jooksul',
+    loading: 'Teie ajaloo laadimine…',
+    noData: 'Selle perioodi kohta andmed puuduvad',
+    progressTrend: 'Progressi suund',
+    progressToGoal: 'Edasiminek eesmärgi poole',
+    ofGoal: '{pct}% eesmärgist',
+    goalReached: '🎯 Eesmärk saavutatud!',
+    categoryBreakdown: 'Kategooria jaotus',
+    noSessionsRange: 'Selles vahemikus pole seansse',
+    tryWiderRange: 'Proovige laiemat valikut või valige mõni muu periood.',
+    noSessionsYet: 'Seansse veel pole',
+    completeFirst: 'Täitke oma esimene hindamine, et näha siin oma edusamme ja suundumusi.',
+    startFirst: 'Alustage esimest hindamist',
+    export: {
+      date: 'Kuupäev',
+      time: 'Aeg',
+      totalScore: 'Koguskoor',
+      duration: 'Kestus (min)',
+      notes: 'Märkmed'
+    }
+  },
+  stats: {
+    averageScore: 'Keskmine punktisumma',
+    medianScore: 'Mediaanskoor',
+    highestScore: 'Kõrgeim skoor',
+    totalSessions: 'Seansse kokku'
+  },
+  network: {
+    rankings: 'Võrgustiku edetabel',
+    searchingPeers: 'Eakaaslaste otsimine...',
+    searching: 'Otsimine...',
+    online: 'Internetis',
+    peers: '{count} eakaaslased',
+    results: '{count} tulemused',
+    avgShort: 'Keskm',
+    p90Short: 'P90',
+    averageScoreTitle: 'Keskmine punktisumma',
+    percentile90Title: '90. protsentiil',
+    globalAverage: 'Globaalne keskmine',
+    percentile90: '90. protsentiil',
+    manifestations: 'Manifestatsioonid',
+    activePeers: 'Aktiivsed kolleegid',
+    categoryRankings: 'Kategooriate paremusjärjestus'
+  },
+  focusAreas: {
+    title: 'Fookusalad',
+    subtitle: 'Teie 3 madalaima punktisummaga kategooriat – nende parandamine toob suurimat kasu.',
+    empty: 'Täitke rohkem seansse, et näha isikupärastatud fookusala soovitusi.'
+  },
+  sessions: {
+    recent: 'Viimased seansid',
+    deselectAll: 'Tühistage valik Kõik',
+    selectAll: 'Valige Kõik',
+    deleteCount: 'Kustuta {count}',
+    cancel: 'Tühista',
+    select: 'Valige',
+    deleting: 'Kustutamine…'
+  },
+  settings: {
+    title: 'Rakenduse seaded',
+    close: 'Sulge seaded',
+    dataManagement: 'Andmehaldus',
+    saveLastSession: 'Salvesta viimane seanss',
+    saveLastSessionDesc: 'Eeltäitke oma viimase lõpetatud seansi vastused.',
+    resetProgress: 'Lähtestage edenemine',
+    resetProgressDesc: 'Kustutage kõik salvestatud vastused ja alustage uuesti.',
+    goals: 'Eesmärgid',
+    targetScore: 'Sihtskoor',
+    targetScoreDesc:
+      'Seadistage eesmärgi skoor (1000–10 000), et jälgida oma edusamme armatuurlaual.',
+    set: 'Määra',
+    clearGoal: 'Selge',
+    currentTarget: 'Praegune sihtmärk:',
+    on: 'Sees',
+    off: 'Väljas',
+    version: 'Manifestatsiooni algoritm {version}',
+    clearAllAnswers: 'Kustuta kõik vastused',
+    clearConfirmTitle: 'Kustuta kõik vastused',
+    clearConfirmMessage:
+      'See kustutab jäädavalt kõik teie praegused vastused ja seda ei saa tagasi võtta.',
+    clearConfirmLabel: 'Selge',
+    keepAnswers: 'Jäta vastused alles',
+    language: 'Keel',
+    languageDesc: 'Valige rakenduse kuvakeel.',
+    languageCount: 'Saadaval {count} keeled',
+    goalErrorRange: 'Palun sisestage skoor vahemikus 1000 kuni 10 000.'
+  },
+  questionnaire: {
+    saving: 'Salvestamine...',
+    saved: 'Salvestatud',
+    progressText: '{pct}% valmis ({answered}/{total})',
+    progressAria: 'Hindamise lõpuleviimise edenemine',
+    maxScore: 'Max: {score}',
+    answerToScore: 'Vastus skoori saamiseks',
+    currentScore: 'Praegune skoor',
+    scrollAll: 'Kerige kõik',
+    stepByStep: 'Samm-sammult',
+    questionOf: '{total} küsimus {current}',
+    previous: '← Eelmine',
+    next: 'Järgmine →',
+    completeAssessment: 'Täielik hindamine',
+    startFresh: 'Kas soovite alustada värskelt?',
+    resetAllAnswers: 'Lähtestage kõik vastused',
+    resetTitle: 'Kas lähtestada kõik vastused?',
+    resetMessage: 'See kustutab kõik vastused ja alustab nullist. Seda ei saa tagasi võtta.',
+    resetLabel: 'Lähtesta',
+    scoreQuality: {
+      notStarted: 'Pole alanud',
+      manifesting: 'Avaldub ❆',
+      aligned: 'Joondatud',
+      building: 'Hoone',
+      startingOut: 'Alustades'
+    },
+    submitHint: {
+      zero: '0 {total} küsimusest vastatud – vastamata küsimused on vaikimisi minimaalsed',
+      partial:
+        '{remaining} küsimus on jäänud — vastamata küsimused on vaikimisi miinimumini | {remaining} küsimusi on jäänud – vastamata küsimuste arv on vaikimisi minimaalne',
+      complete: 'Kõik küsimused on vastatud – esitamiseks valmis!'
+    },
+    submitTitle: {
+      zero: 'Hindamise lõpetamiseks vastake mõnele küsimusele',
+      partial: '{remaining} küsimus on jäänud | {remaining} on veel küsimusi',
+      complete: 'Esitage oma täidetud hinnang'
+    },
+    submitError: 'Seansi salvestamine ebaõnnestus: {error}',
+    dotTitle: 'Küsimus {index}',
+    dotAria: 'Mine küsimuse juurde {index}',
+    keyboardHint: 'Näpunäide: kasutage ← → navigeerimiseks · 1–9 / 0 hindamiseks'
+  },
+  onboarding: {
+    step0Title: 'Tere tulemast manifesteerimisalgoritmi',
+    step0Body1:
+      'See tööriist aitab teil mõõta, kui kooskõlas on teie mõtteviis, harjumused ja igapäevased tegevused teie eesmärkide saavutamisega. Oma praeguse skoori saamiseks vastake igale küsimusele ausalt.',
+    step0Body2:
+      'Täitke küsimustik korrapäraste ajavahemike järel, et jälgida oma kasvu aja jooksul ja näha, millised valdkonnad vajavad kõige rohkem tähelepanu.',
+    step1Title: 'Kuidas punktiarvestus töötab',
+    step1Body:
+      'Iga küsimus on väärt teatud arvu punkte. Hinda end iga küsimuse puhul skaalal 1–10. Hinne 10 tähendab, et järgite seda põhimõtet täielikult; 1 tähendab, et te pole alustanud.',
+    step1TargetHint: '🎯 Sihtmärk: {target} | Maksimaalne: {maximum}',
+    excellent: 'Suurepärane',
+    excellentRange: '7 001 – 10 000',
+    excellentNote: 'Tugev joondus – jätkake',
+    good: 'Hea',
+    goodRange: '4001 – 7000',
+    goodNote: 'Tugev vundament – ruumi kasvamiseks',
+    needsWork: 'Vajab tööd',
+    needsWorkRange: '0–4000',
+    needsWorkNote: 'Keskendu kõigepealt põhitõdedele',
+    step2Title: 'Teie andmed jäävad privaatseks',
+    step2Body1:
+      'Kõik teie vastused ja skooride ajalugu salvestatakse teie seadmesse krüptitud SQLite andmebaasi abil. Ilma teie selgesõnalise loata ei saadeta ühtegi serverisse midagi.',
+    step2Body2:
+      'Valikuline peer-to-peer jagamise funktsioon võimaldab teil näha teiste kasutajate anonüümseks muudetud koondtulemusi. See jagab ainult krüptograafiliselt allkirjastatud kokkuvõtet – mitte kunagi teie individuaalseid vastuseid.',
+    readyText: 'Valmis? Vaatame teie baasskoori.',
+    skipIntro: 'Jäta sissejuhatus vahele',
+    next: 'Edasi',
+    getStarted: 'Alustage'
+  },
+  sharing: {
+    title: 'Anonüümne võrgu jagamine',
+    privacyFirst: '🔒 Privaatsus - esiteks',
+    description:
+      'Soovi korral panustage oma tulemused anonüümselt ülemaailmsesse võrku. Nime, e-posti aadressi, IP-aadressi ega seadme ID-d ei jagata kunagi.',
+    enabled: 'Jagamine lubatud – võrku panustamine',
+    disabled: 'Jagamine keelatud (vaikimisi)',
+    activeBadge: '✓ Teie anonüümseks muudetud tulemusi jagatakse eakaaslastega',
+    enableNote: 'Lubage oma protsentiili asetuse vaatamine võrreldes ülemaailmse võrguga.'
+  },
+  category: {
+    back: '‹ Tagasi',
+    history: 'Ajalugu',
+    date: 'Kuupäev',
+    score: 'Skoor',
+    loading: 'Laadimine...',
+    notEnoughData: 'Andmeid pole piisavalt',
+    noData: '"{category}" jaoks andmeid ei leitud.',
+    goToDashboard: 'Minge juhtpaneelile'
+  },
+  chartActions: {
+    viewFullscreen: 'Kuva täisekraanil',
+    exitFullscreen: 'Välju täisekraanilt',
+    copyChart: 'Kopeeri diagramm',
+    exportChart: 'Ekspordi diagramm',
+    exportDefault: '⬇ Eksport',
+    exportExcel: '📊 Ekspordi Excel',
+    exportCsv: '📄 Ekspordi CSV',
+    exportPdf: '📑 Ekspordi PDF',
+    exportHtml: '🌐 Ekspordi HTML',
+    copied: 'Diagramm kopeeriti lõikelauale',
+    copyFailed: 'Kopeerimine ebaõnnestus – lõikelaud pole saadaval',
+    saveCancelled: 'Salvestamine tühistati'
+  },
+  resume: {
+    continueLastSession: 'Kas jätkata eelmisest seansist?',
+    welcomeBack: 'Tere tulemast tagasi!',
+    historicalBody:
+      'Teie viimase lõpetatud seansi vastused on eellaaditud. Kas soovite jätta need väärtused lähtepunktiks või alustada täiesti tühja küsimustikuga?',
+    activeBody:
+      'Teil on seanss pooleli. Kas soovite jätkata sealt, kus pooleli jäite, või alustada uut hindamist?',
+    clearWarning: '⚠️ See kustutab kõik praegused vastused. Oled sa kindel?',
+    yesStartFresh: 'Jah, alusta värskelt',
+    cancel: 'Tühista',
+    keepLastValues: 'Hoidke viimased väärtused',
+    resumeSession: 'Jätka seanssi',
+    startFresh: 'Alusta värskelt'
+  },
+  questionItem: {
+    pointsSuffix: 'punktid',
+    low: 'Madal',
+    high: 'Kõrge',
+    rateAria: 'Hinda {question}'
+  },
+  dateRange: {
+    rangeLabel: 'Vahemik:',
+    startDate: 'Alguskuupäev',
+    endDate: 'Lõppkuupäev',
+    presets: {
+      '7d': '7 päeva',
+      '30d': '30 päeva',
+      '90d': '90 päeva',
+      '1y': '1 aasta',
+      all: 'Kogu aeg',
+      custom: 'Kohandatud'
+    }
+  },
+  update: {
+    availableTitle: 'v{version} on saadaval!',
+    releaseNotesFallback: 'Uusima versiooni allalaadimiseks külastage väljalaskelehte.',
+    getUpdate: 'Hankige värskendus',
+    dismiss: 'Loobu'
+  },
+  questions: {
+    '1': 'Master the Basics',
+    '2': 'Activate & Illuminate Words',
+    '3': 'Find Pain & Contract Energy',
+    '4': 'Define what you want',
+    '5': 'Write down what you want',
+    '6': "Don't share your dream with others",
+    '7': 'Get a burning desire for your goal',
+    '8': 'Goal must be in Sweet Spot',
+    '9': 'Make a Decision',
+    '10': 'See/Feel good in possession of your goal',
+    '11': 'Release attachment to the outcome',
+    '12': 'Allow the HOW to present itself',
+    '13': 'Know the difference between Dream & Chief Aim',
+    '14': 'Be Focused / Singleness of purpose',
+    '15': 'Daily TO DO list of Priorities',
+    '16': 'Chart Progress / Know the Score',
+    '17': 'Use Momentum Cycle of Success',
+    '18': 'Dream Build - Dream Book & Vision Board',
+    '19': 'Plug into System',
+    '20': 'Science of Personal Mastery Course',
+    '21': 'Watch the words you speak - what you say is what you get',
+    '22': 'Physiology / Dress for success',
+    '23': 'Clear Counter Intentions',
+    '24': 'Awaken your Inner Power: Superpower Processes',
+    '25': 'Broadcast on Alpha-theta brainwave',
+    '26': 'Stop Telling Your Story of woe',
+    '27': 'Show Appreciation / Gratitude',
+    '28': 'Replace Failure Habits w/ Success Habits (Accelerator Processes)',
+    '29': 'Create a Mastermind',
+    '30': 'Watch Successful People/Apprentice',
+    '31': 'Listen to/Read Success Stories',
+    '32': 'Give away what you want first',
+    '33': 'Do It Now Mentality',
+    '34': 'Take Care of Your Body',
+    '35': 'Find the Gold in Adversity',
+    '36': 'Clear Samskaras from Field',
+    '37': 'Take 100% Responsibility',
+    '38': 'Attractor Field Generators',
+    '39': 'Join a Club that connects you to a Power Source',
+    '40': 'Live life with deliberate intent - be in present time',
+    '1a': 'Who do you listen to?',
+    '1b': 'Teachability Index',
+    '1c': 'Training Balance Scale',
+    '1d': 'Unconscious competence',
+    '19a': 'Read books',
+    '19b': 'Listen to Audios',
+    '19c': 'Attend Events (monthly)',
+    '19d': 'Give and receive Recognition / expanded Golden Rule',
+    '19e': 'Develop relationships with like minded people',
+    '23a': 'Money Processes',
+    '23b': 'Relationship Processes',
+    '23c': 'Leadership Processes',
+    '23d': 'Communication Processes',
+    '23e': 'Health Processes',
+    '23f': 'Spiritual Awareness Processes',
+    '23g': 'Dream Processes',
+    '23h': 'Organization & Focus Processes'
+  }
+};
+
+export default et;

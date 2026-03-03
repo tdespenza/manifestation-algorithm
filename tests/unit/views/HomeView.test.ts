@@ -8,6 +8,7 @@ vi.mock('@/components/ui/Questionnaire.vue', () => ({
 }));
 
 import HomeView from '@/views/HomeView.vue';
+import en from '@/i18n/locales/en';
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -26,7 +27,7 @@ describe('HomeView.vue', () => {
     const wrapper = mount(HomeView, {
       global: { plugins: [router] }
     });
-    expect(wrapper.find('h1').text()).toBe('Manifestation Algorithm');
+    expect(wrapper.find('h1').text()).toBe(en.app.name);
   });
 
   it('renders the Questionnaire stub', () => {

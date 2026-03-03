@@ -1,19 +1,19 @@
 <template>
   <div class="stats-panel">
     <div class="stat-item">
-      <div class="label">Average Score</div>
+      <div class="label">{{ $t('stats.averageScore') }}</div>
       <div class="value">{{ Math.round(stats.mean).toLocaleString() }}</div>
     </div>
     <div class="stat-item">
-      <div class="label">Median Score</div>
+      <div class="label">{{ $t('stats.medianScore') }}</div>
       <div class="value">{{ Math.round(stats.median).toLocaleString() }}</div>
     </div>
     <div class="stat-item">
-      <div class="label">Highest Score</div>
+      <div class="label">{{ $t('stats.highestScore') }}</div>
       <div class="value">{{ Math.round(stats.max).toLocaleString() }}</div>
     </div>
     <div class="stat-item">
-      <div class="label">Total Sessions</div>
+      <div class="label">{{ $t('stats.totalSessions') }}</div>
       <div class="value">{{ stats.count }}</div>
     </div>
   </div>

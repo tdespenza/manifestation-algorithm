@@ -12,6 +12,7 @@
  * window.__setMockUpdate() so the update is present from the very first check.
  */
 import { test, expect } from '../fixtures/base';
+import en from '../../src/i18n/locales/en';
 
 // The check fires 3 s after mount; give a generous timeout so the banner has
 // time to appear (or be confirmed absent) in CI.
@@ -82,7 +83,7 @@ test.describe('UpdateNotification', () => {
     await page.goto('/');
 
     await expect(page.locator('.update-banner.ready')).toBeVisible({ timeout: BANNER_WAIT });
-    await expect(page.locator('.update-banner .btn-primary')).toHaveText('Get Update');
+    await expect(page.locator('.update-banner .btn-primary')).toHaveText(en.update.getUpdate);
   });
 
   test('"Get Update" button opens the release page', async ({
@@ -134,9 +135,9 @@ test.describe('UpdateNotification', () => {
 
     // Navigate away and back – the dismissed state is in composable memory so
     // it persists for the lifetime of the App component.  Banner must stay hidden.
-    await page.getByRole('link', { name: 'History' }).click();
+    await page.locator('.nav-links a[href="/dashboard"]').click();
     await page.waitForURL('/dashboard');
-    await page.getByRole('link', { name: 'Questionnaire' }).click();
+    await page.locator('.nav-links a[href="/"]').click();
 
     // The 3-second re-check guard means the banner cannot reappear immediately.
     await expect(page.locator('.update-banner')).toHaveCount(0);
@@ -155,7 +156,7 @@ test.describe('UpdateNotification', () => {
     await expect(page.locator('.update-banner.ready')).toBeVisible({ timeout: BANNER_WAIT });
 
     // App is a SPA; the component stays mounted during navigation.
-    await page.getByRole('link', { name: 'History' }).click();
+    await page.locator('.nav-links a[href="/dashboard"]').click();
     await page.waitForURL('/dashboard');
 
     await expect(page.locator('.update-banner.ready')).toBeVisible({ timeout: 3_000 });
@@ -204,7 +205,7 @@ test.describe('UpdateNotification', () => {
     await expect(page.locator('.update-banner')).toBeVisible({ timeout: BANNER_WAIT });
 
     const dismissBtn = page.locator('.btn-dismiss');
-    await expect(dismissBtn).toHaveAttribute('aria-label', 'Dismiss');
+    await expect(dismissBtn).toHaveAttribute('aria-label', en.update.dismiss);
   });
 });
 
@@ -276,7 +277,7 @@ test.describe('UpdateNotification – comprehensive', () => {
 
     // Check fires after 3 s → banner shows ‘Get Update’ in ready state.
     await expect(page.locator('.update-banner.ready')).toBeVisible({ timeout: BANNER_WAIT });
-    await expect(page.locator('.update-banner .btn-primary')).toHaveText('Get Update');
+    await expect(page.locator('.update-banner .btn-primary')).toHaveText(en.update.getUpdate);
   });
 
   // ─── Dismiss ────────────────────────────────────────────────────────────

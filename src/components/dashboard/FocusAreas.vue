@@ -31,14 +31,14 @@ function scoreColor(score: number): string {
 <template>
   <section class="focus-areas" aria-labelledby="focus-areas-heading">
     <div class="focus-header">
-      <h2 id="focus-areas-heading" class="focus-title">Focus Areas</h2>
+      <h2 id="focus-areas-heading" class="focus-title">{{ $t('focusAreas.title') }}</h2>
       <p class="focus-subtitle">
-        Your 3 lowest-scoring categories — improving these drives the biggest gains.
+        {{ $t('focusAreas.subtitle') }}
       </p>
     </div>
 
     <div v-if="areas.length === 0" class="focus-empty">
-      <p>Complete more sessions to see personalised focus area recommendations.</p>
+      <p>{{ $t('focusAreas.empty') }}</p>
     </div>
 
     <div v-else class="focus-cards" aria-live="polite">

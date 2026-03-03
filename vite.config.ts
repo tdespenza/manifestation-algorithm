@@ -25,6 +25,7 @@ export default defineConfig({
   envPrefix: ['VITE_', 'TAURI_'],
   test: {
     environment: 'jsdom',
+    setupFiles: ['./tests/setup.ts'],
     include: [
       'tests/unit/**/*.{test,spec}.{js,ts}',
       'tests/integration/**/*.{test,spec}.{js,ts}',

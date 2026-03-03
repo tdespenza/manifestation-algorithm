@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { ref } from 'vue';
 import { useDateFilter, DATE_RANGES } from '../../../src/composables/useDateFilter';
 import type { SessionSummary } from '../../../src/services/db';
@@ -22,6 +22,15 @@ function makeTrend(daysAgo: number): { date: string; value: number } {
 }
 
 describe('useDateFilter', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-03-03T12:00:00.000Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   describe('DATE_RANGES', () => {
     it('has 6 preset ranges', () => {
       expect(DATE_RANGES).toHaveLength(6);
@@ -29,12 +38,12 @@ describe('useDateFilter', () => {
 
     it('matches the expected preset labels and values in order', () => {
       expect(DATE_RANGES).toEqual([
-        { label: '7d', value: '7d' },
-        { label: '30d', value: '30d' },
-        { label: '90d', value: '90d' },
-        { label: '1yr', value: '1y' },
-        { label: 'All', value: 'all' },
-        { label: 'Custom', value: 'custom' }
+        { label: 'dateRange.presets.7d', value: '7d' },
+        { label: 'dateRange.presets.30d', value: '30d' },
+        { label: 'dateRange.presets.90d', value: '90d' },
+        { label: 'dateRange.presets.1y', value: '1y' },
+        { label: 'dateRange.presets.all', value: 'all' },
+        { label: 'dateRange.presets.custom', value: 'custom' }
       ]);
     });
 

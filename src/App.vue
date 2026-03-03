@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { RouterLink, RouterView, useRoute } from 'vue-router';
 import { computed, onErrorCaptured, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import NetworkStatus from './components/NetworkStatus.vue';
 import AppToast from './components/ui/AppToast.vue';
 import UpdateNotification from './components/ui/UpdateNotification.vue';
@@ -11,6 +12,7 @@ import { useNetwork, loadSharingState } from './composables/useNetwork';
 import { getSetting, setSetting } from './services/db';
 
 const route = useRoute();
+const { t } = useI18n();
 const mainClass = computed(() => (route.name === 'dashboard' ? 'full-width-main' : 'container'));
 const { addToast } = useToast();
 const { sharingEnabled } = useNetwork();
@@ -33,7 +35,7 @@ onMounted(() => {
 
 onErrorCaptured(err => {
   console.error('Caught in App boundary:', err);
-  addToast('An unexpected error occurred.', 'error');
+  addToast(t('app.unexpectedError'), 'error');
   return false;
 });
 </script>
@@ -47,8 +49,8 @@ onErrorCaptured(err => {
             <img :src="logoUrl" alt="Manifestation Algorithm" class="nav-logo-img" />
           </router-link>
           <div class="nav-links">
-            <router-link to="/" active-class="active">Questionnaire</router-link>
-            <router-link to="/dashboard" active-class="active">History</router-link>
+            <router-link to="/" active-class="active">{{ $t('nav.questionnaire') }}</router-link>
+            <router-link to="/dashboard" active-class="active">{{ $t('nav.history') }}</router-link>
           </div>
         </div>
         <div class="nav-right">

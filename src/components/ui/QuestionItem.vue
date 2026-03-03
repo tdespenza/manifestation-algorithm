@@ -10,14 +10,16 @@
   >
     <div class="question-header">
       <span class="question-number">{{ question.id }}</span>
-      <div class="question-text">{{ question.description }}</div>
-      <span class="question-points">{{ question.points }} pts</span>
+      <div class="question-text">{{ questionText }}</div>
+      <span class="question-points"
+        >{{ question.points }} {{ t('questionItem.pointsSuffix') }}</span
+      >
     </div>
 
     <!-- Rating Slider -->
     <div v-if="!question.hasSubPoints" class="slider-wrapper">
       <div class="slider-container">
-        <span class="slider-label low-label">Low</span>
+        <span class="slider-label low-label">{{ t('questionItem.low') }}</span>
         <input
           type="range"
           class="slider"
@@ -25,10 +27,10 @@
           max="10"
           :value="internalValue"
           :style="{ '--fill-pct': sliderFillPct }"
-          :aria-label="`Rate ${question.description}`"
+          :aria-label="t('questionItem.rateAria', { question: questionText })"
           @input="handleInput"
         />
-        <span class="slider-label high-label">High</span>
+        <span class="slider-label high-label">{{ t('questionItem.high') }}</span>
         <span class="slider-value" :class="sliderValueClass">{{ internalValue }}</span>
       </div>
 
@@ -51,6 +53,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useQuestionnaireStore } from '../../stores/questionnaire';
 import type { Question } from '../../types';
 
@@ -61,6 +64,12 @@ const props = defineProps<{
 }>();
 
 const store = useQuestionnaireStore();
+const { t, te } = useI18n();
+
+const questionText = computed(() => {
+  const key = `questions.${props.question.id}`;
+  return te(key) ? t(key) : props.question.description;
+});
 
 // Access store directly for reactive state
 const internalValue = computed({

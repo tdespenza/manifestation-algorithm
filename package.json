@@ -20,7 +20,10 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:report": "playwright show-report playwright-report",
-    "test:e2e:a11y": "playwright test e2e/tests/a11y.test.ts e2e/tests/a11y-axe.test.ts e2e/tests/a11y-keyboard.test.ts --project=chromium",
+    "test:e2e:a11y": "playwright test e2e/tests/a11y.test.ts e2e/tests/a11y-axe.test.ts e2e/tests/a11y-keyboard.test.ts e2e/tests/a11y-extended.test.ts --project=chromium",
+    "test:visual": "playwright test e2e/tests/visual.test.ts --project=chromium",
+    "test:visual:update": "playwright test e2e/tests/visual.test.ts --update-snapshots --project=chromium",
+    "test:visual:all": "playwright test e2e/tests/visual.test.ts",
     "test:all": "npm run test && npm run test:e2e",
     "naming:check": "node scripts/check-naming.cjs",
     "ci": "npm run lint:check && npm run naming:check && npm run format:check && npm run deps:validate && vue-tsc --noEmit && npm run test && npx playwright test --project=chromium",
@@ -31,8 +34,10 @@
     "format:check": "prettier --check \"src/**/*.{ts,vue}\" \"tests/**/*.ts\"",
     "deps:validate": "depcruise src --config .dependency-cruiser.js",
     "deps:graph": "depcruise src --config .dependency-cruiser.js --output-type dot | node -e \"process.stdin.resume()\" > /dev/null || depcruise src --config .dependency-cruiser.js --output-type err-long",
-    "quality:check": "npm run lint:check && npm run format:check && npm run deps:validate && npm run test:coverage && npm run test:mutation && npm run test:e2e:a11y",
-    "test:mutation": "stryker run"
+    "quality:check": "npm run lint:check && npm run format:check && npm run deps:validate && npm run test:coverage && npm run test:mutation && npm run test:e2e:a11y && npm run test:visual",
+    "test:mutation": "npm run test:mutation:js && npm run test:mutation:rust",
+    "test:mutation:js": "stryker run",
+    "test:mutation:rust": "cd src-tauri && cargo mutants 2>&1"
   },
   "lint-staged": {
     "src/**/*.{ts,vue}": [
@@ -58,6 +63,7 @@
     "uuid": "^13.0.0",
     "vue": "^3.5.29",
     "vue-chartjs": "^5.3.3",
+    "vue-i18n": "^10.0.8",
     "vue-router": "^5.0.3",
     "xlsx": "^0.18.5"
   },

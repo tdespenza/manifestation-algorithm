@@ -5,6 +5,7 @@
  * mounts correctly.
  */
 import { test, expect } from '../fixtures/base';
+import en from '../../src/i18n/locales/en';
 
 test.describe('Home page', () => {
   test.beforeEach(async ({ homePage }) => {
@@ -16,11 +17,11 @@ test.describe('Home page', () => {
   });
 
   test('shows "Manifestation Algorithm" heading', async ({ homePage }) => {
-    await expect(homePage.heading).toHaveText('Manifestation Algorithm');
+    await expect(homePage.heading).toHaveText(en.app.name);
   });
 
   test('shows the instruction subtitle', async ({ homePage }) => {
-    await expect(homePage.subtitle).toContainText('Rate each area');
+    await expect(homePage.subtitle).toHaveText(en.home.subtitle);
   });
 
   test('mounts the Questionnaire component', async ({ homePage }) => {
@@ -37,8 +38,8 @@ test.describe('Home page', () => {
 
   test('questionnaire shows the mode toggle', async ({ page }) => {
     await expect(page.locator('.mode-toggle')).toBeVisible();
-    await expect(page.locator('.mode-toggle button:has-text("Scroll All")')).toBeVisible();
-    await expect(page.locator('.mode-toggle button:has-text("Step by Step")')).toBeVisible();
+    await expect(page.getByRole('button', { name: en.questionnaire.scrollAll })).toBeVisible();
+    await expect(page.getByRole('button', { name: en.questionnaire.stepByStep })).toBeVisible();
   });
 
   test('questionnaire shows the submit button', async ({ page }) => {

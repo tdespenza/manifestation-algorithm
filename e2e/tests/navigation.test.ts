@@ -5,6 +5,7 @@
  * correctly on every page.
  */
 import { test, expect } from '../fixtures/base';
+import en from '../../src/i18n/locales/en';
 
 test.describe('App navigation', () => {
   test.beforeEach(async ({ page }) => {
@@ -18,7 +19,7 @@ test.describe('App navigation', () => {
 
   test('renders the Manifestation Algorithm logo link', async ({ appPage }) => {
     await expect(appPage.navLogo).toBeVisible();
-    await expect(appPage.navLogo).toHaveAttribute('aria-label', 'Manifestation Algorithm');
+    await expect(appPage.navLogo).toHaveAttribute('aria-label', en.app.name);
   });
 
   test('renders Questionnaire and History nav links', async ({ appPage }) => {
@@ -33,7 +34,7 @@ test.describe('App navigation', () => {
   test('navigates to Dashboard (History) via nav link', async ({ appPage, dashboardPage }) => {
     await appPage.goDashboard();
     await expect(dashboardPage.heading).toBeVisible();
-    await expect(dashboardPage.heading).toHaveText('Manifestation Algorithm Tracking History');
+    await expect(dashboardPage.heading).toHaveText(en.dashboard.title);
   });
 
   test('navigates back to Home from Dashboard', async ({ appPage, homePage }) => {
@@ -45,7 +46,7 @@ test.describe('App navigation', () => {
   test('navigates to Settings via gear icon', async ({ appPage, settingsPage }) => {
     await appPage.goSettings();
     await expect(settingsPage.heading).toBeVisible();
-    await expect(settingsPage.heading).toHaveText('Settings');
+    await expect(settingsPage.heading).toHaveText(en.nav.settings);
   });
 
   test('logo click navigates back to home from any page', async ({ appPage }) => {
@@ -57,7 +58,7 @@ test.describe('App navigation', () => {
   test('Settings → Home via questionnaire nav link', async ({ appPage, homePage }) => {
     await appPage.goSettings();
     await appPage.goHome();
-    await expect(homePage.heading).toHaveText('Manifestation Algorithm');
+    await expect(homePage.heading).toHaveText(en.app.name);
   });
 
   test('active link is marked active on home', async ({ page }) => {

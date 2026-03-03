@@ -86,11 +86,22 @@ export default defineConfig({
   /* Global timeout per test */
   timeout: 30_000,
 
-  /* Expect timeout */
+  /* Expect timeout and visual comparison thresholds */
   expect: {
     timeout: 5_000,
+    toHaveScreenshot: {
+      /* Allow up to 2% of pixels to differ (handles anti-aliasing / subpixel rendering) */
+      maxDiffPixelRatio: 0.02,
+      /* Per-pixel colour tolerance (0–1) */
+      threshold: 0.2,
+      /* Always disable CSS animations/transitions for stable snapshots */
+      animations: 'disabled',
+    },
   },
 
   /* Output directory for artifacts */
   outputDir: 'playwright-results',
+
+  /* Directory for visual snapshot baselines – commit these to source control */
+  snapshotDir: 'e2e/snapshots',
 });

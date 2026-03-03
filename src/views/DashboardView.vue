@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useHistoryStore } from '../stores/history';
 import { useToast } from '../composables/useToast';
 import { useDateFilter } from '../composables/useDateFilter';
@@ -18,6 +19,7 @@ import ConfirmDialog from '../components/ui/ConfirmDialog.vue';
 
 const historyStore = useHistoryStore();
 const questionnaireStore = useQuestionnaireStore();
+const { t } = useI18n();
 const { addToast } = useToast();
 const isLoading = computed(() => historyStore.isLoading);
 const rawSessions = computed(() => historyStore.sessions);
@@ -76,11 +78,11 @@ const exportData = computed(() => {
     const dt = new Date(s.completed_at);
     const catScores = categoryScoresBySession.value[s.id] ?? {};
     const row: Record<string, string | number> = {
-      Date: dt.toLocaleDateString(),
-      Time: dt.toLocaleTimeString(),
-      'Total Score': s.total_score,
-      'Duration (min)': Math.round(s.duration_seconds / 60),
-      Notes: s.notes ?? ''
+      [t('dashboard.export.date')]: dt.toLocaleDateString(),
+      [t('dashboard.export.time')]: dt.toLocaleTimeString(),
+      [t('dashboard.export.totalScore')]: s.total_score,
+      [t('dashboard.export.duration')]: Math.round(s.duration_seconds / 60),
+      [t('dashboard.export.notes')]: s.notes ?? ''
     };
     for (const cat of sortedCats) {
       row[cat] = catScores[cat] ?? '';
@@ -116,13 +118,13 @@ onMounted(async () => {
       @cancel="onCancelled"
     />
     <div class="dashboard-header">
-      <h1>Manifestation Algorithm Tracking History</h1>
-      <p class="subtitle">Track your progress over time</p>
+      <h1>{{ $t('dashboard.title') }}</h1>
+      <p class="subtitle">{{ $t('dashboard.subtitle') }}</p>
 
       <div v-if="rawSessions.length > 0" class="controls-bar">
         <ChartActions
           target-id="dashboard-history-area"
-          title="Manifestation Algorithm Tracking History"
+          :title="$t('dashboard.title')"
           :data="exportData"
           :disabled="sessions.length === 0"
           filename="manifestation_history"
@@ -143,7 +145,7 @@ onMounted(async () => {
     <div class="dashboard-content">
       <div v-if="isLoading" class="loading">
         <div class="loading-spinner-icon">⏳</div>
-        <p>Loading your history…</p>
+        <p>{{ $t('dashboard.loading') }}</p>
       </div>
 
       <div v-else-if="sessions.length > 0" id="dashboard-history-area" class="history-content">
@@ -154,7 +156,7 @@ onMounted(async () => {
           </div>
 
           <div class="chart-section">
-            <h2>Progress Trend</h2>
+            <h2>{{ $t('dashboard.progressTrend') }}</h2>
             <ProgressChart :sessions="sessions" />
           </div>
         </div>
@@ -167,7 +169,7 @@ onMounted(async () => {
           aria-label="Progress to goal"
         >
           <div class="goal-progress-header">
-            <span class="goal-progress-label">Progress to Goal</span>
+            <span class="goal-progress-label">{{ $t('dashboard.progressToGoal') }}</span>
             <span class="goal-progress-values">
               {{ Math.round(sessions[0].total_score).toLocaleString() }}
               <span class="goal-progress-sep">/</span>
@@ -200,19 +202,23 @@ onMounted(async () => {
           </div>
           <p class="goal-bar-pct">
             {{
-              Math.min(
-                100,
-                Math.round((sessions[0].total_score / questionnaireStore.goalScore!) * 100)
-              )
-            }}% of goal
-            <span v-if="sessions[0].total_score >= questionnaireStore.goalScore!" class="goal-badge"
-              >🎯 Goal Reached!</span
+              $t('dashboard.ofGoal', {
+                pct: Math.min(
+                  100,
+                  Math.round((sessions[0].total_score / questionnaireStore.goalScore!) * 100)
+                )
+              })
+            }}
+            <span
+              v-if="sessions[0].total_score >= questionnaireStore.goalScore!"
+              class="goal-badge"
+              >{{ $t('dashboard.goalReached') }}</span
             >
           </p>
         </div>
 
         <div class="category-grid-section">
-          <h2>Category Breakdown</h2>
+          <h2>{{ $t('dashboard.categoryBreakdown') }}</h2>
           <div class="category-grid">
             <CategoryCard
               v-for="cat in categories"
@@ -250,16 +256,14 @@ onMounted(async () => {
       <div v-else class="empty-state">
         <template v-if="rawSessions.length > 0">
           <div class="empty-icon">🔍</div>
-          <h2 class="empty-title">No sessions in this range</h2>
-          <p class="empty-desc">Try a wider range or select a different period.</p>
+          <h2 class="empty-title">{{ $t('dashboard.noSessionsRange') }}</h2>
+          <p class="empty-desc">{{ $t('dashboard.tryWiderRange') }}</p>
         </template>
         <template v-else>
           <div class="empty-icon">✨</div>
-          <h2 class="empty-title">No sessions yet</h2>
-          <p class="empty-desc">
-            Complete your first assessment to see your progress and trends here.
-          </p>
-          <router-link to="/" class="cta-button">Start First Assessment</router-link>
+          <h2 class="empty-title">{{ $t('dashboard.noSessionsYet') }}</h2>
+          <p class="empty-desc">{{ $t('dashboard.completeFirst') }}</p>
+          <router-link to="/" class="cta-button">{{ $t('dashboard.startFirst') }}</router-link>
         </template>
       </div>
     </div>
