@@ -1,32 +1,30 @@
 /**
- * English (en) locale messages — default language.
- * All translatable UI strings are keyed by feature/component.
+ * Auto-converted locale module for me.
  */
-const en = {
+import type { Messages } from './en';
+
+const me: Messages = {
   nav: {
     questionnaire: 'Questionnaire',
     history: 'History',
     settings: 'Settings'
   },
-
   app: {
     name: 'Manifestation Algorithm',
     unexpectedError: 'An unexpected error occurred.'
   },
-
   home: {
     subtitle: 'Rate each area of your life — discover your alignment score'
   },
-
   dashboard: {
     title: 'Manifestation Algorithm Tracking History',
     subtitle: 'Track your progress over time',
-    loading: 'Loading your history\u2026',
+    loading: 'Loading your history…',
     noData: 'No data for this period',
     progressTrend: 'Progress Trend',
     progressToGoal: 'Progress to Goal',
     ofGoal: '{pct}% of goal',
-    goalReached: '\uD83C\uDFAF Goal Reached!',
+    goalReached: '🎯 Goal Reached!',
     categoryBreakdown: 'Category Breakdown',
     noSessionsRange: 'No sessions in this range',
     tryWiderRange: 'Try a wider range or select a different period.',
@@ -41,14 +39,12 @@ const en = {
       notes: 'Notes'
     }
   },
-
   stats: {
     averageScore: 'Average Score',
     medianScore: 'Median Score',
     highestScore: 'Highest Score',
     totalSessions: 'Total Sessions'
   },
-
   network: {
     rankings: 'Network Rankings',
     searchingPeers: 'Searching for peers...',
@@ -66,13 +62,11 @@ const en = {
     activePeers: 'Active Peers',
     categoryRankings: 'Category Rankings'
   },
-
   focusAreas: {
     title: 'Focus Areas',
     subtitle: 'Your 3 lowest-scoring categories — improving these drives the biggest gains.',
     empty: 'Complete more sessions to see personalised focus area recommendations.'
   },
-
   sessions: {
     recent: 'Recent Sessions',
     deselectAll: 'Deselect All',
@@ -80,9 +74,8 @@ const en = {
     deleteCount: 'Delete {count}',
     cancel: 'Cancel',
     select: 'Select',
-    deleting: 'Deleting\u2026'
+    deleting: 'Deleting…'
   },
-
   settings: {
     title: 'App Settings',
     close: 'Close settings',
@@ -93,8 +86,7 @@ const en = {
     resetProgressDesc: 'Delete all saved answers and start fresh.',
     goals: 'Goals',
     targetScore: 'Target Score',
-    targetScoreDesc:
-      'Set a goal score (1,000\u201310,000) to track your progress on the dashboard.',
+    targetScoreDesc: 'Set a goal score (1,000–10,000) to track your progress on the dashboard.',
     set: 'Set',
     clearGoal: 'Clear',
     currentTarget: 'Current target:',
@@ -112,7 +104,6 @@ const en = {
     languageCount: '{count} languages available',
     goalErrorRange: 'Please enter a score between 1,000 and 10,000.'
   },
-
   questionnaire: {
     saving: 'Saving...',
     saved: 'Saved',
@@ -124,8 +115,8 @@ const en = {
     scrollAll: 'Scroll All',
     stepByStep: 'Step by Step',
     questionOf: 'Question {current} of {total}',
-    previous: '\u2190 Previous',
-    next: 'Next \u2192',
+    previous: '← Previous',
+    next: 'Next →',
     completeAssessment: 'Complete Assessment',
     startFresh: 'Want to start fresh?',
     resetAllAnswers: 'Reset all answers',
@@ -134,16 +125,16 @@ const en = {
     resetLabel: 'Reset',
     scoreQuality: {
       notStarted: 'Not Started',
-      manifesting: 'Manifesting \u2746',
+      manifesting: 'Manifesting ❆',
       aligned: 'Aligned',
       building: 'Building',
       startingOut: 'Starting Out'
     },
     submitHint: {
-      zero: '0 of {total} questions answered \u2014 unanswered questions default to minimum',
+      zero: '0 of {total} questions answered — unanswered questions default to minimum',
       partial:
-        '{remaining} question remaining \u2014 unanswered questions default to minimum | {remaining} questions remaining \u2014 unanswered questions default to minimum',
-      complete: 'All questions answered \u2014 ready to submit!'
+        '{remaining} question remaining — unanswered questions default to minimum | {remaining} questions remaining — unanswered questions default to minimum',
+      complete: 'All questions answered — ready to submit!'
     },
     submitTitle: {
       zero: 'Answer some questions to complete your assessment',
@@ -155,7 +146,6 @@ const en = {
     dotAria: 'Go to question {index}',
     keyboardHint: 'Tip: Use ← → to navigate · 1–9 / 0 to rate'
   },
-
   onboarding: {
     step0Title: 'Welcome to the Manifestation Algorithm',
     step0Body1:
@@ -164,50 +154,47 @@ const en = {
       'Complete the questionnaire at regular intervals to track your growth over time and see which areas need the most attention.',
     step1Title: 'How Scoring Works',
     step1Body:
-      'Each question is worth a set number of points. Rate yourself on a scale of\u00a01\u201310 for every question. A rating of 10 means you fully embody that principle; 1 means you haven\u2019t started.',
+      'Each question is worth a set number of points. Rate yourself on a scale of 1–10 for every question. A rating of 10 means you fully embody that principle; 1 means you haven’t started.',
     step1TargetHint: '🎯 Target: {target} | Maximum: {maximum}',
     excellent: 'Excellent',
-    excellentRange: '7,001 \u2013 10,000',
-    excellentNote: 'Strong alignment \u2014 keep going',
+    excellentRange: '7,001 – 10,000',
+    excellentNote: 'Strong alignment — keep going',
     good: 'Good',
-    goodRange: '4,001 \u2013 7,000',
-    goodNote: 'Solid foundation \u2014 room to grow',
+    goodRange: '4,001 – 7,000',
+    goodNote: 'Solid foundation — room to grow',
     needsWork: 'Needs Work',
-    needsWorkRange: '0 \u2013 4,000',
+    needsWorkRange: '0 – 4,000',
     needsWorkNote: 'Focus on fundamentals first',
     step2Title: 'Your Data Stays Private',
     step2Body1:
       'All your answers and score history are stored locally on your device using an encrypted SQLite database. Nothing is sent to any server without your explicit permission.',
     step2Body2:
-      'The optional peer-to-peer sharing feature lets you see anonymised aggregate scores from other users. It only shares a cryptographically signed summary \u2014 never your individual answers.',
-    readyText: 'Ready? Let\u2019s get your baseline score.',
+      'The optional peer-to-peer sharing feature lets you see anonymised aggregate scores from other users. It only shares a cryptographically signed summary — never your individual answers.',
+    readyText: 'Ready? Let’s get your baseline score.',
     skipIntro: 'Skip intro',
     next: 'Next',
     getStarted: 'Get Started'
   },
-
   sharing: {
     title: 'Anonymous Network Sharing',
-    privacyFirst: '\uD83D\uDD12 Privacy-First',
+    privacyFirst: '🔒 Privacy-First',
     description:
       'Optionally contribute your results anonymously to the global network. No name, email, IP address, or device ID is ever shared.',
-    enabled: 'Sharing enabled \u2014 contributing to network',
+    enabled: 'Sharing enabled — contributing to network',
     disabled: 'Sharing disabled (default)',
-    activeBadge: '\u2713 Your anonymised scores are being shared with peers',
+    activeBadge: '✓ Your anonymised scores are being shared with peers',
     enableNote: 'Enable to see your percentile rank compared to the global network.'
   },
-
   category: {
-    back: '\u2039 Back',
+    back: '‹ Back',
     history: 'History',
     date: 'Date',
     score: 'Score',
     loading: 'Loading...',
     notEnoughData: 'Not enough data',
-    noData: 'No data found for \u201c{category}\u201d.',
+    noData: 'No data found for “{category}”.',
     goToDashboard: 'Go to Dashboard'
   },
-
   chartActions: {
     viewFullscreen: 'View full screen',
     exitFullscreen: 'Exit full screen',
@@ -222,7 +209,6 @@ const en = {
     copyFailed: 'Copy failed — clipboard not available',
     saveCancelled: 'Save cancelled'
   },
-
   resume: {
     continueLastSession: 'Continue from Last Session?',
     welcomeBack: 'Welcome Back!',
@@ -237,20 +223,33 @@ const en = {
     resumeSession: 'Resume Session',
     startFresh: 'Start Fresh'
   },
-
   questionItem: {
     pointsSuffix: 'pts',
     low: 'Low',
     high: 'High',
     rateAria: 'Rate {question}'
   },
-
+  dateRange: {
+    rangeLabel: 'Range:',
+    startDate: 'Start date',
+    endDate: 'End date',
+    presets: {
+      '7d': '7 Days',
+      '30d': '30 Days',
+      '90d': '90 Days',
+      '1y': '1 Year',
+      all: 'All Time',
+      custom: 'Custom'
+    }
+  },
+  update: {
+    availableTitle: 'v{version} is available!',
+    releaseNotesFallback: 'Visit the release page to download the latest version.',
+    getUpdate: 'Get Update',
+    dismiss: 'Dismiss'
+  },
   questions: {
     '1': 'Master the Basics',
-    '1a': 'Who do you listen to?',
-    '1b': 'Teachability Index',
-    '1c': 'Training Balance Scale',
-    '1d': 'Unconscious competence',
     '2': 'Activate & Illuminate Words',
     '3': 'Find Pain & Contract Energy',
     '4': 'Define what you want',
@@ -269,23 +268,10 @@ const en = {
     '17': 'Use Momentum Cycle of Success',
     '18': 'Dream Build - Dream Book & Vision Board',
     '19': 'Plug into System',
-    '19a': 'Read books',
-    '19b': 'Listen to Audios',
-    '19c': 'Attend Events (monthly)',
-    '19d': 'Give and receive Recognition / expanded Golden Rule',
-    '19e': 'Develop relationships with like minded people',
     '20': 'Science of Personal Mastery Course',
     '21': 'Watch the words you speak - what you say is what you get',
     '22': 'Physiology / Dress for success',
     '23': 'Clear Counter Intentions',
-    '23a': 'Money Processes',
-    '23b': 'Relationship Processes',
-    '23c': 'Leadership Processes',
-    '23d': 'Communication Processes',
-    '23e': 'Health Processes',
-    '23f': 'Spiritual Awareness Processes',
-    '23g': 'Dream Processes',
-    '23h': 'Organization & Focus Processes',
     '24': 'Awaken your Inner Power: Superpower Processes',
     '25': 'Broadcast on Alpha-theta brainwave',
     '26': 'Stop Telling Your Story of woe',
@@ -302,30 +288,25 @@ const en = {
     '37': 'Take 100% Responsibility',
     '38': 'Attractor Field Generators',
     '39': 'Join a Club that connects you to a Power Source',
-    '40': 'Live life with deliberate intent - be in present time'
-  },
-
-  dateRange: {
-    rangeLabel: 'Range:',
-    startDate: 'Start date',
-    endDate: 'End date',
-    presets: {
-      '7d': '7 Days',
-      '30d': '30 Days',
-      '90d': '90 Days',
-      '1y': '1 Year',
-      all: 'All Time',
-      custom: 'Custom'
-    }
-  },
-
-  update: {
-    availableTitle: 'v{version} is available!',
-    releaseNotesFallback: 'Visit the release page to download the latest version.',
-    getUpdate: 'Get Update',
-    dismiss: 'Dismiss'
+    '40': 'Live life with deliberate intent - be in present time',
+    '1a': 'Who do you listen to?',
+    '1b': 'Teachability Index',
+    '1c': 'Training Balance Scale',
+    '1d': 'Unconscious competence',
+    '19a': 'Read books',
+    '19b': 'Listen to Audios',
+    '19c': 'Attend Events (monthly)',
+    '19d': 'Give and receive Recognition / expanded Golden Rule',
+    '19e': 'Develop relationships with like minded people',
+    '23a': 'Money Processes',
+    '23b': 'Relationship Processes',
+    '23c': 'Leadership Processes',
+    '23d': 'Communication Processes',
+    '23e': 'Health Processes',
+    '23f': 'Spiritual Awareness Processes',
+    '23g': 'Dream Processes',
+    '23h': 'Organization & Focus Processes'
   }
 };
 
-export default en;
-export type Messages = typeof en;
+export default me;

@@ -10,7 +10,7 @@
   >
     <div class="question-header">
       <span class="question-number">{{ question.id }}</span>
-      <div class="question-text">{{ question.description }}</div>
+      <div class="question-text">{{ questionText }}</div>
       <span class="question-points"
         >{{ question.points }} {{ t('questionItem.pointsSuffix') }}</span
       >
@@ -27,7 +27,7 @@
           max="10"
           :value="internalValue"
           :style="{ '--fill-pct': sliderFillPct }"
-          :aria-label="t('questionItem.rateAria', { question: question.description })"
+          :aria-label="t('questionItem.rateAria', { question: questionText })"
           @input="handleInput"
         />
         <span class="slider-label high-label">{{ t('questionItem.high') }}</span>
@@ -64,7 +64,12 @@ const props = defineProps<{
 }>();
 
 const store = useQuestionnaireStore();
-const { t } = useI18n();
+const { t, te } = useI18n();
+
+const questionText = computed(() => {
+  const key = `questions.${props.question.id}`;
+  return te(key) ? t(key) : props.question.description;
+});
 
 // Access store directly for reactive state
 const internalValue = computed({

@@ -1,0 +1,315 @@
+/**
+ * Auto-converted locale module for eu.
+ */
+import type { Messages } from './en';
+
+const eu: Messages = {
+  nav: {
+    questionnaire: 'Galdetegia',
+    history: 'Historia',
+    settings: 'Ezarpenak'
+  },
+  app: {
+    name: 'Manifestazio Algoritmoa',
+    unexpectedError: 'Ustekabeko errore bat gertatu da.'
+  },
+  home: {
+    subtitle: 'Baloratu zure bizitzako arlo bakoitza — ezagutu zure lerrokatze puntuazioa'
+  },
+  dashboard: {
+    title: 'Manifestazio-algoritmoaren jarraipenaren historia',
+    subtitle: 'Jarraitu zure aurrerapena denboran zehar',
+    loading: 'Zure historia kargatzen…',
+    noData: 'Ez dago epe honetarako daturik',
+    progressTrend: 'Aurrerapen joera',
+    progressToGoal: 'Helbururako aurrerapena',
+    ofGoal: '{pct} helburuaren %',
+    goalReached: '🎯 Helburua lortuta!',
+    categoryBreakdown: 'Kategorien banaketa',
+    noSessionsRange: 'Ez dago saiorik tarte honetan',
+    tryWiderRange: 'Probatu sorta zabalago bat edo hautatu beste aldi bat.',
+    noSessionsYet: 'Oraindik ez dago saiorik',
+    completeFirst: 'Osatu zure lehen ebaluazioa hemen zure aurrerapenak eta joerak ikusteko.',
+    startFirst: 'Hasi Lehen Ebaluazioa',
+    export: {
+      date: 'Data',
+      time: 'Denbora',
+      totalScore: 'Puntuazio osoa',
+      duration: 'Iraupena (min)',
+      notes: 'Oharrak'
+    }
+  },
+  stats: {
+    averageScore: 'Batez besteko puntuazioa',
+    medianScore: 'Puntuazio mediana',
+    highestScore: 'Puntuazio altuena',
+    totalSessions: 'Saioak guztira'
+  },
+  network: {
+    rankings: 'Sare Sailkapenak',
+    searchingPeers: 'Ikaskideen bila...',
+    searching: 'Bilatzen...',
+    online: 'Sarean',
+    peers: '{count} parekoak',
+    results: '{count} emaitzak',
+    avgShort: 'Batez',
+    p90Short: 'P90',
+    averageScoreTitle: 'Batez besteko puntuazioa',
+    percentile90Title: '90. pertzentila',
+    globalAverage: 'Batez besteko globala',
+    percentile90: '90. pertzentila',
+    manifestations: 'Manifestazioak',
+    activePeers: 'Ikaskide Aktiboak',
+    categoryRankings: 'Kategoria Sailkapenak'
+  },
+  focusAreas: {
+    title: 'Foku-eremuak',
+    subtitle:
+      'Puntuazio baxueneko zure 3 kategoriak — hauek hobetzeak irabazi handienak lortzen ditu.',
+    empty: 'Osatu saio gehiago foku-eremu pertsonalizatuen gomendioak ikusteko.'
+  },
+  sessions: {
+    recent: 'Azken saioak',
+    deselectAll: 'Deshautatu Guztiak',
+    selectAll: 'Hautatu Guztiak',
+    deleteCount: 'Ezabatu {count}',
+    cancel: 'Utzi',
+    select: 'Hautatu',
+    deleting: 'Ezabatzen…'
+  },
+  settings: {
+    title: 'Aplikazioaren ezarpenak',
+    close: 'Itxi ezarpenak',
+    dataManagement: 'Datuen kudeaketa',
+    saveLastSession: 'Gorde azken saioa',
+    saveLastSessionDesc: 'Bete aldez aurretik egindako azken saioko erantzunak.',
+    resetProgress: 'Berrezarri Aurrerapena',
+    resetProgressDesc: 'Ezabatu gordetako erantzun guztiak eta hasi berria.',
+    goals: 'Helburuak',
+    targetScore: 'Helburuko puntuazioa',
+    targetScoreDesc:
+      'Ezarri gol puntuazio bat (1.000-10.000) zure aurrerapena kontrolatzeko panelean.',
+    set: 'Ezarri',
+    clearGoal: 'Garbi',
+    currentTarget: 'Egungo helburua:',
+    on: 'On',
+    off: 'Desaktibatuta',
+    version: 'Manifestazio algoritmoa {version}',
+    clearAllAnswers: 'Garbitu erantzun guztiak',
+    clearConfirmTitle: 'Garbitu erantzun guztiak',
+    clearConfirmMessage:
+      'Honek betiko ezabatuko ditu zure uneko erantzun guztiak eta ezin izango dira desegin.',
+    clearConfirmLabel: 'Garbi',
+    keepAnswers: 'Mantendu erantzunak',
+    language: 'Hizkuntza',
+    languageDesc: 'Aukeratu aplikazioaren bistaratzeko hizkuntza.',
+    languageCount: '{count} hizkuntzak erabilgarri',
+    goalErrorRange: 'Mesedez, idatzi 1.000 eta 10.000 arteko puntuazioa.'
+  },
+  questionnaire: {
+    saving: 'Gordetzen...',
+    saved: 'Gordetuta',
+    progressText: '{pct}% osatuta ({answered}/{total})',
+    progressAria: 'Ebaluazioa osatzeko aurrerapena',
+    maxScore: 'Gehienez: {score}',
+    answerToScore: 'Erantzuna puntuatzeko',
+    currentScore: 'Uneko puntuazioa',
+    scrollAll: 'Korritu Guztiak',
+    stepByStep: 'Urratsez Urrats',
+    questionOf: '{total}-ren {current} galdera',
+    previous: '← Aurrekoa',
+    next: 'Hurrengoa →',
+    completeAssessment: 'Ebaluazio osoa',
+    startFresh: 'Berriz hasi nahi?',
+    resetAllAnswers: 'Berrezarri erantzun guztiak',
+    resetTitle: 'Erantzun guztiak berrezarri?',
+    resetMessage:
+      'Honek erantzun guztiak garbituko ditu eta hutsetik hasiko da. Hau ezin da desegin.',
+    resetLabel: 'Berrezarri',
+    scoreQuality: {
+      notStarted: 'Hasi gabe',
+      manifesting: 'Manifestatzen ❆',
+      aligned: 'Lerrokatuta',
+      building: 'Eraikina',
+      startingOut: 'Hasten'
+    },
+    submitHint: {
+      zero: '{total} galderetatik 0 erantzun dira; erantzunik gabeko galderak gutxieneko gisa',
+      partial:
+        '{remaining} galdera geratzen da — erantzun gabeko galderak gutxieneko | {remaining} galderak geratzen dira — erantzunik gabeko galderak gutxieneko gisa lehenetsita daude',
+      complete: 'Galdera guztiak erantzun dira, bidaltzeko prest!'
+    },
+    submitTitle: {
+      zero: 'Erantzun galdera batzuk zure ebaluazioa osatzeko',
+      partial: '{remaining} galdera geratzen da | {remaining} galderak geratzen dira',
+      complete: 'Bidali amaitutako ebaluazioa'
+    },
+    submitError: 'Ezin izan da gorde saioa: {error}',
+    dotTitle: '{index} galdera',
+    dotAria: 'Joan {index} galderara',
+    keyboardHint: 'Aholkua: Erabili ← → nabigatzeko · 1–9 / 0 baloratzeko'
+  },
+  onboarding: {
+    step0Title: 'Ongi etorri Manifestazio Algoritmora',
+    step0Body1:
+      'Tresna honek zure pentsamoldea, ohiturak eta eguneroko ekintzak zure helburuak lortzearekin zenbaterainoko lerrokatuta dauden neurtzen laguntzen dizu. Erantzun galdera bakoitza zintzotasunez zure uneko puntuazioa lortzeko.',
+    step0Body2:
+      'Bete galdetegia aldian-aldian zure hazkundea denboran zehar jarraitzeko eta arreta gehien behar duten eremuak ikusteko.',
+    step1Title: 'Puntuazioa nola funtzionatzen duen',
+    step1Body:
+      'Galdera bakoitzak puntu kopuru jakin bat balio du. Baloratu zure burua 1-10eko eskalan galdera bakoitzeko. 10eko balorazio batek printzipio hori guztiz gorpuzten duzula esan nahi du; 1ek esan nahi du ez zarela hasi.',
+    step1TargetHint: '🎯 Helburua: {target} | Gehienez: {maximum}',
+    excellent: 'Bikaina',
+    excellentRange: '7.001 – 10.000',
+    excellentNote: 'Lerrokatze sendoa - jarraitu aurrera',
+    good: 'Ona',
+    goodRange: '4.001 – 7.000',
+    goodNote: 'Oinarri sendoa - hazteko lekua',
+    needsWork: 'Lana behar du',
+    needsWorkRange: '0 – 4.000',
+    needsWorkNote: 'Lehenik eta behin oinarrietan zentratu',
+    step2Title: 'Zure datuak pribatuak dira',
+    step2Body1:
+      'Zure erantzun guztiak eta puntuazioaren historia lokalean gordetzen dira zure gailuan SQLite datu-base enkriptatutako bat erabiliz. Ez da ezer bidaliko edozein zerbitzarira zure baimen esplizitua gabe.',
+    step2Body2:
+      'Peer-to-peer partekatzeko aukerako eginbideari esker, beste erabiltzaile batzuen puntuazio orokor anonimoak ikusteko aukera dago. Kriptografiako sinatutako laburpen bat bakarrik partekatzen du, inoiz ez zure erantzun indibidualak.',
+    readyText: 'Prest? Lor dezagun zure oinarrizko puntuazioa.',
+    skipIntro: 'Saltatu sarrera',
+    next: 'Hurrengoa',
+    getStarted: 'Hasi'
+  },
+  sharing: {
+    title: 'Sare partekatzea anonimoa',
+    privacyFirst: '🔒 Pribatutasuna-lehenik',
+    description:
+      'Aukeran, eman zure emaitzak anonimoki sare globalari. Ez da inoiz partekatzen izenik, posta elektronikorik, IP helbiderik edo gailuaren IDrik.',
+    enabled: 'Partekatzea gaituta — sarean laguntzea',
+    disabled: 'Partekatzea desgaituta (lehenetsia)',
+    activeBadge: '✓ Zure puntuazio anonimoak kideekin partekatzen ari dira',
+    enableNote: 'Gaitu zure pertzentilaren sailkapena ikusteko sare globalarekin alderatuta.'
+  },
+  category: {
+    back: '‹ Itzuli',
+    history: 'Historia',
+    date: 'Data',
+    score: 'Puntuazioa',
+    loading: 'Kargatzen...',
+    notEnoughData: 'Datu nahikorik ez',
+    noData: 'Ez da aurkitu "{category}"-rentzat daturik.',
+    goToDashboard: 'Joan Arbelera'
+  },
+  chartActions: {
+    viewFullscreen: 'Ikusi pantaila osoa',
+    exitFullscreen: 'Irten pantaila osotik',
+    copyChart: 'Kopiatu taula',
+    exportChart: 'Esportatu taula',
+    exportDefault: '⬇ Esportatu',
+    exportExcel: '📊 Esportatu Excel',
+    exportCsv: '📄 Esportatu CSV',
+    exportPdf: '📑 Esportatu PDFa',
+    exportHtml: '🌐 Esportatu HTML',
+    copied: 'Diagrama arbelean kopiatu da',
+    copyFailed: 'Ezin izan da kopiatu — arbela ez dago erabilgarri',
+    saveCancelled: 'Gorde bertan behera utzi da'
+  },
+  resume: {
+    continueLastSession: 'Azken saiotik jarraitu nahi duzu?',
+    welcomeBack: 'Ongi etorri berriro!',
+    historicalBody:
+      'Amaitutako azken saioko zure erantzunak aurrez kargatu dira. Balio horiek abiapuntu gisa mantendu nahi al dituzu, edo guztiz hutsik dagoen galdetegi batekin hasi?',
+    activeBody:
+      'Saio bat abian duzu. Gustatuko litzaizuke utzitako lekutik ekin edo balorazio berri bat hasi?',
+    clearWarning: '⚠️ Honek oraingo erantzun guztiak garbituko ditu. Ziur al zaude?',
+    yesStartFresh: 'Bai, Hasi Berriz',
+    cancel: 'Utzi',
+    keepLastValues: 'Mantendu azken balioak',
+    resumeSession: 'Hasi saioa',
+    startFresh: 'Hasi Berria'
+  },
+  questionItem: {
+    pointsSuffix: 'puntuak',
+    low: 'Baxua',
+    high: 'Alta',
+    rateAria: 'Baloratu {question}'
+  },
+  dateRange: {
+    rangeLabel: 'Tartea:',
+    startDate: 'Hasiera data',
+    endDate: 'Amaiera data',
+    presets: {
+      '7d': '7 Egun',
+      '30d': '30 Egun',
+      '90d': '90 Egun',
+      '1y': '1 Urte',
+      all: 'Denbora guztian',
+      custom: 'Pertsonalizatua'
+    }
+  },
+  update: {
+    availableTitle: 'v{version} eskuragarri dago!',
+    releaseNotesFallback: 'Bisitatu bertsioaren orria azken bertsioa deskargatzeko.',
+    getUpdate: 'Eskuratu eguneratzea',
+    dismiss: 'Baztertu'
+  },
+  questions: {
+    '1': 'Master the Basics',
+    '2': 'Activate & Illuminate Words',
+    '3': 'Find Pain & Contract Energy',
+    '4': 'Define what you want',
+    '5': 'Write down what you want',
+    '6': "Don't share your dream with others",
+    '7': 'Get a burning desire for your goal',
+    '8': 'Goal must be in Sweet Spot',
+    '9': 'Make a Decision',
+    '10': 'See/Feel good in possession of your goal',
+    '11': 'Release attachment to the outcome',
+    '12': 'Allow the HOW to present itself',
+    '13': 'Know the difference between Dream & Chief Aim',
+    '14': 'Be Focused / Singleness of purpose',
+    '15': 'Daily TO DO list of Priorities',
+    '16': 'Chart Progress / Know the Score',
+    '17': 'Use Momentum Cycle of Success',
+    '18': 'Dream Build - Dream Book & Vision Board',
+    '19': 'Plug into System',
+    '20': 'Science of Personal Mastery Course',
+    '21': 'Watch the words you speak - what you say is what you get',
+    '22': 'Physiology / Dress for success',
+    '23': 'Clear Counter Intentions',
+    '24': 'Awaken your Inner Power: Superpower Processes',
+    '25': 'Broadcast on Alpha-theta brainwave',
+    '26': 'Stop Telling Your Story of woe',
+    '27': 'Show Appreciation / Gratitude',
+    '28': 'Replace Failure Habits w/ Success Habits (Accelerator Processes)',
+    '29': 'Create a Mastermind',
+    '30': 'Watch Successful People/Apprentice',
+    '31': 'Listen to/Read Success Stories',
+    '32': 'Give away what you want first',
+    '33': 'Do It Now Mentality',
+    '34': 'Take Care of Your Body',
+    '35': 'Find the Gold in Adversity',
+    '36': 'Clear Samskaras from Field',
+    '37': 'Take 100% Responsibility',
+    '38': 'Attractor Field Generators',
+    '39': 'Join a Club that connects you to a Power Source',
+    '40': 'Live life with deliberate intent - be in present time',
+    '1a': 'Who do you listen to?',
+    '1b': 'Teachability Index',
+    '1c': 'Training Balance Scale',
+    '1d': 'Unconscious competence',
+    '19a': 'Read books',
+    '19b': 'Listen to Audios',
+    '19c': 'Attend Events (monthly)',
+    '19d': 'Give and receive Recognition / expanded Golden Rule',
+    '19e': 'Develop relationships with like minded people',
+    '23a': 'Money Processes',
+    '23b': 'Relationship Processes',
+    '23c': 'Leadership Processes',
+    '23d': 'Communication Processes',
+    '23e': 'Health Processes',
+    '23f': 'Spiritual Awareness Processes',
+    '23g': 'Dream Processes',
+    '23h': 'Organization & Focus Processes'
+  }
+};
+
+export default eu;

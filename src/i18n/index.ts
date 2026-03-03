@@ -121,23 +121,18 @@ export const SUPPORTED_LOCALES: Record<string, string> = {
   haw: 'ʻŌlelo Hawaiʻi'
 };
 
-const localeModules = import.meta.glob('./locales/*.{json,ts}', {
+const localeModules = import.meta.glob<Messages>('./locales/*.ts', {
   eager: true,
   import: 'default'
-}) as Record<string, unknown>;
-
-const localeMessages: Record<string, Messages> = Object.fromEntries(
-  Object.entries(localeModules).map(([filePath, localeData]) => {
-    const code = filePath.replace(/^.*\//, '').replace(/\.(json|ts)$/, '');
-    return [code, localeData as Messages];
-  })
-) as Record<string, Messages>;
+});
 
 const messages: Record<string, Messages> = Object.fromEntries(
-  Object.keys(SUPPORTED_LOCALES).map(code => {
-    const message = localeMessages[code];
-    return [code, message];
-  })
+  Object.entries(localeModules)
+    .map(([filePath, localeData]) => {
+      const code = filePath.replace(/^.*\//, '').replace(/\.ts$/, '');
+      return [code, localeData] as const;
+    })
+    .filter(([code]) => code in SUPPORTED_LOCALES)
 ) as Record<string, Messages>;
 
 const DEFAULT_LOCALE = 'en';

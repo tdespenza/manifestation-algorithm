@@ -1,0 +1,319 @@
+/**
+ * Auto-converted locale module for ta.
+ */
+import type { Messages } from './en';
+
+const ta: Messages = {
+  nav: {
+    questionnaire: 'கேள்வித்தாள்',
+    history: 'வரலாறு',
+    settings: 'அமைப்புகள்'
+  },
+  app: {
+    name: 'வெளிப்பாடு அல்காரிதம்',
+    unexpectedError: 'எதிர்பாராத பிழை ஏற்பட்டது.'
+  },
+  home: {
+    subtitle:
+      'உங்கள் வாழ்க்கையின் ஒவ்வொரு பகுதியையும் மதிப்பிடுங்கள் - உங்கள் சீரமைப்பு மதிப்பெண்ணைக் கண்டறியவும்'
+  },
+  dashboard: {
+    title: 'வெளிப்பாடு அல்காரிதம் கண்காணிப்பு வரலாறு',
+    subtitle: 'காலப்போக்கில் உங்கள் முன்னேற்றத்தைக் கண்காணிக்கவும்',
+    loading: 'உங்கள் வரலாற்றை ஏற்றுகிறது…',
+    noData: 'இந்தக் காலத்திற்கான தரவு இல்லை',
+    progressTrend: 'முன்னேற்றப் போக்கு',
+    progressToGoal: 'இலக்கை நோக்கி முன்னேறுங்கள்',
+    ofGoal: 'இலக்கின் {pct}%',
+    goalReached: '🎯 இலக்கை எட்டியது!',
+    categoryBreakdown: 'வகை முறிவு',
+    noSessionsRange: 'இந்த வரம்பில் அமர்வுகள் இல்லை',
+    tryWiderRange: 'பரந்த வரம்பை முயற்சிக்கவும் அல்லது வேறு காலத்தைத் தேர்ந்தெடுக்கவும்.',
+    noSessionsYet: 'இன்னும் அமர்வுகள் இல்லை',
+    completeFirst:
+      'உங்கள் முன்னேற்றம் மற்றும் போக்குகளை இங்கே காண உங்கள் முதல் மதிப்பீட்டை முடிக்கவும்.',
+    startFirst: 'முதல் மதிப்பீட்டைத் தொடங்கவும்',
+    export: {
+      date: 'தேதி',
+      time: 'நேரம்',
+      totalScore: 'மொத்த மதிப்பெண்',
+      duration: 'கால அளவு (நிமிடம்)',
+      notes: 'குறிப்புகள்'
+    }
+  },
+  stats: {
+    averageScore: 'சராசரி மதிப்பெண்',
+    medianScore: 'சராசரி மதிப்பெண்',
+    highestScore: 'அதிக மதிப்பெண்',
+    totalSessions: 'மொத்த அமர்வுகள்'
+  },
+  network: {
+    rankings: 'நெட்வொர்க் தரவரிசை',
+    searchingPeers: 'சகாக்களை தேடுகிறது...',
+    searching: 'தேடுகிறது...',
+    online: 'ஆன்லைன்',
+    peers: '{count} சகாக்கள்',
+    results: '{count} முடிவுகள்',
+    avgShort: 'சராசரி',
+    p90Short: 'P90',
+    averageScoreTitle: 'சராசரி மதிப்பெண்',
+    percentile90Title: '90வது சதவீதம்',
+    globalAverage: 'உலகளாவிய சராசரி',
+    percentile90: '90வது சதவீதம்',
+    manifestations: 'வெளிப்பாடுகள்',
+    activePeers: 'செயலில் உள்ள சகாக்கள்',
+    categoryRankings: 'வகை தரவரிசைகள்'
+  },
+  focusAreas: {
+    title: 'கவனம் செலுத்தும் பகுதிகள்',
+    subtitle:
+      'உங்களின் 3 குறைந்த மதிப்பெண் பிரிவுகள் — இவற்றை மேம்படுத்துவது மிகப்பெரிய ஆதாயங்களை வழங்குகிறது.',
+    empty: 'தனிப்பயனாக்கப்பட்ட ஃபோகஸ் ஏரியா பரிந்துரைகளைப் பார்க்க கூடுதல் அமர்வுகளை முடிக்கவும்.'
+  },
+  sessions: {
+    recent: 'சமீபத்திய அமர்வுகள்',
+    deselectAll: 'அனைத்தையும் தேர்வுநீக்கவும்',
+    selectAll: 'அனைத்தையும் தேர்ந்தெடுக்கவும்',
+    deleteCount: '{count} நீக்கு',
+    cancel: 'ரத்து செய்',
+    select: 'தேர்ந்தெடு',
+    deleting: 'நீக்குகிறது…'
+  },
+  settings: {
+    title: 'பயன்பாட்டு அமைப்புகள்',
+    close: 'அமைப்புகளை மூடு',
+    dataManagement: 'தரவு மேலாண்மை',
+    saveLastSession: 'கடைசி அமர்வை சேமிக்கவும்',
+    saveLastSessionDesc:
+      'உங்களின் மிகச் சமீபத்திய நிறைவு அமர்வின் பதில்களை முன்கூட்டியே நிரப்பவும்.',
+    resetProgress: 'முன்னேற்றத்தை மீட்டமைக்கவும்',
+    resetProgressDesc: 'சேமித்த அனைத்து பதில்களையும் நீக்கிவிட்டு புதிதாகத் தொடங்கவும்.',
+    goals: 'இலக்குகள்',
+    targetScore: 'இலக்கு மதிப்பெண்',
+    targetScoreDesc:
+      'டாஷ்போர்டில் உங்கள் முன்னேற்றத்தைக் கண்காணிக்க கோல் ஸ்கோரை (1,000–10,000) அமைக்கவும்.',
+    set: 'அமைக்கவும்',
+    clearGoal: 'தெளிவு',
+    currentTarget: 'தற்போதைய இலக்கு:',
+    on: 'அன்று',
+    off: 'ஆஃப்',
+    version: 'வெளிப்பாடு அல்காரிதம் {version}',
+    clearAllAnswers: 'அனைத்து பதில்களையும் அழிக்கவும்',
+    clearConfirmTitle: 'அனைத்து பதில்களையும் அழிக்கவும்',
+    clearConfirmMessage:
+      'இது உங்களின் தற்போதைய பதில்கள் அனைத்தையும் நிரந்தரமாக நீக்கிவிடும் மேலும் செயல்தவிர்க்க முடியாது.',
+    clearConfirmLabel: 'தெளிவு',
+    keepAnswers: 'பதில்களை வைத்திருங்கள்',
+    language: 'மொழி',
+    languageDesc: 'பயன்பாட்டிற்கான காட்சி மொழியைத் தேர்ந்தெடுக்கவும்.',
+    languageCount: '{count} மொழிகள் உள்ளன',
+    goalErrorRange: '1,000 முதல் 10,000 வரை மதிப்பெண்ணை உள்ளிடவும்.'
+  },
+  questionnaire: {
+    saving: 'சேமிக்கிறது...',
+    saved: 'சேமிக்கப்பட்டது',
+    progressText: '{pct}% முடிந்தது ({answered}/{total})',
+    progressAria: 'மதிப்பீடு நிறைவு முன்னேற்றம்',
+    maxScore: 'அதிகபட்சம்: {score}',
+    answerToScore: 'மதிப்பெண்களுக்கான பதில்',
+    currentScore: 'தற்போதைய மதிப்பெண்',
+    scrollAll: 'அனைத்தையும் உருட்டவும்',
+    stepByStep: 'படி படி',
+    questionOf: 'கேள்வி {current} இன் {total}',
+    previous: '← முந்தைய',
+    next: 'அடுத்து →',
+    completeAssessment: 'முழுமையான மதிப்பீடு',
+    startFresh: 'புதிதாக தொடங்க வேண்டுமா?',
+    resetAllAnswers: 'எல்லா பதில்களையும் மீட்டமைக்கவும்',
+    resetTitle: 'எல்லா பதில்களையும் மீட்டமைக்கவா?',
+    resetMessage:
+      'இது ஒவ்வொரு பதிலையும் அழிக்கும் மற்றும் புதிதாக தொடங்கும். இதை செயல்தவிர்க்க முடியாது.',
+    resetLabel: 'மீட்டமை',
+    scoreQuality: {
+      notStarted: 'தொடங்கப்படவில்லை',
+      manifesting: 'வெளிப்படுத்துதல் ❆',
+      aligned: 'சீரமைக்கப்பட்டது',
+      building: 'கட்டிடம்',
+      startingOut: 'தொடங்குதல்'
+    },
+    submitHint: {
+      zero: '{total} கேள்விகளில் 0 பதில்கள் — பதிலளிக்கப்படாத கேள்விகள் இயல்புநிலையாக குறைந்தபட்சம்',
+      partial:
+        '{remaining} கேள்வி மீதமுள்ளது — பதிலளிக்கப்படாத கேள்விகள் இயல்புநிலைக்கு குறைந்தபட்சம் | {remaining} கேள்விகள் மீதமுள்ளன - பதிலளிக்கப்படாத கேள்விகள் இயல்புநிலையாக குறைந்தபட்சம்',
+      complete: 'அனைத்து கேள்விகளுக்கும் பதில் கிடைத்தது — சமர்ப்பிக்க தயார்!'
+    },
+    submitTitle: {
+      zero: 'உங்கள் மதிப்பீட்டை முடிக்க சில கேள்விகளுக்கு பதிலளிக்கவும்',
+      partial: '{remaining} கேள்வி மீதமுள்ளது | {remaining} கேள்விகள் மீதமுள்ளன',
+      complete: 'உங்கள் நிறைவு மதிப்பீட்டைச் சமர்ப்பிக்கவும்'
+    },
+    submitError: 'அமர்வைச் சேமிக்க முடியவில்லை: {error}',
+    dotTitle: 'கேள்வி {index}',
+    dotAria: 'கேள்விக்கு செல்க {index}',
+    keyboardHint: 'உதவிக்குறிப்பு: வழிசெலுத்த ← → ஐப் பயன்படுத்தவும் · மதிப்பிடுவதற்கு 1–9 / 0'
+  },
+  onboarding: {
+    step0Title: 'வெளிப்பாடு அல்காரிதத்திற்கு வரவேற்கிறோம்',
+    step0Body1:
+      'உங்கள் இலக்குகளை அடைவதில் உங்கள் மனநிலை, பழக்கவழக்கங்கள் மற்றும் தினசரி நடவடிக்கைகள் எவ்வளவு சீரமைக்கப்பட்டுள்ளன என்பதை அளவிட இந்தக் கருவி உதவுகிறது. உங்கள் தற்போதைய மதிப்பெண்ணைப் பெற ஒவ்வொரு கேள்விக்கும் நேர்மையாக பதிலளிக்கவும்.',
+    step0Body2:
+      'காலப்போக்கில் உங்கள் வளர்ச்சியைக் கண்காணிக்கவும், எந்தெந்த பகுதிகளில் அதிக கவனம் தேவை என்பதைப் பார்க்கவும் வழக்கமான இடைவெளியில் கேள்வித்தாளை முடிக்கவும்.',
+    step1Title: 'ஸ்கோரிங் எப்படி வேலை செய்கிறது',
+    step1Body:
+      'ஒவ்வொரு கேள்வியும் குறிப்பிட்ட எண்ணிக்கையிலான புள்ளிகளுக்கு மதிப்புள்ளது. ஒவ்வொரு கேள்விக்கும் 1–10 என்ற அளவில் உங்களை மதிப்பிடுங்கள். 10 மதிப்பீடானது நீங்கள் அந்தக் கொள்கையை முழுமையாகச் செயல்படுத்துகிறீர்கள் என்று அர்த்தம்; 1 என்றால் நீங்கள் தொடங்கவில்லை.',
+    step1TargetHint: '🎯 இலக்கு: {target} | அதிகபட்சம்: {maximum}',
+    excellent: 'சிறப்பானது',
+    excellentRange: '7,001 - 10,000',
+    excellentNote: 'வலுவான சீரமைப்பு - தொடரவும்',
+    good: 'நல்லது',
+    goodRange: '4,001 - 7,000',
+    goodNote: 'திட அடித்தளம் - வளர அறை',
+    needsWork: 'வேலை தேவை',
+    needsWorkRange: '0 - 4,000',
+    needsWorkNote: 'முதலில் அடிப்படைகளில் கவனம் செலுத்துங்கள்',
+    step2Title: 'உங்கள் தரவு தனிப்பட்டதாக இருக்கும்',
+    step2Body1:
+      'உங்கள் எல்லா பதில்களும் மதிப்பெண் வரலாறும் மறைகுறியாக்கப்பட்ட SQLite தரவுத்தளத்தைப் பயன்படுத்தி உங்கள் சாதனத்தில் உள்ளூரில் சேமிக்கப்படும். உங்கள் வெளிப்படையான அனுமதியின்றி எந்த சர்வருக்கும் எதுவும் அனுப்பப்படாது.',
+    step2Body2:
+      'விருப்பமான பியர்-டு-பியர் பகிர்வு அம்சம், பிற பயனர்களிடமிருந்து அநாமதேய மொத்த மதிப்பெண்களைப் பார்க்க உங்களை அனுமதிக்கிறது. இது குறியாக்கவியல் கையொப்பமிடப்பட்ட சுருக்கத்தை மட்டுமே பகிர்ந்து கொள்கிறது - உங்கள் தனிப்பட்ட பதில்களை ஒருபோதும் பகிர்ந்து கொள்ளாது.',
+    readyText: 'தயாரா? உங்கள் அடிப்படை மதிப்பெண்ணைப் பெறுவோம்.',
+    skipIntro: 'அறிமுகத்தைத் தவிர்க்கவும்',
+    next: 'அடுத்து',
+    getStarted: 'தொடங்குங்கள்'
+  },
+  sharing: {
+    title: 'அநாமதேய நெட்வொர்க் பகிர்வு',
+    privacyFirst: '🔒 தனியுரிமை-முதலில்',
+    description:
+      'உங்கள் முடிவுகளை அநாமதேயமாக உலகளாவிய நெட்வொர்க்கில் பங்களிக்க விரும்பினால். பெயர், மின்னஞ்சல், ஐபி முகவரி அல்லது சாதன ஐடி எதுவும் பகிரப்படவில்லை.',
+    enabled: 'பகிர்தல் இயக்கப்பட்டது - பிணையத்திற்கு பங்களிக்கிறது',
+    disabled: 'பகிர்தல் முடக்கப்பட்டது (இயல்புநிலை)',
+    activeBadge: '✓ உங்கள் அநாமதேய மதிப்பெண்கள் சகாக்களுடன் பகிரப்படுகின்றன',
+    enableNote: 'உலகளாவிய நெட்வொர்க்குடன் ஒப்பிடும்போது உங்கள் சதவீத தரவரிசையைப் பார்க்க இயக்கவும்.'
+  },
+  category: {
+    back: '‹ மீண்டும்',
+    history: 'வரலாறு',
+    date: 'தேதி',
+    score: 'மதிப்பெண்',
+    loading: 'ஏற்றுகிறது...',
+    notEnoughData: 'போதுமான தரவு இல்லை',
+    noData: '“{category}”க்கான தரவு எதுவும் இல்லை.',
+    goToDashboard: 'டாஷ்போர்டுக்குச் செல்லவும்'
+  },
+  chartActions: {
+    viewFullscreen: 'முழுத் திரையைப் பார்க்கவும்',
+    exitFullscreen: 'முழுத்திரையிலிருந்து வெளியேறவும்',
+    copyChart: 'விளக்கப்படத்தை நகலெடு',
+    exportChart: 'ஏற்றுமதி விளக்கப்படம்',
+    exportDefault: '⬇ ஏற்றுமதி',
+    exportExcel: '📊 Excel ஏற்றுமதி',
+    exportCsv: '📄 ஏற்றுமதி CSV',
+    exportPdf: '📑 ஏற்றுமதி PDF',
+    exportHtml: '🌐 HTML ஐ ஏற்றுமதி செய்யவும்',
+    copied: 'விளக்கப்படம் கிளிப்போர்டுக்கு நகலெடுக்கப்பட்டது',
+    copyFailed: 'நகலெடுக்க முடியவில்லை - கிளிப்போர்டு கிடைக்கவில்லை',
+    saveCancelled: 'சேமி ரத்து செய்யப்பட்டது'
+  },
+  resume: {
+    continueLastSession: 'கடைசி அமர்விலிருந்து தொடரவா?',
+    welcomeBack: 'மீண்டும் வரவேற்கிறோம்!',
+    historicalBody:
+      'நீங்கள் கடைசியாக முடித்த அமர்வின் பதில்கள் முன்பே ஏற்றப்பட்டன. அந்த மதிப்புகளை ஒரு தொடக்க புள்ளியாக வைத்திருக்க விரும்புகிறீர்களா அல்லது முற்றிலும் வெற்று கேள்வித்தாளில் தொடங்க விரும்புகிறீர்களா?',
+    activeBody:
+      'உங்களிடம் ஒரு அமர்வு நடந்து கொண்டிருக்கிறது. நீங்கள் விட்ட இடத்திலிருந்து மீண்டும் தொடங்க விரும்புகிறீர்களா அல்லது புதிய மதிப்பீட்டைத் தொடங்க விரும்புகிறீர்களா?',
+    clearWarning:
+      '⚠️ இது தற்போதைய அனைத்து பதில்களையும் அழிக்கும். நீங்கள் உறுதியாக இருக்கிறீர்களா?',
+    yesStartFresh: 'ஆம், புதிதாகத் தொடங்குங்கள்',
+    cancel: 'ரத்து செய்',
+    keepLastValues: 'கடைசி மதிப்புகளை வைத்திருங்கள்',
+    resumeSession: 'அமர்வை மீண்டும் தொடங்கவும்',
+    startFresh: 'புதிதாக தொடங்கவும்'
+  },
+  questionItem: {
+    pointsSuffix: 'புள்ளிகள்',
+    low: 'குறைந்த',
+    high: 'உயர்',
+    rateAria: 'மதிப்பிடவும் {question}'
+  },
+  dateRange: {
+    rangeLabel: 'வரம்பு:',
+    startDate: 'தொடக்க தேதி',
+    endDate: 'முடிவு தேதி',
+    presets: {
+      '7d': '7 நாட்கள்',
+      '30d': '30 நாட்கள்',
+      '90d': '90 நாட்கள்',
+      '1y': '1 வருடம்',
+      all: 'எல்லா நேரமும்',
+      custom: 'தனிப்பயன்'
+    }
+  },
+  update: {
+    availableTitle: 'v{version} கிடைக்கிறது!',
+    releaseNotesFallback: 'சமீபத்திய பதிப்பைப் பதிவிறக்க, வெளியீட்டுப் பக்கத்தைப் பார்வையிடவும்.',
+    getUpdate: 'புதுப்பிப்பைப் பெறுங்கள்',
+    dismiss: 'நிராகரி'
+  },
+  questions: {
+    '1': 'Master the Basics',
+    '2': 'Activate & Illuminate Words',
+    '3': 'Find Pain & Contract Energy',
+    '4': 'Define what you want',
+    '5': 'Write down what you want',
+    '6': "Don't share your dream with others",
+    '7': 'Get a burning desire for your goal',
+    '8': 'Goal must be in Sweet Spot',
+    '9': 'Make a Decision',
+    '10': 'See/Feel good in possession of your goal',
+    '11': 'Release attachment to the outcome',
+    '12': 'Allow the HOW to present itself',
+    '13': 'Know the difference between Dream & Chief Aim',
+    '14': 'Be Focused / Singleness of purpose',
+    '15': 'Daily TO DO list of Priorities',
+    '16': 'Chart Progress / Know the Score',
+    '17': 'Use Momentum Cycle of Success',
+    '18': 'Dream Build - Dream Book & Vision Board',
+    '19': 'Plug into System',
+    '20': 'Science of Personal Mastery Course',
+    '21': 'Watch the words you speak - what you say is what you get',
+    '22': 'Physiology / Dress for success',
+    '23': 'Clear Counter Intentions',
+    '24': 'Awaken your Inner Power: Superpower Processes',
+    '25': 'Broadcast on Alpha-theta brainwave',
+    '26': 'Stop Telling Your Story of woe',
+    '27': 'Show Appreciation / Gratitude',
+    '28': 'Replace Failure Habits w/ Success Habits (Accelerator Processes)',
+    '29': 'Create a Mastermind',
+    '30': 'Watch Successful People/Apprentice',
+    '31': 'Listen to/Read Success Stories',
+    '32': 'Give away what you want first',
+    '33': 'Do It Now Mentality',
+    '34': 'Take Care of Your Body',
+    '35': 'Find the Gold in Adversity',
+    '36': 'Clear Samskaras from Field',
+    '37': 'Take 100% Responsibility',
+    '38': 'Attractor Field Generators',
+    '39': 'Join a Club that connects you to a Power Source',
+    '40': 'Live life with deliberate intent - be in present time',
+    '1a': 'Who do you listen to?',
+    '1b': 'Teachability Index',
+    '1c': 'Training Balance Scale',
+    '1d': 'Unconscious competence',
+    '19a': 'Read books',
+    '19b': 'Listen to Audios',
+    '19c': 'Attend Events (monthly)',
+    '19d': 'Give and receive Recognition / expanded Golden Rule',
+    '19e': 'Develop relationships with like minded people',
+    '23a': 'Money Processes',
+    '23b': 'Relationship Processes',
+    '23c': 'Leadership Processes',
+    '23d': 'Communication Processes',
+    '23e': 'Health Processes',
+    '23f': 'Spiritual Awareness Processes',
+    '23g': 'Dream Processes',
+    '23h': 'Organization & Focus Processes'
+  }
+};
+
+export default ta;

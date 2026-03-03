@@ -1,0 +1,319 @@
+/**
+ * Auto-converted locale module for el.
+ */
+import type { Messages } from './en';
+
+const el: Messages = {
+  nav: {
+    questionnaire: 'Ερωτηματολόγιο',
+    history: 'Ιστορία',
+    settings: 'Ρυθμίσεις'
+  },
+  app: {
+    name: 'Αλγόριθμος εκδήλωσης',
+    unexpectedError: 'Παρουσιάστηκε απροσδόκητο σφάλμα.'
+  },
+  home: {
+    subtitle: 'Βαθμολογήστε κάθε τομέα της ζωής σας — ανακαλύψτε τη βαθμολογία ευθυγράμμισης σας'
+  },
+  dashboard: {
+    title: 'Ιστορικό παρακολούθησης αλγόριθμων εκδηλώσεων',
+    subtitle: 'Παρακολουθήστε την πρόοδό σας με την πάροδο του χρόνου',
+    loading: 'Φόρτωση του ιστορικού σας…',
+    noData: 'Δεν υπάρχουν δεδομένα για αυτήν την περίοδο',
+    progressTrend: 'Τάση προόδου',
+    progressToGoal: 'Πρόοδος προς τον στόχο',
+    ofGoal: '{pct}% του στόχου',
+    goalReached: '🎯 Ο στόχος επετεύχθη!',
+    categoryBreakdown: 'Ανάλυση Κατηγορίας',
+    noSessionsRange: 'Δεν υπάρχουν περίοδοι σύνδεσης σε αυτό το εύρος',
+    tryWiderRange: 'Δοκιμάστε ένα ευρύτερο εύρος ή επιλέξτε μια διαφορετική περίοδο.',
+    noSessionsYet: 'Δεν υπάρχουν ακόμη συνεδρίες',
+    completeFirst:
+      'Ολοκληρώστε την πρώτη σας αξιολόγηση για να δείτε την πρόοδο και τις τάσεις σας εδώ.',
+    startFirst: 'Έναρξη Πρώτης Αξιολόγησης',
+    export: {
+      date: 'Ημερομηνία',
+      time: 'Χρόνος',
+      totalScore: 'Συνολική βαθμολογία',
+      duration: 'Διάρκεια (min)',
+      notes: 'Σημειώσεις'
+    }
+  },
+  stats: {
+    averageScore: 'Μέση Βαθμολογία',
+    medianScore: 'Μέση βαθμολογία',
+    highestScore: 'Υψηλότερη βαθμολογία',
+    totalSessions: 'Σύνολο συνεδριών'
+  },
+  network: {
+    rankings: 'Κατάταξη Δικτύων',
+    searchingPeers: 'Αναζήτηση συνομήλικων...',
+    searching: 'Αναζήτηση...',
+    online: 'Διαδικτυακά',
+    peers: '{count} συνομήλικους',
+    results: '{count} αποτελέσματα',
+    avgShort: 'Μέσος όρος',
+    p90Short: 'P90',
+    averageScoreTitle: 'Μέση Βαθμολογία',
+    percentile90Title: '90ο εκατοστημόριο',
+    globalAverage: 'Παγκόσμιος μέσος όρος',
+    percentile90: '90ο εκατοστημόριο',
+    manifestations: 'Εκδηλώσεις',
+    activePeers: 'Ενεργοί συνομήλικοι',
+    categoryRankings: 'Κατάταξη Κατηγοριών'
+  },
+  focusAreas: {
+    title: 'Περιοχές εστίασης',
+    subtitle:
+      'Οι 3 κατηγορίες με τη χαμηλότερη βαθμολογία σας — η βελτίωση αυτών αποφέρει τα μεγαλύτερα κέρδη.',
+    empty:
+      'Ολοκληρώστε περισσότερες συνεδρίες για να δείτε εξατομικευμένες προτάσεις περιοχής εστίασης.'
+  },
+  sessions: {
+    recent: 'Πρόσφατες συνεδρίες',
+    deselectAll: 'Καταργήστε την επιλογή όλων',
+    selectAll: 'Επιλέξτε Όλα',
+    deleteCount: 'Διαγραφή {count}',
+    cancel: 'Ακύρωση',
+    select: 'Επιλέξτε',
+    deleting: 'Διαγραφή…'
+  },
+  settings: {
+    title: 'Ρυθμίσεις εφαρμογής',
+    close: 'Κλείστε τις ρυθμίσεις',
+    dataManagement: 'Διαχείριση δεδομένων',
+    saveLastSession: 'Αποθήκευση τελευταίας συνεδρίας',
+    saveLastSessionDesc:
+      'Προσυμπληρώστε τις απαντήσεις από την πιο πρόσφατη ολοκληρωμένη συνεδρία σας.',
+    resetProgress: 'Επαναφορά προόδου',
+    resetProgressDesc: 'Διαγράψτε όλες τις αποθηκευμένες απαντήσεις και ξεκινήστε από την αρχή.',
+    goals: 'Στόχοι',
+    targetScore: 'Βαθμολογία στόχου',
+    targetScoreDesc:
+      'Ορίστε ένα σκορ (1.000–10.000) για να παρακολουθείτε την πρόοδό σας στον πίνακα ελέγχου.',
+    set: 'Σετ',
+    clearGoal: 'Καθαρό',
+    currentTarget: 'Τρέχων στόχος:',
+    on: 'Ενεργό',
+    off: 'Απενεργοποίηση',
+    version: 'Αλγόριθμος εκδήλωσης {version}',
+    clearAllAnswers: 'Διαγραφή όλων των απαντήσεων',
+    clearConfirmTitle: 'Διαγραφή όλων των απαντήσεων',
+    clearConfirmMessage:
+      'Αυτό θα διαγράψει οριστικά όλες τις τρέχουσες απαντήσεις σας και δεν μπορεί να αναιρεθεί.',
+    clearConfirmLabel: 'Καθαρό',
+    keepAnswers: 'Κρατήστε τις απαντήσεις',
+    language: 'Γλώσσα',
+    languageDesc: 'Επιλέξτε τη γλώσσα εμφάνισης για την εφαρμογή.',
+    languageCount: '{count} διαθέσιμες γλώσσες',
+    goalErrorRange: 'Εισαγάγετε μια βαθμολογία μεταξύ 1.000 και 10.000.'
+  },
+  questionnaire: {
+    saving: 'Αποθήκευση...',
+    saved: 'Αποθηκεύτηκε',
+    progressText: '{pct}% ολοκληρώθηκε ({answered}/{total})',
+    progressAria: 'Πρόοδος ολοκλήρωσης της αξιολόγησης',
+    maxScore: 'Μέγιστο: {score}',
+    answerToScore: 'Απάντηση στο σκοράρισμα',
+    currentScore: 'Τρέχουσα βαθμολογία',
+    scrollAll: 'Κύλιση σε όλα',
+    stepByStep: 'Βήμα-Βήμα',
+    questionOf: 'Ερώτηση {current} από {total}',
+    previous: '← Προηγούμενο',
+    next: 'Επόμενο →',
+    completeAssessment: 'Ολοκληρωμένη Αξιολόγηση',
+    startFresh: 'Θέλετε να ξεκινήσετε φρέσκα;',
+    resetAllAnswers: 'Επαναφορά όλων των απαντήσεων',
+    resetTitle: 'Επαναφορά όλων των απαντήσεων;',
+    resetMessage:
+      'Αυτό θα καθαρίσει κάθε απάντηση και θα ξεκινήσει από την αρχή. Αυτό δεν μπορεί να αναιρεθεί.',
+    resetLabel: 'Επαναφορά',
+    scoreQuality: {
+      notStarted: 'Δεν έχει ξεκινήσει',
+      manifesting: 'Εκδηλώνοντας ❆',
+      aligned: 'Στοίχιση',
+      building: 'Κτίριο',
+      startingOut: 'Ξεκινώντας'
+    },
+    submitHint: {
+      zero: 'Απαντήθηκαν 0 από {total} ερωτήσεις — αναπάντητα ερωτήσεις από προεπιλογή στο ελάχιστο',
+      partial:
+        'Απομένει ερώτηση {remaining} — αναπάντητα ερωτήσεις από προεπιλογή στο ελάχιστο | Απομένουν ερωτήσεις {remaining} — αναπάντητα ερωτήσεις από προεπιλογή στο ελάχιστο',
+      complete: 'Απαντήθηκαν όλες οι ερωτήσεις — έτοιμο για υποβολή!'
+    },
+    submitTitle: {
+      zero: 'Απαντήστε σε μερικές ερωτήσεις για να ολοκληρώσετε την αξιολόγησή σας',
+      partial: '{remaining} απομένει ερώτηση | {remaining} απομένουν ερωτήσεις',
+      complete: 'Υποβάλετε την ολοκληρωμένη αξιολόγησή σας'
+    },
+    submitError: 'Αποτυχία αποθήκευσης συνεδρίας: {error}',
+    dotTitle: 'Ερώτηση {index}',
+    dotAria: 'Μεταβείτε στην ερώτηση {index}',
+    keyboardHint: 'Συμβουλή: Χρησιμοποιήστε το ← → για πλοήγηση · 1–9 / 0 για να βαθμολογήσετε'
+  },
+  onboarding: {
+    step0Title: 'Καλώς ορίσατε στον Αλγόριθμο Εκδήλωσης',
+    step0Body1:
+      'Αυτό το εργαλείο σάς βοηθά να μετρήσετε πόσο ευθυγραμμισμένες είναι η νοοτροπία, οι συνήθειες και οι καθημερινές σας ενέργειες με την επίτευξη των στόχων σας. Απαντήστε ειλικρινά σε κάθε ερώτηση για να λάβετε την τρέχουσα βαθμολογία σας.',
+    step0Body2:
+      'Συμπληρώστε το ερωτηματολόγιο σε τακτά χρονικά διαστήματα για να παρακολουθείτε την ανάπτυξή σας με την πάροδο του χρόνου και να βλέπετε ποιες περιοχές χρειάζονται τη μεγαλύτερη προσοχή.',
+    step1Title: 'Πώς λειτουργεί η βαθμολογία',
+    step1Body:
+      'Κάθε ερώτηση αξίζει έναν καθορισμένο αριθμό πόντων. Βαθμολογήστε τον εαυτό σας σε μια κλίμακα από 1–10 για κάθε ερώτηση. Μια βαθμολογία 10 σημαίνει ότι ενσωματώνετε πλήρως αυτήν την αρχή. Το 1 σημαίνει ότι δεν έχετε ξεκινήσει.',
+    step1TargetHint: '🎯 Στόχος: {target} | Μέγιστο: {maximum}',
+    excellent: 'Εξαιρετικό',
+    excellentRange: '7.001 – 10.000',
+    excellentNote: 'Ισχυρή ευθυγράμμιση — συνεχίστε',
+    good: 'Καλό',
+    goodRange: '4.001 – 7.000',
+    goodNote: 'Στερεά θεμέλια - χώρος για ανάπτυξη',
+    needsWork: 'Χρειάζεται δουλειά',
+    needsWorkRange: '0 – 4.000',
+    needsWorkNote: 'Εστιάστε πρώτα στα βασικά',
+    step2Title: 'Τα δεδομένα σας παραμένουν ιδιωτικά',
+    step2Body1:
+      'Όλες οι απαντήσεις σας και το ιστορικό βαθμολογίας αποθηκεύονται τοπικά στη συσκευή σας χρησιμοποιώντας μια κρυπτογραφημένη βάση δεδομένων SQLite. Τίποτα δεν αποστέλλεται σε κανένα διακομιστή χωρίς τη ρητή άδειά σας.',
+    step2Body2:
+      'Η προαιρετική δυνατότητα κοινής χρήσης peer-to-peer σάς επιτρέπει να βλέπετε ανώνυμα συγκεντρωτικά αποτελέσματα από άλλους χρήστες. Μοιράζεται μόνο μια κρυπτογραφικά υπογεγραμμένη σύνοψη — ποτέ δεν απαντά μεμονωμένες απαντήσεις.',
+    readyText: 'Ετοιμος; Ας πάρουμε τη βασική βαθμολογία σας.',
+    skipIntro: 'Παράλειψη εισαγωγής',
+    next: 'Επόμενο',
+    getStarted: 'Ξεκινήστε'
+  },
+  sharing: {
+    title: 'Ανώνυμη κοινή χρήση δικτύου',
+    privacyFirst: '🔒 Απόρρητο-Πρώτα',
+    description:
+      'Προαιρετικά συνεισφέρετε τα αποτελέσματά σας ανώνυμα στο παγκόσμιο δίκτυο. Κανένα όνομα, email, διεύθυνση IP ή αναγνωριστικό συσκευής δεν κοινοποιείται ποτέ.',
+    enabled: 'Η κοινή χρήση ενεργοποιήθηκε — συνεισφορά στο δίκτυο',
+    disabled: 'Η κοινή χρήση είναι απενεργοποιημένη (προεπιλογή)',
+    activeBadge: '✓ Οι ανώνυμες βαθμολογίες σας μοιράζονται με συνομηλίκους',
+    enableNote:
+      'Ενεργοποιήστε για να δείτε την εκατοστιαία κατάταξη σε σύγκριση με το παγκόσμιο δίκτυο.'
+  },
+  category: {
+    back: '‹ Πίσω',
+    history: 'Ιστορία',
+    date: 'Ημερομηνία',
+    score: 'Σκορ',
+    loading: 'Φόρτωση...',
+    notEnoughData: 'Δεν υπάρχουν αρκετά δεδομένα',
+    noData: 'Δεν βρέθηκαν δεδομένα για το "{category}".',
+    goToDashboard: 'Μεταβείτε στον Πίνακα ελέγχου'
+  },
+  chartActions: {
+    viewFullscreen: 'Προβολή πλήρους οθόνης',
+    exitFullscreen: 'Έξοδος από πλήρη οθόνη',
+    copyChart: 'Αντιγραφή γραφήματος',
+    exportChart: 'Διάγραμμα εξαγωγής',
+    exportDefault: '⬇ Εξαγωγή',
+    exportExcel: '📊 Εξαγωγή Excel',
+    exportCsv: '📄 Εξαγωγή CSV',
+    exportPdf: '📑 Εξαγωγή PDF',
+    exportHtml: '🌐 Εξαγωγή HTML',
+    copied: 'Το γράφημα αντιγράφηκε στο πρόχειρο',
+    copyFailed: 'Η αντιγραφή απέτυχε — το πρόχειρο δεν είναι διαθέσιμο',
+    saveCancelled: 'Η αποθήκευση ακυρώθηκε'
+  },
+  resume: {
+    continueLastSession: 'Συνέχεια από την τελευταία συνεδρία;',
+    welcomeBack: 'Καλώς ήρθατε πίσω!',
+    historicalBody:
+      'Οι απαντήσεις σας από την τελευταία ολοκληρωμένη συνεδρία έχουν προφορτωθεί. Θα θέλατε να διατηρήσετε αυτές τις τιμές ως σημείο εκκίνησης ή να ξεκινήσετε με ένα εντελώς κενό ερωτηματολόγιο;',
+    activeBody:
+      'Έχετε μια συνεδρία σε εξέλιξη. Θα θέλατε να συνεχίσετε από εκεί που σταματήσατε ή να ξεκινήσετε μια νέα αξιολόγηση;',
+    clearWarning: '⚠️ Αυτό θα διαγράψει όλες τις τρέχουσες απαντήσεις. Είσαι σίγουρος;',
+    yesStartFresh: 'Ναι, Ξεκινήστε από νέα',
+    cancel: 'Ακύρωση',
+    keepLastValues: 'Διατηρήστε τις τελευταίες αξίες',
+    resumeSession: 'Συνέχεια Συνεδρίας',
+    startFresh: 'Ξεκινήστε φρέσκα'
+  },
+  questionItem: {
+    pointsSuffix: 'βαθμοί',
+    low: 'Χαμηλό',
+    high: 'Ψηλά',
+    rateAria: 'Βαθμολογήστε {question}'
+  },
+  dateRange: {
+    rangeLabel: 'Εύρος:',
+    startDate: 'Ημερομηνία έναρξης',
+    endDate: 'Ημερομηνία λήξης',
+    presets: {
+      '7d': '7 Ημέρες',
+      '30d': '30 Ημέρες',
+      '90d': '90 Ημέρες',
+      '1y': '1 Έτος',
+      all: 'Όλων των Εποχών',
+      custom: 'Προσαρμοσμένο'
+    }
+  },
+  update: {
+    availableTitle: 'Το v{version} είναι διαθέσιμο!',
+    releaseNotesFallback: 'Επισκεφτείτε τη σελίδα έκδοσης για λήψη της πιο πρόσφατης έκδοσης.',
+    getUpdate: 'Λήψη ενημέρωσης',
+    dismiss: 'Απόρριψη'
+  },
+  questions: {
+    '1': 'Master the Basics',
+    '2': 'Activate & Illuminate Words',
+    '3': 'Find Pain & Contract Energy',
+    '4': 'Define what you want',
+    '5': 'Write down what you want',
+    '6': "Don't share your dream with others",
+    '7': 'Get a burning desire for your goal',
+    '8': 'Goal must be in Sweet Spot',
+    '9': 'Make a Decision',
+    '10': 'See/Feel good in possession of your goal',
+    '11': 'Release attachment to the outcome',
+    '12': 'Allow the HOW to present itself',
+    '13': 'Know the difference between Dream & Chief Aim',
+    '14': 'Be Focused / Singleness of purpose',
+    '15': 'Daily TO DO list of Priorities',
+    '16': 'Chart Progress / Know the Score',
+    '17': 'Use Momentum Cycle of Success',
+    '18': 'Dream Build - Dream Book & Vision Board',
+    '19': 'Plug into System',
+    '20': 'Science of Personal Mastery Course',
+    '21': 'Watch the words you speak - what you say is what you get',
+    '22': 'Physiology / Dress for success',
+    '23': 'Clear Counter Intentions',
+    '24': 'Awaken your Inner Power: Superpower Processes',
+    '25': 'Broadcast on Alpha-theta brainwave',
+    '26': 'Stop Telling Your Story of woe',
+    '27': 'Show Appreciation / Gratitude',
+    '28': 'Replace Failure Habits w/ Success Habits (Accelerator Processes)',
+    '29': 'Create a Mastermind',
+    '30': 'Watch Successful People/Apprentice',
+    '31': 'Listen to/Read Success Stories',
+    '32': 'Give away what you want first',
+    '33': 'Do It Now Mentality',
+    '34': 'Take Care of Your Body',
+    '35': 'Find the Gold in Adversity',
+    '36': 'Clear Samskaras from Field',
+    '37': 'Take 100% Responsibility',
+    '38': 'Attractor Field Generators',
+    '39': 'Join a Club that connects you to a Power Source',
+    '40': 'Live life with deliberate intent - be in present time',
+    '1a': 'Who do you listen to?',
+    '1b': 'Teachability Index',
+    '1c': 'Training Balance Scale',
+    '1d': 'Unconscious competence',
+    '19a': 'Read books',
+    '19b': 'Listen to Audios',
+    '19c': 'Attend Events (monthly)',
+    '19d': 'Give and receive Recognition / expanded Golden Rule',
+    '19e': 'Develop relationships with like minded people',
+    '23a': 'Money Processes',
+    '23b': 'Relationship Processes',
+    '23c': 'Leadership Processes',
+    '23d': 'Communication Processes',
+    '23e': 'Health Processes',
+    '23f': 'Spiritual Awareness Processes',
+    '23g': 'Dream Processes',
+    '23h': 'Organization & Focus Processes'
+  }
+};
+
+export default el;

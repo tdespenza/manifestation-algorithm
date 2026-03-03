@@ -1,0 +1,318 @@
+/**
+ * Auto-converted locale module for my.
+ */
+import type { Messages } from './en';
+
+const my: Messages = {
+  nav: {
+    questionnaire: 'မေးခွန်းလွှာ',
+    history: 'သမိုင်း',
+    settings: 'ဆက်တင်များ'
+  },
+  app: {
+    name: 'သရုပ်ဖော်မှု အယ်ဂိုရီသမ်',
+    unexpectedError: 'မမျှော်လင့်ထားသော အမှားတစ်ခု ဖြစ်ပွားခဲ့သည်။'
+  },
+  home: {
+    subtitle: 'သင့်ဘဝ၏ နယ်ပယ်တစ်ခုစီကို အဆင့်သတ်မှတ်ပါ — သင့်ချိန်ညှိမှုရမှတ်ကို ရှာဖွေပါ။'
+  },
+  dashboard: {
+    title: 'Manifestation Algorithm ခြေရာခံခြင်းမှတ်တမ်း',
+    subtitle: 'အချိန်နှင့်အမျှ သင်၏တိုးတက်မှုကို ခြေရာခံပါ။',
+    loading: 'သင့်မှတ်တမ်းကို ဖွင့်နေသည်…',
+    noData: 'ဤကာလအတွက် ဒေတာမရှိပါ။',
+    progressTrend: 'တိုးတက်မှု Trend',
+    progressToGoal: 'ပန်းတိုင်သို့ တိုးတက်မှု',
+    ofGoal: 'ဂိုး၏ {pct}%',
+    goalReached: '🎯 ပန်းတိုင်ရောက်ပြီ',
+    categoryBreakdown: 'အမျိုးအစားခွဲခြမ်းစိတ်ဖြာခြင်း။',
+    noSessionsRange: 'ဤအပိုင်းအခြားရှိ စက်ရှင်များမရှိပါ။',
+    tryWiderRange: 'ပိုကျယ်သော အကွာအဝေးကို စမ်းကြည့်ပါ သို့မဟုတ် အခြားကာလတစ်ခုကို ရွေးချယ်ပါ။',
+    noSessionsYet: 'အစည်းအဝေးများ မရှိသေးပါ။',
+    completeFirst:
+      'သင်၏တိုးတက်မှုနှင့် ခေတ်ရေစီးကြောင်းများကို ဤနေရာတွင်ကြည့်ရှုရန် သင်၏ပထမအကဲဖြတ်ချက်ကို အပြီးသတ်ပါ။',
+    startFirst: 'ပထမဆုံး အကဲဖြတ်ခြင်းကို စတင်ပါ။',
+    export: {
+      date: 'ရက်စွဲ',
+      time: 'အချိန်',
+      totalScore: 'စုစုပေါင်းရမှတ်',
+      duration: 'ကြာချိန် (မိနစ်)',
+      notes: 'မှတ်စုများ'
+    }
+  },
+  stats: {
+    averageScore: 'ပျမ်းမျှရမှတ်',
+    medianScore: 'အလယ်အလတ်ရမှတ်',
+    highestScore: 'အမြင့်ဆုံးရမှတ်',
+    totalSessions: 'စုစုပေါင်း ဆက်ရှင်များ'
+  },
+  network: {
+    rankings: 'ကွန်ရက်အဆင့်များ',
+    searchingPeers: 'ရွယ်တူများကို ရှာဖွေနေသည်...',
+    searching: 'ရှာဖွေနေသည်...',
+    online: 'အွန်လိုင်း',
+    peers: '{count} ရွယ်တူများ',
+    results: '{count} ရလဒ်များ',
+    avgShort: 'ပျမ်းမျှ',
+    p90Short: 'P90',
+    averageScoreTitle: 'ပျမ်းမျှရမှတ်',
+    percentile90Title: '၉၀ ရာခိုင်နှုန်း',
+    globalAverage: 'ကမ္ဘာလုံးဆိုင်ရာ ပျမ်းမျှ',
+    percentile90: '၉၀ ရာခိုင်နှုန်း',
+    manifestations: 'သရုပ်',
+    activePeers: 'တက်ကြွသောရွယ်တူများ',
+    categoryRankings: 'အမျိုးအစား အဆင့်များ'
+  },
+  focusAreas: {
+    title: 'Focus Areas များ',
+    subtitle:
+      'သင်၏ရမှတ်အနိမ့်ဆုံး အမျိုးအစား 3 ခု— ၎င်းတို့ကို ပိုမိုကောင်းမွန်အောင်ပြုလုပ်ခြင်းက အကြီးမားဆုံးအကျိုးအမြတ်များရရှိစေပါသည်။',
+    empty:
+      'စိတ်ကြိုက်သတ်မှတ်ထားသော အာရုံစိုက်ဧရိယာ အကြံပြုချက်များကို ကြည့်ရှုရန် နောက်ထပ်ဆက်ရှင်များကို ပြီးအောင်လုပ်ပါ။'
+  },
+  sessions: {
+    recent: 'လတ်တလော ဆက်ရှင်များ',
+    deselectAll: 'အားလုံးကို ဖြုတ်လိုက်ပါ။',
+    selectAll: 'အားလုံးကို ရွေးပါ။',
+    deleteCount: '{count} ဖျက်ရန်',
+    cancel: 'လုပ်တော့',
+    select: 'ရွေးပါ။',
+    deleting: 'ဖျက်နေသည်...'
+  },
+  settings: {
+    title: 'အက်ပ်ဆက်တင်များ',
+    close: 'ဆက်တင်များကို ပိတ်ပါ။',
+    dataManagement: 'ဒေတာစီမံခန့်ခွဲမှု',
+    saveLastSession: 'နောက်ဆုံးစက်ရှင်ကို သိမ်းဆည်းပါ။',
+    saveLastSessionDesc: 'သင့်လတ်တလော ပြီးဆုံးသွားသော စက်ရှင်မှ အဖြေများကို ကြိုတင်ဖြည့်စွက်ပါ။',
+    resetProgress: 'တိုးတက်မှုကို ပြန်လည်သတ်မှတ်ပါ။',
+    resetProgressDesc: 'သိမ်းဆည်းထားသော အဖြေအားလုံးကို ဖျက်ပြီး အသစ်ပြန်စပါ။',
+    goals: 'ပန်းတိုင်',
+    targetScore: 'ပစ်မှတ်ရမှတ်',
+    targetScoreDesc:
+      'ဒက်ရှ်ဘုတ်တွင် သင်၏တိုးတက်မှုကို ခြေရာခံရန် ပန်းတိုင်အမှတ် (1,000–10,000) သတ်မှတ်ပါ။',
+    set: 'သတ်မှတ်',
+    clearGoal: 'ရှင်းပါတယ်။',
+    currentTarget: 'လက်ရှိပစ်မှတ်-',
+    on: 'ဂရန်',
+    off: 'ပိတ်သည်။',
+    version: 'သရုပ်ဖော်မှု အယ်ဂိုရီသမ် {version}',
+    clearAllAnswers: 'အဖြေအားလုံးကို ရှင်းလင်းပါ။',
+    clearConfirmTitle: 'အဖြေအားလုံးကို ရှင်းလင်းပါ။',
+    clearConfirmMessage:
+      '၎င်းသည် သင့်လက်ရှိအဖြေများအားလုံးကို အပြီးအပိုင်ဖျက်မည်ဖြစ်ပြီး ပြန်ပြင်၍မရပါ။',
+    clearConfirmLabel: 'ရှင်းပါတယ်။',
+    keepAnswers: 'အဖြေများကို သိမ်းဆည်းပါ။',
+    language: 'ဘာသာစကား',
+    languageDesc: 'အပလီကေးရှင်းအတွက် ဖော်ပြသည့်ဘာသာစကားကို ရွေးချယ်ပါ။',
+    languageCount: '{count} ဘာသာစကားများ ရနိုင်ပါသည်။',
+    goalErrorRange: 'ကျေးဇူးပြု၍ ရမှတ် 1,000 နှင့် 10,000 ကြားထည့်ပါ။'
+  },
+  questionnaire: {
+    saving: 'သိမ်းဆည်းနေသည်...',
+    saved: 'သိမ်းဆည်းထားသည်။',
+    progressText: '{pct}% ပြီးပါပြီ ({answered}/{total})',
+    progressAria: 'အကဲဖြတ်မှု ပြီးစီးမှု တိုးတက်မှု',
+    maxScore: 'အများဆုံး- {score}',
+    answerToScore: 'အမှတ်ရရန် အဖြေ',
+    currentScore: 'လက်ရှိရမှတ်',
+    scrollAll: 'အားလုံးကို ဆွဲချပါ။',
+    stepByStep: 'တစ်ဆင့်ပြီးတစ်ဆင့်',
+    questionOf: 'မေးခွန်း {current} ၏ {total}',
+    previous: '← ယခင်',
+    next: 'နောက်တစ်ခု →',
+    completeAssessment: 'ပြီးပြည့်စုံသော အကဲဖြတ်ခြင်း။',
+    startFresh: 'အသစ်အဆန်း စတင်လိုပါသလား။',
+    resetAllAnswers: 'အဖြေအားလုံးကို ပြန်လည်သတ်မှတ်ပါ။',
+    resetTitle: 'အဖြေအားလုံးကို ပြန်လည်သတ်မှတ်မလား။',
+    resetMessage: '၎င်းသည် အဖြေတိုင်းကို ရှင်းလင်းစေပြီး အစမှ စတင်သည်။ ဒါကို ပြန်ပြင်လို့ မရပါဘူး။',
+    resetLabel: 'ပြန်လည်သတ်မှတ်ပါ။',
+    scoreQuality: {
+      notStarted: 'မစတင်ပါ။',
+      manifesting: '❆ ဖော်ပြခြင်း။',
+      aligned: 'ညှိထားသည်။',
+      building: 'အဆောက်အဦ',
+      startingOut: 'စတင်ခြင်း'
+    },
+    submitHint: {
+      zero: '{total} မေးခွန်းများထဲမှ 0 ခု ဖြေသည် — အဖြေမရသေးသောမေးခွန်းများသည် အနည်းဆုံးမှ ပုံသေဖြစ်သည်။',
+      partial:
+        '{remaining} မေးခွန်းကျန်သည် — မဖြေရသေးသောမေးခွန်းများသည် မူရင်း | အနည်းဆုံး | {remaining} မေးခွန်းများ ကျန်နေသေးသည် — မဖြေရသေးသောမေးခွန်းများသည် မူရင်းအတိုင်း အနည်းဆုံးဖြစ်သည်။',
+      complete: 'မေးခွန်းအားလုံးကို ဖြေပြီးပါပြီ — တင်သွင်းရန် အသင့်ဖြစ်ပါပြီ။'
+    },
+    submitTitle: {
+      zero: 'သင့်အကဲဖြတ်ချက်ကို အပြီးသတ်ရန် မေးခွန်းအချို့ကို ဖြေပါ။',
+      partial: '{remaining} မေးခွန်းကျန် | {remaining} မေးခွန်းများ ကျန်ပါသည်။',
+      complete: 'သင်၏ အပြီးသတ် အကဲဖြတ်ချက်ကို တင်ပြပါ။'
+    },
+    submitError: 'စက်ရှင်ကို သိမ်းဆည်းရန် မအောင်မြင်ပါ- {error}',
+    dotTitle: 'မေးခွန်း {index}',
+    dotAria: 'မေးခွန်း {index} သို့ သွားပါ',
+    keyboardHint: 'အကြံပြုချက်- အဆင့်သတ်မှတ်ရန် · 1–9 / 0 ကို လမ်းညွှန်ရန် ← → ကိုသုံးပါ။'
+  },
+  onboarding: {
+    step0Title: 'Manifestation Algorithm မှလှိုက်လှဲစွာကြိုဆိုပါသည်။',
+    step0Body1:
+      'ဤကိရိယာသည် သင့်ရည်မှန်းချက်များ အောင်မြင်စေရန်အတွက် သင့်စိတ်ထား၊ အလေ့အထနှင့် နေ့စဉ်လုပ်ဆောင်မှုများ မည်မျှ လိုက်လျောညီထွေဖြစ်စေသည်ကို တိုင်းတာရန် ကူညီပေးသည်။ သင့်လက်ရှိရမှတ်များရရှိရန် မေးခွန်းတစ်ခုစီကို ရိုးရိုးသားသားဖြေပါ။',
+    step0Body2:
+      'သင့်တိုးတက်မှုကို အချိန်နှင့်အမျှ ခြေရာခံရန်နှင့် မည်သည့်ကဏ္ဍများကို အာရုံစိုက်မှုအလိုအပ်ဆုံးလဲဆိုတာကို ကြည့်ရှုရန် ပုံမှန်ကြားကာလတွင် မေးခွန်းပုံစံကို ဖြည့်ပါ။',
+    step1Title: 'အမှတ်ပေးနည်း',
+    step1Body:
+      'မေးခွန်းတစ်ခုစီသည် သတ်မှတ်ထားသော အမှတ်အရေအတွက်နှင့် တန်ဖိုးရှိသည်။ မေးခွန်းတိုင်းအတွက် သင့်ကိုယ်သင် အဆင့် 1-10 ရှိသည်။ 10 အဆင့်သတ်မှတ်ခြင်းဆိုသည်မှာ အဆိုပါမူကို သင်အပြည့်အဝထည့်သွင်းထားခြင်းဖြစ်သည်၊ 1 ဆိုသည်မှာ သင်မစတင်သေးပါ။',
+    step1TargetHint: '🎯 ပစ်မှတ်- {target} | အများဆုံး- {maximum}',
+    excellent: 'မြတ်သော',
+    excellentRange: '7,001 – 10,000',
+    excellentNote: 'ခိုင်မာသော ချိန်ညှိမှု - ဆက်သွားပါ။',
+    good: 'ကောင်းတယ်။',
+    goodRange: '4,001 – 7,000',
+    goodNote: 'ခိုင်မာသောအခြေခံအုတ်မြစ် - ကြီးထွားရန်အခန်း',
+    needsWork: 'အလုပ်လိုတယ်။',
+    needsWorkRange: '0 – 4,000',
+    needsWorkNote: 'အခြေခံအချက်များကို ဦးစွာအာရုံစိုက်ပါ။',
+    step2Title: 'သင့်ဒေတာသည် သီးသန့်တည်ရှိနေပါသည်။',
+    step2Body1:
+      'သင်၏အဖြေများနှင့် ရမှတ်မှတ်တမ်းအားလုံးကို ကုဒ်ဝှက်ထားသော SQLite ဒေတာဘေ့စ်ကို အသုံးပြု၍ သင့်စက်တွင် စက်တွင် သိမ်းဆည်းထားသည်။ သင်၏ တိကျသေချာသော ခွင့်ပြုချက်မရှိဘဲ မည်သည့်ဆာဗာထံ ပေးပို့ခြင်း မရှိပါ။',
+    step2Body2:
+      'ရွေးချယ်နိုင်သော peer-to-peer မျှဝေခြင်းအင်္ဂါရပ်သည် သင့်အား အခြားအသုံးပြုသူများထံမှ အမည်ဝှက်ထားသော စုစုပေါင်းရမှတ်များကို မြင်နိုင်စေပါသည်။ ၎င်းသည် လျှို့ဝှက်ရေးထိုးထားသော အနှစ်ချုပ်ကိုသာ မျှဝေသည် — သင့်တစ်ဦးချင်းစီ၏ အဖြေကို ဘယ်တော့မှ မမျှဝေပါ။',
+    readyText: 'အဆင်သင့်ဖြစ်ပြီလား။ သင်၏အခြေခံရမှတ်ကို ရယူကြပါစို့။',
+    skipIntro: 'မိတ်ဆက်ကို ကျော်ပါ။',
+    next: 'နောက်တစ်ခု',
+    getStarted: 'စတင်လိုက်ပါ။'
+  },
+  sharing: {
+    title: 'အမည်မသိကွန်ရက်မျှဝေခြင်း။',
+    privacyFirst: '🔒 ကိုယ်ရေးကိုယ်တာ-ပထမ',
+    description:
+      'သင့်ရလဒ်များကို ကမ္ဘာလုံးဆိုင်ရာကွန်ရက်သို့ အမည်ဝှက်ဖြင့် စိတ်ကြိုက်ရွေးချယ်နိုင်ပါသည်။ အမည်၊ အီးမေးလ်၊ IP လိပ်စာ သို့မဟုတ် စက်ပစ္စည်း ID ကို မည်သည့်အခါမျှ မမျှဝေပါ။',
+    enabled: 'မျှဝေခြင်းကို ဖွင့်ထားသည် — ကွန်ရက်ကို ပံ့ပိုးပေးသည်။',
+    disabled: 'မျှဝေခြင်းကို ပိတ်ထားသည် (မူလ)',
+    activeBadge: '✓ သင်၏အမည်မသိရမှတ်များကို ရွယ်တူများနှင့် မျှဝေနေပါသည်။',
+    enableNote:
+      'ကမ္ဘာလုံးဆိုင်ရာကွန်ရက်နှင့် နှိုင်းယှဉ်ပါက သင်၏ ရာခိုင်နှုန်းအဆင့်ကို ကြည့်ရှုနိုင်မည်ဖြစ်သည်။'
+  },
+  category: {
+    back: '‹ နောက်',
+    history: 'သမိုင်း',
+    date: 'ရက်စွဲ',
+    score: 'ရမှတ်',
+    loading: 'ဖွင့်နေသည်...',
+    notEnoughData: 'ဒေတာမလုံလောက်ပါ။',
+    noData: '“{category}” အတွက် ဒေတာမတွေ့ပါ။',
+    goToDashboard: 'Dashboard သို့သွားပါ။'
+  },
+  chartActions: {
+    viewFullscreen: 'မျက်နှာပြင်အပြည့်ကိုကြည့်ပါ။',
+    exitFullscreen: 'မျက်နှာပြင်အပြည့်မှ ထွက်ပါ။',
+    copyChart: 'ဇယားကိုကူးယူပါ။',
+    exportChart: 'ဇယားကို ထုတ်ယူပါ။',
+    exportDefault: '⬇ တင်ပို့ခြင်း။',
+    exportExcel: '📊 Excel ကို Export လုပ်ပါ။',
+    exportCsv: '📄 CSV ကို ထုတ်ယူပါ။',
+    exportPdf: '📑 PDF ကို ထုတ်ယူပါ။',
+    exportHtml: '🌐 HTML ကို ထုတ်ယူပါ။',
+    copied: 'ဇယားကွက်ကို ကလစ်ဘုတ်သို့ ကူးယူထားသည်။',
+    copyFailed: 'ကူးယူခြင်း မအောင်မြင်ပါ — ကလစ်ဘုတ်ကို မရနိုင်ပါ။',
+    saveCancelled: 'သိမ်းဆည်းခြင်းကို ပယ်ဖျက်လိုက်ပါပြီ။'
+  },
+  resume: {
+    continueLastSession: 'နောက်ဆုံးစက်ရှင်မှ ဆက်မလား။',
+    welcomeBack: 'ကြိုဆိုပါတယ်!',
+    historicalBody:
+      'သင်၏နောက်ဆုံးပြီးစီးသော စက်ရှင်မှ သင့်အဖြေများကို ကြိုတင်တင်ပြီးပါပြီ။ အဆိုပါတန်ဖိုးများကို အစမှတ်အဖြစ်ထားလိုပါသလား သို့မဟုတ် လုံးဝဗလာမေးခွန်းလွှာဖြင့် စတင်လိုပါသလား။',
+    activeBody:
+      'သင့်တွင် ဆက်ရှင်တစ်ခု လုပ်ဆောင်နေပါသည်။ သင်ထွက်ခွာသွားခဲ့သည့်နေရာကို ပြန်လည်စတင်လိုပါသလား သို့မဟုတ် အသစ်အဆန်းအကဲဖြတ်မှုတစ်ခု စတင်လိုပါသလား။',
+    clearWarning: '⚠️ ၎င်းသည် လက်ရှိအဖြေအားလုံးကို ရှင်းလင်းပါမည်။ သေချာလား?',
+    yesStartFresh: 'ဟုတ်ကဲ့၊ စတင်ပါ။',
+    cancel: 'လုပ်တော့',
+    keepLastValues: 'နောက်ဆုံးတန်ဖိုးများကိုထားပါ။',
+    resumeSession: 'ဆက်ရှင်ကို ပြန်စပါ။',
+    startFresh: 'Fresh စတင်ပါ။'
+  },
+  questionItem: {
+    pointsSuffix: 'အမှတ်',
+    low: 'နိမ့်သည်။',
+    high: 'မြင့်သည်။',
+    rateAria: 'အဆင့် {question}'
+  },
+  dateRange: {
+    rangeLabel: 'အပိုင်းအခြား-',
+    startDate: 'စတင်မည့်ရက်',
+    endDate: 'ကုန်ဆုံးရက်',
+    presets: {
+      '7d': '7 ရက်',
+      '30d': 'ရက် 30',
+      '90d': 'ရက် 90',
+      '1y': '1 နှစ်',
+      all: 'အချိန်တိုင်း',
+      custom: 'စိတ်ကြိုက်'
+    }
+  },
+  update: {
+    availableTitle: 'v{version} ရရှိနိုင်ပါပြီ။',
+    releaseNotesFallback:
+      'နောက်ဆုံးထွက်ဗားရှင်းကို ဒေါင်းလုဒ်လုပ်ရန် ထုတ်ဝေမှုစာမျက်နှာသို့ သွားပါ။',
+    getUpdate: 'Update ရယူပါ။',
+    dismiss: 'ပယ်ရန်'
+  },
+  questions: {
+    '1': 'Master the Basics',
+    '2': 'Activate & Illuminate Words',
+    '3': 'Find Pain & Contract Energy',
+    '4': 'Define what you want',
+    '5': 'Write down what you want',
+    '6': "Don't share your dream with others",
+    '7': 'Get a burning desire for your goal',
+    '8': 'Goal must be in Sweet Spot',
+    '9': 'Make a Decision',
+    '10': 'See/Feel good in possession of your goal',
+    '11': 'Release attachment to the outcome',
+    '12': 'Allow the HOW to present itself',
+    '13': 'Know the difference between Dream & Chief Aim',
+    '14': 'Be Focused / Singleness of purpose',
+    '15': 'Daily TO DO list of Priorities',
+    '16': 'Chart Progress / Know the Score',
+    '17': 'Use Momentum Cycle of Success',
+    '18': 'Dream Build - Dream Book & Vision Board',
+    '19': 'Plug into System',
+    '20': 'Science of Personal Mastery Course',
+    '21': 'Watch the words you speak - what you say is what you get',
+    '22': 'Physiology / Dress for success',
+    '23': 'Clear Counter Intentions',
+    '24': 'Awaken your Inner Power: Superpower Processes',
+    '25': 'Broadcast on Alpha-theta brainwave',
+    '26': 'Stop Telling Your Story of woe',
+    '27': 'Show Appreciation / Gratitude',
+    '28': 'Replace Failure Habits w/ Success Habits (Accelerator Processes)',
+    '29': 'Create a Mastermind',
+    '30': 'Watch Successful People/Apprentice',
+    '31': 'Listen to/Read Success Stories',
+    '32': 'Give away what you want first',
+    '33': 'Do It Now Mentality',
+    '34': 'Take Care of Your Body',
+    '35': 'Find the Gold in Adversity',
+    '36': 'Clear Samskaras from Field',
+    '37': 'Take 100% Responsibility',
+    '38': 'Attractor Field Generators',
+    '39': 'Join a Club that connects you to a Power Source',
+    '40': 'Live life with deliberate intent - be in present time',
+    '1a': 'Who do you listen to?',
+    '1b': 'Teachability Index',
+    '1c': 'Training Balance Scale',
+    '1d': 'Unconscious competence',
+    '19a': 'Read books',
+    '19b': 'Listen to Audios',
+    '19c': 'Attend Events (monthly)',
+    '19d': 'Give and receive Recognition / expanded Golden Rule',
+    '19e': 'Develop relationships with like minded people',
+    '23a': 'Money Processes',
+    '23b': 'Relationship Processes',
+    '23c': 'Leadership Processes',
+    '23d': 'Communication Processes',
+    '23e': 'Health Processes',
+    '23f': 'Spiritual Awareness Processes',
+    '23g': 'Dream Processes',
+    '23h': 'Organization & Focus Processes'
+  }
+};
+
+export default my;

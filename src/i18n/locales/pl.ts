@@ -1,0 +1,316 @@
+/**
+ * Auto-converted locale module for pl.
+ */
+import type { Messages } from './en';
+
+const pl: Messages = {
+  nav: {
+    questionnaire: 'Kwestionariusz',
+    history: 'Historia',
+    settings: 'Ustawienia'
+  },
+  app: {
+    name: 'Algorytm manifestacji',
+    unexpectedError: 'Wystąpił nieoczekiwany błąd.'
+  },
+  home: {
+    subtitle: 'Oceń każdy obszar swojego życia – odkryj swój wynik dopasowania'
+  },
+  dashboard: {
+    title: 'Historia śledzenia algorytmu manifestacji',
+    subtitle: 'Śledź swoje postępy w czasie',
+    loading: 'Ładowanie Twojej historii…',
+    noData: 'Brak danych za ten okres',
+    progressTrend: 'Trend postępu',
+    progressToGoal: 'Postęp do celu',
+    ofGoal: '{pct}% celu',
+    goalReached: '🎯 Cel osiągnięty!',
+    categoryBreakdown: 'Podział kategorii',
+    noSessionsRange: 'Brak sesji w tym zakresie',
+    tryWiderRange: 'Wypróbuj szerszy zakres lub wybierz inny okres.',
+    noSessionsYet: 'Nie ma jeszcze sesji',
+    completeFirst: 'Ukończ pierwszą ocenę, aby zobaczyć tutaj swoje postępy i trendy.',
+    startFirst: 'Rozpocznij pierwszą ocenę',
+    export: {
+      date: 'Data',
+      time: 'Czas',
+      totalScore: 'Wynik całkowity',
+      duration: 'Czas trwania (min)',
+      notes: 'Notatki'
+    }
+  },
+  stats: {
+    averageScore: 'Średni wynik',
+    medianScore: 'Średni wynik',
+    highestScore: 'Najwyższy wynik',
+    totalSessions: 'Łączna liczba sesji'
+  },
+  network: {
+    rankings: 'Rankingi sieci',
+    searchingPeers: 'Szukanie rówieśników...',
+    searching: 'Wyszukiwanie...',
+    online: 'W Internecie',
+    peers: '{count} rówieśnicy',
+    results: 'Wyniki {count}',
+    avgShort: 'Śr',
+    p90Short: 'P90',
+    averageScoreTitle: 'Średni wynik',
+    percentile90Title: '90. percentyl',
+    globalAverage: 'Średnia globalna',
+    percentile90: '90. percentyl',
+    manifestations: 'Manifestacje',
+    activePeers: 'Aktywni rówieśnicy',
+    categoryRankings: 'Rankingi kategorii'
+  },
+  focusAreas: {
+    title: 'Obszary ostrości',
+    subtitle:
+      'Twoje 3 kategorie o najniższych wynikach — ulepszanie ich zapewnia największe korzyści.',
+    empty:
+      'Ukończ więcej sesji, aby zobaczyć spersonalizowane rekomendacje dotyczące obszarów zainteresowania.'
+  },
+  sessions: {
+    recent: 'Ostatnie sesje',
+    deselectAll: 'Odznacz wszystko',
+    selectAll: 'Wybierz wszystko',
+    deleteCount: 'Usuń {count}',
+    cancel: 'Anuluj',
+    select: 'Wybierz',
+    deleting: 'Usuwanie…'
+  },
+  settings: {
+    title: 'Ustawienia aplikacji',
+    close: 'Zamknij ustawienia',
+    dataManagement: 'Zarządzanie danymi',
+    saveLastSession: 'Zapisz ostatnią sesję',
+    saveLastSessionDesc: 'Wstępnie wypełnij odpowiedzi z ostatniej zakończonej sesji.',
+    resetProgress: 'Zresetuj postęp',
+    resetProgressDesc: 'Usuń wszystkie zapisane odpowiedzi i zacznij od nowa.',
+    goals: 'Cele',
+    targetScore: 'Wynik docelowy',
+    targetScoreDesc:
+      'Ustaw wynik celu (1 000–10 000), aby śledzić swoje postępy na pulpicie nawigacyjnym.',
+    set: 'Zestaw',
+    clearGoal: 'Jasne',
+    currentTarget: 'Aktualny cel:',
+    on: 'Włączone',
+    off: 'Wyłączone',
+    version: 'Algorytm manifestacji {version}',
+    clearAllAnswers: 'Wyczyść wszystkie odpowiedzi',
+    clearConfirmTitle: 'Wyczyść wszystkie odpowiedzi',
+    clearConfirmMessage:
+      'Spowoduje to trwałe usunięcie wszystkich Twoich bieżących odpowiedzi i nie będzie można tego cofnąć.',
+    clearConfirmLabel: 'Jasne',
+    keepAnswers: 'Zachowaj odpowiedzi',
+    language: 'Język',
+    languageDesc: 'Wybierz język wyświetlania aplikacji.',
+    languageCount: '{count} dostępne języki',
+    goalErrorRange: 'Wprowadź wynik w przedziale od 1000 do 10 000.'
+  },
+  questionnaire: {
+    saving: 'Zapisywanie...',
+    saved: 'Zapisano',
+    progressText: '{pct}% ukończono ({answered}/{total})',
+    progressAria: 'Postęp w ukończeniu oceny',
+    maxScore: 'Maks.: {score}',
+    answerToScore: 'Odpowiedź na wynik',
+    currentScore: 'Aktualny wynik',
+    scrollAll: 'Przewiń wszystko',
+    stepByStep: 'Krok po kroku',
+    questionOf: 'Pytanie {current} do {total}',
+    previous: '← Poprzedni',
+    next: 'Dalej →',
+    completeAssessment: 'Pełna ocena',
+    startFresh: 'Chcesz zacząć od nowa?',
+    resetAllAnswers: 'Zresetuj wszystkie odpowiedzi',
+    resetTitle: 'Zresetować wszystkie odpowiedzi?',
+    resetMessage:
+      'Spowoduje to wyczyszczenie każdej odpowiedzi i rozpoczęcie od zera. Tego nie można cofnąć.',
+    resetLabel: 'Zresetuj',
+    scoreQuality: {
+      notStarted: 'Nie rozpoczęte',
+      manifesting: 'Manifestowanie ❆',
+      aligned: 'Wyrównane',
+      building: 'Budynek',
+      startingOut: 'Zaczynam'
+    },
+    submitHint: {
+      zero: 'Odpowiedziano na 0 z pytań {total} — liczba pytań bez odpowiedzi jest domyślnie minimalna',
+      partial:
+        '{remaining} pytanie pozostało — domyślnie liczba pytań bez odpowiedzi wynosi minimum | {remaining} pozostałe pytania — domyślnie liczba pytań bez odpowiedzi wynosi minimum',
+      complete: 'Odpowiedzi na wszystkie pytania — gotowe do przesłania!'
+    },
+    submitTitle: {
+      zero: 'Odpowiedz na kilka pytań, aby zakończyć ocenę',
+      partial: '{remaining} pozostało pytanie | {remaining} pozostały pytania',
+      complete: 'Prześlij wypełnioną ocenę'
+    },
+    submitError: 'Nie udało się zapisać sesji: {error}',
+    dotTitle: 'Pytanie {index}',
+    dotAria: 'Przejdź do pytania {index}',
+    keyboardHint: 'Wskazówka: użyj ← → do nawigacji · 1–9 / 0, aby ocenić'
+  },
+  onboarding: {
+    step0Title: 'Witamy w Algorytmie Manifestacji',
+    step0Body1:
+      'To narzędzie pomaga zmierzyć, w jakim stopniu Twój sposób myślenia, nawyki i codzienne działania są dostosowane do osiągnięcia Twoich celów. Odpowiedz szczerze na każde pytanie, aby uzyskać aktualny wynik.',
+    step0Body2:
+      'Wypełniaj kwestionariusz w regularnych odstępach czasu, aby śledzić swój rozwój w czasie i zobaczyć, które obszary wymagają najwięcej uwagi.',
+    step1Title: 'Jak działa punktacja',
+    step1Body:
+      'Każde pytanie jest warte określoną liczbę punktów. Oceń siebie w skali od 1 do 10 przy każdym pytaniu. Ocena 10 oznacza, że ​​w pełni ucieleśniasz tę zasadę; 1 oznacza, że ​​jeszcze nie zacząłeś.',
+    step1TargetHint: '🎯 Cel: {target} | Maksymalnie: {maximum}',
+    excellent: 'Znakomicie',
+    excellentRange: '7 001 – 10 000',
+    excellentNote: 'Mocne dopasowanie – kontynuuj',
+    good: 'Dobrze',
+    goodRange: '4001 – 7000',
+    goodNote: 'Solidny fundament — przestrzeń do rozwoju',
+    needsWork: 'Potrzebuje pracy',
+    needsWorkRange: '0 – 4000',
+    needsWorkNote: 'Najpierw skup się na podstawach',
+    step2Title: 'Twoje dane pozostają prywatne',
+    step2Body1:
+      'Wszystkie Twoje odpowiedzi i historia wyników są przechowywane lokalnie na Twoim urządzeniu przy użyciu zaszyfrowanej bazy danych SQLite. Nic nie jest wysyłane na żaden serwer bez Twojej wyraźnej zgody.',
+    step2Body2:
+      'Opcjonalna funkcja udostępniania peer-to-peer pozwala zobaczyć anonimowe zbiorcze wyniki innych użytkowników. Udostępnia jedynie kryptograficznie podpisane podsumowanie — nigdy indywidualne odpowiedzi.',
+    readyText: 'Gotowy? Obliczmy Twój wynik bazowy.',
+    skipIntro: 'Pomiń wprowadzenie',
+    next: 'Następny',
+    getStarted: 'Rozpocznij'
+  },
+  sharing: {
+    title: 'Anonimowe udostępnianie sieci',
+    privacyFirst: '🔒 Prywatność przede wszystkim',
+    description:
+      'Opcjonalnie możesz udostępnić swoje wyniki anonimowo w sieci globalnej. Nigdy nie udostępnia się żadnego imienia i nazwiska, adresu e-mail, adresu IP ani identyfikatora urządzenia.',
+    enabled: 'Udostępnianie włączone — współtworzenie sieci',
+    disabled: 'Udostępnianie wyłączone (domyślnie)',
+    activeBadge: '✓ Twoje zanonimizowane wyniki są udostępniane rówieśnikom',
+    enableNote: 'Włącz, aby zobaczyć swoją pozycję percentylową w porównaniu z siecią globalną.'
+  },
+  category: {
+    back: '‹ Powrót',
+    history: 'Historia',
+    date: 'Data',
+    score: 'Wynik',
+    loading: 'Ładowanie...',
+    notEnoughData: 'Za mało danych',
+    noData: 'Nie znaleziono danych dla „{category}”.',
+    goToDashboard: 'Przejdź do Panelu'
+  },
+  chartActions: {
+    viewFullscreen: 'Wyświetl na pełnym ekranie',
+    exitFullscreen: 'Wyjdź z pełnego ekranu',
+    copyChart: 'Kopiuj wykres',
+    exportChart: 'Eksportuj wykres',
+    exportDefault: '⬇ Eksportuj',
+    exportExcel: '📊 Eksportuj Excela',
+    exportCsv: '📄 Eksportuj plik CSV',
+    exportPdf: '📑 Eksportuj PDF',
+    exportHtml: '🌐 Eksportuj HTML',
+    copied: 'Wykres skopiowany do schowka',
+    copyFailed: 'Kopiowanie nie powiodło się — schowek jest niedostępny',
+    saveCancelled: 'Zapis anulowany'
+  },
+  resume: {
+    continueLastSession: 'Kontynuować od ostatniej sesji?',
+    welcomeBack: 'Witamy z powrotem!',
+    historicalBody:
+      'Twoje odpowiedzi z ostatniej zakończonej sesji zostały wstępnie załadowane. Czy chcesz zachować te wartości jako punkt wyjścia, czy zacząć od całkowicie pustego kwestionariusza?',
+    activeBody:
+      'Masz sesję w toku. Czy chcesz wznowić od miejsca, w którym przerwałeś, czy rozpocząć nową ocenę?',
+    clearWarning: '⚠️ Spowoduje to usunięcie wszystkich bieżących odpowiedzi. Czy jesteś pewien?',
+    yesStartFresh: 'Tak, zacznij od nowa',
+    cancel: 'Anuluj',
+    keepLastValues: 'Zachowaj ostatnie wartości',
+    resumeSession: 'Wznów sesję',
+    startFresh: 'Zacznij od nowa'
+  },
+  questionItem: {
+    pointsSuffix: 'pkt',
+    low: 'Niski',
+    high: 'Wysoka',
+    rateAria: 'Oceń {question}'
+  },
+  dateRange: {
+    rangeLabel: 'Zasięg:',
+    startDate: 'Data rozpoczęcia',
+    endDate: 'Data końcowa',
+    presets: {
+      '7d': '7 dni',
+      '30d': '30 dni',
+      '90d': '90 dni',
+      '1y': '1 rok',
+      all: 'Cały czas',
+      custom: 'Niestandardowe'
+    }
+  },
+  update: {
+    availableTitle: 'v{version} jest dostępny!',
+    releaseNotesFallback: 'Odwiedź stronę wydania, aby pobrać najnowszą wersję.',
+    getUpdate: 'Pobierz aktualizację',
+    dismiss: 'Odrzuć'
+  },
+  questions: {
+    '1': 'Master the Basics',
+    '2': 'Activate & Illuminate Words',
+    '3': 'Find Pain & Contract Energy',
+    '4': 'Define what you want',
+    '5': 'Write down what you want',
+    '6': "Don't share your dream with others",
+    '7': 'Get a burning desire for your goal',
+    '8': 'Goal must be in Sweet Spot',
+    '9': 'Make a Decision',
+    '10': 'See/Feel good in possession of your goal',
+    '11': 'Release attachment to the outcome',
+    '12': 'Allow the HOW to present itself',
+    '13': 'Know the difference between Dream & Chief Aim',
+    '14': 'Be Focused / Singleness of purpose',
+    '15': 'Daily TO DO list of Priorities',
+    '16': 'Chart Progress / Know the Score',
+    '17': 'Use Momentum Cycle of Success',
+    '18': 'Dream Build - Dream Book & Vision Board',
+    '19': 'Plug into System',
+    '20': 'Science of Personal Mastery Course',
+    '21': 'Watch the words you speak - what you say is what you get',
+    '22': 'Physiology / Dress for success',
+    '23': 'Clear Counter Intentions',
+    '24': 'Awaken your Inner Power: Superpower Processes',
+    '25': 'Broadcast on Alpha-theta brainwave',
+    '26': 'Stop Telling Your Story of woe',
+    '27': 'Show Appreciation / Gratitude',
+    '28': 'Replace Failure Habits w/ Success Habits (Accelerator Processes)',
+    '29': 'Create a Mastermind',
+    '30': 'Watch Successful People/Apprentice',
+    '31': 'Listen to/Read Success Stories',
+    '32': 'Give away what you want first',
+    '33': 'Do It Now Mentality',
+    '34': 'Take Care of Your Body',
+    '35': 'Find the Gold in Adversity',
+    '36': 'Clear Samskaras from Field',
+    '37': 'Take 100% Responsibility',
+    '38': 'Attractor Field Generators',
+    '39': 'Join a Club that connects you to a Power Source',
+    '40': 'Live life with deliberate intent - be in present time',
+    '1a': 'Who do you listen to?',
+    '1b': 'Teachability Index',
+    '1c': 'Training Balance Scale',
+    '1d': 'Unconscious competence',
+    '19a': 'Read books',
+    '19b': 'Listen to Audios',
+    '19c': 'Attend Events (monthly)',
+    '19d': 'Give and receive Recognition / expanded Golden Rule',
+    '19e': 'Develop relationships with like minded people',
+    '23a': 'Money Processes',
+    '23b': 'Relationship Processes',
+    '23c': 'Leadership Processes',
+    '23d': 'Communication Processes',
+    '23e': 'Health Processes',
+    '23f': 'Spiritual Awareness Processes',
+    '23g': 'Dream Processes',
+    '23h': 'Organization & Focus Processes'
+  }
+};
+
+export default pl;

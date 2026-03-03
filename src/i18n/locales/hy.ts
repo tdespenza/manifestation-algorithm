@@ -1,0 +1,314 @@
+/**
+ * Auto-converted locale module for hy.
+ */
+import type { Messages } from './en';
+
+const hy: Messages = {
+  nav: {
+    questionnaire: 'Հարցաթերթիկ',
+    history: 'Պատմություն',
+    settings: 'Կարգավորումներ'
+  },
+  app: {
+    name: 'Դրսեւորման ալգորիթմ',
+    unexpectedError: 'Տեղի ունեցավ անսպասելի սխալ:'
+  },
+  home: {
+    subtitle: 'Գնահատեք ձեր կյանքի յուրաքանչյուր ոլորտ – բացահայտեք ձեր հավասարեցման միավորը'
+  },
+  dashboard: {
+    title: 'Դրսևորման ալգորիթմի հետևման պատմությունը',
+    subtitle: 'Հետևեք ձեր առաջընթացին ժամանակի ընթացքում',
+    loading: 'Բեռնվում է ձեր պատմությունը…',
+    noData: 'Այս ժամանակահատվածի համար տվյալներ չկան',
+    progressTrend: 'Առաջընթացի միտում',
+    progressToGoal: 'Առաջընթաց դեպի նպատակ',
+    ofGoal: '{pct} գոլի %',
+    goalReached: '🎯 Նպատակը հասավ:',
+    categoryBreakdown: 'Կատեգորիա Բաշխում',
+    noSessionsRange: 'Այս տիրույթում նիստեր չկան',
+    tryWiderRange: 'Փորձեք ավելի լայն շրջանակ կամ ընտրեք այլ ժամանակահատված:',
+    noSessionsYet: 'Դեռևս նիստեր չկան',
+    completeFirst:
+      'Լրացրեք ձեր առաջին գնահատականը՝ ձեր առաջընթացն ու միտումները տեսնելու համար այստեղ:',
+    startFirst: 'Սկսեք առաջին գնահատումը',
+    export: {
+      date: 'Ամսաթիվ',
+      time: 'Ժամանակը',
+      totalScore: 'Ընդհանուր միավոր',
+      duration: 'Տևողությունը (րոպե)',
+      notes: 'Նշումներ'
+    }
+  },
+  stats: {
+    averageScore: 'Միջին միավոր',
+    medianScore: 'Միջին միավոր',
+    highestScore: 'Ամենաբարձր միավորը',
+    totalSessions: 'Ընդհանուր նստաշրջաններ'
+  },
+  network: {
+    rankings: 'Ցանցային վարկանիշներ',
+    searchingPeers: 'Հասակակիցների որոնում...',
+    searching: 'Որոնում...',
+    online: 'Առցանց',
+    peers: '{count} հասակակիցներ',
+    results: '{count} արդյունքներ',
+    avgShort: 'Միջին',
+    p90Short: 'P90',
+    averageScoreTitle: 'Միջին միավոր',
+    percentile90Title: '90-րդ տոկոս',
+    globalAverage: 'Համաշխարհային միջին',
+    percentile90: '90-րդ տոկոս',
+    manifestations: 'Դրսևորումներ',
+    activePeers: 'Ակտիվ հասակակիցներ',
+    categoryRankings: 'Կատեգորիաների վարկանիշներ'
+  },
+  focusAreas: {
+    title: 'Ֆոկուս տարածքներ',
+    subtitle:
+      'Ձեր 3 ամենացածր միավորներ ունեցող կատեգորիաները՝ դրանց կատարելագործումը բերում է ամենամեծ ձեռքբերումներին:',
+    empty:
+      'Լրացրեք ավելի շատ աշխատաշրջաններ, որպեսզի տեսնեք անհատականացված ֆոկուսային տարածքի առաջարկությունները:'
+  },
+  sessions: {
+    recent: 'Վերջին նիստերը',
+    deselectAll: 'Ապաընտրել բոլորը',
+    selectAll: 'Ընտրեք Բոլորը',
+    deleteCount: 'Ջնջել {count}',
+    cancel: 'Չեղարկել',
+    select: 'Ընտրել',
+    deleting: 'Ջնջվում է…'
+  },
+  settings: {
+    title: 'Հավելվածի կարգավորումներ',
+    close: 'Փակեք կարգավորումները',
+    dataManagement: 'Տվյալների կառավարում',
+    saveLastSession: 'Պահպանել Վերջին նստաշրջանը',
+    saveLastSessionDesc: 'Նախապես լրացրեք ձեր վերջին ավարտված նիստի պատասխանները:',
+    resetProgress: 'Վերականգնել առաջընթացը',
+    resetProgressDesc: 'Ջնջեք բոլոր պահված պատասխանները և սկսեք նորը:',
+    goals: 'Նպատակներ',
+    targetScore: 'Նպատակային միավոր',
+    targetScoreDesc: 'Սահմանեք գոլի հաշիվ (1000–10000)՝ վահանակում ձեր առաջընթացին հետևելու համար:',
+    set: 'Սահմանել',
+    clearGoal: 'Պարզ',
+    currentTarget: 'Ընթացիկ թիրախ.',
+    on: 'Միացված է',
+    off: 'Անջատված',
+    version: 'Դրսևորման ալգորիթմ {version}',
+    clearAllAnswers: 'Մաքրել բոլոր պատասխանները',
+    clearConfirmTitle: 'Մաքրել բոլոր պատասխանները',
+    clearConfirmMessage: 'Սա ընդմիշտ կջնջի ձեր բոլոր ընթացիկ պատասխանները և չի կարող հետարկվել:',
+    clearConfirmLabel: 'Պարզ',
+    keepAnswers: 'Պահպանեք պատասխանները',
+    language: 'Լեզու',
+    languageDesc: 'Ընտրեք հավելվածի ցուցադրման լեզուն:',
+    languageCount: 'հասանելի են {count} լեզուները',
+    goalErrorRange: 'Խնդրում ենք մուտքագրել 1000-ից 10000 միավոր:'
+  },
+  questionnaire: {
+    saving: 'Պահվում է...',
+    saved: 'Պահպանված է',
+    progressText: '{pct}% ավարտված է ({answered}/{total})',
+    progressAria: 'Գնահատման ավարտի առաջընթացը',
+    maxScore: 'Առավելագույնը՝ {score}',
+    answerToScore: 'Պատասխան՝ գոլ խփելու համար',
+    currentScore: 'Ընթացիկ միավոր',
+    scrollAll: 'Ոլորել Բոլորը',
+    stepByStep: 'Քայլ առ քայլ',
+    questionOf: 'Հարց {current} {total}-ից',
+    previous: '← Նախորդ',
+    next: 'Հաջորդը →',
+    completeAssessment: 'Ամբողջական գնահատում',
+    startFresh: 'Ցանկանու՞մ եք սկսել թարմ:',
+    resetAllAnswers: 'Վերականգնել բոլոր պատասխանները',
+    resetTitle: 'Վերակայե՞լ բոլոր պատասխանները:',
+    resetMessage: 'Սա կջնջի յուրաքանչյուր պատասխան և կսկսի զրոյից: Սա հնարավոր չէ հետարկել:',
+    resetLabel: 'Վերականգնել',
+    scoreQuality: {
+      notStarted: 'Չի սկսվել',
+      manifesting: 'Դրսևորվող ❆',
+      aligned: 'Հավասարեցված',
+      building: 'շենք',
+      startingOut: 'Սկսելով դուրս'
+    },
+    submitHint: {
+      zero: 'Պատասխանվել է {total} հարցերից 0-ը — անպատասխան հարցերը լռելյայն նվազագույն են',
+      partial:
+        'Մնացել է {remaining} հարցը — անպատասխան հարցերը լռելյայն նվազագույնը | Մնացել են {remaining} հարցեր — անպատասխան հարցերը լռելյայն նվազագույն են',
+      complete: 'Բոլոր հարցերի պատասխանները՝ պատրաստ են ներկայացնելու:'
+    },
+    submitTitle: {
+      zero: 'Պատասխանեք մի քանի հարցերի՝ ձեր գնահատումն ավարտելու համար',
+      partial: '{remaining} հարց է մնացել | Մնացել են {remaining} հարցեր',
+      complete: 'Ներկայացրեք ձեր ավարտված գնահատականը'
+    },
+    submitError: 'Չհաջողվեց պահել աշխատաշրջանը՝ {error}',
+    dotTitle: 'Հարց {index}',
+    dotAria: 'Անցեք հարցի {index}',
+    keyboardHint: 'Հուշում. Օգտագործեք ← → նավարկելու համար · 1–9 / 0 գնահատելու համար'
+  },
+  onboarding: {
+    step0Title: 'Բարի գալուստ դրսևորման ալգորիթմ',
+    step0Body1:
+      'Այս գործիքը օգնում է ձեզ չափել, թե որքանով են համահունչ ձեր մտածելակերպը, սովորությունները և ամենօրյա գործողությունները ձեր նպատակներին հասնելու հետ: Ազնվորեն պատասխանեք յուրաքանչյուր հարցին՝ ձեր ընթացիկ միավորը ստանալու համար:',
+    step0Body2:
+      'Լրացրեք հարցաշարը կանոնավոր ընդմիջումներով, որպեսզի հետևեք ձեր աճին ժամանակի ընթացքում և տեսնեք, թե որ ոլորտներն են ամենաշատ ուշադրության կարիքը զգում:',
+    step1Title: 'Ինչպես է աշխատում միավորները',
+    step1Body:
+      'Յուրաքանչյուր հարց արժե մի քանի միավոր: Յուրաքանչյուր հարցի համար գնահատեք ձեզ 1-10 սանդղակով: 10 գնահատականը նշանակում է, որ դուք լիովին մարմնավորում եք այդ սկզբունքը. 1 նշանակում է, որ դուք չեք սկսել:',
+    step1TargetHint: '🎯 Թիրախ՝ {target} | Առավելագույնը՝ {maximum}',
+    excellent: 'Գերազանց',
+    excellentRange: '7001 – 10000',
+    excellentNote: 'Ուժեղ դասավորվածություն — շարունակեք առաջ գնալ',
+    good: 'Լավ',
+    goodRange: '4001 – 7000',
+    goodNote: 'Ամուր հիմք՝ աճելու տեղ',
+    needsWork: 'Աշխատանքի կարիք ունի',
+    needsWorkRange: '0 – 4000',
+    needsWorkNote: 'Առաջին հերթին կենտրոնացեք հիմունքների վրա',
+    step2Title: 'Ձեր տվյալները մնում են մասնավոր',
+    step2Body1:
+      'Ձեր բոլոր պատասխանները և միավորների պատմությունը պահվում են տեղում ձեր սարքում՝ օգտագործելով գաղտնագրված SQLite տվյալների բազա: Առանց ձեր հստակ թույլտվության ոչինչ չի ուղարկվում որևէ սերվերի:',
+    step2Body2:
+      'Հասակակիցների հետ փոխանակման կամընտիր գործառույթը թույլ է տալիս տեսնել այլ օգտվողների անանուն ընդհանուր միավորները: Այն կիսում է միայն ծածկագրային ստորագրված ամփոփագիրը՝ երբեք ձեր անհատական ​​պատասխանները:',
+    readyText: 'Պատրա՞ստ եք: Եկեք ստանանք ձեր բազային գնահատականը:',
+    skipIntro: 'Բաց թողնել ներածությունը',
+    next: 'Հաջորդը',
+    getStarted: 'Սկսեք'
+  },
+  sharing: {
+    title: 'Անանուն ցանցի փոխանակում',
+    privacyFirst: '🔒 Գաղտնիություն-Առաջին',
+    description:
+      'Ցանկության դեպքում ձեր արդյունքները անանուն կերպով փոխանցեք համաշխարհային ցանցին: Ոչ մի անուն, էլփոստ, IP հասցե կամ սարքի ID երբևէ չի տարածվում:',
+    enabled: 'Համօգտագործումը միացված է. ներդրում է ցանցին',
+    disabled: 'Համօգտագործումն անջատված է (կանխադրված)',
+    activeBadge: '✓ Ձեր անանուն միավորները կիսվում են հասակակիցների հետ',
+    enableNote: 'Միացրեք ձեր տոկոսային վարկանիշը համաշխարհային ցանցի համեմատ տեսնելու համար:'
+  },
+  category: {
+    back: '‹ Հետ',
+    history: 'Պատմություն',
+    date: 'Ամսաթիվ',
+    score: 'Միավոր',
+    loading: 'Բեռնվում է...',
+    notEnoughData: 'Բավարար տվյալներ չկան',
+    noData: '«{category}»-ի համար տվյալներ չեն գտնվել:',
+    goToDashboard: 'Գնացեք վահանակ'
+  },
+  chartActions: {
+    viewFullscreen: 'Դիտել ամբողջ էկրանով',
+    exitFullscreen: 'Դուրս գալ ամբողջ էկրանով',
+    copyChart: 'Պատճենել աղյուսակը',
+    exportChart: 'Արտահանման գծապատկեր',
+    exportDefault: '⬇ Արտահանում',
+    exportExcel: '📊 Արտահանել Excel',
+    exportCsv: '📄 Արտահանել CSV',
+    exportPdf: '📑 Արտահանել PDF',
+    exportHtml: '🌐 Արտահանել HTML',
+    copied: 'Գծապատկերը պատճենվեց clipboard-ում',
+    copyFailed: 'Չհաջողվեց պատճենել. սեղմատախտակը հասանելի չէ',
+    saveCancelled: 'Պահպանումը չեղարկված է'
+  },
+  resume: {
+    continueLastSession: 'Շարունակե՞լ Վերջին նստաշրջանից:',
+    welcomeBack: 'Բարի վերադարձ:',
+    historicalBody:
+      'Ձեր վերջին ավարտված նիստի պատասխանները նախապես բեռնված են: Ցանկանու՞մ եք պահպանել այդ արժեքները որպես ելակետ, թե՞ սկսել լրիվ դատարկ հարցաշարից:',
+    activeBody:
+      'Դուք նիստ ունեք ընթացքի մեջ: Ցանկանու՞մ եք վերսկսել այնտեղ, որտեղ թողել եք, թե՞ սկսել նոր գնահատական:',
+    clearWarning: '⚠️ Սա կջնջի բոլոր ընթացիկ պատասխանները: Համոզվա՞ծ ես։',
+    yesStartFresh: 'Այո, սկսեք թարմ',
+    cancel: 'Չեղարկել',
+    keepLastValues: 'Պահպանեք վերջին արժեքները',
+    resumeSession: 'Resume Session',
+    startFresh: 'Սկսեք թարմ'
+  },
+  questionItem: {
+    pointsSuffix: 'միավորներ',
+    low: 'Ցածր',
+    high: 'Բարձր',
+    rateAria: 'Գնահատեք {question}'
+  },
+  dateRange: {
+    rangeLabel: 'Շրջանակ:',
+    startDate: 'Մեկնարկի ամսաթիվը',
+    endDate: 'Ավարտի ամսաթիվը',
+    presets: {
+      '7d': '7 օր',
+      '30d': '30 օր',
+      '90d': '90 օր',
+      '1y': '1 տարի',
+      all: 'Բոլոր ժամանակները',
+      custom: 'Պատվերով'
+    }
+  },
+  update: {
+    availableTitle: 'v{version} հասանելի է:',
+    releaseNotesFallback: 'Վերջին տարբերակը ներբեռնելու համար այցելեք թողարկման էջ:',
+    getUpdate: 'Ստացեք թարմացում',
+    dismiss: 'Հեռացնել'
+  },
+  questions: {
+    '1': 'Master the Basics',
+    '2': 'Activate & Illuminate Words',
+    '3': 'Find Pain & Contract Energy',
+    '4': 'Define what you want',
+    '5': 'Write down what you want',
+    '6': "Don't share your dream with others",
+    '7': 'Get a burning desire for your goal',
+    '8': 'Goal must be in Sweet Spot',
+    '9': 'Make a Decision',
+    '10': 'See/Feel good in possession of your goal',
+    '11': 'Release attachment to the outcome',
+    '12': 'Allow the HOW to present itself',
+    '13': 'Know the difference between Dream & Chief Aim',
+    '14': 'Be Focused / Singleness of purpose',
+    '15': 'Daily TO DO list of Priorities',
+    '16': 'Chart Progress / Know the Score',
+    '17': 'Use Momentum Cycle of Success',
+    '18': 'Dream Build - Dream Book & Vision Board',
+    '19': 'Plug into System',
+    '20': 'Science of Personal Mastery Course',
+    '21': 'Watch the words you speak - what you say is what you get',
+    '22': 'Physiology / Dress for success',
+    '23': 'Clear Counter Intentions',
+    '24': 'Awaken your Inner Power: Superpower Processes',
+    '25': 'Broadcast on Alpha-theta brainwave',
+    '26': 'Stop Telling Your Story of woe',
+    '27': 'Show Appreciation / Gratitude',
+    '28': 'Replace Failure Habits w/ Success Habits (Accelerator Processes)',
+    '29': 'Create a Mastermind',
+    '30': 'Watch Successful People/Apprentice',
+    '31': 'Listen to/Read Success Stories',
+    '32': 'Give away what you want first',
+    '33': 'Do It Now Mentality',
+    '34': 'Take Care of Your Body',
+    '35': 'Find the Gold in Adversity',
+    '36': 'Clear Samskaras from Field',
+    '37': 'Take 100% Responsibility',
+    '38': 'Attractor Field Generators',
+    '39': 'Join a Club that connects you to a Power Source',
+    '40': 'Live life with deliberate intent - be in present time',
+    '1a': 'Who do you listen to?',
+    '1b': 'Teachability Index',
+    '1c': 'Training Balance Scale',
+    '1d': 'Unconscious competence',
+    '19a': 'Read books',
+    '19b': 'Listen to Audios',
+    '19c': 'Attend Events (monthly)',
+    '19d': 'Give and receive Recognition / expanded Golden Rule',
+    '19e': 'Develop relationships with like minded people',
+    '23a': 'Money Processes',
+    '23b': 'Relationship Processes',
+    '23c': 'Leadership Processes',
+    '23d': 'Communication Processes',
+    '23e': 'Health Processes',
+    '23f': 'Spiritual Awareness Processes',
+    '23g': 'Dream Processes',
+    '23h': 'Organization & Focus Processes'
+  }
+};
+
+export default hy;

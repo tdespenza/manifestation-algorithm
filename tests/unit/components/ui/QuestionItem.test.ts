@@ -35,7 +35,7 @@ describe('QuestionItem.vue', () => {
       }
     });
 
-    expect(wrapper.text()).toContain('Test Question');
+    expect(wrapper.text()).toContain('Activate & Illuminate Words');
     expect(wrapper.text()).toContain('100 pts');
     expect(wrapper.find('input[type="range"]').exists()).toBe(true);
   });
