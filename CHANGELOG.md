@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.2] - 2026-03-03
+### Bug Fixes
+- Update visual snapshot check for Linux Chromium baselines
+### Features
+- Add multi-language support with English and Spanish locales- Enhance useDateFilter tests with fake timers for consistent date handling
+### Other Changes
+- Remove obsolete TypeScript build info file for e2e tests- Add localization support for Yoruba, Chinese, and Zulu languages with complete translation files- Add Chinese (zh) and Zulu (zu) locale support for the application
+### Refactoring
+- Streamline locale imports and message generation- Simplify date parsing logic for custom date ranges
+
 ## [0.11.1] - 2026-02-28
 ### Features
 - Enhance accessibility testing and improve UI components- Enhance accessibility testing and improve UI components
