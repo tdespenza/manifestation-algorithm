@@ -35,11 +35,11 @@ const emit = defineEmits<{
 <template>
   <div class="recent-sessions">
     <div class="recent-sessions-header">
-      <h2>Recent Sessions</h2>
+      <h2>{{ $t('sessions.recent') }}</h2>
       <div class="sessions-header-actions">
         <template v-if="selectionMode">
           <button class="select-all-pill" @click="emit('toggle-select-all')">
-            {{ allSelected ? 'Deselect All' : 'Select All' }}
+            {{ allSelected ? $t('sessions.deselectAll') : $t('sessions.selectAll') }}
           </button>
           <button
             v-if="selectedCount > 0"
@@ -47,11 +47,19 @@ const emit = defineEmits<{
             :disabled="isDeleting"
             @click="emit('delete-selected')"
           >
-            {{ isDeleting ? 'Deleting…' : `Delete ${selectedCount}` }}
+            {{
+              isDeleting
+                ? $t('sessions.deleting')
+                : $t('sessions.deleteCount', { count: selectedCount })
+            }}
           </button>
-          <button class="cancel-select-btn" @click="emit('exit-selection')">Cancel</button>
+          <button class="cancel-select-btn" @click="emit('exit-selection')">
+            {{ $t('sessions.cancel') }}
+          </button>
         </template>
-        <button v-else class="select-mode-btn" @click="emit('enter-selection')">Select</button>
+        <button v-else class="select-mode-btn" @click="emit('enter-selection')">
+          {{ $t('sessions.select') }}
+        </button>
       </div>
     </div>
 

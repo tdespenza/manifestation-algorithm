@@ -5,7 +5,7 @@ import Settings from '../components/ui/Settings.vue';
 <template>
   <div class="settings-view">
     <div class="header-section">
-      <h1>Settings</h1>
+      <h1>{{ $t('nav.settings') }}</h1>
     </div>
     <Settings @close="$router.push('/')" />
   </div>

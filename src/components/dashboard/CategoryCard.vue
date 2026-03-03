@@ -18,7 +18,7 @@
       <Line :data="chartData" :options="chartOptions" />
     </div>
     <div v-else class="no-trend">
-      <small>Not enough data</small>
+      <small>{{ $t('category.notEnoughData') }}</small>
     </div>
   </button>
 </template>

@@ -2,10 +2,10 @@
   <div class="settings-panel">
     <ConfirmDialog
       v-if="clearConfirmVisible"
-      title="Clear All Answers"
-      message="This will permanently delete all your current answers and cannot be undone."
-      confirm-label="Clear"
-      cancel-label="Keep Answers"
+      :title="$t('settings.clearConfirmTitle')"
+      :message="$t('settings.clearConfirmMessage')"
+      :confirm-label="$t('settings.clearConfirmLabel')"
+      :cancel-label="$t('settings.keepAnswers')"
       icon="🗑️"
       uid="settings-clear"
       @confirm="doClear"
@@ -13,19 +13,19 @@
     />
 
     <div class="panel-header">
-      <h2>App Settings</h2>
-      <button class="btn-close" aria-label="Close settings" @click="$emit('close')">×</button>
+      <h2>{{ $t('settings.title') }}</h2>
+      <button class="btn-close" :aria-label="$t('settings.close')" @click="$emit('close')">
+        ×
+      </button>
     </div>
 
     <div class="settings-group">
       <div class="settings-section">
-        <h3 class="section-title">Data Management</h3>
+        <h3 class="section-title">{{ $t('settings.dataManagement') }}</h3>
         <div class="setting-item">
           <div class="setting-info">
-            <span class="setting-label">Save Last Session</span>
-            <span class="setting-desc"
-              >Pre-fill answers from your most recent completed session.</span
-            >
+            <span class="setting-label">{{ $t('settings.saveLastSession') }}</span>
+            <span class="setting-desc">{{ $t('settings.saveLastSessionDesc') }}</span>
           </div>
           <button
             class="btn-toggle"
@@ -34,28 +34,28 @@
             @click="store.setSaveLastSession(!store.saveLastSession)"
           >
             <span class="toggle-track" aria-hidden="true"><span class="toggle-thumb"></span></span>
-            <span class="toggle-text-val">{{ store.saveLastSession ? 'On' : 'Off' }}</span>
+            <span class="toggle-text-val">{{
+              store.saveLastSession ? $t('settings.on') : $t('settings.off')
+            }}</span>
           </button>
         </div>
         <div class="setting-item">
           <div class="setting-info">
-            <span class="setting-label">Reset Progress</span>
-            <span class="setting-desc">Delete all saved answers and start fresh.</span>
+            <span class="setting-label">{{ $t('settings.resetProgress') }}</span>
+            <span class="setting-desc">{{ $t('settings.resetProgressDesc') }}</span>
           </div>
           <button id="clear-answers-btn" class="btn btn-danger" @click="requestClear">
-            Clear All Answers
+            {{ $t('settings.clearAllAnswers') }}
           </button>
         </div>
       </div>
 
       <div class="settings-section">
-        <h3 class="section-title">Goals</h3>
+        <h3 class="section-title">{{ $t('settings.goals') }}</h3>
         <div class="setting-item goal-setting-item">
           <div class="setting-info">
-            <span class="setting-label">Target Score</span>
-            <span class="setting-desc"
-              >Set a goal score (1,000–10,000) to track your progress on the dashboard.</span
-            >
+            <span class="setting-label">{{ $t('settings.targetScore') }}</span>
+            <span class="setting-desc">{{ $t('settings.targetScoreDesc') }}</span>
           </div>
           <div class="goal-input-row">
             <input
@@ -70,41 +70,83 @@
               aria-label="Target score"
               @keyup.enter="saveGoal"
             />
-            <button class="btn btn-primary btn-sm" @click="saveGoal">Set</button>
+            <button class="btn btn-primary btn-sm" @click="saveGoal">
+              {{ $t('settings.set') }}
+            </button>
             <button
               v-if="store.goalScore !== null"
               class="btn btn-sm btn-secondary"
               @click="clearGoal"
             >
-              Clear
+              {{ $t('settings.clearGoal') }}
             </button>
           </div>
           <p v-if="goalError" class="goal-error" role="alert">{{ goalError }}</p>
           <p v-if="store.goalScore !== null" class="goal-current">
-            Current target: <strong>{{ store.goalScore.toLocaleString() }}</strong>
+            {{ $t('settings.currentTarget') }}
+            <strong>{{ store.goalScore.toLocaleString() }}</strong>
           </p>
         </div>
       </div>
 
       <div class="setting-about">
-        <p>Manifestation Algorithm {{ appVersion }}</p>
+        <p>{{ $t('settings.version', { version: appVersion }) }}</p>
+      </div>
+
+      <!-- Language selector -->
+      <div class="settings-section">
+        <h3 class="section-title">{{ $t('settings.language') }}</h3>
+        <div class="setting-item">
+          <div class="setting-info">
+            <span id="lang-select-label" class="setting-label">{{ $t('settings.language') }}</span>
+            <span class="setting-desc">{{ $t('settings.languageDesc') }}</span>
+            <span class="setting-desc">{{
+              $t('settings.languageCount', { count: localeOptions.length })
+            }}</span>
+          </div>
+          <select
+            id="lang-select"
+            class="language-select"
+            aria-labelledby="lang-select-label"
+            :value="currentLocale"
+            @change="onLocaleChange"
+          >
+            <option v-for="opt in localeOptions" :key="opt.code" :value="opt.code">
+              {{ opt.label }}
+            </option>
+          </select>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { computed, ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { getVersion } from '@tauri-apps/api/app';
 import { useQuestionnaireStore } from '../../stores/questionnaire';
 import { clearSession } from '../../services/db';
+import { setLocale, getLocale, SUPPORTED_LOCALES } from '../../i18n';
 import ConfirmDialog from './ConfirmDialog.vue';
 
 const emit = defineEmits(['close']);
+const { t } = useI18n();
 const appVersion = ref('...');
 const clearConfirmVisible = ref(false);
 const goalInput = ref('');
 const goalError = ref('');
+const currentLocale = ref(getLocale());
+const supportedLocales = SUPPORTED_LOCALES;
+const localeOptions = computed(() =>
+  Object.entries(supportedLocales).map(([code, label]) => ({ code, label }))
+);
+
+function onLocaleChange(event: Event) {
+  const select = event.target as HTMLSelectElement;
+  setLocale(select.value);
+  currentLocale.value = select.value;
+}
 
 onMounted(async () => {
   try {
@@ -132,7 +174,7 @@ async function saveGoal() {
   }
   const parsed = parseInt(raw, 10);
   if (isNaN(parsed) || parsed < 1000 || parsed > 10000) {
-    goalError.value = 'Please enter a score between 1,000 and 10,000.';
+    goalError.value = t('settings.goalErrorRange');
     return;
   }
   await store.setGoalScore(parsed);
@@ -398,5 +440,21 @@ async function doClear() {
   font-size: 0.82rem;
   color: #6b7280;
   margin: 0;
+}
+
+.language-select {
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  font-size: 0.9rem;
+  color: #374151;
+  cursor: pointer;
+  min-width: 130px;
+}
+
+.language-select:focus {
+  outline: 2px solid var(--true-cobalt, #0a1f7d);
+  outline-offset: 2px;
 }
 </style>

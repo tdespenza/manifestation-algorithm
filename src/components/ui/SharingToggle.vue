@@ -1,13 +1,12 @@
 <template>
   <div class="sharing-toggle">
     <div class="toggle-header">
-      <h4>Anonymous Network Sharing</h4>
-      <span class="privacy-badge">🔒 Privacy-First</span>
+      <h4>{{ $t('sharing.title') }}</h4>
+      <span class="privacy-badge">{{ $t('sharing.privacyFirst') }}</span>
     </div>
 
     <p class="toggle-description">
-      Optionally contribute your results anonymously to the global network. No name, email, IP
-      address, or device ID is ever shared.
+      {{ $t('sharing.description') }}
     </p>
 
     <label class="toggle-label" for="sharing-toggle-input">
@@ -21,19 +20,15 @@
       />
       <span class="toggle-switch" :class="{ active: sharingEnabled }"></span>
       <span class="toggle-text">
-        {{
-          sharingEnabled
-            ? 'Sharing enabled — contributing to network'
-            : 'Sharing disabled (default)'
-        }}
+        {{ sharingEnabled ? $t('sharing.enabled') : $t('sharing.disabled') }}
       </span>
     </label>
 
     <div v-if="sharingEnabled" class="sharing-active-badge">
-      ✓ Your anonymised scores are being shared with peers
+      {{ $t('sharing.activeBadge') }}
     </div>
     <div v-else class="sharing-off-note">
-      Enable to see your percentile rank compared to the global network.
+      {{ $t('sharing.enableNote') }}
     </div>
   </div>
 </template>

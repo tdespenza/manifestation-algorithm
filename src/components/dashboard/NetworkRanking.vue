@@ -1,45 +1,45 @@
 <template>
   <div class="network-stats-panel">
-    <h3>Network Rankings</h3>
+    <h3>{{ $t('network.rankings') }}</h3>
 
     <div v-if="sharingEnabled && count === 0 && manifestations === 0" class="loading">
-      Searching for peers...
+      {{ $t('network.searchingPeers') }}
     </div>
 
     <div v-else class="stats-grid">
       <div class="stat-box primary">
-        <span class="label">Global Average</span>
+        <span class="label">{{ $t('network.globalAverage') }}</span>
         <span class="value">{{ avgScore?.toFixed(1) || '-' }}</span>
       </div>
       <div class="stat-box accent">
-        <span class="label">90th Percentile</span>
+        <span class="label">{{ $t('network.percentile90') }}</span>
         <span class="value">{{ percentile90?.toFixed(1) || '-' }}</span>
       </div>
       <div class="stat-box">
-        <span class="label">Manifestations</span>
+        <span class="label">{{ $t('network.manifestations') }}</span>
         <span class="value">{{ manifestations }}</span>
       </div>
       <div class="stat-box">
-        <span class="label">Active Peers</span>
+        <span class="label">{{ $t('network.activePeers') }}</span>
         <span class="value">{{ count }}</span>
       </div>
     </div>
 
     <div v-if="hasCategories" class="category-breakdown">
-      <h4>Category Rankings</h4>
+      <h4>{{ $t('network.categoryRankings') }}</h4>
       <div class="category-list">
         <div v-for="(stat, category) in categoryStats" :key="category" class="category-item">
           <span class="cat-name">{{ category }}</span>
           <div class="cat-bars">
             <div class="bar-group">
-              <span class="bar-label">Avg</span>
+              <span class="bar-label">{{ $t('network.avgShort') }}</span>
               <div class="bar-bg">
                 <div class="bar-fill avg" :style="{ width: (stat.avg / 100) * 100 + '%' }"></div>
               </div>
               <span class="bar-val">{{ stat.avg.toFixed(1) }}</span>
             </div>
             <div class="bar-group">
-              <span class="bar-label">P90</span>
+              <span class="bar-label">{{ $t('network.p90Short') }}</span>
               <div class="bar-bg">
                 <div class="bar-fill p90" :style="{ width: (stat.p90 / 100) * 100 + '%' }"></div>
               </div>

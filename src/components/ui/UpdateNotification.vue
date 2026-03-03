@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import { useUpdateService } from '@/composables/useUpdateService';
 
 const { state, newVersion, releaseNotes, dismissed, openReleasePage, dismiss } = useUpdateService();
+const { t } = useI18n();
 </script>
 
 <template>
@@ -17,14 +19,12 @@ const { state, newVersion, releaseNotes, dismissed, openReleasePage, dismiss } =
       <template v-if="state === 'ready'">
         <span class="update-icon">🚀</span>
         <span class="update-text">
-          <strong>v{{ newVersion }} is available!</strong>
-          <span class="update-notes">{{
-            releaseNotes || 'Visit the release page to download the latest version.'
-          }}</span>
+          <strong>{{ t('update.availableTitle', { version: newVersion }) }}</strong>
+          <span class="update-notes">{{ releaseNotes || t('update.releaseNotesFallback') }}</span>
         </span>
         <div class="update-actions">
-          <button class="btn-primary" @click="openReleasePage">Get Update</button>
-          <button class="btn-dismiss" aria-label="Dismiss" @click="dismiss">✕</button>
+          <button class="btn-primary" @click="openReleasePage">{{ t('update.getUpdate') }}</button>
+          <button class="btn-dismiss" :aria-label="t('update.dismiss')" @click="dismiss">✕</button>
         </div>
       </template>
     </div>

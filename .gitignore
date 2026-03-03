@@ -9,6 +9,10 @@ test-output/*
 coverage/
 reports/
 .stryker-tmp/
+mutants.out
+mutants.out.old
+snapshots/
+**/snapshots/
 
 # Logs
 logs/

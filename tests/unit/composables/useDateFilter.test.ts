@@ -29,12 +29,12 @@ describe('useDateFilter', () => {
 
     it('matches the expected preset labels and values in order', () => {
       expect(DATE_RANGES).toEqual([
-        { label: '7d', value: '7d' },
-        { label: '30d', value: '30d' },
-        { label: '90d', value: '90d' },
-        { label: '1yr', value: '1y' },
-        { label: 'All', value: 'all' },
-        { label: 'Custom', value: 'custom' }
+        { label: 'dateRange.presets.7d', value: '7d' },
+        { label: 'dateRange.presets.30d', value: '30d' },
+        { label: 'dateRange.presets.90d', value: '90d' },
+        { label: 'dateRange.presets.1y', value: '1y' },
+        { label: 'dateRange.presets.all', value: 'all' },
+        { label: 'dateRange.presets.custom', value: 'custom' }
       ]);
     });
 

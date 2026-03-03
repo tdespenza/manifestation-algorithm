@@ -2,8 +2,10 @@
   <div class="chart-actions">
     <button
       class="action-btn"
-      :title="isFullscreen ? 'Exit full screen' : 'View full screen'"
-      :aria-label="isFullscreen ? 'Exit full screen' : 'View full screen'"
+      :title="isFullscreen ? t('chartActions.exitFullscreen') : t('chartActions.viewFullscreen')"
+      :aria-label="
+        isFullscreen ? t('chartActions.exitFullscreen') : t('chartActions.viewFullscreen')
+      "
       :disabled="props.disabled"
       @click="toggleFullscreen"
     >
@@ -45,8 +47,8 @@
 
     <button
       class="action-btn"
-      title="Copy Chart"
-      aria-label="Copy Chart"
+      :title="t('chartActions.copyChart')"
+      :aria-label="t('chartActions.copyChart')"
       :disabled="busy || props.disabled"
       @click="onCopyChart"
     >
@@ -69,21 +71,21 @@
     <select
       class="export-select"
       :disabled="busy || props.disabled"
-      aria-label="Export chart"
+      :aria-label="t('chartActions.exportChart')"
       @change="onSelectChange"
     >
-      <option value="" disabled selected>⬇ Export</option>
-      <option value="excel">📊 Export Excel</option>
-      <option value="csv">📄 Export CSV</option>
-      <option value="pdf">📑 Export PDF</option>
-      <option value="html">🌐 Export HTML</option>
+      <option value="" disabled selected>{{ t('chartActions.exportDefault') }}</option>
+      <option value="excel">{{ t('chartActions.exportExcel') }}</option>
+      <option value="csv">{{ t('chartActions.exportCsv') }}</option>
+      <option value="pdf">{{ t('chartActions.exportPdf') }}</option>
+      <option value="html">{{ t('chartActions.exportHtml') }}</option>
     </select>
 
     <Teleport v-if="isFullscreen" :to="'#' + targetId">
       <button
         class="exit-fullscreen-btn"
-        title="Exit full screen"
-        aria-label="Exit full screen"
+        :title="t('chartActions.exitFullscreen')"
+        :aria-label="t('chartActions.exitFullscreen')"
         @click="toggleFullscreen"
       >
         <svg
@@ -109,6 +111,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useChartExport } from '../../composables/useChartExport';
 import { useToast } from '../../composables/useToast';
 
@@ -122,6 +125,7 @@ const props = defineProps<{
 
 const { exportToExcel, exportToCSV, exportToPDF, exportToHTML, copyChart } = useChartExport();
 const { addToast } = useToast();
+const { t } = useI18n();
 
 const busy = ref(false);
 const isFullscreen = ref(false);
@@ -181,7 +185,7 @@ async function onCopyChart() {
   try {
     const success = await copyChart(props.targetId);
     addToast(
-      success ? 'Chart copied to clipboard' : 'Copy failed — clipboard not available',
+      success ? t('chartActions.copied') : t('chartActions.copyFailed'),
       success ? 'success' : 'error'
     );
   } finally {
@@ -217,12 +221,12 @@ async function onSelectChange(event: Event) {
       result = await exportToHTML(props.targetId, safeName);
     }
 
-    if (result.message !== 'Save cancelled') {
+    if (result.message !== t('chartActions.saveCancelled')) {
       addToast(result.message, result.success ? 'success' : 'error');
     }
   } catch (err) {
     console.error(err);
-    addToast('Export failed unexpectedly', 'error');
+    addToast(t('app.unexpectedError'), 'error');
   } finally {
     busy.value = false;
   }

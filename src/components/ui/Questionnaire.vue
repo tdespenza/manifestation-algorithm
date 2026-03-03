@@ -4,14 +4,20 @@
     <div class="header">
       <div class="status-container">
         <div class="save-indicator" :class="{ saving: isSaving, saved: !isSaving }">
-          {{ isSaving ? 'Saving...' : 'Saved' }}
+          {{ isSaving ? $t('questionnaire.saving') : $t('questionnaire.saved') }}
         </div>
       </div>
 
       <!-- Progress bar -->
       <div class="progress-wrapper">
         <div class="progress-text">
-          {{ store.percentComplete }}% complete ({{ answeredCount }}/{{ store.totalQuestions }})
+          {{
+            $t('questionnaire.progressText', {
+              pct: store.percentComplete,
+              answered: answeredCount,
+              total: store.totalQuestions
+            })
+          }}
         </div>
         <div
           class="progress-bar"
@@ -19,19 +25,25 @@
           :aria-valuenow="store.percentComplete"
           aria-valuemin="0"
           aria-valuemax="100"
-          aria-label="Assessment completion progress"
+          :aria-label="$t('questionnaire.progressAria')"
         >
           <div class="progress-fill" :style="{ width: store.percentComplete + '%' }"></div>
         </div>
       </div>
 
       <div class="score-summary">
-        <div class="max-info">Max: {{ maxScore.toLocaleString() }}</div>
+        <div class="max-info">
+          {{ $t('questionnaire.maxScore', { score: maxScore.toLocaleString() }) }}
+        </div>
         <div class="current-score" :class="{ success: answeredCount > 0 && score >= 5000 }">
           {{ formattedScore }}
         </div>
         <div class="score-label">
-          {{ answeredCount === 0 ? 'Answer to score' : 'Current Score' }}
+          {{
+            answeredCount === 0
+              ? $t('questionnaire.answerToScore')
+              : $t('questionnaire.currentScore')
+          }}
         </div>
         <div class="score-quality" :style="{ color: scoreQuality.color }">
           {{ scoreQuality.label }}
@@ -41,8 +53,12 @@
 
     <!-- Question Navigation Mode toggle -->
     <div class="mode-toggle">
-      <button :class="{ active: mode === 'scroll' }" @click="mode = 'scroll'">Scroll All</button>
-      <button :class="{ active: mode === 'step' }" @click="mode = 'step'">Step by Step</button>
+      <button :class="{ active: mode === 'scroll' }" @click="mode = 'scroll'">
+        {{ $t('questionnaire.scrollAll') }}
+      </button>
+      <button :class="{ active: mode === 'step' }" @click="mode = 'step'">
+        {{ $t('questionnaire.stepByStep') }}
+      </button>
     </div>
 
     <!-- SCROLL MODE: show all questions -->
@@ -55,9 +71,12 @@
     <!-- STEP MODE: show one question at a time with prev/next nav -->
     <div v-else class="step-mode">
       <div class="step-header">
-        <span class="step-counter"
-          >Question {{ store.currentIndex + 1 }} of {{ store.totalQuestions }}</span
-        >
+        <span class="step-counter">{{
+          $t('questionnaire.questionOf', {
+            current: store.currentIndex + 1,
+            total: store.totalQuestions
+          })
+        }}</span>
       </div>
       <QuestionItem
         v-if="store.currentQuestion"
@@ -71,7 +90,7 @@
           :disabled="store.currentIndex === 0"
           @click="store.goToPrev()"
         >
-          ← Previous
+          {{ $t('questionnaire.previous') }}
         </button>
         <div class="dot-nav">
           <button
@@ -80,8 +99,8 @@
             class="dot"
             :class="{ active: idx === store.currentIndex, answered: isAnswered(idx) }"
             type="button"
-            :title="`Question ${idx + 1}`"
-            :aria-label="`Go to question ${idx + 1}`"
+            :title="$t('questionnaire.dotTitle', { index: idx + 1 })"
+            :aria-label="$t('questionnaire.dotAria', { index: idx + 1 })"
             @click="store.goToIndex(idx)"
           ></button>
         </div>
@@ -90,12 +109,11 @@
           :disabled="store.currentIndex === store.totalQuestions - 1"
           @click="store.goToNext()"
         >
-          Next →
+          {{ $t('questionnaire.next') }}
         </button>
       </div>
       <div class="keyboard-hint">
-        Tip: Use <kbd>←</kbd> <kbd>→</kbd> to navigate · <kbd>1</kbd>–<kbd>9</kbd> / <kbd>0</kbd> to
-        rate
+        {{ $t('questionnaire.keyboardHint') }}
       </div>
     </div>
 
@@ -109,7 +127,7 @@
         :title="submitButtonState.title"
         @click="submit"
       >
-        {{ isSubmitting ? 'Saving...' : 'Complete Assessment' }}
+        {{ isSubmitting ? $t('questionnaire.saving') : $t('questionnaire.completeAssessment') }}
       </button>
       <div v-if="!isSubmitting && !submitError" class="completion-hint">
         {{ submitButtonState.hint }}
@@ -118,17 +136,19 @@
 
     <!-- Reset danger zone -->
     <div class="reset-zone">
-      <span class="reset-zone-label">Want to start fresh?</span>
-      <button class="reset-btn" @click="showResetConfirm = true">Reset all answers</button>
+      <span class="reset-zone-label">{{ $t('questionnaire.startFresh') }}</span>
+      <button class="reset-btn" @click="showResetConfirm = true">
+        {{ $t('questionnaire.resetAllAnswers') }}
+      </button>
     </div>
 
     <!-- Reset confirmation dialog -->
     <ConfirmDialog
       v-if="showResetConfirm"
-      title="Reset All Answers?"
-      message="This will clear every answer and start from scratch. This cannot be undone."
-      confirm-label="Reset"
-      cancel-label="Keep Answers"
+      :title="$t('questionnaire.resetTitle')"
+      :message="$t('questionnaire.resetMessage')"
+      :confirm-label="$t('questionnaire.resetLabel')"
+      :cancel-label="$t('settings.keepAnswers')"
       icon="🔄"
       uid="questionnaire-reset"
       @confirm="doReset"
@@ -140,6 +160,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, reactive, ref, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useQuestionnaireStore } from '../../stores/questionnaire';
 import { questions as allTopLevelQuestions } from '../../data/questions';
 import { getMaxPossibleScore } from '../../services/scoring';
@@ -149,6 +170,7 @@ import ConfirmDialog from './ConfirmDialog.vue';
 
 const store = useQuestionnaireStore();
 const router = useRouter();
+const { t } = useI18n();
 const containerRef = ref<HTMLElement | null>(null);
 const questionRefs = reactive<Record<string, HTMLElement>>({});
 const mode = ref<'scroll' | 'step'>('scroll');
@@ -180,12 +202,13 @@ const formattedScore = computed(() =>
 );
 
 const scoreQuality = computed(() => {
-  if (answeredCount.value === 0) return { label: 'Not Started', color: '#475569' };
+  if (answeredCount.value === 0)
+    return { label: t('questionnaire.scoreQuality.notStarted'), color: '#475569' };
   const pct = score.value / maxScore;
-  if (pct >= 0.75) return { label: 'Manifesting ✦', color: '#1a8a3a' };
-  if (pct >= 0.5) return { label: 'Aligned', color: '#0d7a5f' };
-  if (pct >= 0.25) return { label: 'Building', color: '#4c3f8c' };
-  return { label: 'Starting Out', color: '#475569' };
+  if (pct >= 0.75) return { label: t('questionnaire.scoreQuality.manifesting'), color: '#1a8a3a' };
+  if (pct >= 0.5) return { label: t('questionnaire.scoreQuality.aligned'), color: '#0d7a5f' };
+  if (pct >= 0.25) return { label: t('questionnaire.scoreQuality.building'), color: '#4c3f8c' };
+  return { label: t('questionnaire.scoreQuality.startingOut'), color: '#475569' };
 });
 
 const submitButtonState = computed(() => {
@@ -194,21 +217,21 @@ const submitButtonState = computed(() => {
   if (answeredCount.value === 0) {
     return {
       cssClass: 'incomplete',
-      title: 'Answer some questions to complete your assessment',
-      hint: `0 of ${store.totalQuestions} questions answered — unanswered questions default to minimum`
+      title: t('questionnaire.submitTitle.zero'),
+      hint: t('questionnaire.submitHint.zero', { total: store.totalQuestions })
     };
   }
   if (pct < 100) {
     return {
       cssClass: 'partial',
-      title: `${remaining} question${remaining === 1 ? '' : 's'} remaining`,
-      hint: `${remaining} question${remaining === 1 ? '' : 's'} remaining — unanswered questions default to minimum`
+      title: t('questionnaire.submitTitle.partial', { remaining }, remaining),
+      hint: t('questionnaire.submitHint.partial', { remaining }, remaining)
     };
   }
   return {
     cssClass: 'complete',
-    title: 'Submit your completed assessment',
-    hint: 'All questions answered — ready to submit!'
+    title: t('questionnaire.submitTitle.complete'),
+    hint: t('questionnaire.submitHint.complete')
   };
 });
 
@@ -250,7 +273,7 @@ const submit = async () => {
     router.push('/dashboard');
   } catch (e) {
     console.error(e);
-    submitError.value = 'Failed to save session: ' + e;
+    submitError.value = t('questionnaire.submitError', { error: String(e) });
   } finally {
     isSubmitting.value = false;
   }

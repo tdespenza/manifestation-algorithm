@@ -2,14 +2,17 @@
   <div class="network-status" :class="{ connected: count > 0 }">
     <div class="status-indicator"></div>
     <span class="status-text">{{ statusText }}</span>
-    <span v-if="count > 0" class="peer-count">({{ count }} peers)</span>
+    <span v-if="count > 0" class="peer-count">({{ t('network.peers', { count }) }})</span>
     <span v-if="manifestations > 0" class="manifestation-count"
-      >| {{ manifestations }} results</span
+      >| {{ t('network.results', { count: manifestations }) }}</span
     >
-    <span v-if="avgScore && avgScore > 0" class="avg-score" title="Average Score"
+    <span v-if="avgScore && avgScore > 0" class="avg-score" :title="t('network.averageScoreTitle')"
       >| μ: {{ avgScore.toFixed(1) }}</span
     >
-    <span v-if="percentile90 && percentile90 > 0" class="p90" title="90th Percentile"
+    <span
+      v-if="percentile90 && percentile90 > 0"
+      class="p90"
+      :title="t('network.percentile90Title')"
       >| P90: {{ percentile90.toFixed(1) }}</span
     >
   </div>
@@ -17,13 +20,15 @@
 
 <script setup lang="ts">
 import { onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useNetwork } from '../composables/useNetwork';
 
 const { count, manifestations, avgScore, percentile90, init } = useNetwork();
+const { t } = useI18n();
 
 const statusText = computed(() => {
-  if (count.value > 0) return 'Online';
-  return 'Searching...';
+  if (count.value > 0) return t('network.online');
+  return t('network.searching');
 });
 
 onMounted(() => {

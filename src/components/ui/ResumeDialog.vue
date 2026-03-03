@@ -3,31 +3,34 @@
     <dialog open class="dialog" aria-labelledby="resume-title">
       <div class="icon">{{ isHistorical ? '📋' : '💡' }}</div>
       <h2 id="resume-title">
-        {{ isHistorical ? 'Continue from Last Session?' : 'Welcome Back!' }}
+        {{ isHistorical ? $t('resume.continueLastSession') : $t('resume.welcomeBack') }}
       </h2>
 
       <p v-if="isHistorical">
-        Your answers from your <strong>last completed session</strong> have been pre-loaded. Would
-        you like to keep those values as a starting point, or begin with a completely blank
-        questionnaire?
+        {{ $t('resume.historicalBody') }}
       </p>
       <p v-else>
-        You have a session in progress. Would you like to resume where you left off, or start a
-        fresh assessment?
+        {{ $t('resume.activeBody') }}
       </p>
 
       <div v-if="confirmingFresh" class="confirm-zone">
-        <p class="confirm-warning">⚠️ This will clear all current answers. Are you sure?</p>
+        <p class="confirm-warning">{{ $t('resume.clearWarning') }}</p>
         <div class="actions">
-          <button class="btn-danger" @click="$emit('fresh')">Yes, Start Fresh</button>
-          <button class="btn-secondary" @click="confirmingFresh = false">Cancel</button>
+          <button class="btn-danger" @click="$emit('fresh')">
+            {{ $t('resume.yesStartFresh') }}
+          </button>
+          <button class="btn-secondary" @click="confirmingFresh = false">
+            {{ $t('resume.cancel') }}
+          </button>
         </div>
       </div>
       <div v-else class="actions">
         <button class="btn-primary" @click="$emit('resume')">
-          {{ isHistorical ? 'Keep Last Values' : 'Resume Session' }}
+          {{ isHistorical ? $t('resume.keepLastValues') : $t('resume.resumeSession') }}
         </button>
-        <button class="btn-secondary" @click="confirmingFresh = true">Start Fresh</button>
+        <button class="btn-secondary" @click="confirmingFresh = true">
+          {{ $t('resume.startFresh') }}
+        </button>
       </div>
     </dialog>
   </div>
@@ -35,10 +38,12 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 defineProps<{ isHistorical?: boolean }>();
 defineEmits<{ (e: 'resume'): void; (e: 'fresh'): void }>();
 
+useI18n();
 const confirmingFresh = ref(false);
 </script>
 

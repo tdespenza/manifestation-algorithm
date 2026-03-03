@@ -5,6 +5,7 @@
  * and navigation to category detail.
  */
 import { test, expect } from '../fixtures/base';
+import en from '../../src/i18n/locales/en';
 
 test.describe('Dashboard – empty state', () => {
   test.beforeEach(async ({ dashboardPage }) => {
@@ -12,11 +13,11 @@ test.describe('Dashboard – empty state', () => {
   });
 
   test('renders the dashboard heading', async ({ dashboardPage }) => {
-    await expect(dashboardPage.heading).toHaveText('Manifestation Algorithm Tracking History');
+    await expect(dashboardPage.heading).toHaveText(en.dashboard.title);
   });
 
   test('renders the subtitle', async ({ page }) => {
-    await expect(page.locator('.dashboard-view .subtitle')).toContainText('Track your progress');
+    await expect(page.locator('.dashboard-view .subtitle')).toHaveText(en.dashboard.subtitle);
   });
 
   test('shows empty state when no sessions exist', async ({ page }) => {
@@ -94,7 +95,7 @@ test.describe('Dashboard – navigation', () => {
     // Navigate directly to a category detail - if it has no data it shows a Back button
     await page.goto('/category/TestCategory');
     await page.locator('.category-detail-view, .loading').waitFor({ timeout: 10_000 });
-    const backBtn = page.locator('.back-btn, button:has-text("Back"), button:has-text("Dashboard")').first();
+    const backBtn = page.locator('.back-btn').first();
     if (await backBtn.isVisible()) {
       await backBtn.click();
       await page.waitForURL('/dashboard', { timeout: 5_000 });

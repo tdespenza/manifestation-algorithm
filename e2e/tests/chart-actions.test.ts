@@ -18,6 +18,7 @@
 import { test, expect } from '../fixtures/base';
 import type { DBSeed } from '../fixtures/base';
 import type { Page } from '@playwright/test';
+import en from '../../src/i18n/locales/en';
 
 const SESSION_ID_1 = 'e2e-chart-action-001';
 const SESSION_ID_2 = 'e2e-chart-action-002';
@@ -90,10 +91,10 @@ test.describe('Chart Actions – Dashboard', () => {
     // 5 <option> elements: 1 placeholder + 4 formats
     const options = select.locator('option');
     await expect(options).toHaveCount(5);
-    await expect(options.nth(1)).toHaveText(/Excel/);
-    await expect(options.nth(2)).toHaveText(/CSV/);
-    await expect(options.nth(3)).toHaveText(/PDF/);
-    await expect(options.nth(4)).toHaveText(/HTML/);
+    await expect(options.nth(1)).toHaveText(en.chartActions.exportExcel);
+    await expect(options.nth(2)).toHaveText(en.chartActions.exportCsv);
+    await expect(options.nth(3)).toHaveText(en.chartActions.exportPdf);
+    await expect(options.nth(4)).toHaveText(en.chartActions.exportHtml);
   });
 
   test('no modal appears when a user selects any export format', async ({ page }) => {
@@ -116,13 +117,13 @@ test.describe('Chart Actions – Dashboard', () => {
 
   test('fullscreen button is visible when chart data is present', async ({ page }) => {
     await expect(page.locator('.chart-section')).toBeVisible();
-    const btn = page.locator('.action-btn[title="View full screen"]').first();
+    const btn = page.locator(`.action-btn[title="${en.chartActions.viewFullscreen}"]`).first();
     await expect(btn).toBeVisible();
   });
 
   test('copy button is visible when chart data is present', async ({ page }) => {
     await expect(page.locator('.chart-section')).toBeVisible();
-    const btn = page.locator('.action-btn[title="Copy Chart"]').first();
+    const btn = page.locator(`.action-btn[title="${en.chartActions.copyChart}"]`).first();
     await expect(btn).toBeVisible();
   });
 

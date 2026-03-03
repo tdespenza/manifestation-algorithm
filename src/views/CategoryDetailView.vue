@@ -1,7 +1,7 @@
 <template>
   <div v-if="categoryData.length > 0" class="category-detail-view">
     <header class="view-header">
-      <button class="back-btn" @click="$router.back()">‹ Back</button>
+      <button class="back-btn" @click="$router.back()">{{ $t('category.back') }}</button>
       <h1>{{ category }}</h1>
     </header>
 
@@ -19,12 +19,12 @@
       </div>
 
       <div class="data-table-container">
-        <h3>History</h3>
+        <h3>{{ $t('category.history') }}</h3>
         <table class="history-table">
           <thead>
             <tr>
-              <th>Date</th>
-              <th>Score</th>
+              <th>{{ $t('category.date') }}</th>
+              <th>{{ $t('category.score') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -39,9 +39,9 @@
   </div>
   <div v-else class="loading">
     <h1>{{ category || 'Category Detail' }}</h1>
-    <span v-if="historyStore.isLoading">Loading...</span>
-    <span v-else>No data found for "{{ category }}".</span>
-    <button @click="$router.push('/dashboard')">Go to Dashboard</button>
+    <span v-if="historyStore.isLoading">{{ $t('category.loading') }}</span>
+    <span v-else>{{ $t('category.noData', { category }) }}</span>
+    <button @click="$router.push('/dashboard')">{{ $t('category.goToDashboard') }}</button>
   </div>
 </template>
 

@@ -11,6 +11,7 @@
  *   7. Return to home
  */
 import { test, expect } from '../fixtures/base';
+import en from '../../src/i18n/locales/en';
 
 test.describe('Full user journey (smoke test)', () => {
   test('complete questionnaire and navigate to dashboard', async ({
@@ -21,7 +22,7 @@ test.describe('Full user journey (smoke test)', () => {
   }) => {
     // Step 1: Land on home
     await questionnairePage.goto();
-    await expect(page.locator('.home-view h1')).toHaveText('Manifestation Algorithm');
+    await expect(page.locator('.home-view h1')).toHaveText(en.app.name);
 
     // Step 2: Switch to scroll mode and interact with the first slider
     await questionnairePage.switchToScrollMode();
@@ -43,15 +44,15 @@ test.describe('Full user journey (smoke test)', () => {
 
     // Step 5: Verify redirect to dashboard
     await page.waitForURL('/dashboard', { timeout: 15_000 });
-    await expect(dashboardPage.heading).toHaveText('Manifestation Algorithm Tracking History');
+    await expect(dashboardPage.heading).toHaveText(en.dashboard.title);
 
     // Step 6: Go to settings
     await appPage.goSettings();
-    await expect(page.locator('.settings-view h1')).toHaveText('Settings');
+    await expect(page.locator('.settings-view h1')).toHaveText(en.nav.settings);
 
     // Step 7: Return home via nav
     await appPage.goHome();
-    await expect(page.locator('.home-view h1')).toHaveText('Manifestation Algorithm');
+    await expect(page.locator('.home-view h1')).toHaveText(en.app.name);
   });
 
   test('step-by-step mode: navigate all questions forward and back', async ({
@@ -72,7 +73,8 @@ test.describe('Full user journey (smoke test)', () => {
     }
 
     const textAfter = await questionnairePage.stepCounter.textContent() ?? '';
-    expect(textAfter).toMatch(new RegExp(`Question ${steps + 1} of`));
+    expect(textAfter).toContain(String(steps + 1));
+    expect(textAfter).toContain(String(total));
 
     // Navigate back
     for (let i = 0; i < steps; i++) {
@@ -80,7 +82,8 @@ test.describe('Full user journey (smoke test)', () => {
     }
 
     const textBack = await questionnairePage.stepCounter.textContent() ?? '';
-    expect(textBack).toMatch(/Question 1 of/);
+    expect(textBack).toContain('1');
+    expect(textBack).toContain(String(total));
   });
 
   test('switching between scroll and step modes preserves answers', async ({

@@ -146,3 +146,171 @@ pub struct NetworkScoresCache {
     pub scores: Vec<f64>,
     pub category_scores: std::collections::HashMap<String, Vec<f64>>,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn valid_result() -> ManifestationResult {
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+        ManifestationResult {
+            score: 5_000.0,
+            timestamp: now,
+            category_scores: std::collections::HashMap::from([("health".to_string(), 5.0)]),
+        }
+    }
+
+    // ── Score boundary (kills line-96 mutants: `<→<=` and `>→>=`) ──────────
+
+    #[test]
+    fn validate_score_zero_is_valid() {
+        // Kills `score < 0.0` → `score <= 0.0`
+        let mut r = valid_result();
+        r.score = 0.0;
+        assert!(r.validate().is_ok(), "score 0.0 should be valid");
+    }
+
+    #[test]
+    fn validate_score_max_is_valid() {
+        // Kills `score > 10_000.0` → `score >= 10_000.0`
+        let mut r = valid_result();
+        r.score = 10_000.0;
+        assert!(r.validate().is_ok(), "score 10000.0 should be valid");
+    }
+
+    #[test]
+    fn validate_score_negative_fails() {
+        let mut r = valid_result();
+        r.score = -0.1;
+        assert!(r.validate().is_err());
+    }
+
+    #[test]
+    fn validate_score_over_max_fails() {
+        let mut r = valid_result();
+        r.score = 10_000.1;
+        assert!(r.validate().is_err());
+    }
+
+    // ── Timestamp boundary (kills line-107 mutants: `>→==`, `>→>=`, `+→*`) ─
+
+    #[test]
+    fn validate_timestamp_far_future_fails() {
+        // Kills `> → ==` (600 ≠ 300) and `+ → *` (now*300 >> any real ts)
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+        let mut r = valid_result();
+        r.timestamp = now + 600;
+        assert!(r.validate().is_err(), "timestamp 600 s in future must fail");
+    }
+
+    #[test]
+    fn validate_timestamp_at_grace_boundary_is_valid() {
+        // Kills `> → >=`: now+300 must pass (not strictly greater)
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+        let mut r = valid_result();
+        r.timestamp = now + 300;
+        assert!(r.validate().is_ok(), "timestamp at exactly now+300 should be valid");
+    }
+
+    // ── Category score boundary (kills line-118 mutants: `<→==`, `<→<=`, `>→>=`) ─
+
+    #[test]
+    fn validate_category_score_zero_is_valid() {
+        // Kills `cat_score < 0.0` → `== 0.0` and `<= 0.0`
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+        let r = ManifestationResult {
+            score: 5_000.0,
+            timestamp: now,
+            category_scores: std::collections::HashMap::from([("cat".to_string(), 0.0)]),
+        };
+        assert!(r.validate().is_ok(), "category score 0.0 should be valid");
+    }
+
+    #[test]
+    fn validate_category_score_max_is_valid() {
+        // Kills `cat_score > 10.0` → `>= 10.0`
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+        let r = ManifestationResult {
+            score: 5_000.0,
+            timestamp: now,
+            category_scores: std::collections::HashMap::from([("cat".to_string(), 10.0)]),
+        };
+        assert!(r.validate().is_ok(), "category score 10.0 should be valid");
+    }
+
+    #[test]
+    fn validate_category_score_negative_fails() {
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+        let r = ManifestationResult {
+            score: 5_000.0,
+            timestamp: now,
+            category_scores: std::collections::HashMap::from([("cat".to_string(), -0.1)]),
+        };
+        assert!(r.validate().is_err());
+    }
+
+    #[test]
+    fn validate_category_score_over_max_fails() {
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+        let r = ManifestationResult {
+            score: 5_000.0,
+            timestamp: now,
+            category_scores: std::collections::HashMap::from([("cat".to_string(), 10.1)]),
+        };
+        assert!(r.validate().is_err());
+    }
+
+    #[test]
+    fn validate_category_pii_at_sign_fails() {
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+        let r = ManifestationResult {
+            score: 5_000.0,
+            timestamp: now,
+            category_scores: std::collections::HashMap::from([("user@example.com".to_string(), 5.0)]),
+        };
+        assert!(r.validate().is_err());
+    }
+
+    #[test]
+    fn validate_category_pii_http_fails() {
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+        let r = ManifestationResult {
+            score: 5_000.0,
+            timestamp: now,
+            category_scores: std::collections::HashMap::from([("http://evil.com".to_string(), 5.0)]),
+        };
+        assert!(r.validate().is_err());
+    }
+
+    #[test]
+    fn validate_fully_valid_result_passes() {
+        assert!(valid_result().validate().is_ok());
+    }
+}

@@ -5,8 +5,8 @@ import Questionnaire from '../components/ui/Questionnaire.vue';
 <template>
   <div class="home-view">
     <div class="header-section">
-      <h1>Manifestation Algorithm</h1>
-      <p class="subtitle">Rate each area of your life — discover your alignment score</p>
+      <h1>{{ $t('app.name') }}</h1>
+      <p class="subtitle">{{ $t('home.subtitle') }}</p>
     </div>
     <Questionnaire />
   </div>
