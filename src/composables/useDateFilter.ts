@@ -34,10 +34,17 @@ export function useDateFilter(
     }
   }
 
+  function parseLocalDateBoundary(dateStr: string, endOfDay = false): Date {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return endOfDay
+      ? new Date(year, month - 1, day, 23, 59, 59)
+      : new Date(year, month - 1, day, 0, 0, 0);
+  }
+
   const dateRange = computed<{ start: Date | null; end: Date | null }>(() => {
     if (selectedRange.value === 'custom') {
-      const start = customStart.value ? new Date(customStart.value + 'T00:00:00') : null;
-      const end = customEnd.value ? new Date(customEnd.value + 'T23:59:59') : null;
+      const start = customStart.value ? parseLocalDateBoundary(customStart.value) : null;
+      const end = customEnd.value ? parseLocalDateBoundary(customEnd.value, true) : null;
       return { start, end };
     }
     if (selectedRange.value === 'all') return { start: null, end: null };
