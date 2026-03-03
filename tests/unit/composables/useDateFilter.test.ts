@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { ref } from 'vue';
 import { useDateFilter, DATE_RANGES } from '../../../src/composables/useDateFilter';
 import type { SessionSummary } from '../../../src/services/db';
@@ -22,6 +22,15 @@ function makeTrend(daysAgo: number): { date: string; value: number } {
 }
 
 describe('useDateFilter', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-03-03T12:00:00.000Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   describe('DATE_RANGES', () => {
     it('has 6 preset ranges', () => {
       expect(DATE_RANGES).toHaveLength(6);
