@@ -15,8 +15,7 @@
  */
 
 import { createI18n } from 'vue-i18n';
-import en, { type Messages } from './locales/en';
-import es from './locales/es';
+import { type Messages } from './locales/en';
 
 /** Locales the app officially ships. */
 export const SUPPORTED_LOCALES: Record<string, string> = {
@@ -122,26 +121,26 @@ export const SUPPORTED_LOCALES: Record<string, string> = {
   haw: 'ʻŌlelo Hawaiʻi'
 };
 
-const generatedLocaleModules = import.meta.glob('./locales/*.json', {
+const localeModules = import.meta.glob('./locales/*.{json,ts}', {
   eager: true,
   import: 'default'
 }) as Record<string, unknown>;
 
-const generatedMessages: Record<string, Messages> = Object.fromEntries(
-  Object.entries(generatedLocaleModules).map(([filePath, localeMessages]) => {
-    const code = filePath.replace(/^.*\//, '').replace(/\.json$/, '');
-    return [code, localeMessages as Messages];
+const localeMessages: Record<string, Messages> = Object.fromEntries(
+  Object.entries(localeModules).map(([filePath, localeData]) => {
+    const code = filePath.replace(/^.*\//, '').replace(/\.(json|ts)$/, '');
+    return [code, localeData as Messages];
   })
 ) as Record<string, Messages>;
 
-const BASE_MESSAGES: Record<string, Messages> = { en, es, ...generatedMessages };
-const messages: Record<string, Messages> = {
-  ...(Object.fromEntries(Object.keys(SUPPORTED_LOCALES).map(code => [code, en])) as Record<
-    string,
-    Messages
-  >),
-  ...BASE_MESSAGES
-};
+const messages: Record<string, Messages> = Object.fromEntries(
+  Object.keys(SUPPORTED_LOCALES).map(code => {
+    const message = localeMessages[code];
+    return [code, message];
+  })
+) as Record<string, Messages>;
+
+const DEFAULT_LOCALE = 'en';
 
 /** Storage key for persisting the user's locale preference. */
 const LOCALE_STORAGE_KEY = 'app_locale';
@@ -158,14 +157,14 @@ function resolveInitialLocale(): string {
     // localStorage / navigator may be unavailable in test/SSR environments.
   }
 
-  return 'en';
+  return DEFAULT_LOCALE;
 }
 
 export const i18n = createI18n({
   legacy: false, // Use Composition API mode
   globalInjection: true, // Makes $t() / $d() / $n() available in all templates
   locale: resolveInitialLocale(),
-  fallbackLocale: 'en',
+  fallbackLocale: DEFAULT_LOCALE,
   messages,
   // Use bracket notation so eslint-plugin-vue-i18n doesn't flag missing keys.
   missingWarn: false,
