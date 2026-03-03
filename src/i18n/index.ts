@@ -122,10 +122,26 @@ export const SUPPORTED_LOCALES: Record<string, string> = {
   haw: 'ʻŌlelo Hawaiʻi'
 };
 
-const BASE_MESSAGES: Record<string, Messages> = { en, es };
-const messages: Record<string, Messages> = Object.fromEntries(
-  Object.keys(SUPPORTED_LOCALES).map(code => [code, BASE_MESSAGES[code] ?? en])
+const generatedLocaleModules = import.meta.glob('./locales/*.json', {
+  eager: true,
+  import: 'default'
+}) as Record<string, unknown>;
+
+const generatedMessages: Record<string, Messages> = Object.fromEntries(
+  Object.entries(generatedLocaleModules).map(([filePath, localeMessages]) => {
+    const code = filePath.replace(/^.*\//, '').replace(/\.json$/, '');
+    return [code, localeMessages as Messages];
+  })
 ) as Record<string, Messages>;
+
+const BASE_MESSAGES: Record<string, Messages> = { en, es, ...generatedMessages };
+const messages: Record<string, Messages> = {
+  ...(Object.fromEntries(Object.keys(SUPPORTED_LOCALES).map(code => [code, en])) as Record<
+    string,
+    Messages
+  >),
+  ...BASE_MESSAGES
+};
 
 /** Storage key for persisting the user's locale preference. */
 const LOCALE_STORAGE_KEY = 'app_locale';
@@ -160,8 +176,12 @@ export const i18n = createI18n({
 export function setLocale(locale: string): void {
   if (!(locale in SUPPORTED_LOCALES)) return;
   (i18n.global.locale as { value: string }).value = locale;
-  localStorage.setItem(LOCALE_STORAGE_KEY, locale);
-  document.documentElement.setAttribute('lang', locale);
+  try {
+    localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+    document.documentElement.setAttribute('lang', locale);
+  } catch {
+    // localStorage / document may be unavailable in test/SSR environments.
+  }
 }
 
 /** Return the currently active locale code. */

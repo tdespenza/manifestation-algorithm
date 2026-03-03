@@ -13,6 +13,7 @@
     "!src/router/**",
     "!src/types/**",
     "!src/data/**",
+    "!src/i18n/index.ts",
     "!src/i18n/locales/**",
     "!src/**/*.test.ts",
     "!src/**/*.spec.ts"

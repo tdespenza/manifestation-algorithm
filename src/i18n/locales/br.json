@@ -1,0 +1,236 @@
+{
+  "nav": {
+    "questionnaire": "Goulennoù",
+    "history": "Istor",
+    "settings": "Arventennoù"
+  },
+  "app": {
+    "name": "Algoritm diskouezañ",
+    "unexpectedError": "Degouezhet ez eus bet ur fazi dic'hortoz."
+  },
+  "home": {
+    "subtitle": "Priziit pep tachenn eus ho buhez — dizoloit ho skor aliañ"
+  },
+  "dashboard": {
+    "title": "Istor heuliañ an algoritmoù diskouezañ",
+    "subtitle": "Heuliañ ho mont en-dro a-hed an amzer",
+    "loading": "O kargañ ho istor...",
+    "noData": "Roadenn ebet evit ar prantad-mañ",
+    "progressTrend": "Tremen an araokadennoù",
+    "progressToGoal": "Mont war-raok betek ar pal",
+    "ofGoal": "{pct}% eus ar pal",
+    "goalReached": "🎯 Tizhet eo ar pal !",
+    "categoryBreakdown": "Disrannadur ar rummadoù",
+    "noSessionsRange": "Sesion ebet er rummad-mañ",
+    "tryWiderRange": "Klaskit ur prantad ledanoc'h pe dibabit ur prantad disheñvel.",
+    "noSessionsYet": "Abadenn ebet c'hoazh",
+    "completeFirst": "Echuit ho priziadenn gentañ evit gwelet ho mont en-dro hag ho mont en-dro amañ.",
+    "startFirst": "Kregiñ gant ar priziadenn gentañ",
+    "export": {
+      "date": "Deiziad",
+      "time": "Amzer",
+      "totalScore": "Skor hollek",
+      "duration": "Padelezh (munutenn)",
+      "notes": "Notennoù"
+    }
+  },
+  "stats": {
+    "averageScore": "Skor keitat",
+    "medianScore": "Skor kreiz",
+    "highestScore": "Skor uhelañ",
+    "totalSessions": "Hollad an emvodoù"
+  },
+  "network": {
+    "rankings": "Renkadur ar rouedadoù",
+    "searchingPeers": "Klask a ra ar c'henseurted...",
+    "searching": "O klask...",
+    "online": "Enlinenn",
+    "peers": "{count} peers",
+    "results": "{count} disoc'hoù",
+    "avgShort": "Keitat",
+    "p90Short": "P90",
+    "averageScoreTitle": "Skor keitat",
+    "percentile90Title": "90vet dregantad",
+    "globalAverage": "Keitat hollek",
+    "percentile90": "90vet dregantad",
+    "manifestations": "Diskouezadegoù",
+    "activePeers": "Kevredidi oberiant",
+    "categoryRankings": "Renkadur ar rummadoù"
+  },
+  "focusAreas": {
+    "title": "Tachennoù pouezus",
+    "subtitle": "Ho 3 rummad gant ar poentoù izelañ — gwellaat anezho a zegas ar gounidoù brasañ.",
+    "empty": "Echuiñ muioc'h a abadennoù evit gwelet alioù personelaet evit an tachennoù pouezusañ."
+  },
+  "sessions": {
+    "recent": "Emvodoù diwezhañ",
+    "deselectAll": "Diziuzañ an holl",
+    "selectAll": "Dibab an holl",
+    "deleteCount": "Dilemel {count}",
+    "cancel": "Nullañ",
+    "select": "Diuzañ",
+    "deleting": "O tilemel…"
+  },
+  "settings": {
+    "title": "Arventennoù an arload",
+    "close": "Serriñ an arventennoù",
+    "dataManagement": "Merañ ar roadennoù",
+    "saveLastSession": "Enrollañ an abadenn ziwezhañ",
+    "saveLastSessionDesc": "Leuniañ a-raok ar respontoù eus ho prantad echuet diwezhañ.",
+    "resetProgress": "Adderaouekaat an araokadennoù",
+    "resetProgressDesc": "Diverkañ an holl respontoù enrollet ha kregiñ a-nevez.",
+    "goals": "Palioù",
+    "targetScore": "Skor pal",
+    "targetScoreDesc": "Lakait ur skor pal (1 000–10 000) evit heuliañ ho mont en-dro war ar panel.",
+    "set": "Termeniñ",
+    "clearGoal": "Sklaer",
+    "currentTarget": "Pal bremañ :",
+    "on": "War",
+    "off": "Lazhet",
+    "version": "Algoritm diskouezañ {version}",
+    "clearAllAnswers": "Diverkañ an holl respontoù",
+    "clearConfirmTitle": "Diverkañ an holl respontoù",
+    "clearConfirmMessage": "Gant-se e vo diverket ho respontoù bremanel da viken ha ne c'hallont ket bezañ nullet.",
+    "clearConfirmLabel": "Sklaer",
+    "keepAnswers": "Mirout ar respontoù",
+    "language": "Yezh",
+    "languageDesc": "Dibabit ar yezh diskouez evit an arload.",
+    "languageCount": "{count} yezhoù hegerz",
+    "goalErrorRange": "Lakait ur skor etre 1 000 ha 10 000 mar plij."
+  },
+  "questionnaire": {
+    "saving": "Enrollañ...",
+    "saved": "Enrollet",
+    "progressText": "{pct}% echu ({answered}/{total})",
+    "progressAria": "Araokadennoù echuiñ ar priziañ",
+    "maxScore": "Uhelañ : {score}",
+    "answerToScore": "Respont d'ar skor",
+    "currentScore": "Skor bremañ",
+    "scrollAll": "Riklañ an holl",
+    "stepByStep": "Pazenn-ha-pazenn",
+    "questionOf": "Goulenn {current} digant {total}",
+    "previous": "← A-raok",
+    "next": "Da heul →",
+    "completeAssessment": "Priziadenn klok",
+    "startFresh": "C'hoant da grogiñ a-nevez ?",
+    "resetAllAnswers": "Adderaouekaat an holl respontoù",
+    "resetTitle": "Adderaouekaat an holl respontoù ?",
+    "resetMessage": "Gant-se e vo sklaeraet pep respont ha kroget adalek ar penn-kentañ. Ne c'haller ket distreiñ.",
+    "resetLabel": "Adderaouekaat",
+    "scoreQuality": {
+      "notStarted": "N'eo ket kroget",
+      "manifesting": "O tiskouez ❆",
+      "aligned": "Aliet",
+      "building": "Savadur",
+      "startingOut": "O kregiñ"
+    },
+    "submitHint": {
+      "zero": "0 eus {total} goulennoù respontet — ar goulennoù hep respont a zo da nebeutañ",
+      "partial": "{remaining} goulenn a chom — goulennoù hep respont a zo da vihanañ dre ziouer | {remaining} goulennoù a chom — ar goulennoù hep respont a zo da vihanañ dre ziouer",
+      "complete": "Respontet eo d'an holl c'houlennoù — prest da ginnig !"
+    },
+    "submitTitle": {
+      "zero": "Respontit da c'houlennoù zo evit echuiñ ho priziadenn",
+      "partial": "{remaining} goulenn a chom | {remaining} goulennoù a chom",
+      "complete": "Kas ho priziadenn echuet"
+    },
+    "submitError": "C'hwitet eo enrollañ an dalc'h : {error}",
+    "dotTitle": "Goulenn {index}",
+    "dotAria": "Mont d'ar goulenn {index}",
+    "keyboardHint": "Ali : Implijit ← → evit merdeiñ · 1–9 / 0 evit priziañ"
+  },
+  "onboarding": {
+    "step0Title": "Degemer mat en Algoritm Diskouezadeg",
+    "step0Body1": "An ostilh-mañ a sikour ac'hanoc'h da vuzuliañ pegen liammet eo ho spered, ho kustumoù hag ho oberoù pemdeziek evit tizhout ho palioù. Respontit da bep goulenn en un doare onest evit kaout ho skor bremañ.",
+    "step0Body2": "Leuniañ ar goulennaoueg a-wechoù evit heuliañ ho kresk a-hed an amzer ha gwelet peseurt tachennoù o deus ezhomm ar muiañ a evezh.",
+    "step1Title": "Penaos e ya en-dro ar skorañ",
+    "step1Body": "Pep goulenn a dalv un niver termenet a boentoù. Priziit hoc'h-unan war ur skalfad 1-10 evit pep goulenn. Ur feur 10 a dalvez e vez enkorfet ar pennaenn-se penn-da-benn ; 1 a dalvez n'hoc'h eus ket kroget.",
+    "step1TargetHint": "🎯 Pal : {target} | Uhelañ : {maximum}",
+    "excellent": "Dreist",
+    "excellentRange": "7.001 – 10.000",
+    "excellentNote": "Aliañ kreñv — kenderc'hel",
+    "good": "Mat",
+    "goodRange": "4.001 – 7.000",
+    "goodNote": "Diazez start — plas da greskiñ",
+    "needsWork": "Ezhomm labour",
+    "needsWorkRange": "0 – 4,000",
+    "needsWorkNote": "Lakaat ar gaoz war ar pezh a zo diazez da gentañ",
+    "step2Title": "Chom a ra prevez ho roadennoù",
+    "step2Body1": "Enrollet e vez ho holl respontoù hag ho istor poentoù war ho trevnad en ur implijout un diaz roadennoù SQLite enrineget. Ne vez kaset netra da servijer ebet hep hoc'h aotre splann.",
+    "step2Body2": "Gant an arc'hwel rannañ etre ar c'hevelerien dibar e c'hallit gwelet ar poentoù dastumet dizanv gant implijerien all. Ne rann nemet un diverradenn sinet dre ar c'hriptografezh — biskoazh ho respontoù hiniennel.",
+    "readyText": "Prest? Deomp da gaout ho skor diazez.",
+    "skipIntro": "Dilezel an digoradur",
+    "next": "Kentañ",
+    "getStarted": "Kregiñ"
+  },
+  "sharing": {
+    "title": "Rannañ rouedadoù dizanv",
+    "privacyFirst": "🔒 Ar prevezded da gentañ",
+    "description": "Mar fell deoc'h, kinnigit ho tisoc'hoù en un doare dizanv d'ar rouedad hollek. Ne vez ket rannet anv, postel, chomlec'h IP pe ID urzhiataer ebet.",
+    "enabled": "Rannañ gweredekaet — kemer perzh er rouedad",
+    "disabled": "Diweredekaet eo ar rannañ (dre ziouer)",
+    "activeBadge": "✓ Rannet e vez ho poentoù dizanv gant ho mignoned",
+    "enableNote": "Gweredekaat evit gwelet ho renk dregantad e-keñver ar rouedad hollek."
+  },
+  "category": {
+    "back": "< Kein",
+    "history": "Istor",
+    "date": "Deiziad",
+    "score": "Merkañ",
+    "loading": "O kargañ...",
+    "notEnoughData": "Roadennoù a-walc'h",
+    "noData": "N'eus bet kavet roadennoù ebet evit “{category}”.",
+    "goToDashboard": "Kit da Dashboard"
+  },
+  "chartActions": {
+    "viewFullscreen": "Gwelet ar skramm a-bezh",
+    "exitFullscreen": "Mont kuit eus ar skramm a-bezh",
+    "copyChart": "Eilañ ar gartenn",
+    "exportChart": "Kartenn ezporzhiañ",
+    "exportDefault": "⬇ Ezporzhiañ",
+    "exportExcel": "📊 Ezporzhiañ Excel",
+    "exportCsv": "📄 Ezporzhiañ CSV",
+    "exportPdf": "📑 Ezporzhiañ PDF",
+    "exportHtml": "🌐 Ezporzhiañ HTML",
+    "copied": "Eilet eo bet ar gartenn war ar c'hlipbord",
+    "copyFailed": "C'hwitet en deus an eilañ — n'eus ket tu da gaout ar c'hlipbord",
+    "saveCancelled": "Nullet enrollañ"
+  },
+  "resume": {
+    "continueLastSession": "Kenderc'hel gant an abadenn ziwezhañ ?",
+    "welcomeBack": "Degemer mat en-dro !",
+    "historicalBody": "Rakkarget eo bet ho respontoù eus ho dalc'h diwezhañ echuet. Ha fellout a rafe deoc'h mirout an talvoudoù-se evel poent loc'hañ, pe kregiñ gant ur goulennaoueg goullo penn-da-benn ?",
+    "activeBody": "Ur c'hentelioù a zo o vont war-raok. Ha fellout a rafe deoc'h adkregiñ gant al lec'h ma'z oc'h bet paouezet, pe kregiñ gant ur priziadenn nevez ?",
+    "clearWarning": "⚠️ Diverket e vo an holl respontoù bremañ. Sur oc'h ?",
+    "yesStartFresh": "Ya, Kregiñ a-nevez",
+    "cancel": "Nullañ",
+    "keepLastValues": "Mirout an talvoudoù diwezhañ",
+    "resumeSession": "Adkregiñ gant an dalc'h",
+    "startFresh": "Kregiñ a-nevez"
+  },
+  "questionItem": {
+    "pointsSuffix": "poentoù",
+    "low": "Izel",
+    "high": "Uhel",
+    "rateAria": "Priziañ {question}"
+  },
+  "dateRange": {
+    "rangeLabel": "Skalfad:",
+    "startDate": "Deiziad kregiñ",
+    "endDate": "Deiziad echuiñ",
+    "presets": {
+      "7d": "7 devezh",
+      "30d": "30 devezh",
+      "90d": "90 Devezh",
+      "1y": "1 Bloaz",
+      "all": "A-hed an amzer",
+      "custom": "Diouzh muzul"
+    }
+  },
+  "update": {
+    "availableTitle": "v{version} a c'haller kaout !",
+    "releaseNotesFallback": "Kit war ar bajenn embann evit pellgargañ ar stumm diwezhañ.",
+    "getUpdate": "Kaout hizivadennoù",
+    "dismiss": "Disteurel"
+  }
+}
