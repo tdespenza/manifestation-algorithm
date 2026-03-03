@@ -17,6 +17,8 @@ npm-debug.log*
 
 # Build output
 build/*.txt
+*.txt
+*.tsbuildinfo
 
 # Environment variables
 .env
