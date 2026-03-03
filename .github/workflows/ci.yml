@@ -213,8 +213,8 @@ jobs:
       - name: Ensure visual snapshots exist
         shell: bash
         run: |
-          if ! find e2e/snapshots -type f -name '*.png' -print -quit | grep -q .; then
-            echo "No baseline snapshots found. Generating initial baselines for CI."
+          if ! find e2e/snapshots -type f -name '*-chromium-linux.png' -print -quit | grep -q .; then
+            echo "No Linux Chromium baselines found. Generating initial baselines for CI."
             npm run test:visual:update
           fi
 
