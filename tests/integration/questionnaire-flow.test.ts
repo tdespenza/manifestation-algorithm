@@ -309,4 +309,23 @@ describe('E2E: Complete questionnaire flow', () => {
     );
     consoleSpy.mockRestore();
   });
+
+  it('submitSession does not wait for publish_result to resolve', async () => {
+    await toggleSharing(true);
+    tauriMocks.mockInvoke.mockImplementation((cmd: string) => {
+      if (cmd === 'publish_result') {
+        return new Promise(() => {});
+      }
+      return Promise.resolve(undefined);
+    });
+
+    const store = useQuestionnaireStore();
+    const result = await Promise.race([
+      store.submitSession(),
+      new Promise<string>(resolve => setTimeout(() => resolve('timed-out'), 25))
+    ]);
+
+    expect(result).toBe('hist-e2e-001');
+    expect(store.answers).toEqual({});
+  });
 });
