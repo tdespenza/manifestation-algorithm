@@ -164,6 +164,7 @@ import { useI18n } from 'vue-i18n';
 import { useQuestionnaireStore } from '../../stores/questionnaire';
 import { questions as allTopLevelQuestions } from '../../data/questions';
 import { getMaxPossibleScore } from '../../services/scoring';
+import { useToast } from '../../composables/useToast';
 import type { Question } from '../../types';
 import QuestionItem from './QuestionItem.vue';
 import ConfirmDialog from './ConfirmDialog.vue';
@@ -171,6 +172,7 @@ import ConfirmDialog from './ConfirmDialog.vue';
 const store = useQuestionnaireStore();
 const router = useRouter();
 const { t } = useI18n();
+const { addToast } = useToast();
 const containerRef = ref<HTMLElement | null>(null);
 const questionRefs = reactive<Record<string, HTMLElement>>({});
 const mode = ref<'scroll' | 'step'>('scroll');
@@ -268,15 +270,23 @@ const submit = async () => {
 
   submitError.value = null;
   isSubmitting.value = true;
+  let didSubmit = false;
   try {
     await store.submitSession();
-    router.push('/dashboard');
+    didSubmit = true;
   } catch (e) {
     console.error(e);
-    submitError.value = t('questionnaire.submitError', { error: String(e) });
+    const message = t('questionnaire.submitError', { error: String(e) });
+    submitError.value = message;
+    addToast(message, 'error');
   } finally {
     isSubmitting.value = false;
   }
+
+  if (!didSubmit) return;
+
+  addToast(t('questionnaire.saved'), 'success');
+  await router.push('/dashboard');
 };
 
 const questions = allTopLevelQuestions;
@@ -284,11 +294,11 @@ const questions = allTopLevelQuestions;
 onMounted(async () => {
   await store.init();
   nextTick(() => containerRef.value?.focus());
-  window.addEventListener('keydown', handleGlobalKey);
+  globalThis.addEventListener('keydown', handleGlobalKey);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleGlobalKey);
+  globalThis.removeEventListener('keydown', handleGlobalKey);
 });
 </script>
 
