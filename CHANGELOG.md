@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.4] - 2026-03-22
+### Maintenance
+- Bump rand from 0.9.2 to 0.10.0 in /src-tauri- Bump rand_core from 0.6.4 to 0.9.5 in /src-tauri- Bump tauri from 2.10.2 to 2.10.3 in /src-tauri- Bump tokio from 1.49.0 to 1.50.0 in /src-tauri- Bump actions/download-artifact from 7 to 8- Bump actions/setup-node from 4 to 6- Bump @tauri-apps/cli from 2.10.0 to 2.10.1- Bump @types/node from 25.3.2 to 25.4.0- Bump lint-staged from 16.2.7 to 16.3.3- Bump vue from 3.5.29 to 3.5.30- Bump vue-i18n from 10.0.8 to 11.3.0- Bump rand from 0.9.2 to 0.10.0 in /src-tauri- Bump rand_core from 0.6.4 to 0.9.5 in /src-tauri- Bump @types/node from 25.3.2 to 25.4.0- Bump @types/node from 25.3.2 to 25.4.0- Bump lint-staged from 16.2.7 to 16.3.3- Bump lint-staged from 16.2.7 to 16.3.3- Update rand_core to 0.6.4 and remove rand dependency
+### Other Changes
+- Enhance questionnaire submission flow with toast notifications and refactor network publishing logic- Enhance questionnaire submission flow with toast notifications and refactor network publishing logic
+### Testing
+- Enhance questionnaire flow tests with leaf ID handling and publish result validation
+
 ## [0.11.3] - 2026-03-03
 ### Other Changes
 - Translate and refine motivational phrases in Yoruba for improved clarity and engagement.- Translate motivational phrases into Kurdish for enhanced user engagement and accessibility.- Translate motivational phrases into multiple languages including Vietnamese, Xhosa, Yiddish, Yoruba, Chinese, and Zulu for improved accessibility and user engagement.
