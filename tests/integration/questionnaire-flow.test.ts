@@ -59,7 +59,7 @@ function getLeafIds(qs: typeof questions): string[] {
   const ids: string[] = [];
   const walk = (q: (typeof questions)[0]) => {
     if (q.subPoints?.length) {
-      q.subPoints.forEach(sub => walk(sub as (typeof questions)[0]));
+      q.subPoints.forEach(sub => walk(sub));
     } else {
       ids.push(q.id);
     }
@@ -266,6 +266,8 @@ describe('E2E: Complete questionnaire flow', () => {
     await toggleSharing(true);
 
     const store = useQuestionnaireStore();
+    const leafIds = getLeafIds(questions);
+    await fastSetAnswer(store, leafIds[0], 9);
     const histId = await store.submitSession();
 
     expect(histId).toBe('hist-e2e-001');
@@ -273,9 +275,22 @@ describe('E2E: Complete questionnaire flow', () => {
       'publish_result',
       expect.objectContaining({
         score: expect.any(Number),
-        categoryScores: expect.any(Object)
+        categoryScores: expect.objectContaining({
+          [leafIds[0]]: 9,
+          [leafIds[1]]: 1
+        })
       })
     );
+
+    const publishCall = tauriMocks.mockInvoke.mock.calls.find(
+      (call: unknown[]) => call[0] === 'publish_result'
+    );
+    expect(publishCall?.[1]).toMatchObject({
+      categoryScores: expect.any(Object)
+    });
+    expect(
+      Object.keys((publishCall?.[1] as { categoryScores: Record<string, number> }).categoryScores)
+    ).toHaveLength(leafIds.length);
   });
 
   it('submitSession does NOT call publish_result when sharing is disabled', async () => {
