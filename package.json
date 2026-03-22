@@ -76,7 +76,7 @@
     "@stryker-mutator/typescript-checker": "^9.6.0",
     "@stryker-mutator/vitest-runner": "^9.6.0",
     "@tauri-apps/cli": "^2",
-    "@types/node": "^25.4.0",
+    "@types/node": "^25.5.0",
     "@types/uuid": "^11.0.0",
     "@vitalets/google-translate-api": "^9.2.1",
     "@vitejs/plugin-vue": "^6.0.4",
