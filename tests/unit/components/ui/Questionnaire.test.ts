@@ -5,6 +5,10 @@ import { createRouter, createMemoryHistory } from 'vue-router';
 import Questionnaire from '@/components/ui/Questionnaire.vue';
 import { useQuestionnaireStore } from '@/stores/questionnaire';
 
+const toastMocks = vi.hoisted(() => ({
+  addToast: vi.fn()
+}));
+
 vi.mock('@/services/db', () => ({
   saveAnswer: vi.fn(),
   loadAnswers: vi.fn().mockResolvedValue({}),
@@ -28,6 +32,12 @@ const router = createRouter({
 
 vi.mock('@/components/ui/QuestionItem.vue', () => ({
   default: { template: '<div class="question-item-stub" />' }
+}));
+
+vi.mock('@/composables/useToast', () => ({
+  useToast: () => ({
+    addToast: toastMocks.addToast
+  })
 }));
 
 function makeWrapper(initialState: Record<string, unknown> = {}, stubActions = true) {
@@ -56,6 +66,7 @@ function makeWrapper(initialState: Record<string, unknown> = {}, stubActions = t
 describe('Questionnaire.vue', () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    toastMocks.addToast.mockReset();
   });
 
   afterEach(() => {
@@ -151,6 +162,7 @@ describe('Questionnaire.vue', () => {
     await wrapper.find('.submit-button').trigger('click');
     await flushPromises();
     expect(router.currentRoute.value.path).toBe('/dashboard');
+    expect(toastMocks.addToast).toHaveBeenCalledWith('Saved', 'success');
   });
 
   it('shows error message on submit failure', async () => {
@@ -164,6 +176,7 @@ describe('Questionnaire.vue', () => {
     const errorEl = wrapper.find('.error-hint');
     expect(errorEl.exists()).toBe(true);
     expect(errorEl.text()).toContain('DB error');
+    expect(toastMocks.addToast).toHaveBeenCalledWith(expect.stringContaining('DB error'), 'error');
   });
 
   it('does not invoke submitSession while already submitting', async () => {
@@ -187,7 +200,7 @@ describe('Questionnaire.vue', () => {
     makeWrapper();
     const store = useQuestionnaireStore();
     // In scroll mode (default), listener still receives keydown from window but exits immediately
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
     expect(store.goToNext).not.toHaveBeenCalled();
   });
 
@@ -197,7 +210,7 @@ describe('Questionnaire.vue', () => {
     const buttons = wrapper.findAll('.mode-toggle button');
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
     expect(store.goToNext).toHaveBeenCalled();
   });
 
@@ -207,7 +220,7 @@ describe('Questionnaire.vue', () => {
     const buttons = wrapper.findAll('.mode-toggle button');
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
     expect(store.goToNext).toHaveBeenCalled();
   });
 
@@ -217,7 +230,7 @@ describe('Questionnaire.vue', () => {
     const buttons = wrapper.findAll('.mode-toggle button');
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
     expect(store.goToPrev).toHaveBeenCalled();
   });
 
@@ -227,7 +240,7 @@ describe('Questionnaire.vue', () => {
     const buttons = wrapper.findAll('.mode-toggle button');
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
+    globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
     expect(store.goToPrev).toHaveBeenCalled();
   });
 
@@ -243,7 +256,7 @@ describe('Questionnaire.vue', () => {
     const buttons = wrapper.findAll('.mode-toggle button');
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: '5' }));
+    globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: '5' }));
     expect(store.setAnswer).toHaveBeenCalledWith('q1', 5);
   });
 
@@ -260,7 +273,7 @@ describe('Questionnaire.vue', () => {
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
     (store.setAnswer as ReturnType<typeof vi.fn>).mockClear();
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: '0' }));
+    globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: '0' }));
     expect(store.setAnswer).toHaveBeenCalledTimes(1);
     expect(store.setAnswer).toHaveBeenCalledWith('q1', 10);
   });
@@ -274,7 +287,7 @@ describe('Questionnaire.vue', () => {
     const buttons = wrapper.findAll('.mode-toggle button');
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: '7' }));
+    globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: '7' }));
     expect(store.setAnswer).not.toHaveBeenCalled();
   });
 
@@ -288,7 +301,7 @@ describe('Questionnaire.vue', () => {
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
     (store.setAnswer as ReturnType<typeof vi.fn>).mockClear();
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: '0' }));
+    globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: '0' }));
     expect(store.setAnswer).not.toHaveBeenCalled();
   });
 
@@ -302,13 +315,13 @@ describe('Questionnaire.vue', () => {
     const inputEl = document.createElement('input');
     const event = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true });
     Object.defineProperty(event, 'target', { value: inputEl });
-    window.dispatchEvent(event);
+    globalThis.dispatchEvent(event);
     expect(store.goToNext).not.toHaveBeenCalled();
   });
 
   it('registers and cleans up the global keydown listener on mount/unmount', async () => {
-    const addSpy = vi.spyOn(window, 'addEventListener');
-    const removeSpy = vi.spyOn(window, 'removeEventListener');
+    const addSpy = vi.spyOn(globalThis, 'addEventListener');
+    const removeSpy = vi.spyOn(globalThis, 'removeEventListener');
 
     const wrapper = makeWrapper();
     await wrapper.vm.$nextTick();
@@ -477,7 +490,7 @@ describe('Questionnaire.vue', () => {
     await wrapper.vm.$nextTick();
     // Override currentQuestion to undefined
     vi.spyOn(store, 'currentQuestion', 'get').mockReturnValue(undefined as any);
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: '5' }));
+    globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: '5' }));
     // Should NOT have called setAnswer
     expect(store.setAnswer).not.toHaveBeenCalled();
   });
@@ -489,7 +502,7 @@ describe('Questionnaire.vue', () => {
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
     vi.spyOn(store, 'currentQuestion', 'get').mockReturnValue(undefined as any);
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: '0' }));
+    globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: '0' }));
     expect(store.setAnswer).not.toHaveBeenCalled();
   });
 
@@ -509,7 +522,7 @@ describe('Questionnaire.vue', () => {
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
     // Press a key that doesn't match any branch: not Arrow, not 1-9, not 0
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'a' }));
+    globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'a' }));
     expect(store.goToNext).not.toHaveBeenCalled();
     expect(store.goToPrev).not.toHaveBeenCalled();
     expect(store.setAnswer).not.toHaveBeenCalled();

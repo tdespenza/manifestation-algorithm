@@ -211,6 +211,18 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
     }
   }
 
+  function publishSessionResult(finalScore: number, fullAnswers: Record<string, number>) {
+    const { sharingEnabled } = useNetwork();
+    if (!sharingEnabled.value) return;
+
+    void invoke('publish_result', {
+      score: finalScore,
+      categoryScores: { ...fullAnswers }
+    }).catch(e => {
+      console.error('Failed to publish result to network:', e);
+    });
+  }
+
   async function submitSession(): Promise<string> {
     try {
       isSaving.value = true;
@@ -222,19 +234,12 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
       // Recalculate score from the complete answer set (including default fills)
       const finalScore = calculateScore(fullAnswers);
       const historyId = await saveHistoricalSession(finalScore, fullAnswers);
-      // Publish anonymously to the P2P network if the user has opted in.
-      // This is non-fatal: a network failure must never prevent the session from saving.
-      const { sharingEnabled } = useNetwork();
-      if (sharingEnabled.value) {
-        try {
-          await invoke('publish_result', { score: finalScore, categoryScores: fullAnswers });
-        } catch (e) {
-          console.error('Failed to publish result to network:', e);
-        }
-      }
       await clearSession(sessionId.value);
       answers.value = {};
       currentIndex.value = 0;
+      // Anonymous network sharing is a best-effort side effect and must never
+      // keep the local save flow in a perpetual loading state.
+      publishSessionResult(finalScore, fullAnswers);
       return historyId;
     } catch (e) {
       console.error('Failed to submit session:', e);
