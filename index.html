@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manifestation Algorithm — Track Your Personal Development Score</title>
+  <meta name="description" content="A privacy-first desktop application for scoring and tracking your personal development across 40 life categories. Completely offline, encrypted, and free.">
+  <meta property="og:title" content="Manifestation Algorithm">
+  <meta property="og:description" content="Track your personal development across 40 life categories. Encrypted, offline-first, cross-platform.">
+  <meta property="og:url" content="https://tdespenza.github.io/manifestation-algorithm">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:          #ffffff;
+      --bg-card:     #f9f9f9;
+      --border:      #e0e0e0;
+      --border-gold: rgba(27,45,94,.22);
+      --gold:        #1b2d5e;
+      --gold-light:  #2a4a8c;
+      --gold-dim:    #4a6ab0;
+      --text:        #1a1a1a;
+      --text-muted:  #666666;
+      --radius:      8px;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+    a { color: var(--gold-light); text-decoration: none; }
+    a:hover { color: #0d1f4a; }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2.5rem; height: 60px;
+      background: rgba(255,255,255,.97); backdrop-filter: blur(16px);
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+      border-bottom: 1px solid var(--border-gold);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: .6rem;
+      font-family: 'Playfair Display', serif; font-size: 1.05rem;
+      font-weight: 700; color: #1a1a1a; letter-spacing: .02em;
+    }
+    .nav-logo-img {
+      width: 38px; height: 38px; flex-shrink: 0;
+      filter: drop-shadow(0 0 6px rgba(27,45,94,.18));
+    }
+    /* ── Hero logo mark ── */
+    .hero-logo-wrap {
+      display: flex; justify-content: center;
+      margin-bottom: 1.75rem;
+    }
+    .hero-logo {
+      width: 96px; height: 96px;
+      filter: drop-shadow(0 0 24px rgba(27,45,94,.22)) drop-shadow(0 0 8px rgba(27,45,94,.15));
+      transition: filter .35s;
+    }
+    .hero-logo:hover {
+      filter: drop-shadow(0 0 36px rgba(27,45,94,.35)) drop-shadow(0 0 14px rgba(27,45,94,.22));
+    }
+    .nav-links {
+      display: flex; gap: 2rem; font-size: .8rem;
+      letter-spacing: .09em; text-transform: uppercase; font-weight: 500;
+    }
+    .nav-links a { color: #444444; transition: color .2s; }
+    .nav-links a:hover { color: var(--gold-light); }
+    .nav-cta {
+      display: flex; align-items: center; gap: .45rem;
+      background: transparent; border: 1px solid var(--border-gold);
+      color: var(--gold-light); padding: .38rem 1rem; border-radius: 3px;
+      font-size: .76rem; font-weight: 600; letter-spacing: .07em;
+      text-transform: uppercase; transition: background .2s;
+    }
+    .nav-cta:hover { background: rgba(27,45,94,.08); color: var(--gold-light); }
+    @media (max-width: 680px) { .nav-links { display: none; } nav { padding: 0 1.25rem; } }
+
+    /* ── DIVIDERS ── */
+    .gold-rule {
+      width: 100%; height: 1px; border: none;
+      background: linear-gradient(90deg, transparent 0%, var(--gold-dim) 25%, var(--gold) 50%, var(--gold-dim) 75%, transparent 100%);
+    }
+    .gold-rule-sm {
+      width: 72px; height: 1px; border: none;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 1.1rem auto 1.75rem;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; text-align: center;
+      padding: 7rem 1.5rem 5rem; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse 70% 50% at 50% -5%, rgba(27,45,94,.05) 0%, transparent 65%);
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: .5rem;
+      border: 1px solid var(--border-gold); color: var(--gold-light);
+      font-size: .7rem; font-weight: 600; letter-spacing: .15em;
+      text-transform: uppercase; padding: .3rem 1rem; border-radius: 2px;
+      margin-bottom: 2rem; background: rgba(27,45,94,.05);
+    }
+    .hero-eyebrow::before, .hero-eyebrow::after { content: '◆'; font-size: .45rem; color: var(--gold-dim); }
+    #version-badge {
+      display: inline-block; border: 1px solid rgba(27,45,94,.18);
+      color: var(--text-muted); font-size: .7rem; letter-spacing: .06em;
+      padding: .18rem .7rem; border-radius: 2px; margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.4rem, 6vw, 4.5rem);
+      font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; color: #1a1a1a;
+    }
+    .hero h1 em {
+      font-style: italic;
+      background: linear-gradient(135deg, #2a4a8c 0%, var(--gold) 50%, #0d1f4a 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero-lead {
+      max-width: 580px; margin: 0 auto 3rem;
+      font-size: 1.05rem; color: var(--text-muted);
+      font-weight: 300; line-height: 1.8;
+    }
+    .hero-lead strong { color: var(--gold-light); font-weight: 500; }
+
+    /* ── DOWNLOAD ── */
+    #download-section { max-width: 660px; margin: 0 auto 1.5rem; padding: 0 1rem; }
+    .platform-detected {
+      background: rgba(27,45,94,.05); border: 1px solid var(--border-gold);
+      color: var(--gold-light); padding: .55rem 1rem; border-radius: 4px;
+      font-size: .82rem; letter-spacing: .03em; margin-bottom: 1.1rem; display: none;
+    }
+    .download-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: .85rem; }
+    @media (max-width: 720px) { .download-grid { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 400px) { .download-grid { grid-template-columns: 1fr; } }
+    .dl-btn {
+      display: flex; flex-direction: column; align-items: center; gap: .5rem;
+      padding: 1.25rem .9rem; border-radius: var(--radius);
+      border: 1px solid var(--border); background: var(--bg-card);
+      color: var(--text); font-size: .9rem; font-weight: 600; cursor: pointer;
+      transition: border-color .2s, transform .2s, background .2s, box-shadow .2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06);
+      position: relative; overflow: hidden; letter-spacing: .02em;
+    }
+    .dl-btn::after {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: linear-gradient(180deg, rgba(255,255,255,.5) 0%, transparent 100%);
+    }
+    .dl-btn:hover { transform: translateY(-3px); }
+    .dl-btn .os-icon { font-size: 1.75rem; }
+    .dl-btn .sub { font-size: .72rem; font-weight: 400; color: var(--text-muted); }
+    .dl-btn.win { border-color: rgba(0,120,212,.3); }
+    .dl-btn.win:hover { border-color: rgba(0,120,212,.7); background: rgba(0,120,212,.05); box-shadow: 0 4px 12px rgba(0,120,212,.1); }
+    .dl-btn.mac { border-color: rgba(100,100,100,.25); }
+    .dl-btn.mac:hover { border-color: rgba(100,100,100,.5); background: rgba(100,100,100,.04); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+    .dl-btn.linux { border-color: rgba(27,45,94,.25); }
+    .dl-btn.linux:hover { border-color: var(--gold-light); background: rgba(27,45,94,.04); box-shadow: 0 4px 12px rgba(27,45,94,.08); }
+    .dl-btn.highlighted {
+      border-color: var(--gold-light);
+      background: rgba(27,45,94,.04);
+      box-shadow: 0 0 0 1px rgba(27,45,94,.18), 0 4px 16px rgba(27,45,94,.08);
+    }
+    .dl-btn .recommended-pill {
+      display: none; position: absolute; top: .5rem; right: .5rem;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: #fff; font-size: .6rem; font-weight: 700;
+      letter-spacing: .07em; text-transform: uppercase;
+      padding: .15rem .45rem; border-radius: 2px;
+    }
+    .dl-btn.highlighted .recommended-pill { display: block; }
+    .all-releases {
+      text-align: center; margin-top: .9rem;
+      font-size: .78rem; color: var(--text-muted); letter-spacing: .02em;
+    }
+
+    /* ── STATS ── */
+    .stats-row {
+      display: flex; justify-content: center;
+      gap: 3.5rem; flex-wrap: wrap; margin-top: 3.5rem;
+      padding: 2.5rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    }
+    .stat { text-align: center; }
+    .stat .val {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.25rem; font-weight: 700; line-height: 1; margin-bottom: .3rem;
+      background: linear-gradient(135deg, #cc1a1a, var(--gold));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .stat .lbl { font-size: .7rem; letter-spacing: .13em; text-transform: uppercase; color: var(--text-muted); font-weight: 500; }
+
+    /* ── SECTIONS ── */
+    .section { padding: 5.5rem 1.5rem; }
+    .section-inner { max-width: 920px; margin: 0 auto; }
+    .section-eyebrow {
+      text-align: center; text-transform: uppercase;
+      font-size: .68rem; font-weight: 600; letter-spacing: .18em;
+      color: var(--gold); margin-bottom: .5rem;
+    }
+    .section h2 {
+      font-family: 'Playfair Display', serif; text-align: center;
+      font-size: clamp(1.65rem, 3.5vw, 2.5rem); font-weight: 700;
+      color: #1a1a1a; line-height: 1.2;
+    }
+    .section .sub {
+      text-align: center; color: var(--text-muted); font-size: .95rem;
+      max-width: 540px; margin: 0 auto 3.5rem; font-weight: 300;
+    }
+
+    /* ── STEPS ── */
+    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px,1fr)); gap: 1.5rem; }
+    .step {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.75rem 1.5rem;
+      transition: border-color .2s;
+    }
+    .step:hover { border-color: var(--border-gold); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+    .step-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 34px; height: 34px;
+      background: rgba(27,45,94,.08); border: 1px solid var(--border-gold);
+      color: var(--gold-light); border-radius: 4px; font-weight: 700;
+      font-size: .85rem; margin-bottom: 1rem;
+      font-family: 'Playfair Display', serif;
+    }
+    .step h3 { font-size: .95rem; font-weight: 600; color: #1a1a1a; margin-bottom: .5rem; letter-spacing: .02em; }
+    .step p { font-size: .84rem; color: var(--text-muted); line-height: 1.65; font-weight: 300; }
+
+    /* ── FORMULA ── */
+    .formula-box {
+      background: var(--bg-card); border: 1px solid var(--border-gold);
+      border-radius: var(--radius); padding: 2.25rem 2.5rem;
+      text-align: center; max-width: 560px; margin: 3.5rem auto 0;
+      position: relative;
+    }
+    .formula-box::before {
+      content: ''; position: absolute; top: 0; left: 50%;
+      transform: translateX(-50%); width: 60%; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+    .formula-box .formula-label {
+      font-size: .68rem; letter-spacing: .17em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 1rem; font-weight: 600;
+    }
+    .formula-box .formula {
+      font-family: 'Playfair Display', serif; font-size: 1.2rem;
+      font-style: italic; color: var(--gold-light); margin: .75rem 0 1rem; line-height: 1.5;
+    }
+    .formula-box .formula-note { font-size: .82rem; color: var(--text-muted); font-weight: 300; line-height: 1.65; }
+    .formula-box .formula-note strong { color: var(--gold-light); font-weight: 500; }
+
+    /* ── FEATURES ── */
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 1.25rem; }
+    .feature {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem; transition: border-color .2s;
+    }
+    .feature:hover { border-color: var(--border-gold); }
+    .feature-icon {
+      width: 40px; height: 40px; display: flex; align-items: center;
+      justify-content: center; background: rgba(27,45,94,.06);
+      border: 1px solid rgba(27,45,94,.18); border-radius: 6px;
+      font-size: 1.2rem; margin-bottom: .9rem;
+    }
+    .feature h3 { font-size: .92rem; font-weight: 600; color: #1a1a1a; margin-bottom: .4rem; letter-spacing: .02em; }
+    .feature p { font-size: .83rem; color: var(--text-muted); line-height: 1.65; font-weight: 300; }
+
+    /* ── PRIVACY ── */
+    .privacy-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 1rem; }
+    .privacy-item {
+      display: flex; gap: 1rem; align-items: flex-start;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.25rem; transition: border-color .2s;
+    }
+    .privacy-item:hover { border-color: var(--border-gold); }
+    .privacy-icon {
+      width: 36px; height: 36px; flex-shrink: 0; display: flex;
+      align-items: center; justify-content: center;
+      background: rgba(27,45,94,.06); border: 1px solid rgba(27,45,94,.15);
+      border-radius: 4px; font-size: 1.05rem;
+    }
+    .privacy-item h4 { font-size: .88rem; font-weight: 600; color: #1a1a1a; margin-bottom: .25rem; }
+    .privacy-item p { font-size: .8rem; color: var(--text-muted); font-weight: 300; line-height: 1.6; }
+
+    /* ── CTA ── */
+    .cta-section {
+      padding: 6rem 1.5rem; text-align: center; position: relative; overflow: hidden;
+    }
+    .cta-section::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(27,45,94,.05) 0%, transparent 70%);
+    }
+    .cta-section h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.6rem, 3.5vw, 2.5rem); font-weight: 700;
+      color: #1a1a1a; margin-bottom: 1rem;
+    }
+    .cta-section p { color: var(--text-muted); max-width: 480px; margin: 0 auto 2.5rem; font-weight: 300; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border); padding: 2.5rem 1.5rem;
+      text-align: center; font-size: .78rem; color: var(--text-muted); letter-spacing: .03em;
+    }
+    .footer-emblem {
+      font-family: 'Playfair Display', serif; font-size: .92rem;
+      color: var(--gold-dim); margin-bottom: .5rem; letter-spacing: .08em;
+    }
+    .footer-links { display: flex; justify-content: center; gap: 1.75rem; flex-wrap: wrap; margin: .75rem 0; }
+    .footer-links a { color: var(--text-muted); transition: color .2s; }
+    .footer-links a:hover { color: var(--gold-light); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <img class="nav-logo-img" src="logo.svg" alt="Manifestation Algorithm Logo">
+    Manifestation Algorithm
+  </div>
+  <div class="nav-links">
+    <a href="#how-it-works">Method</a>
+    <a href="#features">Features</a>
+    <a href="#privacy">Privacy</a>
+    <a href="#download">Download</a>
+  </div>
+  <a class="nav-cta"
+     href="https://github.com/tdespenza/manifestation-algorithm"
+     target="_blank">
+    <svg height="13" viewBox="0 0 16 16" width="13" fill="currentColor">
+      <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+               0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
+               -.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66
+               .07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15
+               -.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27
+               .68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12
+               .51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48
+               0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8
+               c0-4.42-3.58-8-8-8z"/>
+    </svg>
+    GitHub
+  </a>
+</nav>
+
+<!-- ═══════════════════════ HERO ═══════════════════════ -->
+<section class="hero">
+  <div class="hero-logo-wrap">
+    <img src="logo.svg" class="hero-logo" alt="Manifestation Algorithm Logo">
+  </div>
+  <div class="hero-eyebrow">Free &amp; Open Source</div>
+  <div><span id="version-badge">v0.1.0</span></div>
+  <h1>Measure Your<br><em>Manifestation Score</em></h1>
+  <p class="hero-lead">
+    A privacy-first desktop application that quantifies your personal development across
+    <strong>40 life categories</strong> &mdash; giving you a score out of
+    <strong>10,000 points</strong>.
+    Completely offline, encrypted, and free.
+  </p>
+
+  <div id="download-section">
+    <div class="platform-detected" id="platform-notice"></div>
+    <div class="download-grid">
+      <a class="dl-btn win" id="btn-win"
+         href="https://github.com/tdespenza/manifestation-algorithm/releases/latest">
+        <span class="recommended-pill">Recommended</span>
+        <span class="os-icon">🖪</span>
+        <strong>Windows</strong>
+        <span class="sub">x64 &middot; .msi Installer</span>
+      </a>
+      <a class="dl-btn mac" id="btn-mac-arm"
+         href="https://github.com/tdespenza/manifestation-algorithm/releases/latest">
+        <span class="recommended-pill">Recommended</span>
+        <span class="os-icon">🍎</span>
+        <strong>macOS</strong>
+        <span class="sub">Apple Silicon &middot; .dmg</span>
+      </a>
+      <a class="dl-btn mac" id="btn-mac-intel"
+         href="https://github.com/tdespenza/manifestation-algorithm/releases/latest">
+        <span class="recommended-pill">Recommended</span>
+        <span class="os-icon">🖥</span>
+        <strong>macOS</strong>
+        <span class="sub">Intel (x64) &middot; .dmg</span>
+      </a>
+      <a class="dl-btn linux" id="btn-linux"
+         href="https://github.com/tdespenza/manifestation-algorithm/releases/latest">
+        <span class="recommended-pill">Recommended</span>
+        <span class="os-icon">🐧</span>
+        <strong>Linux</strong>
+        <span class="sub">x64 &middot; AppImage</span>
+      </a>
+    </div>
+    <p class="all-releases">
+      Looking for a specific version?
+      <a href="https://github.com/tdespenza/manifestation-algorithm/releases" target="_blank">View all releases &rarr;</a>
+    </p>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat"><div class="val">10,000</div><div class="lbl">Max Score</div></div>
+    <div class="stat"><div class="val">40</div><div class="lbl">Life Categories</div></div>
+    <div class="stat"><div class="val">100%</div><div class="lbl">Offline &amp; Private</div></div>
+    <div class="stat"><div class="val">3</div><div class="lbl">Platforms</div></div>
+  </div>
+</section>
+
+<hr class="gold-rule">
+
+<!-- ═══════════════════════ HOW IT WORKS ═══════════════════════ -->
+<section class="section" id="how-it-works">
+  <div class="section-inner">
+    <div class="section-eyebrow">The Method</div>
+    <h2>Your Development, Quantified</h2>
+    <hr class="gold-rule-sm">
+    <p class="sub">The Manifestation Algorithm turns honest self-reflection into measurable data you can track, improve, and compare over time.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">I</div>
+        <h3>Rate 40 Categories</h3>
+        <p>Score yourself 1&ndash;10 across 40 distinct life categories &mdash; mindset, habits, relationships, spirituality, decision-making, and more. Sub-questions allow deeper precision where it matters.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">II</div>
+        <h3>Score Is Calculated</h3>
+        <p>Each answer is multiplied by that category&rsquo;s weight. Your total is the sum of all weighted ratings &mdash; a number between 1,000 and 10,000 reflecting your current alignment.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">III</div>
+        <h3>Track Your Progress</h3>
+        <p>Complete the questionnaire weekly or monthly. The dashboard shows score history, category breakdowns, and trend charts &mdash; all stored locally on your device.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">IV</div>
+        <h3>Compare Anonymously</h3>
+        <p>Opt in to anonymous P2P sharing via libp2p to see where your score stands globally &mdash; without sharing any personal information, email, or account.</p>
+      </div>
+    </div>
+    <div class="formula-box">
+      <div class="formula-label">Scoring Formula</div>
+      <div class="formula">Score = &Sigma; (MaxPoints<sub>i</sub> &times; Rating<sub>i</sub> / 10)</div>
+      <p class="formula-note">
+        Each category carries a maximum point weight. You rate yourself 1&ndash;10 and earn a proportional
+        share of that weight. Minimum score (all 1s) is <strong>1,000</strong>.
+        Maximum (all 10s) is <strong>10,000</strong>.
+      </p>
+    </div>
+  </div>
+</section>
+
+<hr class="gold-rule">
+
+<!-- ═══════════════════════ FEATURES ═══════════════════════ -->
+<section class="section" id="features">
+  <div class="section-inner">
+    <div class="section-eyebrow">Features</div>
+    <h2>Built for Serious Practitioners</h2>
+    <hr class="gold-rule-sm">
+    <p class="sub">Every detail is designed to keep you focused on growth &mdash; not on the tool.</p>
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">📋</div>
+        <h3>40-Category Questionnaire</h3>
+        <p>Weighted 1&ndash;10 sliders across every dimension of personal development. Parent categories support sub-questions for granular scoring.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔐</div>
+        <h3>Encrypted Local Storage</h3>
+        <p>Your data lives in a SQLite database in your OS app-data directory. No cloud sync, no server &mdash; your answers are yours alone.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">💾</div>
+        <h3>Auto-Save &amp; Recovery</h3>
+        <p>Answers are saved as you go. Close mid-session and the app offers to resume exactly where you left off &mdash; no data is ever silently lost.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📊</div>
+        <h3>Dashboard &amp; Trend Charts</h3>
+        <p>Track your score history with line charts. Drill into any category to see which areas are improving and which need attention.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🌐</div>
+        <h3>Anonymous P2P Ranking</h3>
+        <p>Opt-in global percentile comparison via libp2p gossipsub. No servers, no accounts &mdash; just an Ed25519-signed anonymous message on a decentralised network.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🖥️</div>
+        <h3>Native &mdash; Not Electron</h3>
+        <p>Built with Tauri and Rust. Approximately 50 MB, starts under 3 seconds, uses your system&rsquo;s native webview &mdash; not a bundled Chromium.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📦</div>
+        <h3>Zero Dependencies</h3>
+        <p>A single installer contains everything. No Node.js, no Python runtime &mdash; just download, install, and open.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📤</div>
+        <h3>CSV Export</h3>
+        <p>Export your full session history to CSV at any time from the dashboard, for use in any spreadsheet or analysis tool.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="gold-rule">
+
+<!-- ═══════════════════════ PRIVACY ═══════════════════════ -->
+<section class="section" id="privacy">
+  <div class="section-inner">
+    <div class="section-eyebrow">Privacy</div>
+    <h2>Your Data Stays Yours</h2>
+    <hr class="gold-rule-sm">
+    <p class="sub">Designed from the ground up so that your personal development data never leaves your device without your explicit permission.</p>
+    <div class="privacy-grid">
+      <div class="privacy-item">
+        <div class="privacy-icon">🏠</div>
+        <div>
+          <h4>Stored Locally</h4>
+          <p>All responses and score history live in a local file on your device. No cloud accounts, no sync services, no remote database.</p>
+        </div>
+      </div>
+      <div class="privacy-item">
+        <div class="privacy-icon">🔒</div>
+        <div>
+          <h4>No PII in Network</h4>
+          <p>The P2P layer transmits only your numeric score, category averages, and a timestamp &mdash; never your name, device ID, or IP address.</p>
+        </div>
+      </div>
+      <div class="privacy-item">
+        <div class="privacy-icon">🚫</div>
+        <div>
+          <h4>Zero Telemetry</h4>
+          <p>The app makes no outbound requests unless you explicitly enable anonymous P2P sharing. Fully offline by default.</p>
+        </div>
+      </div>
+      <div class="privacy-item">
+        <div class="privacy-icon">👤</div>
+        <div>
+          <h4>No Accounts Required</h4>
+          <p>No sign-up, no email, no profile. The app operates without an internet connection and never asks for personal information.</p>
+        </div>
+      </div>
+      <div class="privacy-item">
+        <div class="privacy-icon">🔑</div>
+        <div>
+          <h4>Ed25519 Identity</h4>
+          <p>Your user identity key is stored locally with restricted file permissions. The P2P node key is kept separate so transport identity cannot be linked to your score signature.</p>
+        </div>
+      </div>
+      <div class="privacy-item">
+        <div class="privacy-icon">📖</div>
+        <div>
+          <h4>Fully Open Source</h4>
+          <p>Every network call, every database query, and every encryption step is auditable on GitHub. No black boxes.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="gold-rule">
+
+<!-- ═══════════════════════ CTA / DOWNLOAD ═══════════════════════ -->
+<section class="cta-section" id="download">
+  <div class="section-eyebrow">Get Started</div>
+  <h2>Ready to Measure Your Alignment?</h2>
+  <hr class="gold-rule-sm">
+  <p>Free, private, and available on every major platform. No account required. No subscription. Ever.</p>
+  <div style="max-width:600px; margin:0 auto; padding:0 1rem;">
+    <div class="download-grid">
+      <a class="dl-btn win" id="cta-btn-win"
+         href="https://github.com/tdespenza/manifestation-algorithm/releases/latest">
+        <span class="os-icon">🖪</span>
+        <strong>Windows</strong>
+        <span class="sub">x64 &middot; .msi Installer</span>
+      </a>
+      <a class="dl-btn mac" id="cta-btn-mac-arm"
+         href="https://github.com/tdespenza/manifestation-algorithm/releases/latest">
+        <span class="os-icon">🍎</span>
+        <strong>macOS</strong>
+        <span class="sub">Apple Silicon &middot; .dmg</span>
+      </a>
+      <a class="dl-btn mac" id="cta-btn-mac-intel"
+         href="https://github.com/tdespenza/manifestation-algorithm/releases/latest">
+        <span class="os-icon">🖥</span>
+        <strong>macOS</strong>
+        <span class="sub">Intel (x64) &middot; .dmg</span>
+      </a>
+      <a class="dl-btn linux" id="cta-btn-linux"
+         href="https://github.com/tdespenza/manifestation-algorithm/releases/latest">
+        <span class="os-icon">🐧</span>
+        <strong>Linux</strong>
+        <span class="sub">x64 &middot; AppImage</span>
+      </a>
+    </div>
+    <p class="all-releases">
+      All versions and checksums:
+      <a href="https://github.com/tdespenza/manifestation-algorithm/releases" target="_blank">GitHub Releases &rarr;</a>
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+<footer>
+  <div class="footer-emblem">&#10022; Manifestation Algorithm</div>
+  <div class="footer-links">
+    <a href="https://github.com/tdespenza/manifestation-algorithm" target="_blank">GitHub</a>
+    <a href="https://github.com/tdespenza/manifestation-algorithm/releases" target="_blank">Releases</a>
+    <a href="https://github.com/tdespenza/manifestation-algorithm/issues" target="_blank">Report a Bug</a>
+    <a href="https://github.com/tdespenza/manifestation-algorithm/blob/main/docs/scoring-formula.md" target="_blank">Scoring Formula</a>
+    <a href="https://github.com/tdespenza/manifestation-algorithm/blob/main/docs/network-architecture.md" target="_blank">Network Docs</a>
+  </div>
+  <div style="margin-top:.65rem">
+    Created by Giovanni Ilacqua &nbsp;&middot;&nbsp; Updated by Tyshawn Despenza &nbsp;&middot;&nbsp; MIT License &nbsp;&middot;&nbsp; Built with Tauri + Vue 3 + Rust
+  </div>
+  <div style="margin-top:.45rem; font-size:.72rem; color:#999;">
+    Not affiliated with, endorsed by, or connected to GIN (Global Information Network) in any way.
+  </div>
+</footer>
+
+<script>
+(function () {
+  var ua = navigator.userAgent || navigator.platform || '';
+  var notice = document.getElementById('platform-notice');
+  var detected = null;
+  if (/Win/i.test(ua))             detected = 'win';
+  else if (/Mac/i.test(ua))        detected = 'mac';
+  else if (/Linux|X11/i.test(ua))  detected = 'linux';
+
+  function highlightBtn(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.add('highlighted');
+  }
+  function setHref(id, url) {
+    var el = document.getElementById(id);
+    if (el && url) el.href = url;
+  }
+
+  if (detected === 'mac') {
+    // Try to detect Apple Silicon via WebGL renderer string.
+    var isArm = false;
+    try {
+      var canvas = document.createElement('canvas');
+      var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (gl) {
+        var dbg = gl.getExtension('WEBGL_debug_renderer_info');
+        if (dbg) {
+          var renderer = gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || '';
+          if (/Apple M\d|Apple GPU/i.test(renderer)) isArm = true;
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    if (isArm) {
+      highlightBtn('btn-mac-arm');
+      notice.textContent = '\u25c6 We detected you are on macOS (Apple Silicon) — the Apple Silicon download is highlighted below.';
+    } else {
+      highlightBtn('btn-mac-intel');
+      notice.textContent = '\u25c6 We detected you are on macOS — Intel (x64) is pre-selected. Choose Apple Silicon if you have an M-series Mac.';
+    }
+    notice.style.display = 'block';
+  } else if (detected) {
+    highlightBtn('btn-' + detected);
+    var labels = { win: 'Windows', linux: 'Linux' };
+    notice.textContent = '\u25c6 We detected you are on ' + labels[detected] +
+      ' — the recommended download is highlighted below.';
+    notice.style.display = 'block';
+  }
+
+  fetch('https://api.github.com/repos/tdespenza/manifestation-algorithm/releases/latest')
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (d && d.tag_name) {
+        var b = document.getElementById('version-badge');
+        if (b) b.textContent = d.tag_name;
+      }
+      var assets = (d && d.assets) || [];
+      assets.forEach(function (a) {
+        var url  = a.browser_download_url;
+        var name = a.name.toLowerCase();
+        if (name.endsWith('.msi') || (name.endsWith('.exe') && name.includes('setup'))) {
+          setHref('btn-win',         url);
+          setHref('cta-btn-win',     url);
+        } else if (name.endsWith('.dmg')) {
+          if (name.includes('aarch64') || name.includes('arm64')) {
+            setHref('btn-mac-arm',       url);
+            setHref('cta-btn-mac-arm',   url);
+          } else if (name.includes('x64') || name.includes('x86_64') || name.includes('intel')) {
+            setHref('btn-mac-intel',     url);
+            setHref('cta-btn-mac-intel', url);
+          }
+        } else if (name.endsWith('.appimage')) {
+          setHref('btn-linux',       url);
+          setHref('cta-btn-linux',   url);
+        }
+      });
+    })
+    .catch(function (err) { console.error(err); });
+})();
+</script>
+</body>
+</html>
