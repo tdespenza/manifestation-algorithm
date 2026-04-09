@@ -49,5 +49,5 @@ ed25519-dalek = { version = "2", features = ["rand_core"] }
 rand_core = { version = "0.6.4", features = ["getrandom"] }
 base64 = "0.22"
 tauri-plugin-dialog = "2.6.0"
-tauri-plugin-fs = "2.4.5"
+tauri-plugin-fs = "2.5.0"
 
