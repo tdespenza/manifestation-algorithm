@@ -18,14 +18,14 @@ S_i = \text{MaxPoints}_i \times \left( \frac{\text{UserRating}_i}{10} \right)
 $$
 
 - **MaxPoints**: The maximum weight assigned to a specific question (defined in the data schema).
-- **UserRating**: An integer value selected by the user, ranging from **1 to 10**.
+- **UserRating**: An integer value selected by the user, ranging from **0 to 10**.
 
 ## Question Hierarchy & Implementation Rules
 
 ### 1. Standalone Questions
 Questions without sub-items function as variable inputs.
 - **Example**: Question 2 "Activate & Illuminate Words" (100 points).
-- **Logic**: User rates 1-10.
+- **Logic**: User rates 0-10.
 - **Calculation**: $100 \times (Rating / 10)$.
 
 ### 2. Parent Questions with Sub-points
