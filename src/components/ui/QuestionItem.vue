@@ -75,7 +75,7 @@ const questionText = computed(() => {
   return te(key) ? t(key) : props.question.description;
 });
 
-const isAnswered = computed(() => Object.hasOwn(store.answers, props.question.id));
+const isAnswered = computed(() => store.answers[props.question.id] !== undefined);
 
 const internalValue = computed({
   get: () => store.answers[props.question.id] ?? MIN_RATING,

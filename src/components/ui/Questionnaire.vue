@@ -237,7 +237,7 @@ const submitButtonState = computed(() => {
 
 function isAnswered(idx: number): boolean {
   const q = leafQuestions[idx];
-  return q ? Object.hasOwn(store.answers, q.id) : false;
+  return q ? store.answers[q.id] !== undefined : false;
 }
 
 /** Keyboard navigation handler for step mode */
