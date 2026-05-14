@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS questionnaire_responses (
   id             INTEGER PRIMARY KEY AUTOINCREMENT,
   session_id     TEXT    NOT NULL,
   question_number TEXT   NOT NULL,           -- question ID, e.g. '1a', '23g'
-  answer_value   INTEGER NOT NULL,           -- 1–10
+  answer_value   INTEGER NOT NULL,           -- 0–10
   answered_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(session_id, question_number)        -- one answer per question per session
 );
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS historical_responses (
   session_id   TEXT    NOT NULL,
   question_id  TEXT    NOT NULL,              -- e.g. '1a', '23g'
   category     TEXT    NOT NULL,              -- parent question description
-  answer_value INTEGER NOT NULL,              -- 1–10
+  answer_value INTEGER NOT NULL,              -- 0–10
   FOREIGN KEY(session_id) REFERENCES historical_sessions(id) ON DELETE CASCADE
 );
 

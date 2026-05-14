@@ -254,7 +254,7 @@ describe('Questionnaire Store', () => {
     it('setAnswer should ignore invalid values', async () => {
       const store = useQuestionnaireStore();
 
-      await store.setAnswer('1b', 0);
+      await store.setAnswer('1b', -1);
       expect(store.answers['1b']).toBeUndefined();
 
       await store.setAnswer('1b', 11);
@@ -263,15 +263,15 @@ describe('Questionnaire Store', () => {
       expect(dbMocks.saveAnswer).not.toHaveBeenCalled();
     });
 
-    it('setAnswer accepts boundary values 1 and 10', async () => {
+    it('setAnswer accepts boundary values 0 and 10', async () => {
       const store = useQuestionnaireStore();
 
-      await store.setAnswer('1b', 1);
+      await store.setAnswer('1b', 0);
       await store.setAnswer('1c', 10);
 
-      expect(store.answers['1b']).toBe(1);
+      expect(store.answers['1b']).toBe(0);
       expect(store.answers['1c']).toBe(10);
-      expect(dbMocks.saveAnswer).toHaveBeenNthCalledWith(1, expect.anything(), '1b', 1);
+      expect(dbMocks.saveAnswer).toHaveBeenNthCalledWith(1, expect.anything(), '1b', 0);
       expect(dbMocks.saveAnswer).toHaveBeenNthCalledWith(2, expect.anything(), '1c', 10);
     });
 
@@ -387,13 +387,13 @@ describe('Questionnaire Store', () => {
 
   it('calculateScore computed reflects answer changes', () => {
     const store = useQuestionnaireStore();
-    const baseline = store.score; // all implicit default (1) = 10% of max
-    // Q2 = 100 pts. Setting from implicit 1 → 5: delta = 100*(5-1)/10 = +40
+    const baseline = store.score; // all implicit default (0) = 0% of max
+    // Q2 = 100 pts. Setting from implicit 0 → 5: delta = 100*(5-0)/10 = +50
     store.answers['2'] = 5;
-    expect(store.score).toBeCloseTo(baseline + 40);
+    expect(store.score).toBeCloseTo(baseline + 50);
     // Setting Q2 from 5 → 10: delta = 100*(10-5)/10 = +50
     store.answers['2'] = 10;
-    expect(store.score).toBeCloseTo(baseline + 90);
+    expect(store.score).toBeCloseTo(baseline + 100);
   });
 
   it('reset() clears all in-memory state to defaults', () => {

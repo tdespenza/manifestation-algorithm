@@ -8,7 +8,7 @@ export interface Question {
 }
 
 export interface AnswerSheet {
-  [questionId: string]: number; // 1-10
+  [questionId: string]: number; // 0-10
 }
 
 export interface HistoricalSession {

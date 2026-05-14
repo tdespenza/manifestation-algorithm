@@ -1,11 +1,12 @@
 import type { Question, AnswerSheet } from '../types';
 import { questions } from '../data/questions';
+import { MIN_RATING, MAX_RATING } from '../constants';
 
 /**
  * Calculates the total manifestation score based on user answers.
  * Formula: Sum of (QuestionPoints * (UserRating / 10))
  *
- * @param answers Map of question ID to user rating (1-10)
+ * @param answers Map of question ID to user rating (0-10)
  * @returns Total calculated score (float)
  */
 export function calculateScore(answers: AnswerSheet): number {
@@ -19,9 +20,9 @@ export function calculateScore(answers: AnswerSheet): number {
     }
 
     const rawRating = answers[q.id];
-    const numericRating = typeof rawRating === 'number' ? rawRating : 1;
-    const rating = Math.min(10, Math.max(1, numericRating));
-    totalScore += q.points * (rating / 10);
+    const numericRating = typeof rawRating === 'number' ? rawRating : MIN_RATING;
+    const rating = Math.min(MAX_RATING, Math.max(MIN_RATING, numericRating));
+    totalScore += q.points * (rating / MAX_RATING);
   };
 
   questions.forEach(processQuestion);
@@ -48,7 +49,7 @@ export function getMaxPossibleScore(): number {
       return;
     }
 
-    maxAnswers[q.id] = 10;
+    maxAnswers[q.id] = MAX_RATING;
   };
 
   questions.forEach(collectIds);

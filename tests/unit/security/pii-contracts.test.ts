@@ -3,7 +3,7 @@
  *
  * These tests enforce the zero-PII promise of the Manifestation Algorithm:
  *   • No personally-identifiable information is stored or exported
- *   • Answer values are bounded to the valid numeric range [1, 10]
+ *   • Answer values are bounded to the valid numeric range [0, 10]
  *   • Question IDs only contain known alphanumeric identifiers
  *   • Session IDs are UUID v4 (cryptographically random, non-biographical)
  *   • Score outputs are strictly numeric and within the expected range
@@ -34,9 +34,9 @@ function getLeafIds(qs: typeof questions): string[] {
 
 const leafIds = getLeafIds(questions);
 
-/** Build an all-minimum answer set (rating = 1 for every leaf question) */
+/** Build an all-minimum answer set (rating = 0 for every leaf question) */
 function minimumAnswers(): Record<string, number> {
-  return Object.fromEntries(leafIds.map(id => [id, 1]));
+  return Object.fromEntries(leafIds.map(id => [id, 0]));
 }
 
 /** Build an all-maximum answer set (rating = 10 for every leaf question) */
@@ -134,10 +134,10 @@ describe('PII Contract: Score calculation output bounds', () => {
 // ─── 3. Answer value bounds ──────────────────────────────────────────────────
 
 describe('PII Contract: Answer values are bounded integers', () => {
-  it('all answer ratings are in range [1, 10]', () => {
+  it('all answer ratings are in range [0, 10]', () => {
     const answers = maximumAnswers();
     for (const [, val] of Object.entries(answers)) {
-      expect(val).toBeGreaterThanOrEqual(1);
+      expect(val).toBeGreaterThanOrEqual(0);
       expect(val).toBeLessThanOrEqual(10);
     }
   });
