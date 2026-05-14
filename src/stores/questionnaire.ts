@@ -19,14 +19,13 @@ import {
   setSetting
 } from '../services/db';
 
-const allQuestions: Question[] = questions.flatMap(question =>
-  question.hasSubPoints ? question.subPoints! : [question]
-);
-
-const TOTAL_QUESTIONS_COUNT = allQuestions.length;
-const VALID_QUESTION_IDS = new Set(allQuestions.map(q => q.id));
-
 export const useQuestionnaireStore = defineStore('questionnaire', () => {
+  const allQuestions: Question[] = questions.flatMap(question =>
+    question.hasSubPoints ? question.subPoints! : [question]
+  );
+  const TOTAL_QUESTIONS_COUNT = allQuestions.length;
+  const VALID_QUESTION_IDS = new Set(allQuestions.map(q => q.id));
+
   const answers = ref<Record<string, number>>({});
   const sessionId = ref('default-session');
   const isSaving = ref(false);
