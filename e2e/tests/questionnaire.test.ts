@@ -32,9 +32,9 @@ test.describe('Questionnaire – scroll mode', () => {
     await expect(sliders.first()).toBeVisible();
   });
 
-  test('slider is in range 1–10', async ({ page }) => {
+  test('slider is in range 0–10', async ({ page }) => {
     const slider = page.locator('.slider').first();
-    await expect(slider).toHaveAttribute('min', '1');
+    await expect(slider).toHaveAttribute('min', '0');
     await expect(slider).toHaveAttribute('max', '10');
   });
 

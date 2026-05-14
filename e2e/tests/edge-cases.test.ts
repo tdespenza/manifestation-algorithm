@@ -3,7 +3,7 @@
  *
  * Covers functionality not explicitly tested in the existing spec files:
  *   - Submit button state transitions (incomplete → partial → complete)
- *   - Rating boundary values (min=1, max=10, digit-0 shortcut)
+ *   - Rating boundary values (min=0, max=10, digit-0 shortcut)
  *   - Completion hint text progression
  *   - Settings panel: app version display, Clear All Answers (confirm & cancel)
  *   - Settings close (×) button routing
@@ -17,7 +17,7 @@
  *   - Save Last Session toggle aria-label
  *   - Score is positive after max-rating all questions
  *   - Questionnaire save-indicator shows "Saved"
- *   - Digit-0 keyboard shortcut sets rating to 10
+ *   - Digit-0 keyboard shortcut sets rating to 0
  *   - Questionnaire can be submitted with 0% completion (defaults apply)
  *   - Direct URL navigation to every route
  */
@@ -131,12 +131,12 @@ test.describe('Questionnaire – rating boundary values', () => {
     await questionnairePage.switchToScrollMode();
   });
 
-  test('slider set to minimum value (1) displays "1"', async ({ page }) => {
+  test('slider set to minimum value (0) displays "0"', async ({ page }) => {
     const slider = page.locator('.slider').first();
     const display = page.locator('.slider-value').first();
-    await slider.fill('1');
+    await slider.fill('0');
     await slider.dispatchEvent('input');
-    await expect(display).toHaveText('1');
+    await expect(display).toHaveText('0');
   });
 
   test('slider set to maximum value (10) displays "10"', async ({ page }) => {
@@ -147,12 +147,12 @@ test.describe('Questionnaire – rating boundary values', () => {
     await expect(display).toHaveText('10');
   });
 
-  test('setting slider to 1 then 10 updates display to 10', async ({ page }) => {
+  test('setting slider to 0 then 10 updates display to 10', async ({ page }) => {
     const slider = page.locator('.slider').first();
     const display = page.locator('.slider-value').first();
-    await slider.fill('1');
+    await slider.fill('0');
     await slider.dispatchEvent('input');
-    await expect(display).toHaveText('1');
+    await expect(display).toHaveText('0');
     await slider.fill('10');
     await slider.dispatchEvent('input');
     await expect(display).toHaveText('10');
@@ -209,7 +209,7 @@ test.describe('Questionnaire – digit-key shortcuts (step mode)', () => {
     }
   });
 
-  test('pressing digit key 0 sets the current question to 10', async ({ page }) => {
+  test('pressing digit key 0 sets the current question to 0', async ({ page }) => {
     const slider = page.locator('.step-mode input[type="range"]').first();
     if (await slider.count() > 0) {
       await page.evaluate(() => {
@@ -217,7 +217,7 @@ test.describe('Questionnaire – digit-key shortcuts (step mode)', () => {
         if (el) el.focus();
       });
       await page.keyboard.press('0');
-      await expect(slider).toHaveValue('10');
+      await expect(slider).toHaveValue('0');
     }
   });
 

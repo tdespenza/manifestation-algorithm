@@ -114,8 +114,8 @@ src/components/
 Total Score = Σ (question.points × (userRating / 10))
 ```
 
-- User rating: 1–10 (integer).
-- Unanswered questions default to rating = 1 during `submitSession`.
+- User rating: 0–10 (integer).
+- Unanswered questions default to rating = 0 during `submitSession`.
 - Max possible score: **10,000 points** (rating = 10 on all questions).
 
 See [scoring-formula.md](scoring-formula.md) for the full weight table.

@@ -23,15 +23,18 @@
         <input
           type="range"
           class="slider"
-          min="1"
-          max="10"
+          :class="{ unanswered: !isAnswered }"
+          :min="MIN_RATING"
+          :max="MAX_RATING"
           :value="internalValue"
           :style="{ '--fill-pct': sliderFillPct }"
           :aria-label="t('questionItem.rateAria', { question: questionText })"
           @input="handleInput"
         />
         <span class="slider-label high-label">{{ t('questionItem.high') }}</span>
-        <span class="slider-value" :class="sliderValueClass">{{ internalValue }}</span>
+        <span class="slider-value" :class="sliderValueClass">{{
+          isAnswered ? internalValue : '—'
+        }}</span>
       </div>
 
       <div class="score-display">
@@ -55,6 +58,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useQuestionnaireStore } from '../../stores/questionnaire';
+import { MIN_RATING, MAX_RATING } from '../../constants';
 import type { Question } from '../../types';
 
 const props = defineProps<{
@@ -71,23 +75,19 @@ const questionText = computed(() => {
   return te(key) ? t(key) : props.question.description;
 });
 
-// Access store directly for reactive state
+const isAnswered = computed(() => store.answers[props.question.id] !== undefined);
+
 const internalValue = computed({
-  get: () => store.answers[props.question.id] || 1,
-  set: val => {
-    if (val >= 1 && val <= 10) {
-      store.setAnswer(props.question.id, val);
-    }
-  }
+  get: () => store.answers[props.question.id] ?? MIN_RATING,
+  set: val => store.setAnswer(props.question.id, val)
 });
 
 const calculatedScore = computed(() => {
-  return props.question.points * (internalValue.value / 10);
+  return props.question.points * (internalValue.value / MAX_RATING);
 });
 
-// Percentage fill for the slider track (0% at value=1, 100% at value=10)
 const sliderFillPct = computed(() => {
-  return `${Math.round(((internalValue.value - 1) / 9) * 100)}%`;
+  return `${Math.round((internalValue.value / MAX_RATING) * 100)}%`;
 });
 
 const sliderValueClass = computed(() => {
@@ -192,6 +192,15 @@ function handleInput(e: Event) {
     #dde2f4 var(--fill-pct, 44%),
     #dde2f4 100%
   );
+}
+
+.slider.unanswered {
+  background: #dde2f4;
+}
+
+.slider.unanswered::-webkit-slider-thumb {
+  background: #b8c0d9;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
 .slider::-webkit-slider-thumb {

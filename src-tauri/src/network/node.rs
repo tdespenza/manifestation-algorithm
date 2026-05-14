@@ -58,7 +58,10 @@ impl PeerNode {
                     let mut hasher = Sha256::new();
                     hasher.update(&message.data);
                     let result = hasher.finalize();
-                    gossipsub::MessageId::from(format!("{:x}", result))
+                        let hex_string = result.iter()
+                            .map(|b| format!("{:02x}", b))
+                            .collect::<String>();
+                    gossipsub::MessageId::from(hex_string)
                 };
                 let gossipsub_config = gossipsub::ConfigBuilder::default()
                     .heartbeat_interval(Duration::from_secs(10))

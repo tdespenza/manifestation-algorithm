@@ -97,7 +97,7 @@ describe('E2E: Complete questionnaire flow', () => {
 
     expect(store.answers).toEqual({});
     expect(store.percentComplete).toBe(0);
-    // With no explicit answers, isComplete is now TRUE to allow default 1s submission
+    // With no explicit answers, submission remains allowed so defaults can apply
     expect(store.currentIndex).toBe(0);
     expect(store.hasSavedSession).toBe(false);
   });
@@ -184,13 +184,13 @@ describe('E2E: Complete questionnaire flow', () => {
 
     // State should be reset after submit
     expect(store.answers).toEqual({});
-    // After reset, answers are empty → isComplete is true (fresh start defaults)
+    // After reset, answers are empty and fresh start defaults apply
     expect(store.percentComplete).toBe(0);
     expect(store.currentIndex).toBe(0);
     expect(dbMocks.clearSession).toHaveBeenCalled();
   });
 
-  it('submitSession always succeeds even with no explicit answers (all default to 1)', async () => {
+  it('submitSession always succeeds even with no explicit answers (all default to 0)', async () => {
     const store = useQuestionnaireStore();
     await store.init();
     // No explicit answers — isComplete is true
@@ -236,15 +236,15 @@ describe('E2E: Complete questionnaire flow', () => {
   it('score is consistent with scoring formula (points × rating/10)', async () => {
     const store = useQuestionnaireStore();
     await store.init();
-    const baseline = store.score; // all implicit 1s
+    const baseline = store.score; // all implicit 0s
 
-    // Q2: 100 pts. 1→5: delta = 100*(5-1)/10 = +40
+    // Q2: 100 pts. 0→5: delta = 100*(5-0)/10 = +50
     await fastSetAnswer(store, '2', 5);
-    expect(store.score - baseline).toBeCloseTo(40, 1);
+    expect(store.score - baseline).toBeCloseTo(50, 1);
 
-    // Q3: 250 pts. 1→10: delta = 250*(10-1)/10 = +225
+    // Q3: 250 pts. 0→10: delta = 250*(10-0)/10 = +250
     await fastSetAnswer(store, '3', 10);
-    expect(store.score - baseline).toBeCloseTo(40 + 225, 1);
+    expect(store.score - baseline).toBeCloseTo(50 + 250, 1);
   });
 
   it('submitSession rethrows and logs when saveHistoricalSession rejects', async () => {
@@ -277,7 +277,7 @@ describe('E2E: Complete questionnaire flow', () => {
         score: expect.any(Number),
         categoryScores: expect.objectContaining({
           [leafIds[0]]: 9,
-          [leafIds[1]]: 1
+          [leafIds[1]]: 0
         })
       })
     );

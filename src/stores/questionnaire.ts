@@ -4,7 +4,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { calculateScore } from '../services/scoring';
 import { questions } from '../data/questions';
 import type { Question } from '../types';
-import { SESSION_TIMEOUT_MS } from '../constants';
+import { SESSION_TIMEOUT_MS, MIN_RATING, MAX_RATING } from '../constants';
 import { useNetwork } from '../composables/useNetwork';
 import {
   saveAnswer as dbSaveAnswer,
@@ -19,13 +19,13 @@ import {
   setSetting
 } from '../services/db';
 
-const allQuestions: Question[] = questions.flatMap(question =>
-  question.hasSubPoints ? question.subPoints! : [question]
-);
-
-const TOTAL_QUESTIONS_COUNT = allQuestions.length;
-
 export const useQuestionnaireStore = defineStore('questionnaire', () => {
+  const allQuestions: Question[] = questions.flatMap(question =>
+    question.hasSubPoints ? question.subPoints! : [question]
+  );
+  const TOTAL_QUESTIONS_COUNT = allQuestions.length;
+  const VALID_QUESTION_IDS = new Set(allQuestions.map(q => q.id));
+
   const answers = ref<Record<string, number>>({});
   const sessionId = ref('default-session');
   const isSaving = ref(false);
@@ -127,7 +127,7 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
         saveLastSession.value = settingVal === 'true';
       }
       const goalVal = await getSetting('goal_score');
-      goalScore.value = goalVal ? parseInt(goalVal, 10) : null;
+      goalScore.value = goalVal ? Number.parseInt(goalVal, 10) : null;
 
       await ensureSessionId();
 
@@ -192,13 +192,12 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
   }
 
   async function setAnswer(questionId: string, value: number) {
-    if (value < 1 || value > 10) return;
-    // Validate that questionId exists in the known leaf questions
-    const validQuestionIds = new Set(allQuestions.map(q => q.id));
-    if (!validQuestionIds.has(questionId)) {
+    if (value < MIN_RATING || value > MAX_RATING) return;
+    if (!VALID_QUESTION_IDS.has(questionId)) {
       console.error('Invalid question ID:', questionId);
       return;
     }
+    if (answers.value[questionId] === value) return;
     answers.value[questionId] = value;
     try {
       isSaving.value = true;
@@ -226,12 +225,10 @@ export const useQuestionnaireStore = defineStore('questionnaire', () => {
   async function submitSession(): Promise<string> {
     try {
       isSaving.value = true;
-      // Fill in default value of 1 for any questions the user never touched
       const fullAnswers: Record<string, number> = {};
       for (const q of allQuestions) {
-        fullAnswers[q.id] = answers.value[q.id] ?? 1;
+        fullAnswers[q.id] = answers.value[q.id] ?? MIN_RATING;
       }
-      // Recalculate score from the complete answer set (including default fills)
       const finalScore = calculateScore(fullAnswers);
       const historyId = await saveHistoricalSession(finalScore, fullAnswers);
       await clearSession(sessionId.value);

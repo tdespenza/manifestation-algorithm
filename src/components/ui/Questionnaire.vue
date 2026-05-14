@@ -196,9 +196,7 @@ const leafQuestions = flattenLeaves(allTopLevelQuestions);
 const isSaving = computed(() => store.isSaving);
 const score = computed(() => store.score);
 const maxScore = getMaxPossibleScore();
-const answeredCount = computed(
-  () => Object.keys(store.answers).filter(k => store.answers[k] >= 1).length
-);
+const answeredCount = computed(() => Object.keys(store.answers).length);
 const formattedScore = computed(() =>
   answeredCount.value === 0 ? '--' : Math.round(score.value).toLocaleString()
 );
@@ -239,7 +237,7 @@ const submitButtonState = computed(() => {
 
 function isAnswered(idx: number): boolean {
   const q = leafQuestions[idx];
-  return q ? (store.answers[q.id] ?? 0) >= 1 : false;
+  return q ? store.answers[q.id] !== undefined : false;
 }
 
 /** Keyboard navigation handler for step mode */
@@ -259,8 +257,7 @@ function handleGlobalKey(e: KeyboardEvent) {
     const val = Number.parseInt(e.key);
     if (store.currentQuestion) store.setAnswer(store.currentQuestion.id, val);
   } else if (e.key === '0') {
-    // '0' key = 10
-    if (store.currentQuestion) store.setAnswer(store.currentQuestion.id, 10);
+    if (store.currentQuestion) store.setAnswer(store.currentQuestion.id, 0);
   }
 }
 
