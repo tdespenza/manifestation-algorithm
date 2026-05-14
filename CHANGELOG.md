@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.6] - 2026-05-14
+### Maintenance
+- Update dependencies and bump version to 0.11.5
+
 ## [0.11.5] - 2026-05-14
 ### Bug Fixes
 - Silence TypeScript 6 baseUrl deprecation during build- Align vitest coverage packages with vitest 4.1.2- Update isAnswered logic to use undefined check for answers- Downgrade typescript from 6.0.2 to 5.9.3 for compatibility- Update gossipsub message ID generation to use hex string format
