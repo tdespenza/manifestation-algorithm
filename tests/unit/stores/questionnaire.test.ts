@@ -303,6 +303,17 @@ describe('Questionnaire Store', () => {
       );
       consoleSpy.mockRestore();
     });
+
+    it('setAnswer skips db save when called again with the same value', async () => {
+      const store = useQuestionnaireStore();
+
+      await store.setAnswer('1b', 6);
+      expect(dbMocks.saveAnswer).toHaveBeenCalledTimes(1);
+
+      // Call again with identical value — early-return guard should prevent a second db write
+      await store.setAnswer('1b', 6);
+      expect(dbMocks.saveAnswer).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('Default state', () => {
