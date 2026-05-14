@@ -5,6 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.5] - 2026-05-14
+### Bug Fixes
+- Silence TypeScript 6 baseUrl deprecation during build- Align vitest coverage packages with vitest 4.1.2- Update isAnswered logic to use undefined check for answers- Downgrade typescript from 6.0.2 to 5.9.3 for compatibility- Update gossipsub message ID generation to use hex string format
+### Features
+- Update user rating scale from 1-10 to 0-10 across documentation, code, and tests- Update user rating scale from 1-10 to 0-10 across documentation, code, and tests- Add @emnapi/core and @emnapi/runtime dependencies
+### Maintenance
+- Bump vue-tsc from 3.2.5 to 3.2.6- Bump jspdf from 4.2.0 to 4.2.1- Bump sha2 from 0.10.9 to 0.11.0 in /src-tauri- Bump dependency-cruiser from 17.3.8 to 17.3.9- Bump typescript from 5.9.3 to 6.0.2- Bump env_logger from 0.11.9 to 0.11.10 in /src-tauri- Bump vue-router from 5.0.3 to 5.0.4- Bump tauri-plugin-fs from 2.4.5 to 2.5.0 in /src-tauri- Bump tauri-plugin-dialog from 2.6.0 to 2.7.0 in /src-tauri- Bump tauri-plugin-fs to 2.5.0- Bump tokio from 1.50.0 to 1.51.1 in /src-tauri- Bump tokio from 1.50.0 to 1.51.1 in /src-tauri- Bump tauri-plugin-updater in /src-tauri- Bump tauri-plugin-updater in /src-tauri- Bump tauri-plugin-sql from 2.3.2 to 2.4.0 in /src-tauri- Bump tauri-plugin-sql from 2.3.2 to 2.4.0 in /src-tauri- Bump @playwright/test from 1.58.2 to 1.59.1- Bump dependency-cruiser from 17.3.9 to 17.3.10- Bump vite from 7.3.1 to 8.0.3- Bump vitest from 4.0.18 to 4.1.2- Bump vue from 3.5.30 to 3.5.31- Bump dependency-cruiser from 17.3.9 to 17.3.10- Bump @playwright/test from 1.58.2 to 1.59.1- Bump vue from 3.5.30 to 3.5.31- Bump vite from 7.3.1 to 8.0.3- Bump tauri-plugin-dialog from 2.6.0 to 2.7.0 in /src-tauri- Bump tauri-plugin-fs to 2.5.0- Bump tokio from 1.50.0 to 1.51.1 in /src-tauri- Bump tauri-plugin-updater in /src-tauri- Bump tauri-plugin-sql from 2.3.2 to 2.4.0 in /src-tauri- Bump @playwright/test from 1.58.2 to 1.59.1- Bump dependency-cruiser from 17.3.9 to 17.3.10- Bump vitest from 4.0.18 to 4.1.2- Bump vue from 3.5.30 to 3.5.31- Bump vitest from 4.0.18 to 4.1.2
+### Other Changes
+- Merge pull request #45 from tdespenza/dependabot/npm_and_yarn/vue-tsc-3.2.6
+
+chore(deps-dev): bump vue-tsc from 3.2.5 to 3.2.6- Merge pull request #44 from tdespenza/dependabot/npm_and_yarn/jspdf-4.2.1
+
+chore(deps): bump jspdf from 4.2.0 to 4.2.1- Merge pull request #43 from tdespenza/dependabot/cargo/src-tauri/sha2-0.11.0
+
+chore(deps): bump sha2 from 0.10.9 to 0.11.0 in /src-tauri- Merge pull request #42 from tdespenza/dependabot/npm_and_yarn/dependency-cruiser-17.3.9
+
+chore(deps-dev): bump dependency-cruiser from 17.3.8 to 17.3.9- Merge pull request #41 from tdespenza/dependabot/npm_and_yarn/typescript-6.0.2
+
+chore(deps-dev): bump typescript from 5.9.3 to 6.0.2- Merge pull request #40 from tdespenza/dependabot/cargo/src-tauri/env_logger-0.11.10
+
+chore(deps): bump env_logger from 0.11.9 to 0.11.10 in /src-tauri- Merge pull request #39 from tdespenza/dependabot/npm_and_yarn/vue-router-5.0.4
+
+chore(deps): bump vue-router from 5.0.3 to 5.0.4- Merge pull request #50 from tdespenza/dependabot/npm_and_yarn/dependency-cruiser-17.3.10
+
+chore(deps-dev): bump dependency-cruiser from 17.3.9 to 17.3.10- Merge pull request #49 from tdespenza/dependabot/npm_and_yarn/playwright/test-1.59.1
+
+chore(deps-dev): bump @playwright/test from 1.58.2 to 1.59.1- Merge pull request #48 from tdespenza/dependabot/npm_and_yarn/vue-3.5.31
+
+chore(deps): bump vue from 3.5.30 to 3.5.31- Merge pull request #52 from tdespenza/dependabot/cargo/src-tauri/tauri-plugin-fs-2.5.0
+
+chore(deps): bump tauri-plugin-fs from 2.4.5 to 2.5.0 in /src-tauri- Merge pull request #47 from tdespenza/dependabot/npm_and_yarn/vite-8.0.3
+
+chore(deps-dev): bump vite from 7.3.1 to 8.0.3- Merge pull request #46 from tdespenza/dependabot/npm_and_yarn/vitest-4.1.2
+
+chore(deps-dev): bump vitest from 4.0.18 to 4.1.2
+### Refactoring
+- Move question processing logic inside useQuestionnaireStore
+### Testing
+- Add guard to prevent duplicate db save in setAnswer method
+
 ## [0.11.4] - 2026-03-22
 ### Maintenance
 - Bump rand from 0.9.2 to 0.10.0 in /src-tauri- Bump rand_core from 0.6.4 to 0.9.5 in /src-tauri- Bump tauri from 2.10.2 to 2.10.3 in /src-tauri- Bump tokio from 1.49.0 to 1.50.0 in /src-tauri- Bump actions/download-artifact from 7 to 8- Bump actions/setup-node from 4 to 6- Bump @tauri-apps/cli from 2.10.0 to 2.10.1- Bump @types/node from 25.3.2 to 25.4.0- Bump lint-staged from 16.2.7 to 16.3.3- Bump vue from 3.5.29 to 3.5.30- Bump vue-i18n from 10.0.8 to 11.3.0- Bump rand from 0.9.2 to 0.10.0 in /src-tauri- Bump rand_core from 0.6.4 to 0.9.5 in /src-tauri- Bump @types/node from 25.3.2 to 25.4.0- Bump @types/node from 25.3.2 to 25.4.0- Bump lint-staged from 16.2.7 to 16.3.3- Bump lint-staged from 16.2.7 to 16.3.3- Update rand_core to 0.6.4 and remove rand dependency
