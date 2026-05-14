@@ -59,11 +59,11 @@ $$\text{Total Score} = \sum_{i=1}^{N} \text{MaxPoints}_i \times \frac{\text{User
 
 - **40 categories** mapped to leaf questions, each weighted by maximum point value
 - **Max score: 10,000 points**
-- **Scale:** 1–10 per question (user-chosen; no answer defaults to 1 on submit)
+- **Scale:** 0–10 per question (user-chosen; no answer defaults to 0 on submit)
 - **Score tiers:** Excellent (> 7,000) · Good (4,000–7,000) · Needs Work (< 4,000)
 
 _See `/docs/scoring-formula.md` for full specification._  
-_See `ADR-006` for the decision to default unanswered questions to 1._
+_See `ADR-006` for the decision to allow partial submissions with a minimum default._
 
 ---
 

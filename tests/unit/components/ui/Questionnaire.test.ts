@@ -252,7 +252,7 @@ describe('Questionnaire.vue', () => {
       description: 'Q1',
       points: 100,
       hasSubPoints: false
-    } as unknown as typeof store.currentQuestion);
+    });
     const buttons = wrapper.findAll('.mode-toggle button');
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
@@ -260,7 +260,7 @@ describe('Questionnaire.vue', () => {
     expect(store.setAnswer).toHaveBeenCalledWith('q1', 5);
   });
 
-  it('handleGlobalKey: key 0 sets answer to 10 in step mode', async () => {
+  it('handleGlobalKey: key 0 sets answer to 0 in step mode', async () => {
     const wrapper = makeWrapper();
     const store = useQuestionnaireStore();
     vi.spyOn(store, 'currentQuestion', 'get').mockReturnValue({
@@ -268,14 +268,14 @@ describe('Questionnaire.vue', () => {
       description: 'Q1',
       points: 100,
       hasSubPoints: false
-    } as unknown as typeof store.currentQuestion);
+    });
     const buttons = wrapper.findAll('.mode-toggle button');
     await buttons[1].trigger('click');
     await wrapper.vm.$nextTick();
     (store.setAnswer as ReturnType<typeof vi.fn>).mockClear();
     globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: '0' }));
     expect(store.setAnswer).toHaveBeenCalledTimes(1);
-    expect(store.setAnswer).toHaveBeenCalledWith('q1', 10);
+    expect(store.setAnswer).toHaveBeenCalledWith('q1', 0);
   });
 
   it('handleGlobalKey: number keys do nothing when currentQuestion is null', async () => {
@@ -448,13 +448,13 @@ describe('Questionnaire.vue', () => {
     }
   });
 
-  it('answeredCount computed runs filter when answers > 0', async () => {
+  it('answeredCount includes explicit 0 answers', async () => {
     const wrapper = makeWrapper({}, false); // stubActions: false to get real computed
     const store = useQuestionnaireStore();
-    // Set an answer so filter callback runs
-    await store.setAnswer('2', 7);
+
+    await store.setAnswer('2', 0);
     await wrapper.vm.$nextTick();
-    // answeredCount should now be at least 1 (for q id '2' with value 7 >= 1)
+
     const vm = wrapper.vm as unknown as { answeredCount: number };
     expect(vm.answeredCount).toBeGreaterThanOrEqual(1);
   });
@@ -472,7 +472,7 @@ describe('Questionnaire.vue', () => {
       // Set answer for first leaf question
       await import('@/utils/analysis').catch(() => null);
       // Check via store that answer exists
-      await store.setAnswer('1a', 5);
+      await store.setAnswer('1a', 0);
       await wrapper.vm.$nextTick();
       // The first dot should now be "answered"
       const firstDot = wrapper.find('.dot');
@@ -620,7 +620,7 @@ describe('Questionnaire.vue', () => {
 
   it('submit button has "partial" class when some but not all questions are answered', async () => {
     // answeredCount > 0 but percentComplete < 100
-    const wrapper = makeWrapper({ answers: { '1a': 5 } });
+    const wrapper = makeWrapper({ answers: { '1a': 0 } });
     await wrapper.vm.$nextTick();
     expect(wrapper.find('.submit-button').classes()).toContain('partial');
   });

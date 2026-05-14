@@ -153,7 +153,7 @@ const en = {
     submitError: 'Failed to save session: {error}',
     dotTitle: 'Question {index}',
     dotAria: 'Go to question {index}',
-    keyboardHint: 'Tip: Use ← → to navigate · 1–9 / 0 to rate'
+    keyboardHint: 'Tip: Use ← → to navigate · 0–9 to rate'
   },
 
   onboarding: {
@@ -164,7 +164,7 @@ const en = {
       'Complete the questionnaire at regular intervals to track your growth over time and see which areas need the most attention.',
     step1Title: 'How Scoring Works',
     step1Body:
-      'Each question is worth a set number of points. Rate yourself on a scale of\u00a01\u201310 for every question. A rating of 10 means you fully embody that principle; 1 means you haven\u2019t started.',
+      'Each question is worth a set number of points. Rate yourself on a scale of\u00a00\u201310 for every question. A rating of 10 means you fully embody that principle; 0 means you haven\u2019t started.',
     step1TargetHint: '🎯 Target: {target} | Maximum: {maximum}',
     excellent: 'Excellent',
     excellentRange: '7,001 \u2013 10,000',

@@ -38,6 +38,11 @@ describe('QuestionItem.vue', () => {
     expect(wrapper.text()).toContain('Activate & Illuminate Words');
     expect(wrapper.text()).toContain('100 pts');
     expect(wrapper.find('input[type="range"]').exists()).toBe(true);
+    expect(wrapper.find('input[type="range"]').attributes('min')).toBe('0');
+    // Unanswered questions display an em-dash instead of "0" to distinguish
+    // "user hasn't rated yet" from "user explicitly chose 0".
+    expect(wrapper.find('.slider-value').text()).toBe('—');
+    expect(wrapper.find('input[type="range"]').classes()).toContain('unanswered');
   });
 
   it('updates store on input', async () => {
@@ -103,19 +108,29 @@ describe('QuestionItem.vue', () => {
     expect(wrapper.find('.sub-points-section').exists()).toBe(false);
   });
 
-  it('input value out of range does not call setAnswer (setter guards 1-10)', async () => {
+  it('input value 0 calls setAnswer', async () => {
     const wrapper = mount(QuestionItem, {
       props: { question: dummyQuestion },
       global: { plugins: [createTestingPinia({ createSpy: vi.fn, stubActions: false })] }
     });
     const store = useQuestionnaireStore();
-    // Manually trigger handleInput with out-of-range value via direct call
+
+    await wrapper.find('input[type="range"]').setValue('0');
+
+    expect(store.setAnswer).toHaveBeenCalledWith('2', 0);
+  });
+
+  it('input value out of range is rejected by store (state unchanged)', async () => {
+    const wrapper = mount(QuestionItem, {
+      props: { question: dummyQuestion },
+      global: { plugins: [createTestingPinia({ createSpy: vi.fn, stubActions: false })] }
+    });
+    const store = useQuestionnaireStore();
     const input = wrapper.find('input[type="range"]');
     const event = new Event('input');
-    Object.defineProperty(event, 'target', { value: { value: '0' } });
-    await input.element.dispatchEvent(event);
-    // setAnswer should not have been called because val 0 < 1
-    expect(store.setAnswer).not.toHaveBeenCalled();
+    Object.defineProperty(event, 'target', { value: { value: '-1' } });
+    input.element.dispatchEvent(event);
+    expect(store.answers['2']).toBeUndefined();
   });
 
   it('highlighted prop adds highlighted class on leaf question', () => {
