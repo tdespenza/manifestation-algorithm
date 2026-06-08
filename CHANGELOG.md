@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.7] - 2026-06-08
+### Maintenance
+- Bump prettier from 3.8.1 to 3.8.3- Bump tauri-plugin-opener from 2.5.3 to 2.5.4 in /src-tauri- Bump @tauri-apps/plugin-updater from 2.10.0 to 2.10.1- Bump lru from 0.16.3 to 0.18.0 in /src-tauri- Bump vue-i18n from 11.3.0 to 11.4.4- Bump tauri-plugin-dialog from 2.7.0 to 2.7.1 in /src-tauri- Bump vite from 8.0.3 to 8.0.13- Bump @types/node from 25.5.0 to 25.9.1- Bump tauri-build from 2.5.6 to 2.6.2 in /src-tauri- Bump tokio from 1.51.1 to 1.52.3 in /src-tauri
+### Other Changes
+- Merge pull request #56 from tdespenza/dependabot/npm_and_yarn/prettier-3.8.3
+
+chore(deps-dev): bump prettier from 3.8.1 to 3.8.3- Merge pull request #57 from tdespenza/dependabot/cargo/src-tauri/tauri-plugin-opener-2.5.4
+
+chore(deps): bump tauri-plugin-opener from 2.5.3 to 2.5.4 in /src-tauri- Merge pull request #58 from tdespenza/dependabot/npm_and_yarn/tauri-apps/plugin-updater-2.10.1
+
+chore(deps): bump @tauri-apps/plugin-updater from 2.10.0 to 2.10.1- Merge pull request #59 from tdespenza/dependabot/cargo/src-tauri/lru-0.18.0
+
+chore(deps): bump lru from 0.16.3 to 0.18.0 in /src-tauri- Merge pull request #60 from tdespenza/dependabot/npm_and_yarn/vue-i18n-11.4.4
+
+chore(deps): bump vue-i18n from 11.3.0 to 11.4.4- Merge pull request #61 from tdespenza/dependabot/cargo/src-tauri/tauri-plugin-dialog-2.7.1
+
+chore(deps): bump tauri-plugin-dialog from 2.7.0 to 2.7.1 in /src-tauri- Merge pull request #62 from tdespenza/dependabot/npm_and_yarn/vite-8.0.13
+
+chore(deps-dev): bump vite from 8.0.3 to 8.0.13- Merge pull request #63 from tdespenza/dependabot/npm_and_yarn/types/node-25.9.1
+
+chore(deps-dev): bump @types/node from 25.5.0 to 25.9.1- Merge pull request #64 from tdespenza/dependabot/cargo/src-tauri/tauri-build-2.6.2
+
+chore(deps): bump tauri-build from 2.5.6 to 2.6.2 in /src-tauri- Merge pull request #65 from tdespenza/dependabot/cargo/src-tauri/tokio-1.52.3
+
+chore(deps): bump tokio from 1.51.1 to 1.52.3 in /src-tauri
+
 ## [0.11.6] - 2026-05-14
 ### Maintenance
 - Update dependencies and bump version to 0.11.5
